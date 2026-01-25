@@ -49,7 +49,7 @@ export function SubNavbar() {
                 px-5 py-1 rounded-full transition-colors
                 ${
                   item.active
-                    ? "bg-[var(--color-action)]/10 dark:bg-blue-400/20 text-[var(--color-action)] dark:text-blue-400"
+                    ? "bg-action/10 dark:bg-blue-400/20 text-action dark:text-blue-400"
                     : "text-gray-500 dark:text-gray-400"
                 }
               `}
@@ -61,7 +61,7 @@ export function SubNavbar() {
                 text-[10px] font-medium
                 ${
                   item.active
-                    ? "text-[var(--color-action)] dark:text-blue-400"
+                    ? "text-action dark:text-blue-400"
                     : "text-gray-500 dark:text-gray-400"
                 }
               `}

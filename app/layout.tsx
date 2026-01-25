@@ -37,9 +37,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          <div className="md:h-0.5 bg-gray-300 w-full h-0.15" />
+          <div className="md:h-0.5 bg-gray-300 w-full h-0.5" />
           <SubNavbar />
-          <div className="md:h-0.5 bg-gray-300 w-full hidden" />
+          <div className="md:h-0.5 bg-gray-300 w-full md:hidden" />
           <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-24 md:pb-0">
             {children}
           </main>
