@@ -9,6 +9,7 @@ export const translations = {
     header: {
       language: "Language",
       currency: "Currency",
+      settings: "Settings",
     },
     summary: {
       balance: "Total Balance",
@@ -39,6 +40,7 @@ export const translations = {
     header: {
       language: "Idioma",
       currency: "Moneda",
+      settings: "Ajustes",
     },
     summary: {
       balance: "Saldo Total",

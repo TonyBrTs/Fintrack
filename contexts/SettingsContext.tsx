@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { translations } from "@/lib/translations";
 
 type Language = "en" | "es";
-type Currency = "USD" | "EUR" | "GBP" | "JPY";
+type Currency = "USD" | "EUR" | "GBP" | "CRC";
 
 interface SettingsContextType {
   language: Language;
@@ -23,7 +23,7 @@ const currencySymbols: Record<Currency, string> = {
   USD: "$",
   EUR: "€",
   GBP: "£",
-  JPY: "¥",
+  CRC: "₡",
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -41,7 +41,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLanguage(savedLanguage);
     }
-    if (savedCurrency && ["USD", "EUR", "GBP", "JPY"].includes(savedCurrency)) {
+    if (savedCurrency && ["USD", "EUR", "GBP", "CRC"].includes(savedCurrency)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrency(savedCurrency);
     }
