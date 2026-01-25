@@ -10,16 +10,26 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useSettings } from "@/contexts/SettingsContext";
 
 export function SubNavbar() {
   const pathname = usePathname();
+  const { t } = useSettings();
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
 
   const navItems = [
-    { name: "Resumen", href: "/", icon: <LayoutDashboard size={20} /> },
-    { name: "Gastos", href: "/gastos", icon: <TrendingDown size={20} /> },
-    { name: "Ingresos", href: "/ingresos", icon: <TrendingUp size={20} /> },
-    { name: "Metas", href: "/metas", icon: <Target size={20} /> },
+    { name: t("nav.summary"), href: "/", icon: <LayoutDashboard size={20} /> },
+    {
+      name: t("nav.expenses"),
+      href: "/gastos",
+      icon: <TrendingDown size={20} />,
+    },
+    {
+      name: t("nav.income"),
+      href: "/ingresos",
+      icon: <TrendingUp size={20} />,
+    },
+    { name: t("nav.goals"), href: "/metas", icon: <Target size={20} /> },
   ];
 
   return (

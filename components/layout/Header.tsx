@@ -1,11 +1,22 @@
 "use client";
 
-import { Moon, Globe, Settings, Bell, Sun } from "lucide-react";
+import { Moon, Globe, Settings, Bell, Sun, Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useSettings } from "@/contexts/SettingsContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage, currency, setCurrency, t } = useSettings();
   const [mounted, setMounted] = useState(false);
 
   // Prevent hydration mismatch
@@ -33,9 +44,50 @@ export function Header() {
         >
           {mounted && theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
         </button>
-        <button className="text-secondary-titles hover:text-action transition-colors cursor-pointer hidden md:block">
-          <Globe size={20} />
-        </button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="text-secondary-titles hover:text-action transition-colors cursor-pointer hidden md:block outline-none">
+              <Globe size={20} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end">
+            <DropdownMenuLabel>{t("header.language")}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => setLanguage("en")}>
+                <span>English</span>
+                {language === "en" && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage("es")}>
+                <span>Español</span>
+                {language === "es" && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>{t("header.currency")}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => setCurrency("USD")}>
+                <span>USD ($)</span>
+                {currency === "USD" && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCurrency("EUR")}>
+                <span>EUR (€)</span>
+                {currency === "EUR" && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCurrency("GBP")}>
+                <span>GBP (£)</span>
+                {currency === "GBP" && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCurrency("JPY")}>
+                <span>JPY (¥)</span>
+                {currency === "JPY" && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <button className="text-secondary-titles hover:text-action transition-colors cursor-pointer hidden md:block">
           <Settings size={20} />
         </button>
