@@ -38,6 +38,12 @@ export const translations = {
       title: "Goals",
       description: "Manage and track your financial goals.",
     },
+    common: {
+      loading: "Loading your finances...",
+      errorTitle: "Oops! Something went wrong",
+      errorMessage: "Could not load data. Make sure the backend is running.",
+      retry: "Retry",
+    },
   },
   es: {
     nav: {
@@ -77,6 +83,13 @@ export const translations = {
     goals: {
       title: "Metas",
       description: "Seguimiento de tus objetivos de ahorro.",
+    },
+    common: {
+      loading: "Cargando tus finanzas...",
+      errorTitle: "¡Ups! Algo salió mal",
+      errorMessage:
+        "No se pudieron cargar los datos. Asegúrate de que el servidor esté funcionando.",
+      retry: "Reintentar",
     },
   },
 };

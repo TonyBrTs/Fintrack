@@ -1,60 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Plus, TrendingDown, Tag } from "lucide-react";
+import { Plus, TrendingDown, Tag, Loader2, AlertCircle } from "lucide-react";
 import { KPICard } from "@/components/ui/KPICard";
 import { Badge } from "@/components/ui/Badge";
 import { useSettings } from "@/contexts/SettingsContext";
 import type { Expense } from "@/types/index";
-
-const mockExpenses: Expense[] = [
-  {
-    id: "1",
-    amount: 45.5,
-    currency: "USD",
-    description: "Almuerzo de negocios",
-    category: "Alimentación",
-    date: "2024-03-20",
-    paymentMethod: "Tarjeta de Crédito",
-  },
-  {
-    id: "2",
-    amount: 12.0,
-    currency: "USD",
-    description: "Uber al aeropuerto",
-    category: "Transporte",
-    date: "2024-03-19",
-    paymentMethod: "Efectivo",
-  },
-  {
-    id: "3",
-    amount: 85.0,
-    currency: "USD",
-    description: "Suscripción Netflix y Spotify",
-    category: "Entretenimiento",
-    date: "2024-03-18",
-    paymentMethod: "Débito",
-  },
-  {
-    id: "4",
-    amount: 120.0,
-    currency: "USD",
-    description: "Pago de luz y agua",
-    category: "Servicios",
-    date: "2024-03-15",
-    paymentMethod: "Transferencia",
-  },
-  {
-    id: "5",
-    amount: 30.0,
-    currency: "USD",
-    description: "Farmacia",
-    category: "Salud",
-    date: "2024-03-14",
-    paymentMethod: "Tarjeta de Crédito",
-  },
-];
-
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -78,8 +30,70 @@ const categoryColors: Record<
 
 export default function GastosPage() {
   const { currency, currencySymbol, translate } = useSettings();
-  const totalMonth = mockExpenses.reduce((acc, curr) => acc + curr.amount, 0);
-  const highestCategory = "Servicios"; // Mocking this for simplicity
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:8080/api/expenses");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch expenses");
+        }
+        const data = await response.json();
+        setExpenses(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching expenses:", err);
+        setError("Could not load expenses. Make sure the backend is running.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExpenses();
+  }, []);
+
+  const totalMonth = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+  const highestCategory = expenses.length > 0 ? "Servicios" : "---"; // Simplified logic
+
+  if (loading) {
+    return (
+      <main className="max-w-360 mx-auto px-4 lg:px-20 py-20 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-12 h-12 text-action animate-spin opacity-50" />
+        <p className="text-secondary-titles font-medium animate-pulse">
+          {translate("common.loading")}
+        </p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="max-w-360 mx-auto px-4 lg:px-20 py-20 flex flex-col items-center justify-center space-y-6 text-center">
+        <div className="bg-expense/10 p-4 rounded-full">
+          <AlertCircle className="w-12 h-12 text-expense" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-titles dark:text-foreground">
+            {translate("common.errorTitle")}
+          </h2>
+          <p className="text-secondary-titles max-w-md mx-auto">
+            {translate("common.errorMessage")}
+          </p>
+        </div>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-action text-white px-6 py-2 rounded-xl font-bold"
+        >
+          {translate("common.retry")}
+        </button>
+      </main>
+    );
+  }
 
   return (
     <main className="max-w-360 mx-auto px-4 lg:px-20 py-10">
@@ -152,7 +166,7 @@ export default function GastosPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockExpenses.map((expense) => (
+            {expenses.map((expense) => (
               <TableRow
                 key={expense.id}
                 className="hover:bg-secondary/20 dark:hover:bg-secondary/5 transition-colors border-border-ui h-20"
