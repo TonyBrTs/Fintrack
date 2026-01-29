@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
+import { getApiHeaders } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,9 +78,7 @@ export function RegisterExpenseModal({
         `${process.env.NEXT_PUBLIC_API_URL}/api/expenses`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: getApiHeaders(),
           body: JSON.stringify({
             ...formData,
             amount: parseFloat(formData.amount),

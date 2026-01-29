@@ -5,6 +5,7 @@ import { Plus, TrendingDown, Tag, Loader2, AlertCircle } from "lucide-react";
 import { KPICard } from "@/components/ui/KPICard";
 import { Badge } from "@/components/ui/Badge";
 import { useSettings } from "@/contexts/SettingsContext";
+import { getApiHeaders } from "@/lib/api";
 import type { Expense } from "@/types/index";
 import { useState, useEffect } from "react";
 import { RegisterExpenseModal } from "@/components/expenses/RegisterExpenseModal";
@@ -44,6 +45,9 @@ export default function GastosPage() {
       setLoading(true);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/expenses`,
+        {
+          headers: getApiHeaders(),
+        },
       );
 
       if (!response.ok) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { getApiHeaders } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { Expense, ExpenseCategory } from "@/types/index";
@@ -99,9 +100,7 @@ export function EditExpenseModal({
 
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getApiHeaders(),
         body: JSON.stringify({
           ...formData,
           amount: parseFloat(formData.amount),
