@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { getApiHeaders } from "@/lib/api";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import type { Income, IncomeSource } from "@/types/index";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +12,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getApiHeaders } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,80 +33,75 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface RegisterExpenseModalProps {
+interface EditIncomeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  income: Income | null;
 }
 
-export function RegisterExpenseModal({
+export function EditIncomeModal({
   isOpen,
   onClose,
   onSuccess,
-}: RegisterExpenseModalProps) {
+  income,
+}: EditIncomeModalProps) {
   const { translate, currency, currencySymbol } = useSettings();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    amount: "",
-    category: "Alimentación",
-    description: "",
-    date: new Date().toISOString().split("T")[0],
-    payment_method: "Tarjeta de Crédito",
+    amount: income?.amount.toString() || "",
+    source: (income?.source as IncomeSource) || ("Salario" as IncomeSource),
+    description: income?.description || "",
+    date: income
+      ? format(new Date(income.date), "yyyy-MM-dd")
+      : format(new Date(), "yyyy-MM-dd"),
+    payment_method: income?.payment_method || "Transferencia",
   });
 
-  const categories = [
-    "Alimentación",
-    "Transporte",
-    "Servicios",
-    "Entretenimiento",
-    "Salud",
-    "Otros",
-  ];
+  useEffect(() => {
+    if (income && isOpen) {
+      setFormData({
+        amount: income.amount.toString(),
+        source: income.source,
+        description: income.description,
+        date: format(new Date(income.date), "yyyy-MM-dd"),
+        payment_method: income.payment_method,
+      });
+    }
+  }, [income, isOpen]);
 
-  const paymentMethods = [
-    "Tarjeta de Crédito",
-    "Tarjeta de Débito",
-    "Efectivo",
-    "Transferencia",
-  ];
+  const sources = ["Salario", "Freelance", "Inversiones", "Regalo", "Otros"];
+
+  const paymentMethods = ["Transferencia", "Efectivo", "PayPal", "Depósito"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/expenses`,
-        {
-          method: "POST",
-          headers: getApiHeaders(),
-          body: JSON.stringify({
-            ...formData,
-            amount: parseFloat(formData.amount),
-            currency,
-            date: new Date(formData.date + "T12:00:00").toISOString(),
-          }),
-        },
-      );
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/incomes/${income?.id}`;
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: getApiHeaders(),
+        body: JSON.stringify({
+          ...formData,
+          amount: parseFloat(formData.amount),
+          currency,
+          date: new Date(formData.date + "T12:00:00").toISOString(),
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to register expense");
+        throw new Error("Failed to update income");
       }
 
-      toast.success(translate("expenses.form.success"));
+      toast.success(translate("income.form.success"));
       onSuccess();
       onClose();
-      // Reset form
-      setFormData({
-        amount: "",
-        category: "Alimentación",
-        description: "",
-        date: new Date().toISOString().split("T")[0],
-        payment_method: "Tarjeta de Crédito",
-      });
     } catch (error) {
-      console.error("Error registering expense:", error);
-      toast.error(translate("expenses.form.error"));
+      console.error("Error updating income:", error);
+      toast.error(translate("income.form.error"));
     } finally {
       setLoading(false);
     }
@@ -116,13 +112,13 @@ export function RegisterExpenseModal({
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle className="text-action">
-            {translate("expenses.form.title")}
+            {translate("income.form.title")}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="space-y-2">
             <label className="text-sm font-bold text-titles dark:text-foreground">
-              {translate("expenses.form.amount")}
+              {translate("income.form.amount")}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-400 z-10">
@@ -145,21 +141,24 @@ export function RegisterExpenseModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-bold text-titles dark:text-foreground">
-                {translate("expenses.form.category")}
+                {translate("income.form.source")}
               </label>
               <Select
-                value={formData.category}
+                value={formData.source}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, category: value })
+                  setFormData({
+                    ...formData,
+                    source: value as IncomeSource,
+                  })
                 }
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar categoría" />
+                  <SelectValue placeholder="Seleccionar fuente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
+                  {sources.map((src) => (
+                    <SelectItem key={src} value={src}>
+                      {src}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -168,7 +167,7 @@ export function RegisterExpenseModal({
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-titles dark:text-foreground">
-                {translate("expenses.form.date")}
+                {translate("income.form.date")}
               </label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -212,7 +211,7 @@ export function RegisterExpenseModal({
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-titles dark:text-foreground">
-              {translate("expenses.form.paymentMethod")}
+              {translate("income.form.paymentMethod")}
             </label>
             <Select
               value={formData.payment_method}
@@ -235,7 +234,7 @@ export function RegisterExpenseModal({
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-titles dark:text-foreground">
-              {translate("expenses.form.description")}
+              {translate("income.form.description")}
             </label>
             <Textarea
               required
@@ -244,7 +243,7 @@ export function RegisterExpenseModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               placeholder="..."
-              className="min-h-24 resize-none"
+              className="min-h-24 resize-none focus-visible:ring-action"
             />
           </div>
 
@@ -255,7 +254,7 @@ export function RegisterExpenseModal({
               onClick={onClose}
               className="w-full sm:w-auto font-medium bg-expense hover:bg-expense/90 text-white dark:bg-expense/10 dark:hover:bg-expense/20 dark:text-expense border border-transparent dark:border-expense/20 cursor-pointer"
             >
-              {translate("expenses.form.cancel")}
+              {translate("income.form.cancel")}
             </Button>
             <Button
               disabled={loading}
@@ -264,8 +263,8 @@ export function RegisterExpenseModal({
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading
-                ? translate("expenses.form.loading")
-                : translate("expenses.form.save")}
+                ? translate("income.form.loading")
+                : translate("income.form.save")}
             </Button>
           </DialogFooter>
         </form>

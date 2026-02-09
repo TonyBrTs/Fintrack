@@ -10,9 +10,15 @@ import (
 	"time"
 )
 
-const storageFile = "expenses.json"
+const (
+	storageFile        = "expenses.json"
+	incomeStorageFile = "incomes.json"
+)
 
-var expenses = []models.Expense{}
+var (
+	expenses = []models.Expense{}
+	incomes  = []models.Income{}
+)
 
 func loadExpenses() {
 	if _, err := os.Stat(storageFile); os.IsNotExist(err) {
@@ -70,31 +76,84 @@ func loadExpenses() {
 
 	data, err := os.ReadFile(storageFile)
 	if err != nil {
-		log.Printf("Error reading file: %v", err)
+		log.Printf("Error reading expenses file: %v", err)
 		return
 	}
 
 	err = json.Unmarshal(data, &expenses)
 	if err != nil {
-		log.Printf("Error unmarshaling data: %v", err)
+		log.Printf("Error unmarshaling expenses data: %v", err)
+	}
+}
+
+func loadIncomes() {
+	if _, err := os.Stat(incomeStorageFile); os.IsNotExist(err) {
+		// Default mock data if file doesn't exist
+		incomes = []models.Income{
+			{
+				ID:            "1",
+				Amount:        2500.0,
+				Currency:      "USD",
+				Description:   "Salario mensual",
+				Source:        "Salario",
+				Date:          time.Now().AddDate(0, 0, -10),
+				PaymentMethod: "Transferencia",
+			},
+			{
+				ID:            "2",
+				Amount:        400.0,
+				Currency:      "USD",
+				Description:   "Proyecto Freelance Logo",
+				Source:        "Freelance",
+				Date:          time.Now().AddDate(0, 0, -5),
+				PaymentMethod: "PayPal",
+			},
+		}
+		saveIncomes()
+		return
+	}
+
+	data, err := os.ReadFile(incomeStorageFile)
+	if err != nil {
+		log.Printf("Error reading incomes file: %v", err)
+		return
+	}
+
+	err = json.Unmarshal(data, &incomes)
+	if err != nil {
+		log.Printf("Error unmarshaling incomes data: %v", err)
 	}
 }
 
 func saveExpenses() {
 	data, err := json.MarshalIndent(expenses, "", "  ")
 	if err != nil {
-		log.Printf("Error marshaling data: %v", err)
+		log.Printf("Error marshaling expenses data: %v", err)
 		return
 	}
 
 	err = os.WriteFile(storageFile, data, 0644)
 	if err != nil {
-		log.Printf("Error writing file: %v", err)
+		log.Printf("Error writing expenses file: %v", err)
+	}
+}
+
+func saveIncomes() {
+	data, err := json.MarshalIndent(incomes, "", "  ")
+	if err != nil {
+		log.Printf("Error marshaling incomes data: %v", err)
+		return
+	}
+
+	err = os.WriteFile(incomeStorageFile, data, 0644)
+	if err != nil {
+		log.Printf("Error writing incomes file: %v", err)
 	}
 }
 
 func main() {
 	loadExpenses()
+	loadIncomes()
 	router := gin.Default()
 
 	// Simple CORS Middleware
@@ -184,6 +243,78 @@ func main() {
 		}
 
 		saveExpenses()
+		ctx.JSON(http.StatusNoContent, nil)
+	})
+
+	// --- INCOMES API ---
+	router.GET("/api/incomes", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, incomes)
+	})
+
+	router.POST("/api/incomes", func(ctx *gin.Context) {
+		var newIncome models.Income
+		if err := ctx.ShouldBindJSON(&newIncome); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		newIncome.ID = time.Now().Format("20060102150405")
+		if newIncome.Date.IsZero() {
+			newIncome.Date = time.Now()
+		}
+
+		incomes = append([]models.Income{newIncome}, incomes...)
+		saveIncomes()
+		ctx.JSON(http.StatusCreated, newIncome)
+	})
+
+	router.PUT("/api/incomes/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		var updatedIncome models.Income
+		if err := ctx.ShouldBindJSON(&updatedIncome); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		found := false
+		for i, income := range incomes {
+			if income.ID == id {
+				updatedIncome.ID = id
+				if updatedIncome.Date.IsZero() {
+					updatedIncome.Date = income.Date
+				}
+				incomes[i] = updatedIncome
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Income not found"})
+			return
+		}
+
+		saveIncomes()
+		ctx.JSON(http.StatusOK, updatedIncome)
+	})
+
+	router.DELETE("/api/incomes/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		found := false
+		for i, income := range incomes {
+			if income.ID == id {
+				incomes = append(incomes[:i], incomes[i+1:]...)
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Income not found"})
+			return
+		}
+
+		saveIncomes()
 		ctx.JSON(http.StatusNoContent, nil)
 	})
 

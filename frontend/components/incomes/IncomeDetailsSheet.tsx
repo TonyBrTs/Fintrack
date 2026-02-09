@@ -3,54 +3,61 @@
 import { Sheet } from "@/components/ui/Sheet";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/Badge";
-import type { Expense } from "@/types/index";
-import { Calendar, Wallet, Tag, Info, Clock, Loader2 } from "lucide-react";
-import { EditExpenseModal } from "./EditExpenseModal";
+import type { Income } from "@/types/index";
+import {
+  Calendar,
+  Wallet,
+  Tag,
+  Info,
+  Clock,
+  Loader2,
+  Pencil,
+  Trash2,
+} from "lucide-react";
+import { EditIncomeModal } from "./EditIncomeModal";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Pencil, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { getApiHeaders } from "@/lib/api";
 import { toast } from "sonner";
-import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
+import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
 
-interface ExpenseDetailsSheetProps {
-  expense: Expense | null;
+interface IncomeDetailsSheetProps {
+  income: Income | null;
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-const categoryColors: Record<
+const sourceColors: Record<
   string,
   "success" | "warning" | "error" | "info" | "default"
 > = {
-  Alimentación: "success",
-  Transporte: "info",
-  Servicios: "warning",
-  Entretenimiento: "error",
-  Salud: "error",
+  Salario: "success",
+  Freelance: "info",
+  Inversiones: "warning",
+  Regalo: "success",
   Otros: "default",
 };
 
-export function ExpenseDetailsSheet({
-  expense,
+export function IncomeDetailsSheet({
+  income,
   isOpen,
   onClose,
   onSuccess,
-}: ExpenseDetailsSheetProps) {
+}: IncomeDetailsSheetProps) {
   const { translate, currencySymbol, currency } = useSettings();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  if (!expense) return null;
+  if (!income) return null;
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/expenses/${expense.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/incomes/${income.id}`,
         {
           method: "DELETE",
           headers: getApiHeaders(),
@@ -58,15 +65,15 @@ export function ExpenseDetailsSheet({
       );
 
       if (!response.ok) {
-        throw new Error("Failed to delete expense");
+        throw new Error("Failed to delete income");
       }
 
-      toast.success(translate("expenses.details.deleteSuccess"));
+      toast.success(translate("income.details.deleteSuccess"));
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error("Error deleting expense:", error);
-      toast.error(translate("expenses.details.deleteError"));
+      console.error("Error deleting income:", error);
+      toast.error(translate("income.details.deleteError"));
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
@@ -77,34 +84,38 @@ export function ExpenseDetailsSheet({
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      title={translate("expenses.details.title")}
+      title={translate("income.details.title")}
     >
-      <EditExpenseModal
+      <EditIncomeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
-          onSuccess?.(); // Call parent's onSuccess to refresh the table
+          onSuccess?.();
           setIsModalOpen(false);
           onClose();
         }}
-        expense={expense}
+        income={income}
       />
       <DeleteConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleDelete}
         loading={isDeleting}
+        title={translate("income.delete")}
+        description={translate("income.details.deleteConfirm")}
+        confirmLabel={translate("income.delete")}
+        cancelLabel={translate("income.form.cancel")}
       />
       <div className="space-y-8 py-4">
         {/* Header/Amount Section */}
         <div className="flex flex-col items-center justify-center p-8 bg-action/5 dark:bg-action/10 rounded-3xl border border-action/10">
           <span className="text-secondary-titles dark:text-muted-foreground text-sm font-bold uppercase tracking-widest mb-2">
-            {translate("expenses.details.amount")}
+            {translate("income.details.amount")}
           </span>
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-black text-titles dark:text-foreground">
               {currencySymbol}
-              {formatCurrency(expense.amount)}
+              {formatCurrency(income.amount)}
             </span>
             <span className="text-sm font-bold text-action">{currency}</span>
           </div>
@@ -118,13 +129,13 @@ export function ExpenseDetailsSheet({
             </div>
             <div className="flex-1">
               <p className="text-xs font-bold text-secondary-titles dark:text-muted-foreground uppercase tracking-wider mb-1">
-                {translate("expenses.details.category")}
+                {translate("income.details.source")}
               </p>
               <Badge
-                variant={categoryColors[expense.category] || "default"}
+                variant={sourceColors[income.source] || "default"}
                 className="text-xs px-3 py-1 font-bold"
               >
-                {expense.category}
+                {income.source}
               </Badge>
             </div>
           </div>
@@ -135,10 +146,10 @@ export function ExpenseDetailsSheet({
             </div>
             <div className="flex-1">
               <p className="text-xs font-bold text-secondary-titles dark:text-muted-foreground uppercase tracking-wider mb-1">
-                {translate("expenses.details.date")}
+                {translate("income.details.date")}
               </p>
               <p className="text-base font-bold text-titles dark:text-foreground">
-                {new Date(expense.date).toLocaleDateString(undefined, {
+                {new Date(income.date).toLocaleDateString(undefined, {
                   weekday: "long",
                   year: "numeric",
                   month: "long",
@@ -154,10 +165,10 @@ export function ExpenseDetailsSheet({
             </div>
             <div className="flex-1">
               <p className="text-xs font-bold text-secondary-titles dark:text-muted-foreground uppercase tracking-wider mb-1">
-                {translate("expenses.details.paymentMethod")}
+                {translate("income.details.paymentMethod")}
               </p>
               <p className="text-base font-bold text-titles dark:text-foreground">
-                {expense.payment_method}
+                {income.payment_method}
               </p>
             </div>
           </div>
@@ -168,10 +179,10 @@ export function ExpenseDetailsSheet({
             </div>
             <div className="flex-1">
               <p className="text-xs font-bold text-secondary-titles dark:text-muted-foreground uppercase tracking-wider mb-1">
-                {translate("expenses.details.description")}
+                {translate("income.details.description")}
               </p>
               <p className="text-base text-titles dark:text-foreground leading-relaxed">
-                {expense.description}
+                {income.description}
               </p>
             </div>
           </div>
@@ -182,13 +193,14 @@ export function ExpenseDetailsSheet({
             </div>
             <div className="flex-1">
               <p className="text-xs font-bold text-secondary-titles dark:text-muted-foreground uppercase tracking-wider mb-1">
-                {translate("expenses.details.id")}
+                {translate("income.details.id")}
               </p>
               <p className="text-xs font-mono text-secondary-titles dark:text-muted-foreground">
-                {expense.id}
+                {income.id}
               </p>
             </div>
           </div>
+
           <div className="flex flex-col sm:flex-row gap-3">
             <motion.button
               whileHover="hover"
@@ -209,7 +221,7 @@ export function ExpenseDetailsSheet({
                   <Trash2 size={20} strokeWidth={2.5} />
                 </motion.div>
               )}
-              {translate("expenses.delete")}
+              {translate("income.delete")}
             </motion.button>
 
             <motion.button
@@ -229,7 +241,7 @@ export function ExpenseDetailsSheet({
               >
                 <Pencil size={20} strokeWidth={2.5} />
               </motion.div>
-              {translate("expenses.edit")}
+              {translate("income.edit")}
             </motion.button>
           </div>
         </div>

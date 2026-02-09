@@ -17,6 +17,7 @@ body {
 
   /* Colores de FinTrack AI */
   --color-income: #10b981;
+  --color-gold: #F5C91D;
   --color-expense: #f43f5e;
   --color-action: #2563eb;
   --color-titles: #111827;
@@ -59,6 +60,7 @@ body {
 }
 
 :root {
+  --color-gold: #F5C91D;
   --radius: 0.625rem;
   --background: #eaeaea;
   --foreground: oklch(0.145 0 0);

@@ -174,7 +174,7 @@ export default function GastosPage() {
         <KPICard
           title={translate("expenses.highestCategory")}
           amount={highestCategory}
-          icon={<Tag size={24} className="text-action" />}
+          icon={<Tag size={24} className="text-gold" />}
         />
       </section>
 

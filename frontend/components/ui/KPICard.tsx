@@ -18,7 +18,7 @@ export function KPICard({ title, amount, icon }: KPICardProps) {
         </p>
       </div>
       {icon && (
-        <div className="p-2 bg-background dark:bg-secondary rounded-lg text-action dark:text-primary">
+        <div className="p-2 bg-background dark:bg-secondary rounded-lg flex items-center justify-center">
           {icon}
         </div>
       )}

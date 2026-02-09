@@ -140,7 +140,9 @@ export function EditExpenseModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>{translate("expenses.form.title")}</DialogTitle>
+          <DialogTitle className="text-action">
+            {translate("expenses.form.title")}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="space-y-2">
@@ -160,7 +162,7 @@ export function EditExpenseModal({
                   setFormData({ ...formData, amount: e.target.value })
                 }
                 placeholder="0.00"
-                className="pl-8 text-lg font-bold h-12"
+                className="pl-8 text-lg font-bold h-12 focus-visible:ring-action"
               />
             </div>
           </div>
@@ -201,7 +203,7 @@ export function EditExpenseModal({
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-full h-10 px-3 justify-start text-left font-normal",
+                      "w-full h-10 px-3 justify-start text-left font-normal focus-visible:ring-action hover:bg-action/5 dark:hover:bg-action/10",
                       !formData.date && "text-muted-foreground",
                     )}
                   >
