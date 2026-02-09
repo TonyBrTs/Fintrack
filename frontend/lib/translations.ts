@@ -114,7 +114,7 @@ export const translations = {
         description: "Descripción",
         date: "Fecha",
         paymentMethod: "Método de Pago",
-        save: "Guardar Gasto",
+        save: "Guardar",
         cancel: "Cancelar",
         loading: "Guardando...",
         success: "Gasto registrado con éxito",

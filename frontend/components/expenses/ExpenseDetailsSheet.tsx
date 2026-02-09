@@ -12,6 +12,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { getApiHeaders } from "@/lib/api";
 import { toast } from "sonner";
+import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 
 interface ExpenseDetailsSheetProps {
   expense: Expense | null;
@@ -40,13 +41,12 @@ export function ExpenseDetailsSheet({
 }: ExpenseDetailsSheetProps) {
   const { translate, currencySymbol, currency } = useSettings();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!expense) return null;
 
   const handleDelete = async () => {
-    if (!confirm(translate("expenses.details.deleteConfirm"))) return;
-
     setIsDeleting(true);
     try {
       const response = await fetch(
@@ -69,6 +69,7 @@ export function ExpenseDetailsSheet({
       toast.error(translate("expenses.details.deleteError"));
     } finally {
       setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -87,6 +88,12 @@ export function ExpenseDetailsSheet({
           onClose();
         }}
         expense={expense}
+      />
+      <DeleteConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
+        loading={isDeleting}
       />
       <div className="space-y-8 py-4">
         {/* Header/Amount Section */}
@@ -185,7 +192,7 @@ export function ExpenseDetailsSheet({
           <div className="flex flex-col sm:flex-row gap-3">
             <motion.button
               whileHover="hover"
-              onClick={handleDelete}
+              onClick={() => setIsDeleteDialogOpen(true)}
               disabled={isDeleting}
               className="group flex-1 flex items-center justify-center gap-2 bg-expense hover:bg-expense/90 text-white dark:bg-expense/10 dark:hover:bg-expense/20 dark:text-expense px-6 py-3 rounded-xl font-bold transition-all border border-transparent dark:border-expense/20 active:scale-95 disabled:opacity-50 cursor-pointer"
             >
