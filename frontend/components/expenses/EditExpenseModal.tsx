@@ -55,8 +55,8 @@ export function EditExpenseModal({
       ("Alimentación" as ExpenseCategory),
     description: expense?.description || "",
     date: expense
-      ? new Date(expense.date).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
+      ? format(new Date(expense.date), "yyyy-MM-dd")
+      : format(new Date(), "yyyy-MM-dd"),
     payment_method: expense?.payment_method || "Tarjeta de Crédito",
   });
 
@@ -66,7 +66,7 @@ export function EditExpenseModal({
         amount: expense.amount.toString(),
         category: expense.category,
         description: expense.description,
-        date: new Date(expense.date).toISOString().split("T")[0],
+        date: format(new Date(expense.date), "yyyy-MM-dd"),
         payment_method: expense.payment_method,
       });
     }
@@ -105,7 +105,7 @@ export function EditExpenseModal({
           ...formData,
           amount: parseFloat(formData.amount),
           currency,
-          date: new Date(formData.date).toISOString(),
+          date: new Date(formData.date + "T12:00:00").toISOString(),
         }),
       });
 
@@ -207,7 +207,7 @@ export function EditExpenseModal({
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.date ? (
-                      format(new Date(formData.date), "PPP")
+                      format(new Date(formData.date + "T12:00:00"), "PPP")
                     ) : (
                       <span>Pick a date</span>
                     )}
@@ -274,19 +274,19 @@ export function EditExpenseModal({
             />
           </div>
 
-          <DialogFooter className="gap-3 sm:gap-0">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-3">
             <Button
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="font-medium"
+              className="w-full sm:w-auto font-medium bg-expense hover:bg-expense/90 text-white dark:bg-expense/10 dark:hover:bg-expense/20 dark:text-expense border border-transparent dark:border-expense/20 cursor-pointer"
             >
               {translate("expenses.form.cancel")}
             </Button>
             <Button
               disabled={loading}
               type="submit"
-              className="bg-action hover:bg-action/90 font-bold text-white shadow-md active:scale-95 transition-all"
+              className="w-full sm:w-auto bg-action hover:bg-action/90 dark:bg-action/10 dark:hover:bg-action/20 text-white dark:text-action font-bold shadow-md active:scale-95 transition-all border border-transparent dark:border-action/20 cursor-pointer"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading

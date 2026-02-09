@@ -8,6 +8,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { getApiHeaders } from "@/lib/api";
 import type { Expense } from "@/types/index";
 import { useState, useEffect } from "react";
+import { formatCurrency } from "@/lib/utils";
 import { RegisterExpenseModal } from "@/components/expenses/RegisterExpenseModal";
 import { ExpenseDetailsSheet } from "@/components/expenses/ExpenseDetailsSheet";
 import {
@@ -133,7 +134,7 @@ export default function GastosPage() {
         <motion.button
           whileHover="hover"
           onClick={() => setIsModalOpen(true)}
-          className="group flex items-center gap-2 bg-action hover:bg-action/90 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
+          className="group flex items-center gap-2 bg-action hover:bg-action/90 text-white dark:bg-action/10 dark:hover:bg-action/20 dark:text-action px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95 border border-transparent dark:border-action/20 cursor-pointer"
         >
           <motion.div
             initial={{ rotate: 0 }}
@@ -167,13 +168,13 @@ export default function GastosPage() {
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         <KPICard
           title={translate("expenses.totalMonth")}
-          amount={`${currencySymbol}${totalMonth.toFixed(2)}`}
-          icon={<TrendingDown size={24} />}
+          amount={`${currencySymbol}${formatCurrency(totalMonth)}`}
+          icon={<TrendingDown size={24} className="text-expense" />}
         />
         <KPICard
           title={translate("expenses.highestCategory")}
           amount={highestCategory}
-          icon={<Tag size={24} />}
+          icon={<Tag size={24} className="text-action" />}
         />
       </section>
 
@@ -235,7 +236,7 @@ export default function GastosPage() {
                   <div className="flex flex-col items-end">
                     <span className="text-base md:text-lg text-titles dark:text-foreground font-black">
                       {currencySymbol}
-                      {expense.amount.toFixed(2)}
+                      {formatCurrency(expense.amount)}
                     </span>
                     <span className="text-[10px] text-secondary-titles dark:text-muted-foreground uppercase font-bold tracking-tighter opacity-80">
                       {currency}

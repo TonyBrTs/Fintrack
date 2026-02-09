@@ -193,7 +193,7 @@ export function Header() {
                 onClick={() => setLanguage("en")}
                 className={`py-2 px-4 rounded-lg text-sm font-medium border transition-all ${
                   language === "en"
-                    ? "bg-action border-action text-white"
+                    ? "bg-action hover:bg-action/90 text-white dark:bg-action/10 dark:hover:bg-action/20 dark:text-action border-transparent dark:border-action/20"
                     : "border-gray-200 dark:border-gray-800 text-secondary-titles"
                 }`}
               >
@@ -226,7 +226,7 @@ export function Header() {
                   onClick={() => setCurrency(curr as typeof currency)}
                   className={`py-2 px-4 rounded-lg text-sm font-medium border transition-all ${
                     currency === curr
-                      ? "bg-action border-action text-white"
+                      ? "bg-action hover:bg-action/90 text-white dark:bg-action/10 dark:hover:bg-action/20 dark:text-action border-transparent dark:border-action/20"
                       : "border-gray-200 dark:border-gray-800 text-secondary-titles"
                   }`}
                 >

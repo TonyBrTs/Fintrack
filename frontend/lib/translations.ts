@@ -25,7 +25,7 @@ export const translations = {
       title: "Expenses",
       description: "Recording and analysis of your expenses.",
       register: "Register Expense",
-      edit: "Edit Expense",
+      edit: "Edit",
       totalMonth: "Total Monthly Expense",
       highestCategory: "Highest Category",
       table: {
@@ -55,7 +55,11 @@ export const translations = {
         paymentMethod: "Payment Method",
         description: "Description",
         id: "Reference ID",
+        deleteConfirm: "Are you sure you want to delete this expense?",
+        deleteSuccess: "Expense deleted successfully",
+        deleteError: "Error deleting expense",
       },
+      delete: "Delete",
     },
     goals: {
       title: "Goals",
@@ -94,7 +98,7 @@ export const translations = {
       title: "Gastos",
       description: "Gestión de tus gastos detallados.",
       register: "Registrar Gasto",
-      edit: "Editar Gasto",
+      edit: "Editar",
       totalMonth: "Gasto Total del Mes",
       highestCategory: "Categoría más alta",
       table: {
@@ -124,7 +128,11 @@ export const translations = {
         paymentMethod: "Método de Pago",
         description: "Descripción",
         id: "ID de Referencia",
+        deleteConfirm: "¿Estás seguro de que deseas eliminar este gasto?",
+        deleteSuccess: "Gasto eliminado con éxito",
+        deleteError: "Error al eliminar el gasto",
       },
+      delete: "Eliminar",
     },
     goals: {
       title: "Metas",

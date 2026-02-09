@@ -4,11 +4,14 @@ import { Sheet } from "@/components/ui/Sheet";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/Badge";
 import type { Expense } from "@/types/index";
-import { Calendar, CreditCard, Tag, Info, Clock } from "lucide-react";
+import { Calendar, CreditCard, Tag, Info, Clock, Loader2 } from "lucide-react";
 import { EditExpenseModal } from "./EditExpenseModal";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { getApiHeaders } from "@/lib/api";
+import { toast } from "sonner";
 
 interface ExpenseDetailsSheetProps {
   expense: Expense | null;
@@ -37,8 +40,37 @@ export function ExpenseDetailsSheet({
 }: ExpenseDetailsSheetProps) {
   const { translate, currencySymbol, currency } = useSettings();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   if (!expense) return null;
+
+  const handleDelete = async () => {
+    if (!confirm(translate("expenses.details.deleteConfirm"))) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/expenses/${expense.id}`,
+        {
+          method: "DELETE",
+          headers: getApiHeaders(),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete expense");
+      }
+
+      toast.success(translate("expenses.details.deleteSuccess"));
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      toast.error(translate("expenses.details.deleteError"));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <Sheet
@@ -65,7 +97,7 @@ export function ExpenseDetailsSheet({
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-black text-titles dark:text-foreground">
               {currencySymbol}
-              {expense.amount.toFixed(2)}
+              {formatCurrency(expense.amount)}
             </span>
             <span className="text-sm font-bold text-action">{currency}</span>
           </div>
@@ -150,25 +182,49 @@ export function ExpenseDetailsSheet({
               </p>
             </div>
           </div>
-          <motion.button
-            whileHover="hover"
-            onClick={() => setIsModalOpen(true)}
-            className="group flex items-center gap-2 bg-action hover:bg-action/90 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
-          >
-            <motion.div
-              initial={{ scale: 1 }}
-              variants={{
-                hover: { scale: 1.2 },
-              }}
-              transition={{
-                duration: 0.6,
-                ease: "easeInOut",
-              }}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <motion.button
+              whileHover="hover"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="group flex-1 flex items-center justify-center gap-2 bg-expense hover:bg-expense/90 text-white dark:bg-expense/10 dark:hover:bg-expense/20 dark:text-expense px-6 py-3 rounded-xl font-bold transition-all border border-transparent dark:border-expense/20 active:scale-95 disabled:opacity-50 cursor-pointer"
             >
-              <Pencil size={20} strokeWidth={2.5} />
-            </motion.div>
-            {translate("expenses.edit")}
-          </motion.button>
+              {isDeleting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <motion.div
+                  initial={{ scale: 1 }}
+                  variants={{
+                    hover: { scale: 1.2 },
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Trash2 size={20} strokeWidth={2.5} />
+                </motion.div>
+              )}
+              {translate("expenses.delete")}
+            </motion.button>
+
+            <motion.button
+              whileHover="hover"
+              onClick={() => setIsModalOpen(true)}
+              className="group flex-1 flex items-center justify-center gap-2 bg-action hover:bg-action/90 text-white dark:bg-action/10 dark:hover:bg-action/20 dark:text-action px-6 py-3 rounded-xl font-bold transition-all border border-transparent dark:border-action/20 active:scale-95 cursor-pointer"
+            >
+              <motion.div
+                initial={{ scale: 1 }}
+                variants={{
+                  hover: { scale: 1.2 },
+                }}
+                transition={{
+                  duration: 0.6,
+                  ease: "easeInOut",
+                }}
+              >
+                <Pencil size={20} strokeWidth={2.5} />
+              </motion.div>
+              {translate("expenses.edit")}
+            </motion.button>
+          </div>
         </div>
       </div>
     </Sheet>

@@ -95,34 +95,34 @@ func saveExpenses() {
 
 func main() {
 	loadExpenses()
-	r := gin.Default()
+	router := gin.Default()
 
 	// Simple CORS Middleware
-	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, ngrok-skip-browser-warning")
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
+	router.Use(func(ctx *gin.Context) {
+		ctx.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		ctx.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		ctx.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if ctx.Request.Method == "OPTIONS" {
+			ctx.AbortWithStatus(http.StatusNoContent)
 			return
 		}
-		c.Next()
+		ctx.Next()
 	})
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
+	router.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
 			"status": "healthy",
 		})
 	})
 
-	r.GET("/api/expenses", func(c *gin.Context) {
-		c.JSON(http.StatusOK, expenses)
+	router.GET("/api/expenses", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, expenses)
 	})
 
-	r.POST("/api/expenses", func(c *gin.Context) {
+	router.POST("/api/expenses", func(ctx *gin.Context) {
 		var newExpense models.Expense
-		if err := c.ShouldBindJSON(&newExpense); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err := ctx.ShouldBindJSON(&newExpense); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -134,23 +134,23 @@ func main() {
 
 		expenses = append([]models.Expense{newExpense}, expenses...) // Prepend for UI freshness
 		saveExpenses()
-		c.JSON(http.StatusCreated, newExpense)
+		ctx.JSON(http.StatusCreated, newExpense)
 	})
 
-	r.PUT("/api/expenses/:id", func(c *gin.Context) {
-		id := c.Param("id")
+	router.PUT("/api/expenses/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
 		var updatedExpense models.Expense
-		if err := c.ShouldBindJSON(&updatedExpense); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err := ctx.ShouldBindJSON(&updatedExpense); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
 		found := false
-		for i, e := range expenses {
-			if e.ID == id {
+		for i, expense := range expenses {
+			if expense.ID == id {
 				updatedExpense.ID = id // Keep the same ID
 				if updatedExpense.Date.IsZero() {
-					updatedExpense.Date = e.Date
+					updatedExpense.Date = expense.Date
 				}
 				expenses[i] = updatedExpense
 				found = true
@@ -159,19 +159,19 @@ func main() {
 		}
 
 		if !found {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Expense not found"})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Expense not found"})
 			return
 		}
 
 		saveExpenses()
-		c.JSON(http.StatusOK, updatedExpense)
+		ctx.JSON(http.StatusOK, updatedExpense)
 	})
 
-	r.DELETE("/api/expenses/:id", func(c *gin.Context) {
-		id := c.Param("id")
+	router.DELETE("/api/expenses/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
 		found := false
-		for i, e := range expenses {
-			if e.ID == id {
+		for i, expense := range expenses {
+			if expense.ID == id {
 				expenses = append(expenses[:i], expenses[i+1:]...)
 				found = true
 				break
@@ -179,13 +179,13 @@ func main() {
 		}
 
 		if !found {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Expense not found"})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Expense not found"})
 			return
 		}
 
 		saveExpenses()
-		c.JSON(http.StatusNoContent, nil)
+		ctx.JSON(http.StatusNoContent, nil)
 	})
 
-	r.Run("0.0.0.0:8080")
+	router.Run("0.0.0.0:8080")
 }
