@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { RegisterExpenseModal } from "@/components/expenses/RegisterExpenseModal";
 import { ExpenseDetailsSheet } from "@/components/expenses/ExpenseDetailsSheet";
+import { useSearchParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -34,12 +35,25 @@ const categoryColors: Record<
 
 export default function GastosPage() {
   const { currency, currencySymbol, translate } = useSettings();
+  const searchParams = useSearchParams();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  // Auto-open details if ID is in URL
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (id && expenses.length > 0) {
+      const expense = expenses.find((e) => e.id.toString() === id);
+      if (expense) {
+        setSelectedExpense(expense);
+        setIsDetailsOpen(true);
+      }
+    }
+  }, [searchParams, expenses]);
 
   const fetchExpenses = async () => {
     try {

@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { RegisterIncomeModal } from "@/components/incomes/RegisterIncomeModal";
 import { IncomeDetailsSheet } from "@/components/incomes/IncomeDetailsSheet";
+import { useSearchParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -39,12 +40,25 @@ const sourceColors: Record<
 
 export default function IngresosPage() {
   const { currency, currencySymbol, translate } = useSettings();
+  const searchParams = useSearchParams();
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  // Auto-open details if ID is in URL
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (id && incomes.length > 0) {
+      const income = incomes.find((i) => i.id.toString() === id);
+      if (income) {
+        setSelectedIncome(income);
+        setIsDetailsOpen(true);
+      }
+    }
+  }, [searchParams, incomes]);
 
   const fetchIncomes = async () => {
     try {

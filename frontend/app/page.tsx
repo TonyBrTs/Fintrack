@@ -13,6 +13,9 @@ import { useState, useEffect } from "react";
 import { getApiHeaders } from "@/lib/api";
 import type { Expense, Income } from "@/types/index";
 import { formatCurrency } from "@/lib/utils";
+import { SummaryCharts } from "@/components/SummaryCharts";
+import { RecentTransactions } from "@/components/RecentTransactions";
+import { FinancialInsights } from "@/components/FinancialInsights";
 
 export default function SummaryPage() {
   const { currencySymbol, translate } = useSettings();
@@ -72,9 +75,19 @@ export default function SummaryPage() {
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {translate("nav.summary")}
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          {translate("common.summaryDescription") ||
+            "Visualiza tu salud financiera de un vistazo."}
+        </p>
+      </div>
+
       {/* KPI Cards Row */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <KPICard
           title={translate("summary.balance")}
           amount={`${currencySymbol}${formatCurrency(balance)}`}
@@ -96,6 +109,24 @@ export default function SummaryPage() {
           icon={<PieChart size={24} className="text-action" />}
         />
       </section>
+
+      {/* Recent Activity (Moved under cards) */}
+      <section>
+        <RecentTransactions expenses={expenses} incomes={incomes} />
+      </section>
+
+      {/* Main Content Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Charts Column */}
+        <div className="lg:col-span-2 space-y-8">
+          <SummaryCharts expenses={expenses} incomes={incomes} />
+        </div>
+
+        {/* Sidebar Column (Insights only now) */}
+        <div className="space-y-8">
+          <FinancialInsights expenses={expenses} incomes={incomes} />
+        </div>
+      </div>
     </div>
   );
 }
