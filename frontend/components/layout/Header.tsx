@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Moon, Globe, Settings, Bell, Sun, Check, Menu } from "lucide-react";
+import { Moon, Globe, Sun, Check, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -18,11 +18,31 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Header() {
+  return (
+    <header className="h-18 bg-white dark:bg-card border-b border-gray-100 dark:border-border px-8 flex items-center justify-between transition-colors duration-300">
+      {/* Logo */}
+      <h1 className="text-titles dark:text-foreground font-bold text-xl">
+        FinTrack AI
+      </h1>
+
+      {/* Right side: Icons and Avatar */}
+      <div className="flex items-center gap-5">
+        <DesktopMenu />
+        <MobileMenu />
+      </div>
+    </header>
+  );
+}
+
+// ----------------------------------------------------------------------
+// DESKTOP MENU COMPONENT
+// ----------------------------------------------------------------------
+
+function DesktopMenu() {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, currency, setCurrency, translate } =
     useSettings();
   const [mounted, setMounted] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -35,101 +55,97 @@ export function Header() {
   };
 
   return (
-    <header className="h-18 bg-white dark:bg-card border-b border-gray-100 dark:border-border px-8 flex items-center justify-between transition-colors duration-300">
-      {/* Logo */}
-      <h1 className="text-titles dark:text-foreground font-bold text-xl">
-        FinTrack AI
-      </h1>
+    <div className="hidden md:flex items-center gap-5">
+      <button
+        onClick={toggleTheme}
+        className="text-secondary-titles hover:text-action transition-colors cursor-pointer"
+      >
+        {mounted && theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
 
-      {/* Right side: Icons and Avatar */}
-      <div className="flex items-center gap-5">
-        {/* Desktop Icons */}
-        <div className="hidden md:flex items-center gap-5">
-          <button
-            onClick={toggleTheme}
-            className="text-secondary-titles hover:text-action transition-colors cursor-pointer"
-          >
-            {mounted && theme === "dark" ? (
-              <Sun size={20} />
-            ) : (
-              <Moon size={20} />
-            )}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="text-secondary-titles hover:text-action transition-colors cursor-pointer outline-none">
+            <Globe size={20} />
           </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end">
+          <DropdownMenuLabel>{translate("header.language")}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => setLanguage("en")}>
+              <span>English</span>
+              {language === "en" && <Check className="ml-auto h-4 w-4" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLanguage("es")}>
+              <span>Español</span>
+              {language === "es" && <Check className="ml-auto h-4 w-4" />}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel>{translate("header.currency")}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => setCurrency("USD")}>
+              <span>USD ($)</span>
+              {currency === "USD" && <Check className="ml-auto h-4 w-4" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setCurrency("EUR")}>
+              <span>EUR (€)</span>
+              {currency === "EUR" && <Check className="ml-auto h-4 w-4" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setCurrency("GBP")}>
+              <span>GBP (£)</span>
+              {currency === "GBP" && <Check className="ml-auto h-4 w-4" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setCurrency("CRC")}>
+              <span>CRC (₡)</span>
+              {currency === "CRC" && <Check className="ml-auto h-4 w-4" />}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="text-secondary-titles hover:text-action transition-colors cursor-pointer outline-none">
-                <Globe size={20} />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel>
-                {translate("header.language")}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => setLanguage("en")}>
-                  <span>English</span>
-                  {language === "en" && <Check className="ml-auto h-4 w-4" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLanguage("es")}>
-                  <span>Español</span>
-                  {language === "es" && <Check className="ml-auto h-4 w-4" />}
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>
-                {translate("header.currency")}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => setCurrency("USD")}>
-                  <span>USD ($)</span>
-                  {currency === "USD" && <Check className="ml-auto h-4 w-4" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCurrency("EUR")}>
-                  <span>EUR (€)</span>
-                  {currency === "EUR" && <Check className="ml-auto h-4 w-4" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCurrency("GBP")}>
-                  <span>GBP (£)</span>
-                  {currency === "GBP" && <Check className="ml-auto h-4 w-4" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCurrency("CRC")}>
-                  <span>CRC (₡)</span>
-                  {currency === "CRC" && <Check className="ml-auto h-4 w-4" />}
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+      {/* Avatar (Desktop Only) */}
+      <Avatar size="lg" className="cursor-pointer hidden md:flex">
+        <AvatarImage src="https://github.com/shadcn.png" alt="TonyBrTs" />
+        <AvatarFallback className="bg-action text-white font-medium text-sm">
+          TA
+        </AvatarFallback>
+      </Avatar>
+    </div>
+  );
+}
 
-          <button className="text-secondary-titles hover:text-action transition-colors cursor-pointer mr-0.5">
-            <Bell size={20} />
-          </button>
-        </div>
+// ----------------------------------------------------------------------
+// MOBILE MENU COMPONENT
+// ----------------------------------------------------------------------
 
-        {/* Mobile Burger Menu Button */}
-        <button
-          onClick={() => setIsMenuOpen(true)}
-          className="md:hidden text-secondary-titles hover:text-action transition-colors cursor-pointer"
-        >
-          <Menu size={24} />
-        </button>
+function MobileMenu() {
+  const { theme, setTheme } = useTheme();
+  const { language, setLanguage, currency, setCurrency, translate } =
+    useSettings();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-        <button className="text-secondary-titles hover:text-action transition-colors cursor-pointer hidden md:block">
-          <Settings size={20} />
-        </button>
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
-        {/* Avatar (Desktop Only) */}
-        <Avatar size="lg" className="cursor-pointer hidden md:flex">
-          <AvatarImage src="https://github.com/shadcn.png" alt="TonyBrTs" />
-          <AvatarFallback className="bg-action text-white font-medium text-sm">
-            TA
-          </AvatarFallback>
-        </Avatar>
-      </div>
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
-      {/* Mobile Menu Sheet */}
+  return (
+    <>
+      <button
+        onClick={() => setIsMenuOpen(true)}
+        className="md:hidden text-secondary-titles hover:text-action transition-colors cursor-pointer"
+      >
+        <Menu size={24} />
+      </button>
+
       <Sheet
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
@@ -155,10 +171,11 @@ export function Header() {
           </div>
 
           <div className="h-px bg-gray-100 dark:bg-gray-800 w-full" />
+
           {/* Theme Toggle */}
           <div className="flex items-center justify-between">
             <span className="text-secondary-titles font-medium">
-              {theme === "dark" ? "Dark Mode" : "Light Mode"}
+              {mounted && theme === "dark" ? "Dark Mode" : "Light Mode"}
             </span>
             <button
               onClick={toggleTheme}
@@ -168,8 +185,9 @@ export function Header() {
                 layout
                 initial={false}
                 animate={{
-                  x: theme === "dark" ? 24 : 0,
-                  backgroundColor: theme === "dark" ? "#60a5fa" : "#facc15",
+                  x: mounted && theme === "dark" ? 24 : 0,
+                  backgroundColor:
+                    mounted && theme === "dark" ? "#60a5fa" : "#facc15",
                 }}
                 transition={{
                   type: "spring",
@@ -237,6 +255,6 @@ export function Header() {
           </div>
         </div>
       </Sheet>
-    </header>
+    </>
   );
 }

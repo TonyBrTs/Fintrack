@@ -157,16 +157,18 @@ export default function SummaryPage() {
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
       <div className="md:flex md:items-end md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {translate("nav.summary")}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {translate("common.summaryDescription") ||
-              "Visualiza tu salud financiera de un vistazo."}
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-15 bg-action rounded-full" />
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-titles dark:text-foreground">
+              {translate("nav.summary")}
+            </h1>
+          </div>
+          <p className="text-secondary-titles dark:text-muted-foreground text-lg ml-5">
+            {translate("common.summaryDescription")}
           </p>
         </div>
-        <div className="md:w-auto w-full">
+        <div className="md:w-auto w-full mt-3">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-full md:w-[180px] rounded-xl bg-surface border-border">
               <SelectValue placeholder="Seleccionar mes" />
