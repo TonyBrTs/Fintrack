@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FinTrack AI 🚀
 
-## Getting Started
+**FinTrack AI** is a modern, full-stack personal finance application designed to help users track expenses, incomes, and goals with ease. Built with a focus on performance, aesthetics, and user experience.
 
-First, run the development server:
+![Project Banner](https://via.placeholder.com/1200x400?text=FinTrack+AI+Preview)
+
+## ✨ Technical Overview
+
+This project is a monorepo consisting of a high-performance **Go** backend and a dynamic **Next.js** frontend.
+
+| Component    | Technology Stack                                                                          | Key Features                                                                          |
+| ------------ | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Frontend** | [Next.js 16](https://nextjs.org/) (React 19), [Tailwind CSS v4](https://tailwindcss.com/) | Dark Mode, Responsive Design, Interactive Charts (Recharts), Framer Motion Animations |
+| **Backend**  | [Go 1.23](https://go.dev/), [Gin Framework](https://gin-gonic.com/)                       | RESTful API, JSON File Storage (NoSQL-lite approach), Fast Execution                  |
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v20+)
+- [Go](https://go.dev/) (v1.23+)
+
+### 1. Backend Setup
+
+The backend runs on port `8080`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd backend
+go mod download
+go run main.go
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Frontend Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The frontend runs on `http://localhost:3000`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## Learn More
+## 🌟 Key Features
 
-To learn more about Next.js, take a look at the following resources:
+- **Dashboard Summary**: Real-time overview of your financial health (Balance, Income, Expenses, Savings Rate).
+- **Goal Tracking**: Set and visualize financial goals with progress bars.
+- **Transaction Management**: Easy-to-use interface for adding and viewing transactions.
+- **Multi-Currency Support**: Switch between USD, EUR, GBP, and CRC seamlessly.
+- **Theme Customization**: Beautiful Light and Dark modes.
+- **Global Search & Shortcuts**: Quick access to features (triggered by shortcuts).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📂 Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+fintrack-ai/
+├── backend/            # Go REST API
+│   ├── cmd/            # Entry point
+│   ├── internal/       # Business logic & handlers
+│   └── *.json          # Data storage files
+├── frontend/           # Next.js Application
+│   ├── app/            # App Router pages
+│   ├── components/     # Reusable UI components
+│   └── lib/            # Utilities & API clients
+└── README.md           # You are here
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+_Built with ❤️ by TonyBrTs_
