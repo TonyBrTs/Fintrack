@@ -43,17 +43,20 @@ npm start
 
 ```
 frontend/
-├── app/                  # Next.js App Router (Pages & Layouts)
-│   ├── goals/            # Goals Page
-│   ├── transactions/     # Transactions Page
-│   └── page.tsx          # Dashboard (Home)
-├── components/           # React Components
-│   ├── layout/           # Header, Sidebar, Wrapper
-│   ├── ui/               # Reusable UI elements (Buttons, Inputs, Cards)
-│   └── *.tsx             # Feature-specific components (Charts, KPI Cards)
-├── contexts/             # Global Context Providers (Settings, Theme)
-├── lib/                  # Utilities (API helpers, Formatting)
-└── public/               # Static assets
+├── src/
+│   ├── app/              # Next.js App Router (Pages & Layouts)
+│   │   ├── goals/        # Goals Page
+│   │   ├── transactions/ # Transactions Page
+│   │   └── page.tsx      # Dashboard (Home)
+│   ├── components/       # React Components
+│   │   ├── layout/       # Header, Sidebar, Wrapper
+│   │   ├── ui/           # Reusable UI elements (Buttons, Inputs, Cards)
+│   │   └── *.tsx         # Feature-specific components (Charts, KPI Cards)
+│   ├── contexts/         # Global Context Providers (Settings, Theme)
+│   ├── lib/              # Utilities (API helpers, Formatting)
+│   └── types/            # TypeScript Definitions
+├── public/               # Static assets
+└── ...
 ```
 
 ## ✨ Key Components

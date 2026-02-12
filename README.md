@@ -58,9 +58,10 @@ fintrack-ai/
 │   ├── internal/       # Business logic & handlers
 │   └── *.json          # Data storage files
 ├── frontend/           # Next.js Application
-│   ├── app/            # App Router pages
-│   ├── components/     # Reusable UI components
-│   └── lib/            # Utilities & API clients
+│   ├── src/            # Source code
+│   │   ├── app/        # App Router pages
+│   │   ├── components/ # Reusable UI components
+│   │   └── lib/        # Utilities & API clients
 └── README.md           # You are here
 ```
 

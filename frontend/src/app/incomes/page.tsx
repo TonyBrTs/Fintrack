@@ -1,23 +1,9 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import {
-  Plus,
-  TrendingUp,
-  HandCoins,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
-import { KPICard } from "@/components/ui/KPICard";
-import { Badge } from "@/components/ui/Badge";
-import { useSettings } from "@/contexts/SettingsContext";
-import { getApiHeaders } from "@/lib/api";
-import type { Income } from "@/types/index";
-import { useState, useEffect } from "react";
-import { formatCurrency } from "@/lib/utils";
-import { RegisterIncomeModal } from "@/components/incomes/RegisterIncomeModal";
-import { IncomeDetailsSheet } from "@/components/incomes/IncomeDetailsSheet";
-import { useSearchParams } from "next/navigation";
+import { IncomeDetailsSheet } from '@/components/incomes/IncomeDetailsSheet';
+import { RegisterIncomeModal } from '@/components/incomes/RegisterIncomeModal';
+import { Badge } from '@/components/ui/Badge';
+import { KPICard } from '@/components/ui/KPICard';
 import {
   Table,
   TableBody,
@@ -25,20 +11,25 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
+import { useSettings } from '@/contexts/SettingsContext';
+import { getApiHeaders } from '@/lib/api';
+import { formatCurrency } from '@/lib/utils';
+import type { Income } from '@/types/index';
+import { motion } from 'framer-motion';
+import { AlertCircle, HandCoins, Loader2, Plus, TrendingUp } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
-const sourceColors: Record<
-  string,
-  "success" | "warning" | "error" | "info" | "default"
-> = {
-  Salario: "success",
-  Freelance: "info",
-  Inversiones: "warning",
-  Regalo: "success",
-  Otros: "default",
+const sourceColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default'> = {
+  Salario: 'success',
+  Freelance: 'info',
+  Inversiones: 'warning',
+  Regalo: 'success',
+  Otros: 'default',
 };
 
-export default function IngresosPage() {
+function IncomesContent() {
   const { currency, currencySymbol, translate } = useSettings();
   const searchParams = useSearchParams();
   const [incomes, setIncomes] = useState<Income[]>([]);
@@ -50,7 +41,7 @@ export default function IngresosPage() {
 
   // Auto-open details if ID is in URL
   useEffect(() => {
-    const id = searchParams.get("id");
+    const id = searchParams.get('id');
     if (id && incomes.length > 0) {
       const income = incomes.find((i) => i.id.toString() === id);
       if (income) {
@@ -63,22 +54,19 @@ export default function IngresosPage() {
   const fetchIncomes = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/incomes`,
-        {
-          headers: getApiHeaders(),
-        },
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/incomes`, {
+        headers: getApiHeaders(),
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch incomes");
+        throw new Error('Failed to fetch incomes');
       }
       const data = await response.json();
       setIncomes(data);
       setError(null);
     } catch (err) {
-      console.error("Error fetching incomes:", err);
-      setError("Could not load incomes. Make sure the backend is running.");
+      console.error('Error fetching incomes:', err);
+      setError('Could not load incomes. Make sure the backend is running.');
     } finally {
       setLoading(false);
     }
@@ -98,15 +86,14 @@ export default function IngresosPage() {
     {} as Record<string, number>,
   );
 
-  const mainSource =
-    Object.entries(sourceTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || "---";
+  const mainSource = Object.entries(sourceTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || '---';
 
   if (loading && incomes.length === 0) {
     return (
       <main className="max-w-360 mx-auto px-4 lg:px-20 py-20 flex flex-col items-center justify-center space-y-4">
         <Loader2 className="w-12 h-12 text-income animate-spin opacity-50" />
         <p className="text-secondary-titles font-medium animate-pulse">
-          {translate("common.loading")}
+          {translate('common.loading')}
         </p>
       </main>
     );
@@ -120,17 +107,17 @@ export default function IngresosPage() {
         </div>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-titles dark:text-foreground">
-            {translate("common.errorTitle")}
+            {translate('common.errorTitle')}
           </h2>
           <p className="text-secondary-titles max-w-md mx-auto">
-            {translate("common.errorMessage")}
+            {translate('common.errorMessage')}
           </p>
         </div>
         <button
           onClick={() => fetchIncomes()}
           className="bg-income text-white px-6 py-2 rounded-xl font-bold cursor-pointer"
         >
-          {translate("common.retry")}
+          {translate('common.retry')}
         </button>
       </main>
     );
@@ -143,11 +130,11 @@ export default function IngresosPage() {
           <div className="flex items-center gap-3">
             <div className="w-1 h-15 bg-action rounded-full" />
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-titles dark:text-foreground">
-              {translate("income.title")}
+              {translate('income.title')}
             </h1>
           </div>
           <p className="text-secondary-titles dark:text-muted-foreground text-lg ml-5">
-            {translate("income.description")}
+            {translate('income.description')}
           </p>
         </div>
         <motion.button
@@ -162,12 +149,12 @@ export default function IngresosPage() {
             }}
             transition={{
               duration: 0.6,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }}
           >
             <Plus size={20} strokeWidth={2.5} />
           </motion.div>
-          {translate("income.register")}
+          {translate('income.register')}
         </motion.button>
       </header>
 
@@ -186,15 +173,13 @@ export default function IngresosPage() {
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         <KPICard
-          title={translate("income.totalMonth")}
+          title={translate('income.totalMonth')}
           amount={`${currencySymbol}${formatCurrency(totalMonth)}`}
           icon={<TrendingUp size={24} className="text-income" />}
         />
         <KPICard
-          title={translate("income.mainSource")}
-          amount={
-            mainSource === "---" ? "---" : translate(`sources.${mainSource}`)
-          }
+          title={translate('income.mainSource')}
+          amount={mainSource === '---' ? '---' : translate(`sources.${mainSource}`)}
           icon={<HandCoins size={24} className="text-gold" />}
         />
       </section>
@@ -209,16 +194,16 @@ export default function IngresosPage() {
           <TableHeader className="bg-secondary/30 dark:bg-secondary/10">
             <TableRow className="hover:bg-transparent border-border-ui border-b-2">
               <TableHead className="px-4 md:px-6 py-5 text-xs md:text-sm font-bold text-titles dark:text-foreground uppercase tracking-widest">
-                {translate("income.table.date")}
+                {translate('income.table.date')}
               </TableHead>
               <TableHead className="hidden md:table-cell px-6 py-5 text-sm font-bold text-titles dark:text-foreground uppercase tracking-widest">
-                {translate("income.table.description")}
+                {translate('income.table.description')}
               </TableHead>
               <TableHead className="px-4 md:px-6 py-5 text-xs md:text-sm font-bold text-titles dark:text-foreground uppercase tracking-widest">
-                {translate("income.table.source")}
+                {translate('income.table.source')}
               </TableHead>
               <TableHead className="px-4 md:px-6 py-5 text-xs md:text-sm font-bold text-titles dark:text-foreground uppercase tracking-widest text-right">
-                {translate("income.table.amount")}
+                {translate('income.table.amount')}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -234,9 +219,7 @@ export default function IngresosPage() {
               >
                 <TableCell className="px-4 md:px-6 py-4 text-sm text-titles dark:text-foreground whitespace-nowrap font-medium">
                   <div className="flex flex-col">
-                    <span className="text-base">
-                      {new Date(income.date).toLocaleDateString()}
-                    </span>
+                    <span className="text-base">{new Date(income.date).toLocaleDateString()}</span>
                     <span className="md:hidden text-[10px] text-secondary-titles mt-0.5 truncate max-w-20 opacity-70">
                       {income.description}
                     </span>
@@ -247,7 +230,7 @@ export default function IngresosPage() {
                 </TableCell>
                 <TableCell className="px-4 md:px-6 py-4">
                   <Badge
-                    variant={sourceColors[income.source] || "default"}
+                    variant={sourceColors[income.source] || 'default'}
                     className="text-[10px] md:text-xs px-3 py-1 font-bold tracking-tight shadow-sm"
                   >
                     {translate(`sources.${income.source}`)}
@@ -270,5 +253,13 @@ export default function IngresosPage() {
         </Table>
       </motion.section>
     </main>
+  );
+}
+
+export default function IngresosPage() {
+  return (
+    <Suspense>
+      <IncomesContent />
+    </Suspense>
   );
 }
