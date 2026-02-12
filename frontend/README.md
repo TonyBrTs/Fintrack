@@ -1,6 +1,6 @@
-# FinTrack AI - Frontend 🎨
+# FinTrack - Frontend 🎨
 
-The user interface for **FinTrack AI**, built with **Next.js 16**, designed for speed and interactivity.
+The user interface for **FinTrack**, built with **Next.js 16**, designed for speed and interactivity.
 
 ## 🛠 Tech Stack
 

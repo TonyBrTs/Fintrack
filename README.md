@@ -1,8 +1,6 @@
-# FinTrack AI 🚀
+# FinTrack 🚀
 
-**FinTrack AI** is a modern, full-stack personal finance application designed to help users track expenses, incomes, and goals with ease. Built with a focus on performance, aesthetics, and user experience.
-
-![Project Banner](https://via.placeholder.com/1200x400?text=FinTrack+AI+Preview)
+**FinTrack** is a modern, full-stack personal finance application designed to help users track expenses, incomes, and goals with ease. Built with a focus on performance, aesthetics, and user experience.
 
 ## ✨ Technical Overview
 

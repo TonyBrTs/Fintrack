@@ -1,6 +1,6 @@
-# FinTrack AI - Backend ⚙️
+# FinTrack - Backend ⚙️
 
-The robust API server for **FinTrack AI**, built with **Go (Golang)** for high performance and reliability.
+The robust API server for **FinTrack**, built with **Go (Golang)** for high performance and reliability.
 
 ## 🛠 Tech Stack
 
