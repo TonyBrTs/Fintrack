@@ -22,6 +22,7 @@ frontend/build
 backend/bin
 */expenses.json
 */incomes.json
+*/goals.json
 
 # misc
 .DS_Store

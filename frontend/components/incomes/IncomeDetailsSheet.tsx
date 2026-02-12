@@ -135,7 +135,7 @@ export function IncomeDetailsSheet({
                 variant={sourceColors[income.source] || "default"}
                 className="text-xs px-3 py-1 font-bold"
               >
-                {income.source}
+                {translate(`sources.${income.source}`)}
               </Badge>
             </div>
           </div>

@@ -124,7 +124,7 @@ export function ExpenseDetailsSheet({
                 variant={categoryColors[expense.category] || "default"}
                 className="text-xs px-3 py-1 font-bold"
               >
-                {expense.category}
+                {translate(`categories.${expense.category}`)}
               </Badge>
             </div>
           </div>
@@ -171,7 +171,13 @@ export function ExpenseDetailsSheet({
                 {translate("expenses.details.description")}
               </p>
               <p className="text-base text-titles dark:text-foreground leading-relaxed">
-                {expense.description}
+                {expense.category === "Metas"
+                  ? `${translate("goals.contributionToGoal")}: ${
+                      expense.description.includes(": ")
+                        ? expense.description.split(": ")[1]
+                        : expense.description
+                    }`
+                  : expense.description}
               </p>
             </div>
           </div>

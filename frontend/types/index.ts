@@ -4,6 +4,7 @@ export type ExpenseCategory =
   | "Servicios"
   | "Entretenimiento"
   | "Salud"
+  | "Metas"
   | "Otros";
 
 export interface Expense {
@@ -31,4 +32,13 @@ export interface Income {
   source: IncomeSource;
   date: Date | string;
   payment_method: string;
+}
+
+export interface Goal {
+  id: string;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  deadline: Date | string;
+  category: string;
 }

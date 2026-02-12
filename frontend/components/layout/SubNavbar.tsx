@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   TrendingUp,
   TrendingDown,
-  Target,
+  Goal,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,7 +36,7 @@ export function SubNavbar() {
     {
       name: translate("nav.goals"),
       href: "/metas",
-      icon: <Target size={20} />,
+      icon: <Goal size={20} />,
     },
   ];
 

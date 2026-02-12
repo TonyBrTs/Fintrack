@@ -2,7 +2,7 @@
 
 import { Expense, Income } from "@/types/index";
 import { useSettings } from "@/contexts/SettingsContext";
-import { Lightbulb, TrendingDown, Target, Zap } from "lucide-react";
+import { Lightbulb, TrendingDown, Goal, Zap } from "lucide-react";
 
 interface FinancialInsightsProps {
   expenses: Expense[];
@@ -47,7 +47,7 @@ export function FinancialInsights({
     });
   } else if (savingsRate > 0) {
     insights.push({
-      icon: <Target className="text-blue-500" />,
+      icon: <Goal className="text-blue-500" />,
       title: "Meta de ahorro",
       desc: "Intenta llegar al 20% de ahorro mensual para fortalecer tu fondo de emergencia.",
       color:

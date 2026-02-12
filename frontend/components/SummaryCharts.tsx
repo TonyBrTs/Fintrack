@@ -20,6 +20,7 @@ import { formatCurrency } from "@/lib/utils";
 interface SummaryChartsProps {
   expenses: Expense[];
   incomes: Income[];
+  currentMonthExpenses?: Expense[];
 }
 
 const COLORS = [
@@ -36,11 +37,18 @@ interface ChartDataItem {
   value: number;
 }
 
-export function SummaryCharts({ expenses, incomes }: SummaryChartsProps) {
+export function SummaryCharts({
+  expenses,
+  incomes,
+  currentMonthExpenses,
+}: SummaryChartsProps) {
   const { translate, currencySymbol } = useSettings();
 
+  // Use currentMonthExpenses if provided, otherwise fallback to all expenses
+  const expensesForPie = currentMonthExpenses || expenses;
+
   // Process data for Expenses by Category (Pie Chart)
-  const categoryData = expenses.reduce((acc: ChartDataItem[], curr) => {
+  const categoryData = expensesForPie.reduce((acc: ChartDataItem[], curr) => {
     const existing = acc.find((item) => item.name === curr.category);
     if (existing) {
       existing.value += curr.amount;

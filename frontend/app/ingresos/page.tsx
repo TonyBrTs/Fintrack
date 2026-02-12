@@ -192,7 +192,9 @@ export default function IngresosPage() {
         />
         <KPICard
           title={translate("income.mainSource")}
-          amount={mainSource}
+          amount={
+            mainSource === "---" ? "---" : translate(`sources.${mainSource}`)
+          }
           icon={<HandCoins size={24} className="text-gold" />}
         />
       </section>
@@ -248,7 +250,7 @@ export default function IngresosPage() {
                     variant={sourceColors[income.source] || "default"}
                     className="text-[10px] md:text-xs px-3 py-1 font-bold tracking-tight shadow-sm"
                   >
-                    {income.source}
+                    {translate(`sources.${income.source}`)}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-4 md:px-6 py-4 text-right">

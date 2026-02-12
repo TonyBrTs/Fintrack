@@ -13,11 +13,13 @@ import (
 const (
 	storageFile        = "expenses.json"
 	incomeStorageFile = "incomes.json"
+	goalsStorageFile  = "goals.json"
 )
 
 var (
 	expenses = []models.Expense{}
 	incomes  = []models.Income{}
+	goals    = []models.Goal{}
 )
 
 func loadExpenses() {
@@ -138,6 +140,56 @@ func saveExpenses() {
 	}
 }
 
+func loadGoals() {
+	if _, err := os.Stat(goalsStorageFile); os.IsNotExist(err) {
+		// Default mock data
+		goals = []models.Goal{
+			{
+				ID:            "1",
+				Name:          "Fondo de Emergencia",
+				TargetAmount:  5000.0,
+				CurrentAmount: 1200.0,
+				Deadline:      time.Now().AddDate(1, 0, 0),
+				Category:      "Ahorro",
+			},
+			{
+				ID:            "2",
+				Name:          "Viaje a Japón",
+				TargetAmount:  3000.0,
+				CurrentAmount: 450.0,
+				Deadline:      time.Now().AddDate(0, 6, 0),
+				Category:      "Viajes",
+			},
+		}
+		saveGoals()
+		return
+	}
+
+	data, err := os.ReadFile(goalsStorageFile)
+	if err != nil {
+		log.Printf("Error reading goals file: %v", err)
+		return
+	}
+
+	err = json.Unmarshal(data, &goals)
+	if err != nil {
+		log.Printf("Error unmarshaling goals data: %v", err)
+	}
+}
+
+func saveGoals() {
+	data, err := json.MarshalIndent(goals, "", "  ")
+	if err != nil {
+		log.Printf("Error marshaling goals data: %v", err)
+		return
+	}
+
+	err = os.WriteFile(goalsStorageFile, data, 0644)
+	if err != nil {
+		log.Printf("Error writing goals file: %v", err)
+	}
+}
+
 func saveIncomes() {
 	data, err := json.MarshalIndent(incomes, "", "  ")
 	if err != nil {
@@ -154,6 +206,7 @@ func saveIncomes() {
 func main() {
 	loadExpenses()
 	loadIncomes()
+	loadGoals()
 	router := gin.Default()
 
 	// Simple CORS Middleware
@@ -315,6 +368,71 @@ func main() {
 		}
 
 		saveIncomes()
+		ctx.JSON(http.StatusNoContent, nil)
+	})
+
+	// --- GOALS API ---
+	router.GET("/api/goals", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, goals)
+	})
+
+	router.POST("/api/goals", func(ctx *gin.Context) {
+		var newGoal models.Goal
+		if err := ctx.ShouldBindJSON(&newGoal); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		newGoal.ID = time.Now().Format("20060102150405")
+		goals = append([]models.Goal{newGoal}, goals...)
+		saveGoals()
+		ctx.JSON(http.StatusCreated, newGoal)
+	})
+
+	router.PUT("/api/goals/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		var updatedGoal models.Goal
+		if err := ctx.ShouldBindJSON(&updatedGoal); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		found := false
+		for i, goal := range goals {
+			if goal.ID == id {
+				updatedGoal.ID = id
+				goals[i] = updatedGoal
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Goal not found"})
+			return
+		}
+
+		saveGoals()
+		ctx.JSON(http.StatusOK, updatedGoal)
+	})
+
+	router.DELETE("/api/goals/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		found := false
+		for i, goal := range goals {
+			if goal.ID == id {
+				goals = append(goals[:i], goals[i+1:]...)
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Goal not found"})
+			return
+		}
+
+		saveGoals()
 		ctx.JSON(http.StatusNoContent, nil)
 	})
 

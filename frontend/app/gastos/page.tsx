@@ -31,6 +31,7 @@ const categoryColors: Record<
   Entretenimiento: "error",
   Salud: "error",
   Otros: "default",
+  Metas: "warning",
 };
 
 export default function GastosPage() {
@@ -187,7 +188,11 @@ export default function GastosPage() {
         />
         <KPICard
           title={translate("expenses.highestCategory")}
-          amount={highestCategory}
+          amount={
+            highestCategory === "---"
+              ? "---"
+              : translate(`categories.${highestCategory}`)
+          }
           icon={<Tag size={24} className="text-gold" />}
         />
       </section>
@@ -231,19 +236,29 @@ export default function GastosPage() {
                       {new Date(expense.date).toLocaleDateString()}
                     </span>
                     <span className="md:hidden text-[10px] text-secondary-titles mt-0.5 truncate max-w-20 opacity-70">
-                      {expense.description}
+                      {expense.category === "Metas"
+                        ? `${translate("goals.contributionToGoal")}: ${
+                            expense.description.split(": ")[1] ||
+                            expense.description
+                          }`
+                        : expense.description}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell className="hidden md:table-cell px-6 py-4 text-sm text-titles dark:text-foreground font-medium">
-                  {expense.description}
+                  {expense.category === "Metas"
+                    ? `${translate("goals.contributionToGoal")}: ${
+                        expense.description.split(": ")[1] ||
+                        expense.description
+                      }`
+                    : expense.description}
                 </TableCell>
                 <TableCell className="px-4 md:px-6 py-4">
                   <Badge
                     variant={categoryColors[expense.category]}
                     className="text-[10px] md:text-xs px-3 py-1 font-bold tracking-tight shadow-sm"
                   >
-                    {expense.category}
+                    {translate(`categories.${expense.category}`)}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-4 md:px-6 py-4 text-right">

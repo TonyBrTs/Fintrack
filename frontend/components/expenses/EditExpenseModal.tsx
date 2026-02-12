@@ -78,6 +78,7 @@ export function EditExpenseModal({
     "Servicios",
     "Entretenimiento",
     "Salud",
+    "Metas",
     "Otros",
   ];
 
