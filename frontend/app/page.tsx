@@ -225,7 +225,7 @@ export default function SummaryPage() {
               <h2 className="text-xl font-bold">{translate("nav.goals")}</h2>
             </div>
             <Link
-              href="/metas"
+              href="/goals"
               className="text-xs font-bold text-action hover:underline"
             >
               {translate("nav.goals")} →

@@ -25,17 +25,17 @@ export function SubNavbar() {
     },
     {
       name: translate("nav.expenses"),
-      href: "/gastos",
+      href: "/expenses",
       icon: <TrendingDown size={20} />,
     },
     {
       name: translate("nav.income"),
-      href: "/ingresos",
+      href: "/incomes",
       icon: <TrendingUp size={20} />,
     },
     {
       name: translate("nav.goals"),
-      href: "/metas",
+      href: "/goals",
       icon: <Goal size={20} />,
     },
   ];

@@ -58,8 +58,8 @@ export function RecentTransactions({
               key={`${tx.type}-${tx.id}`}
               href={
                 tx.type === "income"
-                  ? `/ingresos?id=${tx.id}`
-                  : `/gastos?id=${tx.id}`
+                  ? `/incomes?id=${tx.id}`
+                  : `/expenses?id=${tx.id}`
               }
               className="bg-white dark:bg-card shrink-0 w-64 p-4 rounded-2xl bg-surface border border-border shadow-sm hover:shadow-md transition-all group cursor-pointer active:scale-95 block"
             >
