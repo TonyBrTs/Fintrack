@@ -118,11 +118,11 @@ export function ExpenseDetailsSheet({
             <div className="p-2 bg-secondary/50 dark:bg-secondary/20 rounded-xl">
               <Calendar className="w-5 h-5 text-action" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-secondary-titles dark:text-muted-foreground uppercase tracking-wider mb-1">
                 {translate("expenses.details.date")}
               </p>
-              <p className="text-base font-bold text-titles dark:text-foreground">
+              <p className="text-base font-bold text-titles dark:text-foreground break-words capitalize leading-snug">
                 {new Date(expense.date).toLocaleDateString(undefined, {
                   weekday: "long",
                   year: "numeric",

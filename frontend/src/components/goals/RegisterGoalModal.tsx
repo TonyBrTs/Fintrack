@@ -149,7 +149,7 @@ export function RegisterGoalModal({
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <label className="text-sm font-bold ml-1 flex items-center gap-2 text-titles dark:text-foreground">
                 {translate("goals.deadline")}
               </label>
@@ -158,19 +158,21 @@ export function RegisterGoalModal({
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-full h-12 px-3 justify-start text-left font-normal focus-visible:ring-action hover:bg-action/5",
+                      "w-full h-12 px-3 justify-start text-left font-normal focus-visible:ring-action hover:bg-action/5 overflow-hidden",
                       !formData.deadline && "text-muted-foreground",
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.deadline ? (
-                      format(new Date(formData.deadline + "T12:00:00"), "PPP")
-                    ) : (
-                      <span>Seleccionar fecha</span>
-                    )}
+                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                    <span className="truncate">
+                      {formData.deadline ? (
+                        format(new Date(formData.deadline + "T12:00:00"), "PPP")
+                      ) : (
+                        <span>Seleccionar fecha</span>
+                      )}
+                    </span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="start">
                   <Calendar
                     mode="single"
                     selected={

@@ -142,7 +142,7 @@ export function RegisterExpenseModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-bold text-titles dark:text-foreground">
                 {translate("expenses.form.category")}
@@ -166,7 +166,7 @@ export function RegisterExpenseModal({
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <label className="text-sm font-bold text-titles dark:text-foreground">
                 {translate("expenses.form.date")}
               </label>
@@ -175,19 +175,21 @@ export function RegisterExpenseModal({
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-full h-10 px-3 justify-start text-left font-normal focus-visible:ring-action hover:bg-action/5 dark:hover:bg-action/10",
+                      "w-full h-10 px-3 justify-start text-left font-normal focus-visible:ring-action hover:bg-action/5 dark:hover:bg-action/10 overflow-hidden",
                       !formData.date && "text-muted-foreground",
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date ? (
-                      format(new Date(formData.date + "T12:00:00"), "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
+                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                    <span className="truncate">
+                      {formData.date ? (
+                        format(new Date(formData.date + "T12:00:00"), "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="start">
                   <Calendar
                     mode="single"
                     selected={

@@ -121,9 +121,9 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
             </div>
 
             {/* Deadline */}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1 border-t border-border/30">
-              <Calendar size={13} className="text-action" />
-              <span>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1 border-t border-border/30 min-w-0 overflow-hidden">
+              <Calendar size={13} className="text-action shrink-0" />
+              <span className="truncate">
                 {translate("goals.deadline") || "Fecha límite"}:{" "}
                 {new Date(goal.deadline).toLocaleDateString(undefined, {
                   year: "numeric",
