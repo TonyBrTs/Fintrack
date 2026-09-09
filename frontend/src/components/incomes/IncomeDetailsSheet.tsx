@@ -81,32 +81,13 @@ export function IncomeDetailsSheet({
   };
 
   return (
-    <Sheet
-      isOpen={isOpen}
-      onClose={onClose}
-      title={translate("income.details.title")}
-    >
-      <EditIncomeModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          onSuccess?.();
-          setIsModalOpen(false);
-          onClose();
-        }}
-        income={income}
-      />
-      <DeleteConfirmDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleDelete}
-        loading={isDeleting}
-        title={translate("income.delete")}
-        description={translate("income.details.deleteConfirm")}
-        confirmLabel={translate("income.delete")}
-        cancelLabel={translate("income.form.cancel")}
-      />
-      <div className="space-y-8 py-4">
+    <>
+      <Sheet
+        isOpen={isOpen}
+        onClose={onClose}
+        title={translate("income.details.title")}
+      >
+        <div className="space-y-8 py-4">
         {/* Header/Amount Section */}
         <div className="flex flex-col items-center justify-center p-8 bg-action/5 dark:bg-action/10 rounded-3xl border border-action/10">
           <span className="text-secondary-titles dark:text-muted-foreground text-sm font-bold uppercase tracking-widest mb-2">
@@ -247,5 +228,27 @@ export function IncomeDetailsSheet({
         </div>
       </div>
     </Sheet>
+
+      <EditIncomeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => {
+          onSuccess?.();
+          setIsModalOpen(false);
+          onClose();
+        }}
+        income={income}
+      />
+      <DeleteConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
+        loading={isDeleting}
+        title={translate("income.delete")}
+        description={translate("income.details.deleteConfirm")}
+        confirmLabel={translate("income.delete")}
+        cancelLabel={translate("income.form.cancel")}
+      />
+    </>
   );
 }

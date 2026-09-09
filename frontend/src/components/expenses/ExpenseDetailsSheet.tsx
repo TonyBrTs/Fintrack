@@ -74,28 +74,13 @@ export function ExpenseDetailsSheet({
   };
 
   return (
-    <Sheet
-      isOpen={isOpen}
-      onClose={onClose}
-      title={translate("expenses.details.title")}
-    >
-      <EditExpenseModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          onSuccess?.(); // Call parent's onSuccess to refresh the table
-          setIsModalOpen(false);
-          onClose();
-        }}
-        expense={expense}
-      />
-      <DeleteConfirmDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleDelete}
-        loading={isDeleting}
-      />
-      <div className="space-y-8 py-4">
+    <>
+      <Sheet
+        isOpen={isOpen}
+        onClose={onClose}
+        title={translate("expenses.details.title")}
+      >
+        <div className="space-y-8 py-4">
         {/* Header/Amount Section */}
         <div className="flex flex-col items-center justify-center p-8 bg-action/5 dark:bg-action/10 rounded-3xl border border-action/10">
           <span className="text-secondary-titles dark:text-muted-foreground text-sm font-bold uppercase tracking-widest mb-2">
@@ -241,5 +226,23 @@ export function ExpenseDetailsSheet({
         </div>
       </div>
     </Sheet>
+
+      <EditExpenseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => {
+          onSuccess?.(); // Call parent's onSuccess to refresh the table
+          setIsModalOpen(false);
+          onClose();
+        }}
+        expense={expense}
+      />
+      <DeleteConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
+        loading={isDeleting}
+      />
+    </>
   );
 }
