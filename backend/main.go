@@ -209,11 +209,22 @@ func main() {
 	loadGoals()
 	router := gin.Default()
 
-	// Simple CORS Middleware
+	// CORS Middleware
+	frontendURL := os.Getenv("FRONTEND_URL")
 	router.Use(func(ctx *gin.Context) {
-		ctx.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := ctx.Request.Header.Get("Origin")
+		if frontendURL != "" {
+			if origin == frontendURL || origin == "http://localhost:3000" {
+				ctx.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			} else {
+				ctx.Writer.Header().Set("Access-Control-Allow-Origin", frontendURL)
+			}
+		} else {
+			ctx.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		}
 		ctx.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		ctx.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		ctx.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		if ctx.Request.Method == "OPTIONS" {
 			ctx.AbortWithStatus(http.StatusNoContent)
 			return
@@ -436,5 +447,9 @@ func main() {
 		ctx.JSON(http.StatusNoContent, nil)
 	})
 
-	router.Run("0.0.0.0:8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	router.Run("0.0.0.0:" + port)
 }
