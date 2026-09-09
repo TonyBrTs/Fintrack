@@ -1,71 +1,110 @@
 # FinTrack - Frontend 🎨
 
-The user interface for **FinTrack**, built with **Next.js 16**, designed for speed and interactivity.
-
-## 🛠 Tech Stack
-
-- **Framework**: [Next.js](https://nextjs.org/) (App Router, React 19)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **State Management**: React Context (Settings, Theme)
-- **Data Fetching**: Fetch API + SWR (planned)
-- **Charts**: [Recharts](https://recharts.org/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **UI Components**: [shadcn/ui](https://ui.shadcn.com/) based
-
-## 🚀 Getting Started
-
-### Installation
-
-```bash
-# Install dependencies
-npm install
-```
-
-### Development Server
-
-```bash
-# Run the development server on http://localhost:3000
-npm run dev
-```
-
-### Production Build
-
-```bash
-# Build the application for production
-npm run build
-
-# Start the production server
-npm start
-```
-
-## 📂 Project Structure
-
-```
-frontend/
-├── src/
-│   ├── app/              # Next.js App Router (Pages & Layouts)
-│   │   ├── goals/        # Goals Page
-│   │   ├── transactions/ # Transactions Page
-│   │   └── page.tsx      # Dashboard (Home)
-│   ├── components/       # React Components
-│   │   ├── layout/       # Header, Sidebar, Wrapper
-│   │   ├── ui/           # Reusable UI elements (Buttons, Inputs, Cards)
-│   │   └── *.tsx         # Feature-specific components (Charts, KPI Cards)
-│   ├── contexts/         # Global Context Providers (Settings, Theme)
-│   ├── lib/              # Utilities (API helpers, Formatting)
-│   └── types/            # TypeScript Definitions
-├── public/               # Static assets
-└── ...
-```
-
-## ✨ Key Components
-
-- **Header**: Responsive top bar with Theme Toggle, Language/Currency Switcher, and User Profile.
-- **Sidebar**: Easy navigation for Dashboard, Transactions, Goals, and Settings.
-- **KPICard**: Displays key metrics like Balance, Income, Expenses.
-- **SummaryCharts**: Visualizes spending trends over time.
+Interfaz web moderna de **FinTrack**, construida con **Next.js 16 (React 19)**, **Tailwind CSS v4** y una estética cuidada con soporte para PWA, micro-animaciones y diseño adaptativo.
 
 ---
 
-_Built with ❤️ by TonyBrTs_
+## 🛠 Stack Tecnológico
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack, React 19)
+- **Estilos**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Componentes Primitivos**: [Radix UI](https://www.radix-ui.com/) (Select, Popovers, Dropdowns)
+- **Animaciones**: [Framer Motion](https://www.framer.com/motion/)
+- **Gráficos**: [Recharts](https://recharts.org/)
+- **Iconografía**: [Lucide React](https://lucide.dev/)
+- **Logotipo Vectorial**: Componente SVG personalizado adaptativo ([BrandLogo.tsx](src/components/layout/BrandLogo.tsx))
+- **Notificaciones**: [Sonner](https://sonner.emilkowal.ski/)
+- **PWA**: Service Worker (`public/sw.js`) y Web App Manifest (`src/app/manifest.ts`)
+
+---
+
+## 🚀 Inicio y Scripts Disponibles
+
+### Instalación de dependencias
+
+```bash
+cd frontend
+npm install
+```
+
+### Servidor de Desarrollo
+
+```bash
+npm run dev
+```
+
+La aplicación estará accesible en [http://localhost:3000](http://localhost:3000).
+
+### Compilación para Producción
+
+```bash
+npm run build
+npm start
+```
+
+### Comprobación de Calidad y Linter
+
+```bash
+npm run lint
+```
+
+---
+
+## 🌐 Enrutamiento y Páginas
+
+- `/`: **Resumen / Dashboard** — Vista general, métricas financieras clave, carrusel animado de transacciones recientes, gráficos de distribución y metas destacadas.
+- `/expenses`: **Gastos** — Gestión, categorización y filtros dinámicos por descripción y categoría.
+- `/incomes`: **Ingresos** — Registro y análisis de entradas por fuente de ingresos.
+- `/goals`: **Metas** — Monitoreo de ahorros y contribución interactiva a objetivos.
+
+---
+
+## 📂 Estructura del Código Fuente
+
+```
+frontend/
+├── public/                     # Recursos estáticos y PWA
+│   ├── sw.js                   # Service worker para caché offline
+│   ├── icon-192.png            # Icono PWA para dispositivos
+│   └── icon-512.png            # Icono PWA splash screen
+├── src/
+│   ├── app/                    # Rutas de Next.js App Router
+│   │   ├── expenses/           # Página de Gastos
+│   │   ├── incomes/            # Página de Ingresos
+│   │   ├── goals/              # Página de Metas
+│   │   ├── layout.tsx          # Layout principal (Providers, Header, SubNavbar)
+│   │   ├── page.tsx            # Dashboard / Resumen
+│   │   ├── manifest.ts         # Generador de Web App Manifest
+│   │   └── globals.css         # Tokens de diseño Tailwind v4 y scrollbar personalizado
+│   ├── components/
+│   │   ├── expenses/           # Modales de creación/edición de gastos
+│   │   ├── incomes/            # Modales de creación/edición de ingresos
+│   │   ├── goals/              # Tarjetas interactivas y modales de metas
+│   │   ├── layout/             # Header, SubNavbar, BrandLogo SVG, ServiceWorkerRegister
+│   │   └── ui/                 # Componentes Radix UI estilizados (Select, Sheet, KPICard)
+│   ├── contexts/               # SettingsContext (idiomas en/es, monedas USD/EUR/GBP/CRC)
+│   ├── lib/                    # Translations, clientes API y utilidades de formato
+│   └── types/                  # Definiciones de tipos TypeScript (Expense, Income, Goal)
+├── next.config.ts              # Configuración de Next.js y variables de entorno
+├── package.json
+└── README.md
+```
+
+---
+
+## 🌟 Características de la Interfaz
+
+1. **Carrusel de Actividad Reciente**:
+   - Avance automático cada 3.5 segundos con transición continua en bucle infinito.
+   - Pausa al interactuar con el ratón o en pantallas táctiles.
+   - Indicador minimalista de progreso y botones de navegación manual.
+2. **Filtros Radix UI Glassmorphic**:
+   - Menús desplegables con desenfoque de fondo y borde refinado, sin depender de los controles nativos del sistema operativo.
+3. **SubNavbar Segmentado**:
+   - Pestañas con micro-animaciones mediante `layoutId` de Framer Motion e íconos temáticos para cada vista.
+4. **Menú Lateral Completo en Móviles**:
+   - Implementado con `createPortal` para evitar recortes de `backdrop-filter`, con controles táctiles para tema, idioma y moneda.
+
+---
+
+_Desarrollado con ❤️ por TonyBrTs_

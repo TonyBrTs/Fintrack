@@ -1,77 +1,93 @@
 # FinTrack - Backend ⚙️
 
-The robust API server for **FinTrack**, built with **Go (Golang)** for high performance and reliability.
+Servidor API de alto rendimiento para **FinTrack**, desarrollado en **Go (Golang)** con el framework Gin y persistencia ligera en archivos JSON.
 
-## 🛠 Tech Stack
+---
 
-- **Language**: [Go 1.23](https://go.dev/)
-- **Web Framework**: [Gin Gonic](https://gin-gonic.com/)
-- **Data Storage**: JSON File System (Lightweight, NoSQL-like)
-- **Serialization**: Standard `encoding/json`
+## 🛠 Stack Tecnológico
 
-## 🚀 Getting Started
+- **Lenguaje**: [Go 1.23+](https://go.dev/)
+- **Framework Web**: [Gin Gonic](https://gin-gonic.com/)
+- **Almacenamiento**: Archivos JSON locales (`expenses.json`, `incomes.json`, `goals.json`)
+- **Serialización**: `encoding/json` estándar
+- **Seguridad / CORS**: Middleware CORS con soporte para `http://localhost:3000`
 
-### Prerequisites
+---
 
-Ensure Go is installed and added to your PATH.
+## 🚀 Inicio y Configuración
 
-### Installation
+### Prerrequisitos
+
+- Tener Go instalado en tu máquina o en WSL (Windows Subsystem for Linux):
+  ```bash
+  go version
+  ```
+
+### Instalación de dependencias
 
 ```bash
-# Navigate to the backend directory
 cd backend
-
-# Download dependencies
 go mod download
 ```
 
-### Running the Server
+### Ejecutar el Servidor
 
-The server runs on port `8080` by default.
+El servidor se inicia por defecto en el puerto `8080`:
 
 ```bash
-# Run the application
-go run cmd/main.go
-# OR simply
 go run main.go
-```
-
-## 🔌 API Endpoints
-
-### Transactions (Expenses & Incomes)
-
-| Method   | Endpoint            | Description           |
-| -------- | ------------------- | --------------------- |
-| `GET`    | `/api/expenses`     | Retrieve all expenses |
-| `POST`   | `/api/expenses`     | Add a new expense     |
-| `DELETE` | `/api/expenses/:id` | Delete an expense     |
-| `GET`    | `/api/incomes`      | Retrieve all incomes  |
-| `POST`   | `/api/incomes`      | Add a new income      |
-| `DELETE` | `/api/incomes/:id`  | Delete an income      |
-
-### Goals
-
-| Method   | Endpoint         | Description                  |
-| -------- | ---------------- | ---------------------------- |
-| `GET`    | `/api/goals`     | Retrieve all financial goals |
-| `POST`   | `/api/goals`     | Create a new financial goal  |
-| `PUT`    | `/api/goals/:id` | Update goal progress         |
-| `DELETE` | `/api/goals/:id` | Delete a goal                |
-
-## 📂 Project Structure
-
-```
-backend/
-├── cmd/
-│   └── main.go       # Application entry point
-├── internal/
-│   ├── handlers/     # Request handlers (Controllers)
-│   ├── models/       # Data structures
-│   └── repository/   # Data access layer (JSON file ops)
-├── data/             # JSON storage files (expenses.json, etc.)
-└── go.mod            # Dependency definitions
 ```
 
 ---
 
-_Built with ❤️ by TonyBrTs_
+## 🔌 Especificación de la API REST
+
+### Gastos (`/api/expenses`)
+
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/api/expenses` | Obtener la lista completa de gastos |
+| `POST` | `/api/expenses` | Registrar un nuevo gasto |
+| `PUT` | `/api/expenses/:id` | Actualizar un gasto existente |
+| `DELETE` | `/api/expenses/:id` | Eliminar un gasto por su identificador |
+
+### Ingresos (`/api/incomes`)
+
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/api/incomes` | Obtener la lista completa de ingresos |
+| `POST` | `/api/incomes` | Registrar un nuevo ingreso |
+| `PUT` | `/api/incomes/:id` | Actualizar un ingreso existente |
+| `DELETE` | `/api/incomes/:id` | Eliminar un ingreso por su identificador |
+
+### Metas de Ahorro (`/api/goals`)
+
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/api/goals` | Obtener todas las metas financieras |
+| `POST` | `/api/goals` | Crear una nueva meta de ahorro |
+| `PUT` | `/api/goals/:id` | Actualizar meta o añadir aportes |
+| `DELETE` | `/api/goals/:id` | Eliminar una meta |
+
+---
+
+## 📂 Estructura del Backend
+
+```
+backend/
+├── internal/
+│   ├── handlers/       # Controladores de solicitudes HTTP (Gin)
+│   ├── models/         # Estructuras de datos (Expense, Income, Goal)
+│   └── repository/     # Lógica de lectura y escritura en archivos JSON
+├── expenses.json       # Persistencia local de gastos
+├── incomes.json        # Persistencia local de ingresos
+├── goals.json          # Persistencia local de metas
+├── go.mod              # Definición de dependencias
+├── go.sum              # Checksums de dependencias
+├── main.go             # Inicialización y configuración de rutas Gin
+└── README.md
+```
+
+---
+
+_Desarrollado con ❤️ por TonyBrTs_
