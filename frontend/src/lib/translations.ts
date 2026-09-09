@@ -124,6 +124,7 @@ export const translations = {
       summaryDescription: "Visualize your financial health at a glance.",
       allTime: "All Time",
       noRecentActivity: "No recent activity",
+      recent: "recent",
     },
     goals: {
       title: "Financial Goals",
@@ -297,6 +298,7 @@ export const translations = {
       summaryDescription: "Visualiza tu salud financiera de un vistazo.",
       allTime: "Todo el tiempo",
       noRecentActivity: "No hay actividad reciente",
+      recent: "recientes",
     },
     goals: {
       title: "Metas Financieras",

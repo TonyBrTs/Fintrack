@@ -8,6 +8,7 @@ import {
   PieChart,
   Loader2,
   Goal as GoalIcon,
+  Calendar,
 } from "lucide-react";
 import {
   Select,
@@ -155,23 +156,24 @@ export default function SummaryPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
-      <div className="md:flex md:items-end md:justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-15 bg-action rounded-full" />
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-titles dark:text-foreground">
-              {translate("nav.summary")}
-            </h1>
-          </div>
-          <p className="text-secondary-titles dark:text-muted-foreground text-lg ml-5">
-            {translate("common.summaryDescription")}
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Header & Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-titles dark:text-foreground">
+            {translate("nav.summary") || "Resumen"}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {translate("common.summaryDescription") || "Vista general de tus finanzas y métricas clave"}
           </p>
         </div>
-        <div className="md:w-auto w-full mt-3">
+        <div className="sm:w-auto w-full">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-full md:w-[180px] rounded-xl bg-surface border-border">
-              <SelectValue placeholder="Seleccionar mes" />
+            <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border-border/80 shadow-xs font-medium text-sm">
+              <div className="flex items-center gap-2 truncate">
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Seleccionar mes" />
+              </div>
             </SelectTrigger>
             <SelectContent>
               {generateMonthOptions().map((option) => (
@@ -185,31 +187,39 @@ export default function SummaryPage() {
       </div>
 
       {/* KPI Cards Row */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         <KPICard
           title={translate("summary.balance")}
           amount={`${currencySymbol}${formatCurrency(balance)}`}
-          icon={<Wallet size={24} className="text-action" />}
+          trend={balance >= 0 ? "Estado óptimo" : "Balance negativo"}
+          trendType={balance >= 0 ? "up" : "down"}
+          icon={<Wallet size={22} className="text-action dark:text-blue-400" />}
         />
         <KPICard
           title={translate("summary.income")}
           amount={`${currencySymbol}${formatCurrency(totalIncomesFiltered)}`}
-          icon={<TrendingUp size={24} className="text-income" />}
+          trend={`${filteredIncomes.length} ingresos`}
+          trendType="up"
+          icon={<TrendingUp size={22} className="text-emerald-500" />}
         />
         <KPICard
           title={translate("summary.expenses")}
           amount={`${currencySymbol}${formatCurrency(totalExpensesFiltered)}`}
-          icon={<TrendingDown size={24} className="text-expense" />}
+          trend={`${filteredExpenses.length} gastos`}
+          trendType="down"
+          icon={<TrendingDown size={22} className="text-rose-500" />}
         />
         <KPICard
           title={translate("summary.savings")}
           amount={`${netSavingPercentFiltered.toFixed(1)}%`}
-          icon={<PieChart size={24} className="text-action" />}
+          trend={netSavingPercentFiltered >= 20 ? "Excelente" : "Ajustado"}
+          trendType={netSavingPercentFiltered >= 20 ? "up" : "neutral"}
+          icon={<PieChart size={22} className="text-amber-500" />}
         />
       </section>
 
-      {/* Recent Activity */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Recent Activity & Goals Row */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <RecentTransactions
             expenses={filteredExpenses}
@@ -218,66 +228,75 @@ export default function SummaryPage() {
         </div>
 
         {/* Goals Progress in Summary */}
-        <div className="bg-background p-6 rounded-[32px] border border-border shadow-sm flex flex-col h-full">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-action/10 text-action rounded-xl">
-                <GoalIcon size={20} />
+        <div className="bg-card/90 dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl border border-border/80 dark:border-border/60 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
+                  <GoalIcon size={18} />
+                </div>
+                <h2 className="text-base font-bold text-titles dark:text-foreground">
+                  {translate("nav.goals")}
+                </h2>
               </div>
-              <h2 className="text-xl font-bold">{translate("nav.goals")}</h2>
+              <Link
+                href="/goals"
+                className="text-xs font-bold text-action dark:text-blue-400 hover:underline flex items-center gap-1"
+              >
+                Ver todas →
+              </Link>
             </div>
-            <Link
-              href="/goals"
-              className="text-xs font-bold text-action hover:underline"
-            >
-              {translate("nav.goals")} →
-            </Link>
+
+            {goals.length === 0 ? (
+              <div className="py-8 flex flex-col items-center justify-center text-center">
+                <GoalIcon
+                  size={36}
+                  className="text-muted-foreground opacity-25 mb-2"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {translate("goals.emptyState") || "No tienes metas registradas"}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {goals.slice(0, 3).map((goal) => {
+                  const progress = Math.min(
+                    (goal.current_amount / goal.target_amount) * 100,
+                    100,
+                  );
+                  return (
+                    <div key={goal.id} className="space-y-1.5 p-3 rounded-2xl bg-secondary/40 border border-border/40">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-bold truncate max-w-44 text-titles dark:text-foreground">
+                          {goal.name}
+                        </span>
+                        <span className="font-extrabold text-action dark:text-blue-400">
+                          {progress.toFixed(0)}%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progress}%` }}
+                          className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 rounded-full"
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
+                        <span>{currencySymbol}{formatCurrency(goal.current_amount)}</span>
+                        <span>de {currencySymbol}{formatCurrency(goal.target_amount)}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {goals.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
-              <GoalIcon
-                size={40}
-                className="text-muted-foreground opacity-20 mb-3"
-              />
-              <p className="text-sm text-muted-foreground">
-                {translate("goals.emptyState")}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-6 overflow-y-auto max-h-75 pr-2 custom-scrollbar">
-              {goals.slice(0, 3).map((goal) => {
-                const progress = Math.min(
-                  (goal.current_amount / goal.target_amount) * 100,
-                  100,
-                );
-                return (
-                  <div key={goal.id} className="space-y-2">
-                    <div className="flex justify-between items-end">
-                      <span className="font-bold text-sm truncate max-w-30">
-                        {goal.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground font-medium">
-                        {progress.toFixed(0)}%
-                      </span>
-                    </div>
-                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        className="h-full bg-action"
-                        transition={{ duration: 1, ease: "easeOut" }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-              {goals.length > 3 && (
-                <p className="text-[10px] text-center text-muted-foreground pt-2">
-                  + {goals.length - 3} metas más en la página de metas
-                </p>
-              )}
-            </div>
+          {goals.length > 3 && (
+            <p className="text-[11px] text-center text-muted-foreground pt-4 border-t border-border/40 mt-4">
+              + {goals.length - 3} metas activas en tu lista
+            </p>
           )}
         </div>
       </section>

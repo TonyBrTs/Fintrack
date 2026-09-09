@@ -42,7 +42,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
       setLanguage(savedLanguage);
     }
     if (savedCurrency && ["USD", "EUR", "GBP", "CRC"].includes(savedCurrency)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrency(savedCurrency);
     }
   }, []);

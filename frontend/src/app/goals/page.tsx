@@ -1,18 +1,20 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getApiHeaders } from "@/lib/api";
 import { Goal } from "@/types/index";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { RegisterGoalModal } from "@/components/goals/RegisterGoalModal";
-import { Plus, Loader2, Goal as GoalIcon } from "lucide-react";
+import { KPICard } from "@/components/ui/KPICard";
+import { Plus, Loader2, Target, Trophy, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
 import { toast } from "sonner";
+import { formatCurrency } from "@/lib/utils";
 
 export default function GoalsPage() {
-  const { translate } = useSettings();
+  const { translate, currencySymbol } = useSettings();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,9 +62,9 @@ export default function GoalsPage() {
       if (response.ok) {
         setIsDeleteDialogOpen(false);
         fetchGoals();
-        toast.success(translate("goals.details.deleteSuccess"));
+        toast.success(translate("goals.details.deleteSuccess") || "Meta eliminada");
       } else {
-        toast.error(translate("goals.details.deleteError"));
+        toast.error(translate("goals.details.deleteError") || "Error al eliminar la meta");
       }
     } catch (error) {
       console.error("Error deleting goal:", error);
@@ -76,62 +78,68 @@ export default function GoalsPage() {
     fetchGoals();
   }, []);
 
+  const totalSaved = useMemo(() => {
+    return goals.reduce((acc, curr) => acc + curr.current_amount, 0);
+  }, [goals]);
+
+  const totalTarget = useMemo(() => {
+    return goals.reduce((acc, curr) => acc + curr.target_amount, 0);
+  }, [goals]);
+
+  const overallProgress = useMemo(() => {
+    if (totalTarget === 0) return 0;
+    return Math.min((totalSaved / totalTarget) * 100, 100);
+  }, [totalSaved, totalTarget]);
+
+  const completedGoalsCount = useMemo(() => {
+    return goals.filter((g) => g.current_amount >= g.target_amount).length;
+  }, [goals]);
+
   if (loading && goals.length === 0) {
     return (
-      <main className="max-w-7xl mx-auto px-4 lg:px-20 py-20 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-12 h-12 text-action animate-spin opacity-50" />
-        <p className="text-muted-foreground font-medium animate-pulse">
-          {translate("common.loading")}
+      <main className="max-w-7xl mx-auto px-4 lg:px-20 py-24 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-10 h-10 text-action animate-spin opacity-60" />
+        <p className="text-muted-foreground font-medium animate-pulse text-sm">
+          {translate("common.loading") || "Cargando metas..."}
         </p>
       </main>
     );
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 lg:px-20 py-10">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <DeleteConfirmDialog
-          isOpen={isDeleteDialogOpen}
-          onClose={() => {
-            setIsDeleteDialogOpen(false);
-            setGoalToDelete(null);
-          }}
-          onConfirm={confirmDelete}
-          loading={isDeleting}
-          title={translate("goals.delete")}
-          description={translate("goals.details.deleteConfirm")}
-          confirmLabel={translate("goals.delete")}
-          cancelLabel={translate("income.form.cancel")}
-        />
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-15 bg-action rounded-full" />
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-titles dark:text-foreground">
-              {translate("goals.title")}
-            </h1>
-          </div>
-          <p className="text-secondary-titles dark:text-muted-foreground text-lg ml-5">
-            {translate("goals.description")}
+    <div className="space-y-8 max-w-7xl mx-auto">
+      <DeleteConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setGoalToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        loading={isDeleting}
+        title={translate("goals.delete") || "Eliminar meta"}
+        description={translate("goals.details.deleteConfirm") || "¿Estás seguro de que deseas eliminar esta meta?"}
+        confirmLabel={translate("goals.delete") || "Eliminar"}
+        cancelLabel={translate("income.form.cancel") || "Cancelar"}
+      />
+
+      {/* Header */}
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-titles dark:text-foreground">
+            {translate("goals.title") || "Metas Financieras"}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {translate("goals.description") || "Define tus objetivos de ahorro y sigue tu progreso"}
           </p>
         </div>
         <motion.button
-          whileHover="hover"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setIsModalOpen(true)}
-          className="group flex items-center gap-2 bg-action hover:bg-action/90 text-white dark:bg-action/10 dark:hover:bg-action/20 dark:text-action px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95 border border-transparent dark:border-action/20 cursor-pointer"
+          className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer"
         >
-          <motion.div
-            initial={{ rotate: 0 }}
-            variants={{
-              hover: { rotate: 180 },
-            }}
-            transition={{
-              duration: 0.6,
-              ease: "easeInOut",
-            }}
-          >
-            <Plus size={20} strokeWidth={2.5} />
-          </motion.div>
-          {translate("goals.register")}
+          <Plus size={18} strokeWidth={2.5} />
+          {translate("goals.register") || "Nueva Meta"}
         </motion.button>
       </header>
 
@@ -141,30 +149,63 @@ export default function GoalsPage() {
         onSuccess={fetchGoals}
       />
 
+      {/* Metrics Row */}
+      {goals.length > 0 && (
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+          <KPICard
+            title="Total Acumulado en Metas"
+            amount={`${currencySymbol}${formatCurrency(totalSaved)}`}
+            trend={`de ${currencySymbol}${formatCurrency(totalTarget)}`}
+            trendType="up"
+            icon={<Target size={22} className="text-action dark:text-blue-400" />}
+          />
+          <KPICard
+            title="Progreso Global"
+            amount={`${overallProgress.toFixed(1)}%`}
+            trend={overallProgress >= 50 ? "Buen avance" : "En progreso"}
+            trendType={overallProgress >= 50 ? "up" : "neutral"}
+            icon={<Sparkles size={22} className="text-amber-500" />}
+          />
+          <KPICard
+            title="Metas Cumplidas"
+            amount={`${completedGoalsCount} / ${goals.length}`}
+            trend={completedGoalsCount > 0 ? "¡Objetivos logrados!" : "Aún sin completar"}
+            trendType={completedGoalsCount > 0 ? "up" : "neutral"}
+            icon={<Trophy size={22} className="text-emerald-500" />}
+          />
+        </section>
+      )}
+
+      {/* Goals Grid */}
       {goals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-          <div className="p-6 bg-muted rounded-full text-muted-foreground opacity-30">
-            <GoalIcon size={64} />
+        <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-card/60 dark:bg-card/40 rounded-3xl border border-dashed border-border/80">
+          <div className="p-5 bg-action/10 rounded-2xl text-action">
+            <Target size={48} />
           </div>
-          <p className="text-muted-foreground max-w-sm">
-            {translate("goals.emptyState")}
-          </p>
+          <div className="space-y-1">
+            <h3 className="text-lg font-bold text-titles dark:text-foreground">
+              Comienza tu primera meta de ahorro
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              {translate("goals.emptyState") || "No tienes metas registradas. Crea una para visualizar tu progreso."}
+            </p>
+          </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="text-action font-bold hover:underline cursor-pointer"
+            className="text-action dark:text-blue-400 font-bold hover:underline cursor-pointer text-sm"
           >
-            {translate("goals.register")}
+            + {translate("goals.register") || "Crear primera meta"}
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
             {goals.map((goal, index) => (
               <motion.div
                 key={goal.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.05, duration: 0.3 }}
               >
                 <GoalCard
                   goal={goal}
@@ -176,6 +217,6 @@ export default function GoalsPage() {
           </AnimatePresence>
         </div>
       )}
-    </main>
+    </div>
   );
 }

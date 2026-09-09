@@ -2,7 +2,8 @@ import { Header } from '@/components/layout/Header';
 import { SubNavbar } from '@/components/layout/SubNavbar';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SettingsProvider } from '@/contexts/SettingsContext';
-import type { Metadata } from 'next';
+import { ServiceWorkerRegister } from '@/components/layout/ServiceWorkerRegister';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -16,9 +17,30 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#090d16' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+};
+
 export const metadata: Metadata = {
-  title: 'FinTrack',
-  description: 'Your intelligent financial tracker',
+  title: 'FinTrack - Gestor Financiero',
+  description: 'Tu gestor inteligente de finanzas personales, gastos, ingresos y metas',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'FinTrack',
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 import { Toaster } from '@/components/ui/sonner';
@@ -40,16 +62,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SettingsProvider>
-            <div className="sticky top-0 z-50">
+            <div className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-background/80 border-b border-border/60 transition-colors duration-300">
               <Header />
-              <div className="md:h-0.5 bg-gray-300 w-full h-0.5" />
               <SubNavbar />
-              <div className="md:h-0.5 bg-gray-300 w-full md:hidden" />
             </div>
-            <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-24 md:pb-0">
+            <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-12 pt-4 md:pt-6">
               {children}
             </main>
             <Toaster position="bottom-right" richColors />
+            <ServiceWorkerRegister />
           </SettingsProvider>
         </ThemeProvider>
       </body>

@@ -9,129 +9,80 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 
 export function SubNavbar() {
   const pathname = usePathname();
   const { translate } = useSettings();
-  const [hoveredTab, setHoveredTab] = useState<string | null>(null);
 
   const navItems = [
     {
-      name: translate("nav.summary"),
+      name: translate("nav.summary") || "Resumen",
       href: "/",
-      icon: <LayoutDashboard size={20} />,
+      icon: LayoutDashboard,
+      activeColor: "text-blue-500",
     },
     {
-      name: translate("nav.expenses"),
+      name: translate("nav.expenses") || "Gastos",
       href: "/expenses",
-      icon: <TrendingDown size={20} />,
+      icon: TrendingDown,
+      activeColor: "text-rose-500",
     },
     {
-      name: translate("nav.income"),
+      name: translate("nav.income") || "Ingresos",
       href: "/incomes",
-      icon: <TrendingUp size={20} />,
+      icon: TrendingUp,
+      activeColor: "text-emerald-500",
     },
     {
-      name: translate("nav.goals"),
+      name: translate("nav.goals") || "Metas",
       href: "/goals",
-      icon: <Goal size={20} />,
+      icon: Goal,
+      activeColor: "text-purple-500",
     },
   ];
 
   return (
-    <>
-      {/* Desktop/Tablet View (Top Bar) */}
-      <div className="hidden md:flex bg-white dark:bg-card border-b border-gray-100 dark:border-border items-center px-4 md:px-20 overflow-x-auto whitespace-nowrap transition-colors duration-300 scrollbar-hide">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              onMouseEnter={() => setHoveredTab(item.name)}
-              onMouseLeave={() => setHoveredTab(null)}
-              className={`
-                relative px-4 py-4 font-medium transition-colors cursor-pointer
-                ${
-                  isActive
-                    ? "text-action dark:text-blue-400"
-                    : "text-gray-500 hover:text-action/70 dark:text-gray-400 dark:hover:text-white"
-                }
-              `}
-            >
-              {item.name}
-
-              {/* Active Tab Sliding Underline */}
-              {isActive && (
-                <motion.span
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 w-full h-0.75 bg-action dark:bg-blue-400 rounded-t-sm"
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-              )}
-
-              {/* Hover Underline (only if not active) */}
-              {!isActive && hoveredTab === item.name && (
-                <motion.span
-                  layoutId="hoverTab"
-                  className="absolute bottom-0 left-0 w-full h-0.75 bg-action/70 dark:bg-gray-600 rounded-t-sm"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                />
-              )}
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Mobile View (Bottom Bar - WhatsApp Style) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-card border-t border-gray-200 dark:border-border flex justify-between items-center px-6 py-2 z-50 transition-colors duration-300 text-[10px]">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="flex flex-col items-center gap-1 cursor-pointer relative"
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="activeTabMobile"
-                  className="absolute inset-0 bg-action/10 dark:bg-blue-400/20 rounded-full -z-10 w-16 h-8 mx-auto top-0"
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-              )}
-              <div
+    <nav aria-label="Navegación principal" className="w-full border-t border-border/40 bg-background/40 backdrop-blur-md">
+      <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-20 py-2 flex items-center justify-start sm:justify-center overflow-x-auto scrollbar-hide">
+        <div className="inline-flex items-center gap-1 p-1 bg-secondary/60 dark:bg-slate-900/60 rounded-2xl border border-border/60 shadow-xs">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
                 className={`
-                  px-5 py-1 rounded-full transition-colors z-10
+                  relative flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer shrink-0 select-none
                   ${
                     isActive
-                      ? "text-action dark:text-blue-400"
-                      : "text-gray-500 dark:text-gray-400"
+                      ? "text-foreground font-bold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                   }
                 `}
               >
-                {item.icon}
-              </div>
-              <span
-                className={`
-                  font-medium
-                  ${
-                    isActive
-                      ? "text-action dark:text-blue-400"
-                      : "text-gray-500 dark:text-gray-400"
-                  }
-                `}
-              >
-                {item.name}
-              </span>
-            </Link>
-          );
-        })}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeSubTab"
+                    className="absolute inset-0 bg-card dark:bg-card rounded-xl border border-border/70 shadow-xs"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <Icon
+                    size={16}
+                    className={`transition-colors ${
+                      isActive ? item.activeColor : "text-muted-foreground"
+                    }`}
+                  />
+                  <span>{item.name}</span>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
-    </>
+    </nav>
   );
 }

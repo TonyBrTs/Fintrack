@@ -12,14 +12,30 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getApiHeaders } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/index';
 import { motion } from 'framer-motion';
-import { AlertCircle, Loader2, Plus, Tag, TrendingDown } from 'lucide-react';
+import {
+  AlertCircle,
+  ChevronRight,
+  Filter,
+  Loader2,
+  Plus,
+  Search,
+  Tag,
+  TrendingDown,
+} from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 
 const categoryColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default'> = {
   Alimentación: 'success',
@@ -40,6 +56,8 @@ function ExpensesContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Auto-open details if ID is in URL
   useEffect(() => {
@@ -78,25 +96,53 @@ function ExpensesContent() {
     fetchExpenses();
   }, []);
 
-  const totalMonth = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalMonth = useMemo(() => {
+    return expenses.reduce((acc, curr) => acc + curr.amount, 0);
+  }, [expenses]);
 
-  const categoryTotals = expenses.reduce(
-    (acc, curr) => {
-      acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
+  const categoryTotals = useMemo(() => {
+    return expenses.reduce(
+      (acc, curr) => {
+        acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+  }, [expenses]);
 
-  const highestCategory =
-    Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || '---';
+  const highestCategory = useMemo(() => {
+    return Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || '---';
+  }, [categoryTotals]);
+
+  // Unique categories list
+  const categoriesList = useMemo(() => {
+    const set = new Set<string>();
+    expenses.forEach((e) => {
+      if (e.category) set.add(e.category);
+    });
+    return Array.from(set);
+  }, [expenses]);
+
+  // Filtered expenses
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter((e) => {
+      const matchesSearch =
+        e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.payment_method.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCat = selectedCategory === 'all' || e.category === selectedCategory;
+
+      return matchesSearch && matchesCat;
+    });
+  }, [expenses, searchTerm, selectedCategory]);
 
   if (loading && expenses.length === 0) {
     return (
-      <main className="max-w-360 mx-auto px-4 lg:px-20 py-20 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-12 h-12 text-action animate-spin opacity-50" />
-        <p className="text-secondary-titles font-medium animate-pulse">
-          {translate('common.loading')}
+      <main className="max-w-7xl mx-auto px-4 lg:px-20 py-24 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-10 h-10 text-action animate-spin opacity-60" />
+        <p className="text-muted-foreground font-medium animate-pulse text-sm">
+          {translate('common.loading') || 'Cargando gastos...'}
         </p>
       </main>
     );
@@ -104,60 +150,48 @@ function ExpensesContent() {
 
   if (error && expenses.length === 0) {
     return (
-      <main className="max-w-360 mx-auto px-4 lg:px-20 py-20 flex flex-col items-center justify-center space-y-6 text-center">
-        <div className="bg-expense/10 p-4 rounded-full">
-          <AlertCircle className="w-12 h-12 text-expense" />
+      <main className="max-w-7xl mx-auto px-4 lg:px-20 py-24 flex flex-col items-center justify-center space-y-6 text-center">
+        <div className="bg-rose-500/10 p-4 rounded-full">
+          <AlertCircle className="w-10 h-10 text-rose-500" />
         </div>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-titles dark:text-foreground">
-            {translate('common.errorTitle')}
+            {translate('common.errorTitle') || 'Error de conexión'}
           </h2>
-          <p className="text-secondary-titles max-w-md mx-auto">
-            {translate('common.errorMessage')}
+          <p className="text-muted-foreground max-w-md mx-auto text-sm">
+            {translate('common.errorMessage') || 'No se pudieron cargar los gastos del servidor.'}
           </p>
         </div>
         <button
           onClick={() => fetchExpenses()}
-          className="bg-action text-white px-6 py-2 rounded-xl font-bold"
+          className="bg-action text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all"
         >
-          {translate('common.retry')}
+          {translate('common.retry') || 'Reintentar'}
         </button>
       </main>
     );
   }
 
   return (
-    <main className="max-w-360 mx-auto px-4 lg:px-20 py-10">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-15 bg-action rounded-full" />
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-titles dark:text-foreground">
-              {translate('expenses.title')}
-            </h1>
-          </div>
-          <p className="text-secondary-titles dark:text-muted-foreground text-lg ml-5">
-            {translate('expenses.description')}
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-titles dark:text-foreground">
+            {translate('expenses.title') || 'Gastos'}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {translate('expenses.description') || 'Monitorea y categoriza todos tus egresos'}
           </p>
         </div>
         <motion.button
-          whileHover="hover"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setIsModalOpen(true)}
-          className="group flex items-center gap-2 bg-action hover:bg-action/90 text-white dark:bg-action/10 dark:hover:bg-action/20 dark:text-action px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95 border border-transparent dark:border-action/20 cursor-pointer"
+          className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer"
         >
-          <motion.div
-            initial={{ rotate: 0 }}
-            variants={{
-              hover: { rotate: 180 },
-            }}
-            transition={{
-              duration: 0.6,
-              ease: 'easeInOut',
-            }}
-          >
-            <Plus size={20} strokeWidth={2.5} />
-          </motion.div>
-          {translate('expenses.register')}
+          <Plus size={18} strokeWidth={2.5} />
+          {translate('expenses.register') || 'Registrar Gasto'}
         </motion.button>
       </header>
 
@@ -174,96 +208,144 @@ function ExpensesContent() {
         onSuccess={fetchExpenses}
       />
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+      {/* KPI Cards */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
         <KPICard
-          title={translate('expenses.totalMonth')}
+          title={translate('expenses.totalMonth') || 'Total en Gastos'}
           amount={`${currencySymbol}${formatCurrency(totalMonth)}`}
-          icon={<TrendingDown size={24} className="text-expense" />}
+          trend={`${expenses.length} registros en total`}
+          trendType="down"
+          icon={<TrendingDown size={22} className="text-rose-500" />}
         />
         <KPICard
-          title={translate('expenses.highestCategory')}
-          amount={highestCategory === '---' ? '---' : translate(`categories.${highestCategory}`)}
-          icon={<Tag size={24} className="text-gold" />}
+          title={translate('expenses.highestCategory') || 'Categoría Principal'}
+          amount={highestCategory === '---' ? '---' : translate(`categories.${highestCategory}`) || highestCategory}
+          trend={highestCategory !== '---' ? `${currencySymbol}${formatCurrency(categoryTotals[highestCategory] || 0)} acumulado` : undefined}
+          trendType="neutral"
+          icon={<Tag size={22} className="text-amber-500" />}
         />
       </section>
 
+      {/* Filters and Search Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar por descripción, categoría o método..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border border-border/80 text-sm placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-action/40 transition-all"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-auto min-w-[200px] sm:w-[220px] h-10 rounded-xl bg-card/90 dark:bg-card/75 border-border/80 font-medium text-sm">
+              <div className="flex items-center gap-2 truncate">
+                <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Todas las categorías" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las categorías</SelectItem>
+              {categoriesList.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {translate(`categories.${cat}`) || cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <span className="text-xs text-muted-foreground font-semibold px-2.5 py-2 bg-secondary/80 rounded-xl whitespace-nowrap border border-border/50">
+            {filteredExpenses.length} {filteredExpenses.length === 1 ? 'gasto' : 'gastos'}
+          </span>
+        </div>
+      </div>
+
+      {/* Expenses Table */}
       <motion.section
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-card-bg dark:bg-card border border-border-ui rounded-3xl overflow-hidden shadow-xl shadow-black/5"
+        transition={{ duration: 0.4 }}
+        className="bg-card/90 dark:bg-card/75 backdrop-blur-sm border border-border/80 dark:border-border/60 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all"
       >
         <Table>
-          <TableHeader className="bg-secondary/30 dark:bg-secondary/10">
-            <TableRow className="hover:bg-transparent border-border-ui border-b-2">
-              <TableHead className="px-4 md:px-6 py-5 text-xs md:text-sm font-bold text-titles dark:text-foreground uppercase tracking-widest">
-                {translate('expenses.table.date')}
+          <TableHeader className="bg-secondary/40 dark:bg-secondary/20">
+            <TableRow className="hover:bg-transparent border-b border-border/60">
+              <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {translate('expenses.table.date') || 'Fecha'}
               </TableHead>
-              <TableHead className="hidden md:table-cell px-6 py-5 text-sm font-bold text-titles dark:text-foreground uppercase tracking-widest">
-                {translate('expenses.table.description')}
+              <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {translate('expenses.table.description') || 'Descripción'}
               </TableHead>
-              <TableHead className="px-4 md:px-6 py-5 text-xs md:text-sm font-bold text-titles dark:text-foreground uppercase tracking-widest">
-                {translate('expenses.table.category')}
+              <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {translate('expenses.table.category') || 'Categoría'}
               </TableHead>
-              <TableHead className="px-4 md:px-6 py-5 text-xs md:text-sm font-bold text-titles dark:text-foreground uppercase tracking-widest text-right">
-                {translate('expenses.table.amount')}
+              <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">
+                {translate('expenses.table.amount') || 'Monto'}
               </TableHead>
+              <TableHead className="w-10 px-2 py-4"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {expenses.map((expense) => (
-              <TableRow
-                key={expense.id}
-                onClick={() => {
-                  setSelectedExpense(expense);
-                  setIsDetailsOpen(true);
-                }}
-                className="hover:bg-secondary/20 dark:hover:bg-secondary/5 border-border-ui h-20 cursor-pointer active:scale-[0.99] transition-all"
-              >
-                <TableCell className="px-4 md:px-6 py-4 text-sm text-titles dark:text-foreground whitespace-nowrap font-medium">
-                  <div className="flex flex-col">
-                    <span className="text-base">{new Date(expense.date).toLocaleDateString()}</span>
-                    <span className="md:hidden text-[10px] text-secondary-titles mt-0.5 truncate max-w-20 opacity-70">
-                      {expense.category === 'Metas'
-                        ? `${translate('goals.contributionToGoal')}: ${
-                            expense.description.split(': ')[1] || expense.description
-                          }`
-                        : expense.description}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell px-6 py-4 text-sm text-titles dark:text-foreground font-medium">
-                  {expense.category === 'Metas'
-                    ? `${translate('goals.contributionToGoal')}: ${
-                        expense.description.split(': ')[1] || expense.description
-                      }`
-                    : expense.description}
-                </TableCell>
-                <TableCell className="px-4 md:px-6 py-4">
-                  <Badge
-                    variant={categoryColors[expense.category]}
-                    className="text-[10px] md:text-xs px-3 py-1 font-bold tracking-tight shadow-sm"
-                  >
-                    {translate(`categories.${expense.category}`)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="px-4 md:px-6 py-4 text-right">
-                  <div className="flex flex-col items-end">
-                    <span className="text-base md:text-lg text-titles dark:text-foreground font-black">
-                      {currencySymbol}
-                      {formatCurrency(expense.amount)}
-                    </span>
-                    <span className="text-[10px] text-secondary-titles dark:text-muted-foreground uppercase font-bold tracking-tighter opacity-80">
-                      {currency}
-                    </span>
-                  </div>
+            {filteredExpenses.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-12 text-center text-muted-foreground text-sm">
+                  No se encontraron gastos que coincidan con los filtros aplicados.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              filteredExpenses.map((expense) => (
+                <TableRow
+                  key={expense.id}
+                  onClick={() => {
+                    setSelectedExpense(expense);
+                    setIsDetailsOpen(true);
+                  }}
+                  className="hover:bg-secondary/30 dark:hover:bg-secondary/15 border-b border-border/40 cursor-pointer transition-colors group"
+                >
+                  <TableCell className="px-5 py-4 text-sm font-medium whitespace-nowrap text-titles dark:text-foreground">
+                    <div className="flex flex-col">
+                      <span className="font-semibold">{new Date(expense.date).toLocaleDateString()}</span>
+                      <span className="text-[11px] text-muted-foreground">{expense.payment_method}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-5 py-4 text-sm font-semibold text-titles dark:text-foreground">
+                    {expense.category === 'Metas'
+                      ? `${translate('goals.contributionToGoal') || 'Aporte a meta'}: ${
+                          expense.description.split(': ')[1] || expense.description
+                        }`
+                      : expense.description}
+                  </TableCell>
+                  <TableCell className="px-5 py-4">
+                    <Badge
+                      variant={categoryColors[expense.category] || 'default'}
+                      className="text-xs px-3 py-1 font-bold shadow-2xs"
+                    >
+                      {translate(`categories.${expense.category}`) || expense.category}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="px-5 py-4 text-right">
+                    <div className="flex flex-col items-end">
+                      <span className="text-base font-black text-rose-500 dark:text-rose-400">
+                        -{currencySymbol}{formatCurrency(expense.amount)}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">
+                        {currency}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-2 py-4 text-right pr-4">
+                    <ChevronRight className="w-4 h-4 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all inline" />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </motion.section>
-    </main>
+    </div>
   );
 }
 
