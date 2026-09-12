@@ -168,7 +168,7 @@ Debes responder ÚNICAMENTE un array JSON con esta estructura exacta, sin texto 
 `;
 
     // Discover models if not cached
-    let modelsToTry = cachedWorkingModel
+    const modelsToTry = cachedWorkingModel
       ? [cachedWorkingModel]
       : await getAvailableGeminiModels(apiKey);
 

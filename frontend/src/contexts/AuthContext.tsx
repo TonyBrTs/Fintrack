@@ -5,6 +5,12 @@ import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 
+export type AuthModalMode =
+  | "login"
+  | "register"
+  | "forgot_password"
+  | "update_password";
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -16,11 +22,15 @@ interface AuthContextType {
     password: string,
     fullName?: string
   ) => Promise<{ error: AuthError | null; needsEmailConfirmation?: boolean }>;
+  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
+  resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   isAuthModalOpen: boolean;
-  authModalMode: "login" | "register";
-  openAuthModal: (mode?: "login" | "register") => void;
+  authModalMode: AuthModalMode;
+  openAuthModal: (mode?: AuthModalMode) => void;
   closeAuthModal: () => void;
+  setAuthModalMode: (mode: AuthModalMode) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
+  const [authModalMode, setAuthModalMode] = useState<AuthModalMode>("login");
 
   useEffect(() => {
     // 1. Get initial session
@@ -42,14 +52,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     });
 
-    // 2. Listen for auth changes (token refresh, sign in, sign out)
+    // 2. Listen for auth changes (token refresh, sign in, sign out, password recovery)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setToken(session?.access_token ?? null);
       setIsLoading(false);
+
+      if (event === "PASSWORD_RECOVERY") {
+        setAuthModalMode("update_password");
+        setIsAuthModalOpen(true);
+      }
     });
 
     return () => {
@@ -121,6 +136,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error, needsEmailConfirmation: false };
   };
 
+  const signInWithGoogle = async () => {
+    setIsLoading(true);
+    try {
+      const redirectUrl =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/`
+          : undefined;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: "offline",
+            prompt: "select_account",
+          },
+        },
+      });
+      return { error };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPasswordForEmail = async (email: string) => {
+    const redirectUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/`
+        : undefined;
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+    return { error };
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (!error && data.user) {
+      setUser(data.user);
+    }
+    return { error };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -128,7 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
   };
 
-  const openAuthModal = (mode: "login" | "register" = "login") => {
+  const openAuthModal = (mode: AuthModalMode = "login") => {
     setAuthModalMode(mode);
     setIsAuthModalOpen(true);
   };
@@ -144,11 +205,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     signInWithEmail,
     signUpWithEmail,
+    signInWithGoogle,
+    resetPasswordForEmail,
+    updatePassword,
     signOut,
     isAuthModalOpen,
     authModalMode,
     openAuthModal,
     closeAuthModal,
+    setAuthModalMode,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
