@@ -19,10 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { safeFetch } from '@/lib/api';
+import { useCategories } from '@/hooks/useCategories';
+import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
 import { formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/index';
 import { motion } from 'framer-motion';
@@ -52,11 +55,13 @@ const categoryColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 
 function ExpensesContent() {
   const { currency, currencySymbol, translate } = useSettings();
   const { user, openAuthModal } = useAuth();
+  const { categories: userCatList } = useCategories("expense");
   const searchParams = useSearchParams();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -126,14 +131,15 @@ function ExpensesContent() {
     return Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || '---';
   }, [categoryTotals]);
 
-  // Unique categories list
+  // Unique categories list combining user categories and transactions
   const categoriesList = useMemo(() => {
     const set = new Set<string>();
+    userCatList.forEach((c) => set.add(c.name));
     expenses.forEach((e) => {
       if (e.category) set.add(e.category);
     });
     return Array.from(set);
-  }, [expenses]);
+  }, [expenses, userCatList]);
 
   // Filtered expenses
   const filteredExpenses = useMemo(() => {
@@ -208,21 +214,38 @@ function ExpensesContent() {
             {translate('expenses.description') || 'Monitorea y categoriza todos tus egresos'}
           </p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer"
-        >
-          <Plus size={18} strokeWidth={2.5} />
-          {translate('expenses.register') || 'Registrar Gasto'}
-        </motion.button>
+        <div className="flex items-center gap-2.5">
+          <Button
+            variant="outline"
+            onClick={() => setIsManageCategoriesOpen(true)}
+            className="flex items-center gap-1.5 rounded-xl font-bold text-xs sm:text-sm h-10 px-3.5 border-border/80 hover:bg-secondary cursor-pointer"
+          >
+            <Tag size={15} className="text-blue-500" />
+            <span>Categorías</span>
+          </Button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
+          >
+            <Plus size={18} strokeWidth={2.5} />
+            {translate('expenses.register') || 'Registrar Gasto'}
+          </motion.button>
+        </div>
       </header>
 
       <RegisterExpenseModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchExpenses}
+      />
+
+      <ManageCategoriesModal
+        isOpen={isManageCategoriesOpen}
+        onClose={() => setIsManageCategoriesOpen(false)}
+        type="expense"
       />
 
       <ExpenseDetailsSheet

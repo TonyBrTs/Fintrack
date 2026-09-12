@@ -119,10 +119,22 @@ Campos idénticos adaptados con columna `source` (Salario, Freelance, Inversione
 #### 3. `public.goals` (Metas de Ahorro)
 Campos: `id`, `user_id`, `name`, `target_amount`, `current_amount`, `deadline`, `category`, `created_at`.
 
+#### 4. `public.categories` (Categorías Personalizadas)
+| Campo | Tipo | Restricción | Descripción |
+| :--- | :--- | :--- | :--- |
+| `id` | `VARCHAR(100)` | `PRIMARY KEY` | Identificador único de la categoría |
+| `user_id` | `UUID` | `NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE` | Llave foránea del usuario propietario |
+| `name` | `VARCHAR(100)` | `NOT NULL` | Nombre de la categoría (máx. 50 caracteres) |
+| `type` | `VARCHAR(20)` | `NOT NULL DEFAULT 'expense'` | Tipo (`expense` o `income`) |
+| `color` | `VARCHAR(50)` | `DEFAULT 'blue'` | Color temático distintivo |
+| `icon` | `VARCHAR(50)` | `DEFAULT 'tag'` | Identificador del icono visual |
+| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Fecha de creación del registro |
+
 ### Índices de Alto Rendimiento
 - `idx_expenses_user_date ON public.expenses(user_id, date DESC)`
 - `idx_incomes_user_date ON public.incomes(user_id, date DESC)`
 - `idx_goals_user ON public.goals(user_id)`
+- `idx_categories_user ON public.categories(user_id, type)`
 
 ### Políticas de Row Level Security (RLS)
 Cada tabla tiene RLS activado (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`) con 4 políticas:
@@ -139,6 +151,8 @@ CREATE POLICY "Users can only update their own expenses"
 CREATE POLICY "Users can only delete their own expenses" 
   ON public.expenses FOR DELETE USING (auth.uid() = user_id);
 ```
+*(De manera análoga, se aplican las 4 políticas para `public.incomes`, `public.goals` y `public.categories`).*
+
 
 ---
 

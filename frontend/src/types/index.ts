@@ -5,7 +5,8 @@ export type ExpenseCategory =
   | "Entretenimiento"
   | "Salud"
   | "Metas"
-  | "Otros";
+  | "Otros"
+  | (string & {});
 
 export interface Expense {
   id: string;
@@ -22,7 +23,8 @@ export type IncomeSource =
   | "Freelance"
   | "Inversiones"
   | "Regalo"
-  | "Otros";
+  | "Otros"
+  | (string & {});
 
 export interface Income {
   id: string;
@@ -41,4 +43,15 @@ export interface Goal {
   current_amount: number;
   deadline: Date | string;
   category: string;
+}
+
+export interface Category {
+  id: string;
+  user_id?: string;
+  name: string;
+  type: "expense" | "income";
+  color?: string;
+  icon?: string;
+  is_default: boolean;
+  created_at?: string;
 }

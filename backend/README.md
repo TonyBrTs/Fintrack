@@ -69,6 +69,14 @@ go run main.go
 | `PUT` | `/api/goals/:id` | Actualizar meta o añadir aportes |
 | `DELETE` | `/api/goals/:id` | Eliminar una meta |
 
+### Categorías Personalizadas (`/api/categories`)
+
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/api/categories?type=expense\|income` | Obtener categorías del sistema y del usuario |
+| `POST` | `/api/categories` | Crear una nueva categoría personalizada |
+| `DELETE` | `/api/categories/:id?reassignTo=...` | Eliminar categoría con reasignación opcional |
+
 ---
 
 ## 📂 Estructura del Backend
@@ -76,12 +84,13 @@ go run main.go
 ```
 backend/
 ├── internal/
-│   ├── handlers/       # Controladores de solicitudes HTTP (Gin)
-│   ├── models/         # Estructuras de datos (Expense, Income, Goal)
-│   └── repository/     # Lógica de lectura y escritura en archivos JSON
+│   ├── database/       # Conexión PostgreSQL (GORM) y AutoMigrate
+│   ├── middleware/     # AuthMiddleware (validación JWT con caché)
+│   └── models/         # Modelos (Expense, Income, Goal, Category)
 ├── expenses.json       # Persistencia local de gastos
 ├── incomes.json        # Persistencia local de ingresos
 ├── goals.json          # Persistencia local de metas
+├── categories.json     # Persistencia local de categorías
 ├── go.mod              # Definición de dependencias
 ├── go.sum              # Checksums de dependencias
 ├── main.go             # Inicialización y configuración de rutas Gin

@@ -18,15 +18,17 @@ import (
 )
 
 const (
-	storageFile       = "expenses.json"
-	incomeStorageFile = "incomes.json"
-	goalsStorageFile  = "goals.json"
+	storageFile           = "expenses.json"
+	incomeStorageFile     = "incomes.json"
+	goalsStorageFile      = "goals.json"
+	categoriesStorageFile = "categories.json"
 )
 
 var (
 	expenses     = []models.Expense{}
 	incomes      = []models.Income{}
 	goals        = []models.Goal{}
+	categories   = []models.Category{}
 	storageMutex sync.RWMutex
 )
 
@@ -99,6 +101,29 @@ func saveGoals() {
 	_ = os.WriteFile(goalsStorageFile, data, 0644)
 }
 
+func loadCategories() {
+	if _, err := os.Stat(categoriesStorageFile); os.IsNotExist(err) {
+		return
+	}
+	data, err := os.ReadFile(categoriesStorageFile)
+	if err != nil {
+		log.Printf("Error reading categories file: %v", err)
+		return
+	}
+	_ = json.Unmarshal(data, &categories)
+}
+
+func saveCategories() {
+	storageMutex.Lock()
+	defer storageMutex.Unlock()
+	data, err := json.MarshalIndent(categories, "", "  ")
+	if err != nil {
+		log.Printf("Error marshaling categories data: %v", err)
+		return
+	}
+	_ = os.WriteFile(categoriesStorageFile, data, 0644)
+}
+
 func main() {
 	// Load environment variables from .env if present
 	if err := godotenv.Load(); err != nil {
@@ -114,6 +139,7 @@ func main() {
 	loadExpenses()
 	loadIncomes()
 	loadGoals()
+	loadCategories()
 
 	router := gin.Default()
 
@@ -628,6 +654,326 @@ func main() {
 
 		saveGoals()
 		ctx.JSON(http.StatusNoContent, nil)
+	})
+
+	// --- CATEGORIES API ---
+	// GET /api/categories?type=expense|income
+	api.GET("/categories", func(ctx *gin.Context) {
+		userID := ctx.GetString("userID")
+		catType := strings.ToLower(strings.TrimSpace(ctx.Query("type")))
+
+		var resultList []models.CategoryResponse
+
+		// Add default system categories matching filter
+		if catType == "" || catType == "expense" {
+			resultList = append(resultList, models.DefaultExpenseCategories...)
+		}
+		if catType == "" || catType == "income" {
+			resultList = append(resultList, models.DefaultIncomeSources...)
+		}
+
+		if database.DB != nil {
+			var userCategories []models.Category
+			query := database.DB.Where("user_id = ?", userID)
+			if catType != "" {
+				query = query.Where("type = ?", catType)
+			}
+			if err := query.Order("created_at asc").Find(&userCategories).Error; err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No fue posible cargar las categorías"})
+				return
+			}
+
+			for _, c := range userCategories {
+				resultList = append(resultList, models.CategoryResponse{
+					ID:        c.ID,
+					UserID:    c.UserID,
+					Name:      c.Name,
+					Type:      c.Type,
+					Color:     c.Color,
+					Icon:      c.Icon,
+					IsDefault: false,
+					CreatedAt: c.CreatedAt,
+				})
+			}
+			ctx.JSON(http.StatusOK, resultList)
+			return
+		}
+
+		// Fallback in-memory
+		storageMutex.RLock()
+		defer storageMutex.RUnlock()
+		for _, c := range categories {
+			if (c.UserID == userID || c.UserID == "") && (catType == "" || c.Type == catType) {
+				resultList = append(resultList, models.CategoryResponse{
+					ID:        c.ID,
+					UserID:    c.UserID,
+					Name:      c.Name,
+					Type:      c.Type,
+					Color:     c.Color,
+					Icon:      c.Icon,
+					IsDefault: false,
+					CreatedAt: c.CreatedAt,
+				})
+			}
+		}
+		ctx.JSON(http.StatusOK, resultList)
+	})
+
+	// POST /api/categories
+	api.POST("/categories", func(ctx *gin.Context) {
+		userID := ctx.GetString("userID")
+		var req struct {
+			Name  string `json:"name"`
+			Type  string `json:"type"`
+			Color string `json:"color"`
+			Icon  string `json:"icon"`
+		}
+
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Información de categoría inválida"})
+			return
+		}
+
+		name := strings.TrimSpace(req.Name)
+		if name == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "El nombre de la categoría es requerido"})
+			return
+		}
+		if len(name) > 50 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "El nombre de la categoría no debe exceder 50 caracteres"})
+			return
+		}
+
+		catType := strings.ToLower(strings.TrimSpace(req.Type))
+		if catType != "expense" && catType != "income" {
+			catType = "expense"
+		}
+
+		color := strings.TrimSpace(req.Color)
+		if color == "" {
+			color = "blue"
+		}
+
+		icon := strings.TrimSpace(req.Icon)
+		if icon == "" {
+			icon = "tag"
+		}
+
+		// Check collision with default system categories
+		if catType == "expense" {
+			for _, def := range models.DefaultExpenseCategories {
+				if strings.EqualFold(def.Name, name) {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ya existe una categoría del sistema con ese nombre"})
+					return
+				}
+			}
+		} else {
+			for _, def := range models.DefaultIncomeSources {
+				if strings.EqualFold(def.Name, name) {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ya existe una categoría del sistema con ese nombre"})
+					return
+				}
+			}
+		}
+
+		newCat := models.Category{
+			ID:        fmt.Sprintf("cat-%d", time.Now().UnixNano()),
+			UserID:    userID,
+			Name:      name,
+			Type:      catType,
+			Color:     color,
+			Icon:      icon,
+			CreatedAt: time.Now(),
+		}
+
+		if database.DB != nil {
+			var existing models.Category
+			if err := database.DB.Where("user_id = ? AND LOWER(name) = ? AND type = ?", userID, strings.ToLower(name), catType).First(&existing).Error; err == nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ya tienes una categoría creada con este nombre"})
+				return
+			}
+
+			if err := database.DB.Create(&newCat).Error; err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No fue posible guardar la categoría"})
+				return
+			}
+
+			ctx.JSON(http.StatusCreated, models.CategoryResponse{
+				ID:        newCat.ID,
+				UserID:    newCat.UserID,
+				Name:      newCat.Name,
+				Type:      newCat.Type,
+				Color:     newCat.Color,
+				Icon:      newCat.Icon,
+				IsDefault: false,
+				CreatedAt: newCat.CreatedAt,
+			})
+			return
+		}
+
+		// Fallback in-memory
+		storageMutex.Lock()
+		for _, c := range categories {
+			if c.UserID == userID && strings.EqualFold(c.Name, name) && c.Type == catType {
+				storageMutex.Unlock()
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ya tienes una categoría creada con este nombre"})
+				return
+			}
+		}
+		categories = append(categories, newCat)
+		storageMutex.Unlock()
+		saveCategories()
+
+		ctx.JSON(http.StatusCreated, models.CategoryResponse{
+			ID:        newCat.ID,
+			UserID:    newCat.UserID,
+			Name:      newCat.Name,
+			Type:      newCat.Type,
+			Color:     newCat.Color,
+			Icon:      newCat.Icon,
+			IsDefault: false,
+			CreatedAt: newCat.CreatedAt,
+		})
+	})
+
+	// DELETE /api/categories/:id?reassignTo=...
+	api.DELETE("/categories/:id", func(ctx *gin.Context) {
+		userID := ctx.GetString("userID")
+		id := ctx.Param("id")
+		reassignTo := strings.TrimSpace(ctx.Query("reassignTo"))
+
+		if strings.HasPrefix(id, "default-") {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Las categorías del sistema no se pueden eliminar"})
+			return
+		}
+
+		if database.DB != nil {
+			var cat models.Category
+			if err := database.DB.Where("id = ? AND user_id = ?", id, userID).First(&cat).Error; err != nil {
+				ctx.JSON(http.StatusNotFound, gin.H{"error": "Categoría no encontrada o no autorizada"})
+				return
+			}
+
+			// Validate if expenses or incomes are using this category
+			var count int64
+			if cat.Type == "expense" {
+				database.DB.Model(&models.Expense{}).Where("user_id = ? AND category = ?", userID, cat.Name).Count(&count)
+			} else {
+				database.DB.Model(&models.Income{}).Where("user_id = ? AND source = ?", userID, cat.Name).Count(&count)
+			}
+
+			if count > 0 {
+				if reassignTo == "" {
+					ctx.JSON(http.StatusConflict, gin.H{
+						"error":         fmt.Sprintf("Esta categoría está asociada a %d transacción(es). Puedes reasignarlas antes de eliminarla.", count),
+						"in_use":        true,
+						"count":         count,
+						"category_name": cat.Name,
+						"category_type": cat.Type,
+					})
+					return
+				}
+
+				// Reassign matching transactions
+				if cat.Type == "expense" {
+					if err := database.DB.Model(&models.Expense{}).Where("user_id = ? AND category = ?", userID, cat.Name).Update("category", reassignTo).Error; err != nil {
+						ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No fue posible reasignar los gastos"})
+						return
+					}
+				} else {
+					if err := database.DB.Model(&models.Income{}).Where("user_id = ? AND source = ?", userID, cat.Name).Update("source", reassignTo).Error; err != nil {
+						ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No fue posible reasignar los ingresos"})
+						return
+					}
+				}
+			}
+
+			if err := database.DB.Where("id = ? AND user_id = ?", id, userID).Delete(&models.Category{}).Error; err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "No fue posible eliminar la categoría"})
+				return
+			}
+
+			ctx.JSON(http.StatusOK, gin.H{
+				"message":         "Categoría eliminada exitosamente",
+				"reassigned":      count > 0,
+				"reassigned_to":   reassignTo,
+				"reassigned_count": count,
+			})
+			return
+		}
+
+		// Fallback in-memory
+		storageMutex.Lock()
+		defer storageMutex.Unlock()
+
+		catIdx := -1
+		var cat models.Category
+		for i, c := range categories {
+			if c.ID == id && (c.UserID == userID || c.UserID == "") {
+				catIdx = i
+				cat = c
+				break
+			}
+		}
+
+		if catIdx == -1 {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Categoría no encontrada"})
+			return
+		}
+
+		var count int64
+		if cat.Type == "expense" {
+			for _, exp := range expenses {
+				if exp.UserID == userID && exp.Category == cat.Name {
+					count++
+				}
+			}
+		} else {
+			for _, inc := range incomes {
+				if inc.UserID == userID && inc.Source == cat.Name {
+					count++
+				}
+			}
+		}
+
+		if count > 0 {
+			if reassignTo == "" {
+				ctx.JSON(http.StatusConflict, gin.H{
+					"error":         fmt.Sprintf("Esta categoría está asociada a %d transacción(es). Puedes reasignarlas antes de continuar.", count),
+					"in_use":        true,
+					"count":         count,
+					"category_name": cat.Name,
+					"category_type": cat.Type,
+				})
+				return
+			}
+
+			if cat.Type == "expense" {
+				for i := range expenses {
+					if expenses[i].UserID == userID && expenses[i].Category == cat.Name {
+						expenses[i].Category = reassignTo
+					}
+				}
+				saveExpenses()
+			} else {
+				for i := range incomes {
+					if incomes[i].UserID == userID && incomes[i].Source == cat.Name {
+						incomes[i].Source = reassignTo
+					}
+				}
+				saveIncomes()
+			}
+		}
+
+		categories = append(categories[:catIdx], categories[catIdx+1:]...)
+		saveCategories()
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"message":         "Categoría eliminada exitosamente",
+			"reassigned":      count > 0,
+			"reassigned_to":   reassignTo,
+			"reassigned_count": count,
+		})
 	})
 
 	port := os.Getenv("PORT")

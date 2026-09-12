@@ -24,7 +24,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
+import { useCategories } from "@/hooks/useCategories";
+import { CategoryModal } from "@/components/categories/CategoryModal";
 import {
   Select,
   SelectContent,
@@ -47,6 +49,8 @@ export function EditExpenseModal({
   expense,
 }: EditExpenseModalProps) {
   const { translate, currency, currencySymbol } = useSettings();
+  const { categories: categoryList } = useCategories("expense");
+  const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     amount: expense?.amount.toString() || "",
@@ -71,16 +75,6 @@ export function EditExpenseModal({
       });
     }
   }, [expense, isOpen]);
-
-  const categories = [
-    "Alimentación",
-    "Transporte",
-    "Servicios",
-    "Entretenimiento",
-    "Salud",
-    "Metas",
-    "Otros",
-  ];
 
   const paymentMethods = [
     "Tarjeta de Crédito",
@@ -132,7 +126,8 @@ export function EditExpenseModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle className="text-action">
@@ -180,11 +175,24 @@ export function EditExpenseModal({
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
+                  {categoryList.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.name}>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${cat.is_default ? "bg-slate-400" : "bg-blue-500"}`} />
+                        <span>{cat.name}</span>
+                      </div>
                     </SelectItem>
                   ))}
+                  <div className="p-1 border-t border-border/40 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setIsCreateCategoryOpen(true)}
+                      className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Plus size={13} />
+                      <span>+ Nueva categoría...</span>
+                    </button>
+                  </div>
                 </SelectContent>
               </Select>
             </div>
@@ -296,5 +304,15 @@ export function EditExpenseModal({
         </form>
       </DialogContent>
     </Dialog>
+
+    <CategoryModal
+      isOpen={isCreateCategoryOpen}
+      onClose={() => setIsCreateCategoryOpen(false)}
+      defaultType="expense"
+      onSuccess={(newCat) => {
+        setFormData((prev) => ({ ...prev, category: newCat.name as ExpenseCategory }));
+      }}
+    />
+  </>
   );
 }

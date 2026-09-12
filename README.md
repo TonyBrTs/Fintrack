@@ -93,6 +93,11 @@ npm start
 - `PUT /api/goals/:id`: Actualizar o registrar aportes a una meta.
 - `DELETE /api/goals/:id`: Eliminar una meta.
 
+### Categorías Personalizadas (`/api/categories`)
+- `GET /api/categories?type=expense|income`: Obtener categorías combinadas (sistema y privadas del usuario).
+- `POST /api/categories`: Crear una nueva categoría personalizada para el usuario autenticado.
+- `DELETE /api/categories/:id?reassignTo=...`: Eliminar categoría con reasignación opcional de movimientos existentes.
+
 ---
 
 ## 📂 Estructura del Repositorio
@@ -101,12 +106,13 @@ npm start
 Fintrack/
 ├── backend/
 │   ├── internal/
-│   │   ├── handlers/       # Controladores de solicitudes HTTP
-│   │   ├── models/         # Modelos de datos (Expense, Income, Goal)
-│   │   └── repository/     # Capa de persistencia en archivos JSON
-│   ├── expenses.json       # Base de datos JSON de gastos
-│   ├── incomes.json        # Base de datos JSON de ingresos
-│   ├── goals.json          # Base de datos JSON de metas
+│   │   ├── database/       # Conexión PostgreSQL (GORM) y AutoMigrate
+│   │   ├── middleware/     # AuthMiddleware (validación JWT con caché)
+│   │   └── models/         # Modelos de datos (Expense, Income, Goal, Category)
+│   ├── expenses.json       # Persistencia local / contingencia de gastos
+│   ├── incomes.json        # Persistencia local / contingencia de ingresos
+│   ├── goals.json          # Persistencia local / contingencia de metas
+│   ├── categories.json     # Persistencia local / contingencia de categorías
 │   ├── go.mod              # Módulos y dependencias de Go
 │   ├── main.go             # Punto de entrada del servidor Gin
 │   └── README.md
@@ -125,12 +131,14 @@ Fintrack/
 │   │   │   ├── page.tsx    # Dashboard / Resumen financiero
 │   │   │   └── globals.css # Tokens de diseño y utilidades
 │   │   ├── components/
+│   │   │   ├── categories/ # Modales de creación y gestión de categorías
 │   │   │   ├── expenses/   # Modales y detalles de gastos
 │   │   │   ├── incomes/    # Modales y detalles de ingresos
 │   │   │   ├── goals/      # Tarjetas y modales de metas
 │   │   │   ├── layout/     # Header, BrandLogo SVG, SubNavbar
 │   │   │   └── ui/         # Componentes Radix UI (Select, Sheet, etc.)
-│   │   ├── contexts/       # SettingsContext (idioma, divisas)
+│   │   ├── contexts/       # SettingsContext (idioma, divisas) y AuthContext
+│   │   ├── hooks/          # useCategories para sincronización reactiva
 │   │   ├── lib/            # Traducciones, llamadas a API y utilidades
 │   │   └── types/          # Definiciones TypeScript
 │   ├── next.config.ts

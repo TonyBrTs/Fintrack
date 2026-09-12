@@ -19,10 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { safeFetch } from '@/lib/api';
+import { useCategories } from '@/hooks/useCategories';
+import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
 import { formatCurrency } from '@/lib/utils';
 import type { Income } from '@/types/index';
 import { motion } from 'framer-motion';
@@ -34,6 +37,7 @@ import {
   Loader2,
   Plus,
   Search,
+  Tag,
   TrendingUp,
 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
@@ -50,11 +54,13 @@ const sourceColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'd
 function IncomesContent() {
   const { currency, currencySymbol, translate } = useSettings();
   const { user, openAuthModal } = useAuth();
+  const { categories: userSourceList } = useCategories("income");
   const searchParams = useSearchParams();
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -124,14 +130,15 @@ function IncomesContent() {
     return Object.entries(sourceTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || '---';
   }, [sourceTotals]);
 
-  // Unique sources list
+  // Unique sources list combining user categories and transactions
   const sourcesList = useMemo(() => {
     const set = new Set<string>();
+    userSourceList.forEach((c) => set.add(c.name));
     incomes.forEach((i) => {
       if (i.source) set.add(i.source);
     });
     return Array.from(set);
-  }, [incomes]);
+  }, [incomes, userSourceList]);
 
   // Filtered incomes
   const filteredIncomes = useMemo(() => {
@@ -206,21 +213,38 @@ function IncomesContent() {
             {translate('income.description') || 'Gestiona y analiza tus fuentes de capital'}
           </p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all cursor-pointer"
-        >
-          <Plus size={18} strokeWidth={2.5} />
-          {translate('income.register') || 'Registrar Ingreso'}
-        </motion.button>
+        <div className="flex items-center gap-2.5">
+          <Button
+            variant="outline"
+            onClick={() => setIsManageCategoriesOpen(true)}
+            className="flex items-center gap-1.5 rounded-xl font-bold text-xs sm:text-sm h-10 px-3.5 border-border/80 hover:bg-secondary cursor-pointer"
+          >
+            <Tag size={15} className="text-emerald-500" />
+            <span>Fuentes</span>
+          </Button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all cursor-pointer h-10"
+          >
+            <Plus size={18} strokeWidth={2.5} />
+            {translate('income.register') || 'Registrar Ingreso'}
+          </motion.button>
+        </div>
       </header>
 
       <RegisterIncomeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchIncomes}
+      />
+
+      <ManageCategoriesModal
+        isOpen={isManageCategoriesOpen}
+        onClose={() => setIsManageCategoriesOpen(false)}
+        type="income"
       />
 
       <IncomeDetailsSheet

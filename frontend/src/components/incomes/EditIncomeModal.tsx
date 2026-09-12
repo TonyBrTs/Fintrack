@@ -24,7 +24,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
+import { useCategories } from "@/hooks/useCategories";
+import { CategoryModal } from "@/components/categories/CategoryModal";
 import {
   Select,
   SelectContent,
@@ -47,6 +49,8 @@ export function EditIncomeModal({
   income,
 }: EditIncomeModalProps) {
   const { translate, currency, currencySymbol } = useSettings();
+  const { categories: sourceList } = useCategories("income");
+  const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     amount: income?.amount.toString() || "",
@@ -69,8 +73,6 @@ export function EditIncomeModal({
       });
     }
   }, [income, isOpen]);
-
-  const sources = ["Salario", "Freelance", "Inversiones", "Regalo", "Otros"];
 
   const paymentMethods = ["Transferencia", "Efectivo", "PayPal", "Depósito"];
 
@@ -114,7 +116,8 @@ export function EditIncomeModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle className="text-action">
@@ -162,11 +165,24 @@ export function EditIncomeModal({
                   <SelectValue placeholder="Seleccionar fuente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {sources.map((src) => (
-                    <SelectItem key={src} value={src}>
-                      {src}
+                  {sourceList.map((src) => (
+                    <SelectItem key={src.id} value={src.name}>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${src.is_default ? "bg-slate-400" : "bg-emerald-500"}`} />
+                        <span>{src.name}</span>
+                      </div>
                     </SelectItem>
                   ))}
+                  <div className="p-1 border-t border-border/40 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setIsCreateCategoryOpen(true)}
+                      className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Plus size={13} />
+                      <span>+ Nueva categoría...</span>
+                    </button>
+                  </div>
                 </SelectContent>
               </Select>
             </div>
@@ -278,5 +294,15 @@ export function EditIncomeModal({
         </form>
       </DialogContent>
     </Dialog>
+
+    <CategoryModal
+      isOpen={isCreateCategoryOpen}
+      onClose={() => setIsCreateCategoryOpen(false)}
+      defaultType="income"
+      onSuccess={(newCat) => {
+        setFormData((prev) => ({ ...prev, source: newCat.name as IncomeSource }));
+      }}
+    />
+  </>
   );
 }
