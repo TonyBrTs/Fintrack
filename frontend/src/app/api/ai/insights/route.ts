@@ -30,6 +30,64 @@ interface RequestData {
   currency?: string;
 }
 
+let cachedWorkingModel: string | null = null;
+
+async function getAvailableGeminiModels(apiKey: string): Promise<string[]> {
+  try {
+    const listRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
+      { method: "GET" }
+    );
+
+    if (listRes.ok) {
+      const data = await listRes.json();
+      const models: Array<{ name: string; supportedGenerationMethods?: string[] }> =
+        data.models || [];
+
+      // Filter only models that support generateContent
+      const valid = models
+        .filter((m) => m.supportedGenerationMethods?.includes("generateContent"))
+        .map((m) => m.name.replace(/^models\//, ""));
+
+      if (valid.length > 0) {
+        // Prioritize: gemini-2.0-flash, gemini-1.5-flash-latest, gemini-1.5-flash, gemini-2.5-flash, etc.
+        const sorted = [...valid].sort((a, b) => {
+          const score = (name: string) => {
+            if (name.includes("2.0-flash")) return 10;
+            if (name.includes("1.5-flash-latest")) return 9;
+            if (name.includes("1.5-flash")) return 8;
+            if (name.includes("2.5-flash")) return 7;
+            if (name.includes("flash")) return 6;
+            if (name.includes("2.0")) return 5;
+            if (name.includes("1.5-pro")) return 4;
+            if (name.includes("pro")) return 3;
+            return 1;
+          };
+          return score(b) - score(a);
+        });
+
+        console.log("[Gemini] Available models from API key:", sorted);
+        return sorted;
+      }
+    } else {
+      const err = await listRes.text();
+      console.warn("[Gemini] ListModels returned status", listRes.status, err);
+    }
+  } catch (err) {
+    console.warn("[Gemini] Error fetching ListModels:", err);
+  }
+
+  // Default hardcoded fallback list if ListModels was not reachable
+  return [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-flash",
+    "gemini-2.5-flash",
+    "gemini-1.5-pro",
+    "gemini-pro",
+  ];
+}
+
 export async function POST(req: Request) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -109,33 +167,90 @@ Debes responder ÚNICAMENTE un array JSON con esta estructura exacta, sin texto 
 ]
 `;
 
-    // Call Google Gemini API (gemini-1.5-flash)
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Discover models if not cached
+    let modelsToTry = cachedWorkingModel
+      ? [cachedWorkingModel]
+      : await getAvailableGeminiModels(apiKey);
 
-    const geminiRes = await fetch(geminiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: prompt }],
+    // Ensure common models are present in list if initial ones fail
+    const fallbackList = [
+      "gemini-2.0-flash",
+      "gemini-1.5-flash-latest",
+      "gemini-1.5-flash",
+      "gemini-2.5-flash",
+      "gemini-1.5-pro",
+      "gemini-pro",
+    ];
+    for (const fb of fallbackList) {
+      if (!modelsToTry.includes(fb)) {
+        modelsToTry.push(fb);
+      }
+    }
+
+    let rawContent = "";
+    let lastErrorStatus = 0;
+    let lastErrorText = "";
+
+    // Try models in order until one succeeds
+    for (const model of modelsToTry) {
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+        const payload: Record<string, unknown> = {
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.3,
+            topP: 0.8,
+            maxOutputTokens: 900,
           },
-        ],
-        generationConfig: {
-          temperature: 0.3,
-          topP: 0.8,
-          maxOutputTokens: 900,
-          responseMimeType: "application/json",
-        },
-      }),
-    });
+        };
 
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error("Gemini API error:", geminiRes.status, errText);
+        // Newer models support responseMimeType
+        if (
+          model.includes("1.5") ||
+          model.includes("2.0") ||
+          model.includes("2.5") ||
+          model.includes("flash")
+        ) {
+          (payload.generationConfig as Record<string, unknown>).responseMimeType =
+            "application/json";
+        }
+
+        const geminiRes = await fetch(geminiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (geminiRes.ok) {
+          const geminiData = await geminiRes.json();
+          rawContent =
+            geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          if (rawContent) {
+            cachedWorkingModel = model;
+            console.log(`[Gemini] Successfully generated insights using model: ${model}`);
+            break;
+          }
+        } else {
+          lastErrorStatus = geminiRes.status;
+          lastErrorText = await geminiRes.text();
+          console.warn(`[Gemini] Model ${model} returned ${geminiRes.status}:`, lastErrorText);
+          // If 404, continue to next model in loop
+        }
+      } catch (callErr) {
+        console.warn(`[Gemini] Call to ${model} threw error:`, callErr);
+      }
+    }
+
+    if (!rawContent) {
+      console.error("[Gemini] All model attempts failed. Last status:", lastErrorStatus, lastErrorText);
       return NextResponse.json(
         {
           ok: false,
@@ -146,10 +261,6 @@ Debes responder ÚNICAMENTE un array JSON con esta estructura exacta, sin texto 
         { status: 200 }
       );
     }
-
-    const geminiData = await geminiRes.json();
-    const rawContent =
-      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     // Clean potential markdown wrap
     const cleaned = rawContent
@@ -184,6 +295,7 @@ Debes responder ÚNICAMENTE un array JSON con esta estructura exacta, sin texto 
     return NextResponse.json({
       ok: true,
       configured: true,
+      modelUsed: cachedWorkingModel,
       insights: parsedInsights,
       timestamp: new Date().toISOString(),
     });
