@@ -10,7 +10,7 @@ interface KPICardProps {
 
 export function KPICard({ title, amount, icon, trend, trendType }: KPICardProps) {
   return (
-    <div className="group relative overflow-hidden bg-card/90 dark:bg-card/75 border border-border/80 dark:border-border/60 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-action/30 dark:hover:border-blue-500/30 hover:-translate-y-1 transition-all duration-300">
+    <div className="group relative overflow-hidden bg-card dark:bg-card/75 border border-slate-200/90 dark:border-border/60 rounded-2xl p-6 shadow-card hover:shadow-card-hover hover:border-action/40 dark:hover:border-blue-500/30 hover:-translate-y-1 transition-all duration-300">
       {/* Subtle decorative glow */}
       <div className="absolute -right-12 -top-12 w-28 h-28 bg-action/5 rounded-full blur-2xl group-hover:bg-action/10 transition-colors pointer-events-none" />
 

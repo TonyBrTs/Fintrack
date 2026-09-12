@@ -21,7 +21,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useState, useEffect } from "react";
-import { getApiHeaders, safeFetch } from "@/lib/api";
+import { safeFetch } from "@/lib/api";
 import type { Expense, Income, Goal } from "@/types/index";
 import { formatCurrency } from "@/lib/utils";
 import { SummaryCharts } from "@/components/SummaryCharts";

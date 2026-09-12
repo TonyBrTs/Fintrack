@@ -15,7 +15,12 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Check, Globe, Menu, Moon, Sun, LayoutDashboard, TrendingDown, TrendingUp, Goal, LogOut, LogIn, User as UserIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
+
+const emptySubscribe = () => () => {};
+function useHydrated() {
+  return useSyncExternalStore(emptySubscribe, () => true, () => false);
+}
 
 import { BrandLogo } from './BrandLogo';
 import Link from 'next/link';
@@ -54,11 +59,7 @@ function DesktopMenu() {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, currency, setCurrency, translate } = useSettings();
   const { user, signOut, openAuthModal } = useAuth();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useHydrated();
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -182,11 +183,7 @@ function MobileMenu() {
   const { language, setLanguage, currency, setCurrency, translate } = useSettings();
   const { user, signOut, openAuthModal } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useHydrated();
 
   const isEs = language === 'es';
 

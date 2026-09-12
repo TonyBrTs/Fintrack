@@ -18,7 +18,7 @@ import { EditIncomeModal } from "./EditIncomeModal";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";
-import { getApiHeaders, safeFetch } from "@/lib/api";
+import { safeFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
 

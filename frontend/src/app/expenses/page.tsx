@@ -22,7 +22,7 @@ import {
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { getApiHeaders, safeFetch } from '@/lib/api';
+import { safeFetch } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/index';
 import { motion } from 'framer-motion';
@@ -116,7 +116,7 @@ function ExpensesContent() {
       },
       {} as Record<string, number>,
     );
-  }, [expenses]);
+  }, [safeExpenses]);
 
   const highestCategory = useMemo(() => {
     return Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || '---';
@@ -276,7 +276,7 @@ function ExpensesContent() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-card/90 dark:bg-card/75 backdrop-blur-sm border border-border/80 dark:border-border/60 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all"
+        className="bg-card dark:bg-card/75 backdrop-blur-sm border border-slate-200/90 dark:border-border/60 rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all"
       >
         <Table>
           <TableHeader className="bg-secondary/40 dark:bg-secondary/20">

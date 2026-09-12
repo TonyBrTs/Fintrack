@@ -178,7 +178,7 @@ export function RecentTransactions({
                     ? `/incomes?id=${tx.id}`
                     : `/expenses?id=${tx.id}`
                 }
-                className="shrink-0 w-68 sm:w-72 p-4 rounded-2xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border border-border/80 dark:border-border/60 shadow-xs hover:shadow-lg hover:-translate-y-1 hover:border-action/30 transition-all group cursor-pointer block snap-start"
+                className="shrink-0 w-68 sm:w-72 p-4 rounded-2xl bg-card dark:bg-card/75 backdrop-blur-sm border border-slate-200/90 dark:border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-action/40 transition-all group cursor-pointer block snap-start"
               >
                 <div className="flex justify-between items-start mb-3">
                   <div

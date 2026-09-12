@@ -1,8 +1,8 @@
 "use client";
 
-import { getApiHeaders, safeFetch } from "@/lib/api";
+import { safeFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { cn, formatLiveNumber, parseLiveNumber } from "@/lib/utils";
 import type { Income, IncomeSource } from "@/types/index";
 import {
   Dialog,
@@ -61,7 +61,7 @@ export function EditIncomeModal({
   useEffect(() => {
     if (income && isOpen) {
       setFormData({
-        amount: income.amount.toString(),
+        amount: formatLiveNumber(income.amount.toString()),
         source: income.source,
         description: income.description,
         date: format(new Date(income.date), "yyyy-MM-dd"),
@@ -79,13 +79,20 @@ export function EditIncomeModal({
     setLoading(true);
 
     try {
+      const parsedAmount = parseFloat(parseLiveNumber(formData.amount));
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        toast.error("Por favor ingresa un monto válido");
+        setLoading(false);
+        return;
+      }
+
       const endpoint = `/api/incomes/${income?.id}`;
 
       const res = await safeFetch(endpoint, {
         method: "PUT",
         body: JSON.stringify({
           ...formData,
-          amount: parseFloat(formData.amount),
+          amount: parsedAmount,
           currency,
           date: new Date(formData.date + "T12:00:00").toISOString(),
         }),
@@ -125,11 +132,11 @@ export function EditIncomeModal({
               </span>
               <Input
                 required
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 value={formData.amount}
                 onChange={(e) =>
-                  setFormData({ ...formData, amount: e.target.value })
+                  setFormData({ ...formData, amount: formatLiveNumber(e.target.value) })
                 }
                 placeholder="0.00"
                 className="pl-8 text-lg font-bold h-12 focus-visible:ring-action"

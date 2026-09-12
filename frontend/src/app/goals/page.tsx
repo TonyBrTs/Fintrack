@@ -4,7 +4,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useState, useEffect, useMemo } from "react";
-import { getApiHeaders, safeFetch } from "@/lib/api";
+import { safeFetch } from "@/lib/api";
 import { Goal } from "@/types/index";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { RegisterGoalModal } from "@/components/goals/RegisterGoalModal";

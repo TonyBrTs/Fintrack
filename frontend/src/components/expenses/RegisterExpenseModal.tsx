@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, formatLiveNumber, parseLiveNumber } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getApiHeaders, safeFetch } from "@/lib/api";
+import { safeFetch } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,11 +74,18 @@ export function RegisterExpenseModal({
     setLoading(true);
 
     try {
+      const parsedAmount = parseFloat(parseLiveNumber(formData.amount));
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        toast.error("Por favor ingresa un monto válido");
+        setLoading(false);
+        return;
+      }
+
       const res = await safeFetch("/api/expenses", {
         method: "POST",
         body: JSON.stringify({
           ...formData,
-          amount: parseFloat(formData.amount),
+          amount: parsedAmount,
           currency,
           date: new Date(formData.date + "T12:00:00").toISOString(),
         }),
@@ -126,11 +133,11 @@ export function RegisterExpenseModal({
               </span>
               <Input
                 required
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 value={formData.amount}
                 onChange={(e) =>
-                  setFormData({ ...formData, amount: e.target.value })
+                  setFormData({ ...formData, amount: formatLiveNumber(e.target.value) })
                 }
                 placeholder="0.00"
                 className="pl-8 text-lg font-bold h-12 focus-visible:ring-action"

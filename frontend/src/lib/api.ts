@@ -61,7 +61,7 @@ export const getApiHeaders = (extraHeaders: Record<string, string> = {}): Record
   return headers;
 };
 
-export interface SafeFetchResult<T = any> {
+export interface SafeFetchResult<T = unknown> {
   ok: boolean;
   status: number;
   data: T | null;
@@ -72,7 +72,7 @@ export interface SafeFetchResult<T = any> {
  * Safe fetch wrapper that handles timeouts, server errors, and network disconnects
  * without throwing unhandled exceptions that break the Next.js runtime.
  */
-export async function safeFetch<T = any>(
+export async function safeFetch<T = unknown>(
   endpoint: string,
   options: RequestInit & { timeoutMs?: number } = {}
 ): Promise<SafeFetchResult<T>> {
@@ -107,10 +107,10 @@ export async function safeFetch<T = any>(
     }
 
     const data = await res.json();
-    return { ok: true, status: res.status, data };
-  } catch (err: any) {
+    return { ok: true, status: res.status, data: data as T };
+  } catch (err: unknown) {
     clearTimeout(timer);
-    const isTimeout = err?.name === "AbortError";
+    const isTimeout = err instanceof Error && err.name === "AbortError";
     const errorMsg = isTimeout
       ? "Tiempo de espera agotado al contactar con el backend."
       : "No se pudo establecer conexión con el backend. Asegúrate de que el servidor esté encendido.";

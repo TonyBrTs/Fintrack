@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Loader2, Goal, CalendarIcon } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getApiHeaders, safeFetch } from "@/lib/api";
+import { safeFetch } from "@/lib/api";
+import { cn, formatLiveNumber, parseLiveNumber } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +27,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 import { Calendar } from "@/components/ui/calendar";
@@ -59,12 +59,19 @@ export function RegisterGoalModal({
     setLoading(true);
 
     try {
+      const parsedTarget = parseFloat(parseLiveNumber(formData.target_amount));
+      if (isNaN(parsedTarget) || parsedTarget <= 0) {
+        toast.error("Por favor ingresa una meta válida");
+        setLoading(false);
+        return;
+      }
+
       const res = await safeFetch("/api/goals", {
         method: "POST",
         body: JSON.stringify({
           ...formData,
-          target_amount: parseFloat(formData.target_amount),
-          current_amount: parseFloat(formData.current_amount),
+          target_amount: parsedTarget,
+          current_amount: parseFloat(parseLiveNumber(formData.current_amount)) || 0,
           deadline: new Date(formData.deadline + "T12:00:00").toISOString(),
         }),
       });
@@ -132,11 +139,11 @@ export function RegisterGoalModal({
                 </span>
                 <Input
                   required
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={formData.target_amount}
                   onChange={(e) =>
-                    setFormData({ ...formData, target_amount: e.target.value })
+                    setFormData({ ...formData, target_amount: formatLiveNumber(e.target.value) })
                   }
                   placeholder="0.00"
                   className="pl-8 text-lg font-bold h-12 focus-visible:ring-action"

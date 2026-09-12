@@ -26,7 +26,7 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
 
   return (
     <>
-      <div className="bg-card/90 dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl border border-border/80 dark:border-border/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden flex flex-col justify-between">
+      <div className="bg-card dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl border border-slate-200/90 dark:border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden flex flex-col justify-between">
         {/* Subtle background glow */}
         <div
           className={`absolute -right-16 -bottom-16 w-36 h-36 rounded-full blur-3xl pointer-events-none transition-opacity duration-500 ${

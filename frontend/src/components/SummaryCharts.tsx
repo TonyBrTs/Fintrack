@@ -102,7 +102,7 @@ export function SummaryCharts({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Expenses by Category */}
-      <div className="bg-card/90 dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl shadow-sm border border-border/80 dark:border-border/60 flex flex-col justify-between hover:shadow-md transition-all">
+      <div className="bg-card dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl shadow-card hover:shadow-card-hover border border-slate-200/90 dark:border-border/60 flex flex-col justify-between transition-all">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-action/10 text-action">
@@ -187,7 +187,7 @@ export function SummaryCharts({
       </div>
 
       {/* Income vs Expenses Trend */}
-      <div className="bg-card/90 dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl shadow-sm border border-border/80 dark:border-border/60 flex flex-col justify-between hover:shadow-md transition-all">
+      <div className="bg-card dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl shadow-card hover:shadow-card-hover border border-slate-200/90 dark:border-border/60 flex flex-col justify-between transition-all">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">

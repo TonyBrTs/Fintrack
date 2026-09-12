@@ -79,7 +79,7 @@ export function FinancialInsights({
   }
 
   return (
-    <div className="bg-card/90 dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl shadow-sm border border-border/80 dark:border-border/60 h-full flex flex-col justify-between hover:shadow-md transition-all">
+    <div className="bg-card dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl shadow-card hover:shadow-card-hover border border-slate-200/90 dark:border-border/60 h-full flex flex-col justify-between transition-all">
       <div>
         <div className="flex items-center gap-2.5 mb-6">
           <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">

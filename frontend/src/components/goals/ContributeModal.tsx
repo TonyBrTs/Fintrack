@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Loader2, DollarSign, Goal as GoalIcon } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getApiHeaders, safeFetch } from "@/lib/api";
+import { safeFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { Goal } from "@/types/index";
+import { formatLiveNumber, parseLiveNumber } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -35,8 +36,11 @@ export function ContributeModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const contributeAmount = parseFloat(amount);
-    if (isNaN(contributeAmount) || contributeAmount <= 0) return;
+    const contributeAmount = parseFloat(parseLiveNumber(amount));
+    if (isNaN(contributeAmount) || contributeAmount <= 0) {
+      toast.error("Por favor ingresa un monto válido");
+      return;
+    }
 
     setLoading(true);
 
@@ -109,11 +113,10 @@ export function ContributeModal({
               <Input
                 required
                 autoFocus
-                type="number"
-                step="0.01"
-                min="0.01"
+                type="text"
+                inputMode="decimal"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => setAmount(formatLiveNumber(e.target.value))}
                 placeholder="0.00"
                 className="pl-8 text-lg font-bold h-12 focus-visible:ring-action"
               />

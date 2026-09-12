@@ -76,7 +76,7 @@ body {
 :root {
   --color-gold: #f59e0b;
   --radius: 0.75rem;
-  --background: #f8fafc;
+  --background: #f1f5f9;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -216,3 +216,18 @@ body {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.32);
 }
+
+/* Elevated Light Mode Card Shadows */
+.shadow-card {
+  box-shadow: 0 4px 20px -3px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+}
+.shadow-card-hover {
+  box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+}
+.dark .shadow-card {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+}
+.dark .shadow-card-hover {
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.6);
+}
+
