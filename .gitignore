@@ -28,6 +28,8 @@ backend/bin
 .DS_Store
 *.pem
 frontend/.vercel
+.agents/
+
 
 # debug
 npm-debug.log*
