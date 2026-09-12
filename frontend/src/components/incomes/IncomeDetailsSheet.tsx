@@ -96,10 +96,7 @@ export function IncomeDetailsSheet({
     }
   };
 
-  const sourceName =
-    translate(`sources.${income.source}`) !== `sources.${income.source}`
-      ? translate(`sources.${income.source}`)
-      : income.source;
+  const sourceName = translate(`sources.${income.source}`, income.source);
 
   return (
     <>

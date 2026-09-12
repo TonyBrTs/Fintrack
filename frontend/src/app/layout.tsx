@@ -1,5 +1,6 @@
 import { Header } from '@/components/layout/Header';
 import { SubNavbar } from '@/components/layout/SubNavbar';
+import { BottomNavbar } from '@/components/layout/BottomNavbar';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -66,15 +67,16 @@ export default function RootLayout({
         >
           <AuthProvider>
             <SettingsProvider>
-              <div className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-background/80 border-b border-border/60 transition-colors duration-300">
+              <div className="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-background/80 border-b border-border/60 transition-colors duration-300">
                 <Header />
                 <SubNavbar />
               </div>
-              <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-12 pt-4 md:pt-6">
+              <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-24 md:pb-12 pt-3 md:pt-6">
                 {children}
               </main>
+              <BottomNavbar />
               <AuthModal />
-              <Toaster position="bottom-right" richColors />
+              <Toaster position="bottom-right" richColors className="mb-16 md:mb-0" />
               <ServiceWorkerRegister />
             </SettingsProvider>
           </AuthProvider>

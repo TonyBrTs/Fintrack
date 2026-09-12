@@ -98,11 +98,10 @@ export function ExpenseDetailsSheet({
     }
   };
 
-  const categoryName =
-    translate(`categories.${expense.category}`) !==
-    `categories.${expense.category}`
-      ? translate(`categories.${expense.category}`)
-      : expense.category;
+  const categoryName = translate(
+    `categories.${expense.category}`,
+    expense.category
+  );
 
   return (
     <>

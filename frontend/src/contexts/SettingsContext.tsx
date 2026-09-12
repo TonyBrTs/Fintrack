@@ -12,7 +12,7 @@ interface SettingsContextType {
   setLanguage: (lang: Language) => void;
   setCurrency: (curr: Currency) => void;
   currencySymbol: string;
-  translate: (path: string) => string;
+  translate: (path: string, fallback?: string) => string;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(
@@ -59,17 +59,24 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [currency]);
 
-  const translate = (path: string): string => {
+  const translate = (path: string, fallback?: string): string => {
     const keys = path.split(".");
     let result: unknown = translations[language];
     for (const key of keys) {
       if (result && typeof result === "object" && key in result) {
         result = (result as Record<string, unknown>)[key];
       } else {
+        if (fallback !== undefined) return fallback;
+        if (path.startsWith("categories.")) return path.slice("categories.".length);
+        if (path.startsWith("sources.")) return path.slice("sources.".length);
         return path;
       }
     }
-    return typeof result === "string" ? result : path;
+    if (typeof result === "string") return result;
+    if (fallback !== undefined) return fallback;
+    if (path.startsWith("categories.")) return path.slice("categories.".length);
+    if (path.startsWith("sources.")) return path.slice("sources.".length);
+    return path;
   };
 
   const value = {
