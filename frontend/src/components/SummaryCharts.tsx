@@ -122,8 +122,8 @@ export function SummaryCharts({
             {translate("common.noData") || "No hay datos para este período"}
           </div>
         ) : (
-          <div className="h-[260px] sm:h-[300px] w-full relative grow">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[260px] sm:h-[300px] w-full min-w-0 min-h-[260px] relative grow">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={260}>
               <PieChart>
                 <Pie
                   data={categoryData}
@@ -202,8 +202,8 @@ export function SummaryCharts({
           </span>
         </div>
 
-        <div className="h-[260px] sm:h-[300px] w-full grow">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[260px] sm:h-[300px] w-full min-w-0 min-h-[260px] grow">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={260}>
             <BarChart
               data={monthlyData}
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
