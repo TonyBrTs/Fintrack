@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2, Goal, CalendarIcon } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -59,21 +59,17 @@ export function RegisterGoalModal({
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/goals`,
-        {
-          method: "POST",
-          headers: getApiHeaders(),
-          body: JSON.stringify({
-            ...formData,
-            target_amount: parseFloat(formData.target_amount),
-            current_amount: parseFloat(formData.current_amount),
-            deadline: new Date(formData.deadline + "T12:00:00").toISOString(),
-          }),
-        },
-      );
+      const res = await safeFetch("/api/goals", {
+        method: "POST",
+        body: JSON.stringify({
+          ...formData,
+          target_amount: parseFloat(formData.target_amount),
+          current_amount: parseFloat(formData.current_amount),
+          deadline: new Date(formData.deadline + "T12:00:00").toISOString(),
+        }),
+      });
 
-      if (response.ok) {
+      if (res.ok) {
         toast.success(translate("goals.form.success"));
         onSuccess();
         onClose();
@@ -85,11 +81,10 @@ export function RegisterGoalModal({
           category: "Ahorro",
         });
       } else {
-        toast.error(translate("goals.form.error"));
+        toast.error(res.error || translate("goals.form.error") || "Error al registrar la meta");
       }
-    } catch (error) {
-      console.error("Error registering goal:", error);
-      toast.error(translate("goals.form.error"));
+    } catch {
+      toast.error(translate("goals.form.error") || "Error al registrar la meta");
     } finally {
       setLoading(false);
     }

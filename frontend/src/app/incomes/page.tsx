@@ -20,7 +20,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getApiHeaders } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { getApiHeaders, safeFetch } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import type { Income } from '@/types/index';
 import { motion } from 'framer-motion';
@@ -47,6 +49,7 @@ const sourceColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'd
 
 function IncomesContent() {
   const { currency, currencySymbol, translate } = useSettings();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,34 +75,39 @@ function IncomesContent() {
   const fetchIncomes = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/incomes`, {
-        headers: getApiHeaders(),
-      });
+      const res = await safeFetch<Income[]>('/api/incomes');
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch incomes');
+      if (!res.ok) {
+        setError(res.error || 'No se pudieron cargar los ingresos. Asegúrate de que el backend esté encendido.');
+        setIncomes([]);
+        return;
       }
-      const data = await response.json();
-      setIncomes(data);
+      setIncomes(Array.isArray(res.data) ? res.data : []);
       setError(null);
-    } catch (err) {
-      console.error('Error fetching incomes:', err);
-      setError('Could not load incomes. Make sure the backend is running.');
+    } catch {
+      setError('No se pudo establecer conexión con el backend.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!user) {
+      setIncomes([]);
+      setLoading(false);
+      return;
+    }
     fetchIncomes();
-  }, []);
+  }, [user]);
+
+  const safeIncomes = useMemo(() => Array.isArray(incomes) ? incomes : [], [incomes]);
 
   const totalMonth = useMemo(() => {
-    return incomes.reduce((acc, curr) => acc + curr.amount, 0);
-  }, [incomes]);
+    return safeIncomes.reduce((acc, curr) => acc + curr.amount, 0);
+  }, [safeIncomes]);
 
   const sourceTotals = useMemo(() => {
-    return incomes.reduce(
+    return safeIncomes.reduce(
       (acc, curr) => {
         acc[curr.source] = (acc[curr.source] || 0) + curr.amount;
         return acc;
@@ -345,8 +353,10 @@ function IncomesContent() {
 
 export default function IngresosPage() {
   return (
-    <Suspense>
-      <IncomesContent />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense>
+        <IncomesContent />
+      </Suspense>
+    </ProtectedRoute>
   );
 }

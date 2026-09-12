@@ -1,6 +1,6 @@
 "use client";
 
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { Income, IncomeSource } from "@/types/index";
@@ -79,11 +79,10 @@ export function EditIncomeModal({
     setLoading(true);
 
     try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/incomes/${income?.id}`;
+      const endpoint = `/api/incomes/${income?.id}`;
 
-      const response = await fetch(url, {
+      const res = await safeFetch(endpoint, {
         method: "PUT",
-        headers: getApiHeaders(),
         body: JSON.stringify({
           ...formData,
           amount: parseFloat(formData.amount),
@@ -92,16 +91,16 @@ export function EditIncomeModal({
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update income");
+      if (!res.ok) {
+        toast.error(res.error || translate("income.form.error") || "Error al actualizar el ingreso");
+        return;
       }
 
       toast.success(translate("income.form.success"));
       onSuccess();
       onClose();
-    } catch (error) {
-      console.error("Error updating income:", error);
-      toast.error(translate("income.form.error"));
+    } catch {
+      toast.error(translate("income.form.error") || "Error al actualizar el ingreso");
     } finally {
       setLoading(false);
     }

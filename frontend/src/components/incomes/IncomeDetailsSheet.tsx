@@ -18,7 +18,7 @@ import { EditIncomeModal } from "./EditIncomeModal";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
 
@@ -56,24 +56,20 @@ export function IncomeDetailsSheet({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/incomes/${income.id}`,
-        {
-          method: "DELETE",
-          headers: getApiHeaders(),
-        },
-      );
+      const res = await safeFetch(`/api/incomes/${income.id}`, {
+        method: "DELETE",
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to delete income");
+      if (!res.ok) {
+        toast.error(res.error || translate("income.details.deleteError") || "Error al eliminar el ingreso");
+        return;
       }
 
       toast.success(translate("income.details.deleteSuccess"));
       onSuccess?.();
       onClose();
-    } catch (error) {
-      console.error("Error deleting income:", error);
-      toast.error(translate("income.details.deleteError"));
+    } catch {
+      toast.error(translate("income.details.deleteError") || "Error al eliminar el ingreso");
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);

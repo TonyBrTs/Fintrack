@@ -18,8 +18,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useState, useEffect } from "react";
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import type { Expense, Income, Goal } from "@/types/index";
 import { formatCurrency } from "@/lib/utils";
 import { SummaryCharts } from "@/components/SummaryCharts";
@@ -30,6 +32,7 @@ import Link from "next/link";
 
 export default function SummaryPage() {
   const { currencySymbol, translate } = useSettings();
+  const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -67,42 +70,44 @@ export default function SummaryPage() {
       try {
         setLoading(true);
         const [expensesRes, incomesRes, goalsRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/expenses`, {
-            headers: getApiHeaders(),
-          }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/incomes`, {
-            headers: getApiHeaders(),
-          }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/goals`, {
-            headers: getApiHeaders(),
-          }),
+          safeFetch<Expense[]>("/api/expenses"),
+          safeFetch<Income[]>("/api/incomes"),
+          safeFetch<Goal[]>("/api/goals"),
         ]);
 
-        if (expensesRes.ok && incomesRes.ok && goalsRes.ok) {
-          const [expensesData, incomesData, goalsData] = await Promise.all([
-            expensesRes.json(),
-            incomesRes.json(),
-            goalsRes.json(),
-          ]);
-          setExpenses(expensesData);
-          setIncomes(incomesData);
-          setGoals(goalsData);
-        }
-      } catch (error) {
-        console.error("Error fetching summary data:", error);
+        setExpenses(Array.isArray(expensesRes.data) ? expensesRes.data : []);
+        setIncomes(Array.isArray(incomesRes.data) ? incomesRes.data : []);
+        setGoals(Array.isArray(goalsRes.data) ? goalsRes.data : []);
+      } catch {
+        // Safe fallback
+        setExpenses([]);
+        setIncomes([]);
+        setGoals([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, []);
+    if (!user) {
+      setExpenses([]);
+      setIncomes([]);
+      setGoals([]);
+      setLoading(false);
+      return;
+    }
 
-  const totalExpensesAllTime = expenses.reduce(
+    fetchData();
+  }, [user]);
+
+  const currentExpenses = Array.isArray(expenses) ? expenses : [];
+  const currentIncomes = Array.isArray(incomes) ? incomes : [];
+  const currentGoals = Array.isArray(goals) ? goals : [];
+
+  const totalExpensesAllTime = currentExpenses.reduce(
     (acc, curr) => acc + curr.amount,
     0,
   );
-  const totalIncomesAllTime = incomes.reduce(
+  const totalIncomesAllTime = currentIncomes.reduce(
     (acc, curr) => acc + curr.amount,
     0,
   );
@@ -111,8 +116,8 @@ export default function SummaryPage() {
   // Filtering Logic
   const filteredExpenses =
     selectedMonth === "all"
-      ? expenses
-      : expenses.filter((e) => {
+      ? currentExpenses
+      : currentExpenses.filter((e) => {
           const d = new Date(e.date);
           const monthKey = `${d.getFullYear()}-${String(
             d.getMonth() + 1,
@@ -122,8 +127,8 @@ export default function SummaryPage() {
 
   const filteredIncomes =
     selectedMonth === "all"
-      ? incomes
-      : incomes.filter((i) => {
+      ? currentIncomes
+      : currentIncomes.filter((i) => {
           const d = new Date(i.date);
           const monthKey = `${d.getFullYear()}-${String(
             d.getMonth() + 1,
@@ -156,17 +161,18 @@ export default function SummaryPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header & Filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-titles dark:text-foreground">
-            {translate("nav.summary") || "Resumen"}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {translate("common.summaryDescription") || "Vista general de tus finanzas y métricas clave"}
-          </p>
-        </div>
+    <ProtectedRoute>
+      <div className="space-y-8 max-w-7xl mx-auto">
+        {/* Header & Filter */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-titles dark:text-foreground">
+              {translate("nav.summary") || "Resumen"}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {translate("common.summaryDescription") || "Vista general de tus finanzas y métricas clave"}
+            </p>
+          </div>
         <div className="sm:w-auto w-full">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border-border/80 shadow-xs font-medium text-sm">
@@ -247,7 +253,7 @@ export default function SummaryPage() {
               </Link>
             </div>
 
-            {goals.length === 0 ? (
+            {currentGoals.length === 0 ? (
               <div className="py-8 flex flex-col items-center justify-center text-center">
                 <GoalIcon
                   size={36}
@@ -259,7 +265,7 @@ export default function SummaryPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {goals.slice(0, 3).map((goal) => {
+                {currentGoals.slice(0, 3).map((goal) => {
                   const progress = Math.min(
                     (goal.current_amount / goal.target_amount) * 100,
                     100,
@@ -293,9 +299,9 @@ export default function SummaryPage() {
             )}
           </div>
 
-          {goals.length > 3 && (
+          {currentGoals.length > 3 && (
             <p className="text-[11px] text-center text-muted-foreground pt-4 border-t border-border/40 mt-4">
-              + {goals.length - 3} metas activas en tu lista
+              + {currentGoals.length - 3} metas activas en tu lista
             </p>
           )}
         </div>
@@ -306,8 +312,8 @@ export default function SummaryPage() {
         {/* Charts Column */}
         <div className="lg:col-span-2 space-y-8">
           <SummaryCharts
-            expenses={expenses}
-            incomes={incomes}
+            expenses={currentExpenses}
+            incomes={currentIncomes}
             currentMonthExpenses={filteredExpenses}
           />
         </div>
@@ -320,6 +326,7 @@ export default function SummaryPage() {
           />
         </div>
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

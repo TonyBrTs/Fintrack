@@ -1,8 +1,10 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useState, useEffect, useMemo } from "react";
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import { Goal } from "@/types/index";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { RegisterGoalModal } from "@/components/goals/RegisterGoalModal";
@@ -15,6 +17,7 @@ import { formatCurrency } from "@/lib/utils";
 
 export default function GoalsPage() {
   const { translate, currencySymbol } = useSettings();
+  const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,18 +28,13 @@ export default function GoalsPage() {
   const fetchGoals = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/goals`,
-        {
-          headers: getApiHeaders(),
-        },
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setGoals(data);
+      const res = await safeFetch<Goal[]>("/api/goals");
+      if (res.ok) {
+        setGoals(Array.isArray(res.data) ? res.data : []);
       }
-    } catch (error) {
-      console.error("Error fetching goals:", error);
+    } catch {
+      // Safe fallback
+      setGoals([]);
     } finally {
       setLoading(false);
     }
@@ -52,22 +50,18 @@ export default function GoalsPage() {
 
     try {
       setIsDeleting(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/goals/${goalToDelete}`,
-        {
-          method: "DELETE",
-          headers: getApiHeaders(),
-        },
-      );
-      if (response.ok) {
+      const res = await safeFetch(`/api/goals/${goalToDelete}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
         setIsDeleteDialogOpen(false);
         fetchGoals();
         toast.success(translate("goals.details.deleteSuccess") || "Meta eliminada");
       } else {
-        toast.error(translate("goals.details.deleteError") || "Error al eliminar la meta");
+        toast.error(res.error || translate("goals.details.deleteError") || "Error al eliminar la meta");
       }
-    } catch (error) {
-      console.error("Error deleting goal:", error);
+    } catch {
+      toast.error(translate("goals.details.deleteError") || "Error al eliminar la meta");
     } finally {
       setIsDeleting(false);
       setGoalToDelete(null);
@@ -75,16 +69,23 @@ export default function GoalsPage() {
   };
 
   useEffect(() => {
+    if (!user) {
+      setGoals([]);
+      setLoading(false);
+      return;
+    }
     fetchGoals();
-  }, []);
+  }, [user]);
+
+  const safeGoals = useMemo(() => Array.isArray(goals) ? goals : [], [goals]);
 
   const totalSaved = useMemo(() => {
-    return goals.reduce((acc, curr) => acc + curr.current_amount, 0);
-  }, [goals]);
+    return safeGoals.reduce((acc, curr) => acc + curr.current_amount, 0);
+  }, [safeGoals]);
 
   const totalTarget = useMemo(() => {
-    return goals.reduce((acc, curr) => acc + curr.target_amount, 0);
-  }, [goals]);
+    return safeGoals.reduce((acc, curr) => acc + curr.target_amount, 0);
+  }, [safeGoals]);
 
   const overallProgress = useMemo(() => {
     if (totalTarget === 0) return 0;
@@ -107,7 +108,8 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <ProtectedRoute>
+      <div className="space-y-8 max-w-7xl mx-auto">
       <DeleteConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => {
@@ -217,6 +219,7 @@ export default function GoalsPage() {
           </AnimatePresence>
         </div>
       )}
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

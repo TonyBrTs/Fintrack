@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,22 +74,19 @@ export function RegisterExpenseModal({
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/expenses`,
-        {
-          method: "POST",
-          headers: getApiHeaders(),
-          body: JSON.stringify({
-            ...formData,
-            amount: parseFloat(formData.amount),
-            currency,
-            date: new Date(formData.date + "T12:00:00").toISOString(),
-          }),
-        },
-      );
+      const res = await safeFetch("/api/expenses", {
+        method: "POST",
+        body: JSON.stringify({
+          ...formData,
+          amount: parseFloat(formData.amount),
+          currency,
+          date: new Date(formData.date + "T12:00:00").toISOString(),
+        }),
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to register expense");
+      if (!res.ok) {
+        toast.error(res.error || translate("expenses.form.error") || "Error al registrar el gasto");
+        return;
       }
 
       toast.success(translate("expenses.form.success"));
@@ -103,9 +100,8 @@ export function RegisterExpenseModal({
         date: new Date().toISOString().split("T")[0],
         payment_method: "Tarjeta de Crédito",
       });
-    } catch (error) {
-      console.error("Error registering expense:", error);
-      toast.error(translate("expenses.form.error"));
+    } catch {
+      toast.error(translate("expenses.form.error") || "Error al registrar el gasto");
     } finally {
       setLoading(false);
     }

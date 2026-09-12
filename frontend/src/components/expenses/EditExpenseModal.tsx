@@ -1,6 +1,6 @@
 "use client";
 
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { Expense, ExpenseCategory } from "@/types/index";
@@ -94,14 +94,13 @@ export function EditExpenseModal({
     setLoading(true);
 
     try {
-      const url = expense
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/expenses/${expense.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/expenses`;
+      const endpoint = expense
+        ? `/api/expenses/${expense.id}`
+        : `/api/expenses`;
       const method = expense ? "PUT" : "POST";
 
-      const response = await fetch(url, {
+      const res = await safeFetch(endpoint, {
         method,
-        headers: getApiHeaders(),
         body: JSON.stringify({
           ...formData,
           amount: parseFloat(formData.amount),
@@ -110,28 +109,16 @@ export function EditExpenseModal({
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to process expense");
+      if (!res.ok) {
+        toast.error(res.error || translate("expenses.form.error") || "Error al procesar el gasto");
+        return;
       }
 
-      const successMsg = expense
-        ? translate("expenses.form.success") // Or add update specific key if available
-        : translate("expenses.form.success");
-
-      toast.success(successMsg);
+      toast.success(translate("expenses.form.success"));
       onSuccess();
       onClose();
-      // Reset form
-      setFormData({
-        amount: "",
-        category: "Alimentación",
-        description: "",
-        date: new Date().toISOString().split("T")[0],
-        payment_method: "Tarjeta de Crédito",
-      });
-    } catch (error) {
-      console.error("Error registering expense:", error);
-      toast.error(translate("expenses.form.error"));
+    } catch {
+      toast.error(translate("expenses.form.error") || "Error al procesar el gasto");
     } finally {
       setLoading(false);
     }

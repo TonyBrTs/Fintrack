@@ -10,7 +10,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Pencil, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 
@@ -49,24 +49,20 @@ export function ExpenseDetailsSheet({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/expenses/${expense.id}`,
-        {
-          method: "DELETE",
-          headers: getApiHeaders(),
-        },
-      );
+      const res = await safeFetch(`/api/expenses/${expense.id}`, {
+        method: "DELETE",
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to delete expense");
+      if (!res.ok) {
+        toast.error(res.error || translate("expenses.details.deleteError") || "Error al eliminar el gasto");
+        return;
       }
 
       toast.success(translate("expenses.details.deleteSuccess"));
       onSuccess?.();
       onClose();
-    } catch (error) {
-      console.error("Error deleting expense:", error);
-      toast.error(translate("expenses.details.deleteError"));
+    } catch {
+      toast.error(translate("expenses.details.deleteError") || "Error al eliminar el gasto");
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);

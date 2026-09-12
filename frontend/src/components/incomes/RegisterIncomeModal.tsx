@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,22 +62,19 @@ export function RegisterIncomeModal({
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/incomes`,
-        {
-          method: "POST",
-          headers: getApiHeaders(),
-          body: JSON.stringify({
-            ...formData,
-            amount: parseFloat(formData.amount),
-            currency,
-            date: new Date(formData.date + "T12:00:00").toISOString(),
-          }),
-        },
-      );
+      const res = await safeFetch("/api/incomes", {
+        method: "POST",
+        body: JSON.stringify({
+          ...formData,
+          amount: parseFloat(formData.amount),
+          currency,
+          date: new Date(formData.date + "T12:00:00").toISOString(),
+        }),
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to register income");
+      if (!res.ok) {
+        toast.error(res.error || translate("income.form.error") || "Error al registrar el ingreso");
+        return;
       }
 
       toast.success(translate("income.form.success"));
@@ -91,9 +88,8 @@ export function RegisterIncomeModal({
         date: new Date().toISOString().split("T")[0],
         payment_method: "Transferencia",
       });
-    } catch (error) {
-      console.error("Error registering income:", error);
-      toast.error(translate("income.form.error"));
+    } catch {
+      toast.error(translate("income.form.error") || "Error al registrar el ingreso");
     } finally {
       setLoading(false);
     }

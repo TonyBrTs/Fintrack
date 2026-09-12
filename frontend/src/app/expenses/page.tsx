@@ -20,7 +20,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getApiHeaders } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { getApiHeaders, safeFetch } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/index';
 import { motion } from 'framer-motion';
@@ -49,6 +51,7 @@ const categoryColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 
 
 function ExpensesContent() {
   const { currency, currencySymbol, translate } = useSettings();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,34 +77,39 @@ function ExpensesContent() {
   const fetchExpenses = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/expenses`, {
-        headers: getApiHeaders(),
-      });
+      const res = await safeFetch<Expense[]>('/api/expenses');
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch expenses');
+      if (!res.ok) {
+        setError(res.error || 'No se pudieron cargar los gastos. Asegúrate de que el backend esté encendido.');
+        setExpenses([]);
+        return;
       }
-      const data = await response.json();
-      setExpenses(data);
+      setExpenses(Array.isArray(res.data) ? res.data : []);
       setError(null);
-    } catch (err) {
-      console.error('Error fetching expenses:', err);
-      setError('Could not load expenses. Make sure the backend is running.');
+    } catch {
+      setError('No se pudo establecer conexión con el backend.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!user) {
+      setExpenses([]);
+      setLoading(false);
+      return;
+    }
     fetchExpenses();
-  }, []);
+  }, [user]);
+
+  const safeExpenses = useMemo(() => Array.isArray(expenses) ? expenses : [], [expenses]);
 
   const totalMonth = useMemo(() => {
-    return expenses.reduce((acc, curr) => acc + curr.amount, 0);
-  }, [expenses]);
+    return safeExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+  }, [safeExpenses]);
 
   const categoryTotals = useMemo(() => {
-    return expenses.reduce(
+    return safeExpenses.reduce(
       (acc, curr) => {
         acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
         return acc;
@@ -351,8 +359,10 @@ function ExpensesContent() {
 
 export default function GastosPage() {
   return (
-    <Suspense>
-      <ExpensesContent />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense>
+        <ExpensesContent />
+      </Suspense>
+    </ProtectedRoute>
   );
 }

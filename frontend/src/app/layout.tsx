@@ -2,6 +2,8 @@ import { Header } from '@/components/layout/Header';
 import { SubNavbar } from '@/components/layout/SubNavbar';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SettingsProvider } from '@/contexts/SettingsContext';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { ServiceWorkerRegister } from '@/components/layout/ServiceWorkerRegister';
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -53,6 +55,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background min-h-screen transition-colors duration-300`}
       >
         <ThemeProvider
@@ -61,17 +64,20 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SettingsProvider>
-            <div className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-background/80 border-b border-border/60 transition-colors duration-300">
-              <Header />
-              <SubNavbar />
-            </div>
-            <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-12 pt-4 md:pt-6">
-              {children}
-            </main>
-            <Toaster position="bottom-right" richColors />
-            <ServiceWorkerRegister />
-          </SettingsProvider>
+          <AuthProvider>
+            <SettingsProvider>
+              <div className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-background/80 border-b border-border/60 transition-colors duration-300">
+                <Header />
+                <SubNavbar />
+              </div>
+              <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-12 pt-4 md:pt-6">
+                {children}
+              </main>
+              <AuthModal />
+              <Toaster position="bottom-right" richColors />
+              <ServiceWorkerRegister />
+            </SettingsProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

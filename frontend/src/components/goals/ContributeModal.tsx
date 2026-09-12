@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2, DollarSign, Goal as GoalIcon } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getApiHeaders } from "@/lib/api";
+import { getApiHeaders, safeFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { Goal } from "@/types/index";
 import {
@@ -46,20 +46,15 @@ export function ContributeModal({
         current_amount: goal.current_amount + contributeAmount,
       };
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/goals/${goal.id}`,
-        {
-          method: "PUT",
-          headers: getApiHeaders(),
-          body: JSON.stringify(updatedGoal),
-        },
-      );
+      const res = await safeFetch(`/api/goals/${goal.id}`, {
+        method: "PUT",
+        body: JSON.stringify(updatedGoal),
+      });
 
-      if (response.ok) {
+      if (res.ok) {
         // Also record this as an expense to decrease balance and show in recent activity
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/expenses`, {
+        await safeFetch("/api/expenses", {
           method: "POST",
-          headers: getApiHeaders(),
           body: JSON.stringify({
             amount: contributeAmount,
             description: `${translate("goals.contributionToGoal")}: ${goal.name}`,
@@ -75,11 +70,10 @@ export function ContributeModal({
         onClose();
         setAmount("");
       } else {
-        toast.error(translate("goals.contributeError"));
+        toast.error(res.error || translate("goals.contributeError") || "Error al realizar el aporte");
       }
-    } catch (error) {
-      console.error("Error contributing to goal:", error);
-      toast.error(translate("goals.contributeError"));
+    } catch {
+      toast.error(translate("goals.contributeError") || "Error al realizar el aporte");
     } finally {
       setLoading(false);
     }

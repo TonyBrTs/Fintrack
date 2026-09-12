@@ -1,7 +1,7 @@
 'use client';
 
 import { Sheet } from '@/components/ui/Sheet';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Check, Globe, Menu, Moon, Sun, LayoutDashboard, TrendingDown, TrendingUp, Goal } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Check, Globe, Menu, Moon, Sun, LayoutDashboard, TrendingDown, TrendingUp, Goal, LogOut, LogIn, User as UserIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
@@ -36,7 +37,7 @@ export function Header() {
         </div>
       </Link>
 
-      {/* Right side: Icons and Avatar */}
+      {/* Right side: Icons, Auth and Avatar */}
       <div className="flex items-center gap-2 sm:gap-3">
         <DesktopMenu />
         <MobileMenu />
@@ -52,17 +53,27 @@ export function Header() {
 function DesktopMenu() {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, currency, setCurrency, translate } = useSettings();
+  const { user, signOut, openAuthModal } = useAuth();
   const [mounted, setMounted] = useState(false);
 
-  // Prevent hydration mismatch
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
+
+  const isEs = language === 'es';
+
+  const userInitials = user?.email
+    ? user.email.slice(0, 2).toUpperCase()
+    : 'FT';
+
+  const displayName =
+    (user?.user_metadata?.full_name as string) ||
+    user?.email?.split('@')[0] ||
+    'Usuario';
 
   return (
     <div className="hidden md:flex items-center gap-2">
@@ -121,11 +132,42 @@ function DesktopMenu() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Avatar (Desktop Only) */}
-      <Avatar size="lg" className="cursor-pointer hidden md:flex">
-        <AvatarImage src="https://github.com/shadcn.png" alt="TonyBrTs" />
-        <AvatarFallback className="bg-action text-white font-medium text-sm">TA</AvatarFallback>
-      </Avatar>
+      {/* User Profile or Login Button */}
+      {user ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex items-center gap-2 pl-1 cursor-pointer">
+              <Avatar size="lg" className="ring-2 ring-blue-500/30 hover:ring-blue-500/60 transition-all">
+                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-xs">
+                  {userInitials}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-60" align="end">
+            <div className="px-3 py-2">
+              <p className="text-xs font-bold text-foreground truncate">{displayName}</p>
+              <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => signOut()}
+              className="text-rose-500 hover:text-rose-600 cursor-pointer focus:text-rose-600 focus:bg-rose-500/10"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>{isEs ? 'Cerrar Sesión' : 'Sign Out'}</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <button
+          onClick={() => openAuthModal('login')}
+          className="ml-1 inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-xs transition-all cursor-pointer"
+        >
+          <LogIn size={14} />
+          <span>{isEs ? 'Iniciar Sesión' : 'Sign In'}</span>
+        </button>
+      )}
     </div>
   );
 }
@@ -138,13 +180,24 @@ function MobileMenu() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, currency, setCurrency, translate } = useSettings();
+  const { user, signOut, openAuthModal } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
+
+  const isEs = language === 'es';
+
+  const userInitials = user?.email
+    ? user.email.slice(0, 2).toUpperCase()
+    : 'FT';
+
+  const displayName =
+    (user?.user_metadata?.full_name as string) ||
+    user?.email?.split('@')[0] ||
+    (isEs ? 'Invitado' : 'Guest');
 
   const navItems = [
     {
@@ -190,21 +243,52 @@ function MobileMenu() {
       >
         <div className="flex flex-col gap-5 pb-6">
           {/* User Profile Card */}
-          <div className="flex items-center gap-3.5 p-3.5 bg-secondary/50 dark:bg-card/60 border border-border/60 rounded-2xl">
-            <Avatar size="lg" className="ring-2 ring-blue-500/30">
-              <AvatarImage src="https://github.com/shadcn.png" alt="TonyBrTs" />
-              <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm">
-                TA
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-foreground font-bold text-sm truncate">TonyBrTs</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+          {user ? (
+            <div className="flex items-center justify-between p-3.5 bg-secondary/50 dark:bg-card/60 border border-border/60 rounded-2xl">
+              <div className="flex items-center gap-3 min-w-0">
+                <Avatar size="lg" className="ring-2 ring-blue-500/30 shrink-0">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-foreground font-bold text-sm truncate">{displayName}</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                  </div>
+                  <span className="text-muted-foreground text-xs truncate">{user.email}</span>
+                </div>
               </div>
-              <span className="text-muted-foreground text-xs truncate">tony@example.com</span>
+              <button
+                onClick={() => {
+                  signOut();
+                  setIsMenuOpen(false);
+                }}
+                className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer shrink-0"
+                title={isEs ? "Cerrar sesión" : "Sign out"}
+              >
+                <LogOut size={18} />
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-2xl flex flex-col gap-2.5 text-center">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center mx-auto">
+                <UserIcon size={20} />
+              </div>
+              <p className="text-xs font-semibold text-foreground">
+                {isEs ? "Inicia sesión para proteger tus finanzas" : "Sign in to protect your finances"}
+              </p>
+              <button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  openAuthModal('login');
+                }}
+                className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs cursor-pointer"
+              >
+                {isEs ? "Iniciar Sesión" : "Sign In"}
+              </button>
+            </div>
+          )}
 
           {/* Navigation Links */}
           <div className="space-y-1.5">
