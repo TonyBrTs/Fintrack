@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Shield, Tag, AlertTriangle, Loader2 } from "lucide-react";
+import { Trash2, Plus, Shield, Tag, AlertTriangle, Loader2, X } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { Category } from "@/types";
 import { CategoryModal } from "./CategoryModal";
@@ -57,9 +57,12 @@ export function ManageCategoriesModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-[500px] max-w-[calc(100vw-2rem)] max-h-[85dvh] flex flex-col rounded-2xl bg-card border border-border/80 shadow-2xl p-5 sm:p-6">
+        <DialogContent
+          showCloseButton={false}
+          className="sm:max-w-[500px] max-w-[calc(100vw-2rem)] max-h-[85dvh] flex flex-col rounded-2xl bg-card border border-border/80 shadow-2xl p-5 sm:p-6"
+        >
           <DialogHeader className="text-left">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/40">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
                   <Tag size={20} />
@@ -74,16 +77,28 @@ export function ManageCategoriesModal({
                 </div>
               </div>
 
-              <Button
-                onClick={() => setIsCreateOpen(true)}
-                size="sm"
-                className="rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer flex items-center gap-1.5 shadow-sm shrink-0 min-h-[38px] px-3.5"
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-8 h-8 rounded-xl bg-secondary/80 hover:bg-secondary text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                aria-label="Cerrar modal"
               >
-                <Plus size={14} strokeWidth={2.5} />
-                <span>Nueva</span>
-              </Button>
+                <X size={18} />
+              </button>
             </div>
           </DialogHeader>
+
+          {/* Botón destacado para añadir nueva categoría sin superposición */}
+          <div className="pt-2">
+            <Button
+              type="button"
+              onClick={() => setIsCreateOpen(true)}
+              className="w-full rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white cursor-pointer flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 min-h-[44px] transition-all active:scale-[0.98]"
+            >
+              <Plus size={16} strokeWidth={2.5} />
+              <span>Añadir {type === "expense" ? "categoría de gasto" : "fuente de ingreso"}</span>
+            </Button>
+          </div>
 
           <div className="flex-1 overflow-y-auto space-y-5 py-3 pr-1">
             {/* Categorías Personalizadas */}

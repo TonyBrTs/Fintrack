@@ -166,11 +166,11 @@ export function EditExpenseModal({
                 <button
                   type="button"
                   onClick={() => setIsCreateCategoryOpen(true)}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer py-0.5 px-1.5 rounded-lg hover:bg-blue-500/10 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer py-0.5 px-2 rounded-lg hover:bg-blue-500/10 transition-colors"
                   title="Crear nueva categoría"
                 >
                   <Plus size={13} strokeWidth={2.5} />
-                  <span>+ Nueva</span>
+                  <span>Añadir categoría</span>
                 </button>
               </div>
               <Select
@@ -205,7 +205,7 @@ export function EditExpenseModal({
                     >
                       <div className="flex items-center gap-1.5">
                         <Plus size={14} strokeWidth={2.5} />
-                        <span>+ Nueva categoría...</span>
+                        <span>Añadir nueva categoría...</span>
                       </div>
                     </SelectItem>
                   </div>

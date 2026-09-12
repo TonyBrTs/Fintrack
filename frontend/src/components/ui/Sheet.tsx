@@ -54,7 +54,7 @@ export function Sheet({ isOpen, onClose, title, children }: SheetProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 280 }}
-            className="relative z-[101] h-full w-[85%] max-w-sm bg-card/98 dark:bg-slate-950/98 backdrop-blur-2xl border-l border-border/80 shadow-2xl shadow-black/40 flex flex-col p-6 overflow-hidden"
+            className="relative z-[101] h-full w-full sm:w-[450px] sm:max-w-md bg-card/98 dark:bg-slate-950/98 backdrop-blur-2xl border-l border-border/80 shadow-2xl shadow-black/40 flex flex-col p-5 sm:p-6 overflow-hidden"
           >
             {/* Drawer Header */}
             <div className="flex items-center justify-between pb-4 mb-2 border-b border-border/60">

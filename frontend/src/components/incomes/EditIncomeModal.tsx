@@ -156,11 +156,11 @@ export function EditIncomeModal({
                 <button
                   type="button"
                   onClick={() => setIsCreateCategoryOpen(true)}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 cursor-pointer py-0.5 px-1.5 rounded-lg hover:bg-emerald-500/10 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 cursor-pointer py-0.5 px-2 rounded-lg hover:bg-emerald-500/10 transition-colors"
                   title="Crear nueva fuente de ingresos"
                 >
                   <Plus size={13} strokeWidth={2.5} />
-                  <span>+ Nueva</span>
+                  <span>Añadir fuente</span>
                 </button>
               </div>
               <Select
@@ -195,7 +195,7 @@ export function EditIncomeModal({
                     >
                       <div className="flex items-center gap-1.5">
                         <Plus size={14} strokeWidth={2.5} />
-                        <span>+ Nueva fuente...</span>
+                        <span>Añadir nueva fuente...</span>
                       </div>
                     </SelectItem>
                   </div>
