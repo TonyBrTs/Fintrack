@@ -213,11 +213,11 @@ function IncomesContent() {
             {translate('income.description') || 'Gestiona y analiza tus fuentes de capital'}
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <Button
             variant="outline"
             onClick={() => setIsManageCategoriesOpen(true)}
-            className="flex items-center gap-1.5 rounded-xl font-bold text-xs sm:text-sm h-10 px-3.5 border-border/80 hover:bg-secondary cursor-pointer"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl font-bold text-xs sm:text-sm h-10 px-3.5 border-border/80 hover:bg-secondary cursor-pointer"
           >
             <Tag size={15} className="text-emerald-500" />
             <span>Fuentes</span>
@@ -227,10 +227,10 @@ function IncomesContent() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all cursor-pointer h-10"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all cursor-pointer h-10"
           >
             <Plus size={18} strokeWidth={2.5} />
-            {translate('income.register') || 'Registrar Ingreso'}
+            <span className="truncate">{translate('income.register') || 'Registrar Ingreso'}</span>
           </motion.button>
         </div>
       </header>

@@ -214,11 +214,11 @@ function ExpensesContent() {
             {translate('expenses.description') || 'Monitorea y categoriza todos tus egresos'}
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <Button
             variant="outline"
             onClick={() => setIsManageCategoriesOpen(true)}
-            className="flex items-center gap-1.5 rounded-xl font-bold text-xs sm:text-sm h-10 px-3.5 border-border/80 hover:bg-secondary cursor-pointer"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl font-bold text-xs sm:text-sm h-10 px-3.5 border-border/80 hover:bg-secondary cursor-pointer"
           >
             <Tag size={15} className="text-blue-500" />
             <span>Categorías</span>
@@ -228,10 +228,10 @@ function ExpensesContent() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
           >
             <Plus size={18} strokeWidth={2.5} />
-            {translate('expenses.register') || 'Registrar Gasto'}
+            <span className="truncate">{translate('expenses.register') || 'Registrar Gasto'}</span>
           </motion.button>
         </div>
       </header>

@@ -2,7 +2,7 @@
 
 import { safeFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
-import { cn, formatLiveNumber, parseLiveNumber } from "@/lib/utils";
+import { cn, formatLiveNumber, parseLiveNumber, getCategoryColorBg } from "@/lib/utils";
 import type { Expense, ExpenseCategory } from "@/types/index";
 import {
   Dialog,
@@ -159,17 +159,32 @@ export function EditExpenseModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-titles dark:text-foreground">
-                {translate("expenses.form.category")}
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-bold text-titles dark:text-foreground">
+                  {translate("expenses.form.category")}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateCategoryOpen(true)}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer py-0.5 px-1.5 rounded-lg hover:bg-blue-500/10 transition-colors"
+                  title="Crear nueva categoría"
+                >
+                  <Plus size={13} strokeWidth={2.5} />
+                  <span>+ Nueva</span>
+                </button>
+              </div>
               <Select
                 value={formData.category}
-                onValueChange={(value) =>
+                onValueChange={(value) => {
+                  if (value === "__new_category__") {
+                    setIsCreateCategoryOpen(true);
+                    return;
+                  }
                   setFormData({
                     ...formData,
                     category: value as ExpenseCategory,
-                  })
-                }
+                  });
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Seleccionar categoría" />
@@ -178,20 +193,21 @@ export function EditExpenseModal({
                   {categoryList.map((cat) => (
                     <SelectItem key={cat.id} value={cat.name}>
                       <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${cat.is_default ? "bg-slate-400" : "bg-blue-500"}`} />
-                        <span>{cat.name}</span>
+                        <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", getCategoryColorBg(cat.color))} />
+                        <span className="truncate">{cat.name}</span>
                       </div>
                     </SelectItem>
                   ))}
                   <div className="p-1 border-t border-border/40 mt-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsCreateCategoryOpen(true)}
-                      className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer"
+                    <SelectItem
+                      value="__new_category__"
+                      className="text-blue-600 dark:text-blue-400 font-bold focus:bg-blue-500/10 focus:text-blue-600 dark:focus:text-blue-400 cursor-pointer"
                     >
-                      <Plus size={13} />
-                      <span>+ Nueva categoría...</span>
-                    </button>
+                      <div className="flex items-center gap-1.5">
+                        <Plus size={14} strokeWidth={2.5} />
+                        <span>+ Nueva categoría...</span>
+                      </div>
+                    </SelectItem>
                   </div>
                 </SelectContent>
               </Select>

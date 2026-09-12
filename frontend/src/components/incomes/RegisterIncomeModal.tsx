@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn, formatLiveNumber, parseLiveNumber } from "@/lib/utils";
+import { cn, formatLiveNumber, parseLiveNumber, getCategoryColorBg } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -138,14 +138,29 @@ export function RegisterIncomeModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-titles dark:text-foreground">
-                {translate("income.form.source")}
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-bold text-titles dark:text-foreground">
+                  {translate("income.form.source")}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateCategoryOpen(true)}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 cursor-pointer py-0.5 px-1.5 rounded-lg hover:bg-emerald-500/10 transition-colors"
+                  title="Crear nueva fuente de ingresos"
+                >
+                  <Plus size={13} strokeWidth={2.5} />
+                  <span>+ Nueva</span>
+                </button>
+              </div>
               <Select
                 value={formData.source}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, source: value })
-                }
+                onValueChange={(value) => {
+                  if (value === "__new_category__") {
+                    setIsCreateCategoryOpen(true);
+                    return;
+                  }
+                  setFormData({ ...formData, source: value });
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Seleccionar fuente" />
@@ -154,20 +169,21 @@ export function RegisterIncomeModal({
                   {sourceList.map((src) => (
                     <SelectItem key={src.id} value={src.name}>
                       <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${src.is_default ? "bg-slate-400" : "bg-emerald-500"}`} />
-                        <span>{src.name}</span>
+                        <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", getCategoryColorBg(src.color))} />
+                        <span className="truncate">{src.name}</span>
                       </div>
                     </SelectItem>
                   ))}
                   <div className="p-1 border-t border-border/40 mt-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsCreateCategoryOpen(true)}
-                      className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors cursor-pointer"
+                    <SelectItem
+                      value="__new_category__"
+                      className="text-emerald-600 dark:text-emerald-400 font-bold focus:bg-emerald-500/10 focus:text-emerald-600 dark:focus:text-emerald-400 cursor-pointer"
                     >
-                      <Plus size={13} />
-                      <span>+ Nueva categoría...</span>
-                    </button>
+                      <div className="flex items-center gap-1.5">
+                        <Plus size={14} strokeWidth={2.5} />
+                        <span>+ Nueva fuente...</span>
+                      </div>
+                    </SelectItem>
                   </div>
                 </SelectContent>
               </Select>

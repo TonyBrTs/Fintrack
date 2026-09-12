@@ -55,3 +55,28 @@ export function parseLiveNumber(val: string): string {
   return val.replace(/,/g, "");
 }
 
+/**
+ * Returns static Tailwind CSS classes for category color dots and badges.
+ */
+export function getCategoryColorBg(color?: string): string {
+  switch (color?.toLowerCase()) {
+    case "emerald":
+      return "bg-emerald-500";
+    case "purple":
+      return "bg-purple-500";
+    case "amber":
+      return "bg-amber-500";
+    case "rose":
+      return "bg-rose-500";
+    case "cyan":
+      return "bg-cyan-500";
+    case "indigo":
+      return "bg-indigo-500";
+    case "slate":
+      return "bg-slate-500";
+    case "blue":
+    default:
+      return "bg-blue-500";
+  }
+}
+
