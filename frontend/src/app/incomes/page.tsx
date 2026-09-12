@@ -49,7 +49,7 @@ const sourceColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'd
 
 function IncomesContent() {
   const { currency, currencySymbol, translate } = useSettings();
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const searchParams = useSearchParams();
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,14 +78,18 @@ function IncomesContent() {
       const res = await safeFetch<Income[]>('/api/incomes');
 
       if (!res.ok) {
-        setError(res.error || 'No se pudieron cargar los ingresos. Asegúrate de que el backend esté encendido.');
+        if (res.isUnauthorized) {
+          setError('Tu sesión ha expirado o necesitas iniciar sesión.');
+        } else {
+          setError(res.error || 'No fue posible cargar tus ingresos en este momento.');
+        }
         setIncomes([]);
         return;
       }
       setIncomes(Array.isArray(res.data) ? res.data : []);
       setError(null);
     } catch {
-      setError('No se pudo establecer conexión con el backend.');
+      setError('No se pudo establecer conexión. Por favor, intenta nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -155,6 +159,7 @@ function IncomesContent() {
   }
 
   if (error && incomes.length === 0) {
+    const isAuthError = error.toLowerCase().includes('sesión') || error.toLowerCase().includes('iniciar');
     return (
       <main className="max-w-7xl mx-auto px-4 lg:px-20 py-24 flex flex-col items-center justify-center space-y-6 text-center">
         <div className="bg-rose-500/10 p-4 rounded-full">
@@ -162,18 +167,29 @@ function IncomesContent() {
         </div>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-titles dark:text-foreground">
-            {translate('common.errorTitle') || 'Error de conexión'}
+            {isAuthError ? 'Sesión requerida' : (translate('common.errorTitle') || 'Algo no salió como esperábamos')}
           </h2>
           <p className="text-muted-foreground max-w-md mx-auto text-sm">
-            {translate('common.errorMessage') || 'No se pudieron cargar los ingresos del servidor.'}
+            {error || translate('common.errorMessage') || 'No fue posible cargar la información en este momento.'}
           </p>
         </div>
-        <button
-          onClick={() => fetchIncomes()}
-          className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all"
-        >
-          {translate('common.retry') || 'Reintentar'}
-        </button>
+        <div className="flex items-center gap-3">
+          {isAuthError ? (
+            <button
+              onClick={() => openAuthModal('login')}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
+            >
+              Iniciar Sesión
+            </button>
+          ) : (
+            <button
+              onClick={() => fetchIncomes()}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
+            >
+              {translate('common.retry') || 'Reintentar'}
+            </button>
+          )}
+        </div>
       </main>
     );
   }

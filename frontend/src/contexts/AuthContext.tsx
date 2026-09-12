@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
 interface AuthContextType {
   user: User | null;
@@ -53,6 +54,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    let lastToastTime = 0;
+
+    const handleUnauthorized = () => {
+      const now = Date.now();
+      if (now - lastToastTime > 3000) {
+        lastToastTime = now;
+        toast.error("Tu sesión ha expirado o necesitas iniciar sesión.", {
+          id: "auth-session-expired",
+        });
+      }
+      setAuthModalMode("login");
+      setIsAuthModalOpen(true);
+    };
+
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+    return () => {
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
     };
   }, []);
 

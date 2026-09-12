@@ -42,7 +42,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "Missing Authorization header",
+				"error": "No autorizado. Por favor, inicia sesión para continuar.",
+				"code":  "UNAUTHORIZED",
 			})
 			return
 		}
@@ -50,7 +51,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid Authorization header format. Expected 'Bearer <token>'",
+				"error": "Formato de autenticación no válido. Por favor, inicia sesión de nuevo.",
+				"code":  "INVALID_AUTH_FORMAT",
 			})
 			return
 		}
@@ -58,7 +60,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		tokenString := strings.TrimSpace(parts[1])
 		if tokenString == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "Empty bearer token",
+				"error": "Token de autenticación ausente. Inicia sesión para continuar.",
+				"code":  "EMPTY_TOKEN",
 			})
 			return
 		}
@@ -126,7 +129,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		resp, err := client.Do(req)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{
-				"error": "Authentication service unavailable",
+				"error": "El servicio de autenticación no está disponible en este momento. Intenta de nuevo.",
+				"code":  "AUTH_UNAVAILABLE",
 			})
 			return
 		}
@@ -134,7 +138,8 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if resp.StatusCode != http.StatusOK {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid or expired token",
+				"error": "Tu sesión ha expirado o no es válida. Por favor, inicia sesión nuevamente.",
+				"code":  "SESSION_EXPIRED",
 			})
 			return
 		}
@@ -145,7 +150,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 		if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil || userInfo.ID == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "Failed to parse authenticated user information",
+				"error": "No fue posible verificar tus credenciales. Por favor, inicia sesión nuevamente.",
+				"code":  "AUTH_VERIFICATION_FAILED",
 			})
 			return
 		}

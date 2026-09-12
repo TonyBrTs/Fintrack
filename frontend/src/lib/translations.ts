@@ -118,8 +118,8 @@ export const translations = {
     },
     common: {
       loading: "Loading your finances...",
-      errorTitle: "Oops! Something went wrong",
-      errorMessage: "Could not load data. Make sure the backend is running.",
+      errorTitle: "Something went wrong",
+      errorMessage: "Could not load your financial data right now. Please try again.",
       retry: "Retry",
       summaryDescription: "Visualize your financial health at a glance.",
       allTime: "All Time",
@@ -291,9 +291,9 @@ export const translations = {
     },
     common: {
       loading: "Cargando tus finanzas...",
-      errorTitle: "¡Ups! Algo salió mal",
+      errorTitle: "Algo no salió como esperábamos",
       errorMessage:
-        "No se pudieron cargar los datos. Asegúrate de que el servidor esté funcionando.",
+        "No fue posible cargar tu información en este momento. Por favor intenta de nuevo.",
       retry: "Reintentar",
       summaryDescription: "Visualiza tu salud financiera de un vistazo.",
       allTime: "Todo el tiempo",

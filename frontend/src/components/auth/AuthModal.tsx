@@ -30,6 +30,30 @@ export function AuthModal() {
 
   const isEs = language === "es";
 
+  const getFriendlyAuthError = (msg?: string): string => {
+    if (!msg) return isEs ? "Ocurrió un inconveniente. Por favor, intenta de nuevo." : "An error occurred. Please try again.";
+    const lower = msg.toLowerCase();
+    if (lower.includes("invalid login credentials") || lower.includes("invalid credentials")) {
+      return isEs ? "Correo electrónico o contraseña incorrectos." : "Invalid email or password.";
+    }
+    if (lower.includes("user already registered") || lower.includes("already registered")) {
+      return isEs ? "Ya existe una cuenta registrada con este correo electrónico." : "An account already exists with this email.";
+    }
+    if (lower.includes("email not confirmed")) {
+      return isEs ? "Por favor confirma tu correo electrónico antes de ingresar." : "Please confirm your email address before signing in.";
+    }
+    if (lower.includes("password should be at least") || lower.includes("least 6 characters")) {
+      return isEs ? "La contraseña debe tener al menos 6 caracteres." : "Password must be at least 6 characters.";
+    }
+    if (lower.includes("rate limit") || lower.includes("too many requests")) {
+      return isEs ? "Demasiados intentos en poco tiempo. Por favor espera un momento." : "Too many attempts. Please wait a moment.";
+    }
+    if (lower.includes("network") || lower.includes("failed to fetch")) {
+      return isEs ? "No se pudo conectar con el servicio. Verifica tu conexión a internet." : "Could not reach authentication service.";
+    }
+    return msg;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -48,7 +72,7 @@ export function AuthModal() {
       if (isLogin) {
         const { error } = await signInWithEmail(email, password);
         if (error) {
-          toast.error(error.message || (isEs ? "Error al iniciar sesión" : "Failed to sign in"));
+          toast.error(getFriendlyAuthError(error.message));
         } else {
           toast.success(isEs ? "¡Bienvenido de nuevo!" : "Welcome back!");
           setEmail("");
@@ -57,7 +81,7 @@ export function AuthModal() {
       } else {
         const { error, needsEmailConfirmation } = await signUpWithEmail(email, password, fullName);
         if (error) {
-          toast.error(error.message || (isEs ? "Error al registrarse" : "Failed to create account"));
+          toast.error(getFriendlyAuthError(error.message));
         } else if (needsEmailConfirmation) {
           toast.info(
             isEs

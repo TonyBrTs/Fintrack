@@ -66,6 +66,7 @@ export interface SafeFetchResult<T = unknown> {
   status: number;
   data: T | null;
   error?: string;
+  isUnauthorized?: boolean;
 }
 
 /**
@@ -95,15 +96,56 @@ export async function safeFetch<T = unknown>(
     clearTimeout(timer);
 
     if (!res.ok) {
-      let errorMsg = `Error del servidor (${res.status})`;
+      let rawError = "";
+      let errorCode = "";
       try {
         const body = await res.json();
-        if (body?.error) errorMsg = body.error;
-        else if (body?.message) errorMsg = body.message;
+        if (body?.error) rawError = String(body.error);
+        else if (body?.message) rawError = String(body.message);
+        if (body?.code) errorCode = String(body.code);
       } catch {
         // Body is not JSON
       }
-      return { ok: false, status: res.status, data: null, error: errorMsg };
+
+      let errorMsg = "No se pudo completar la operación. Por favor, intenta nuevamente.";
+      let isUnauthorized = false;
+
+      if (res.status === 401) {
+        isUnauthorized = true;
+        errorMsg = "Tu sesión ha expirado o necesitas iniciar sesión para continuar.";
+        currentToken = null;
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("auth:unauthorized", {
+              detail: { endpoint, status: 401, error: errorMsg, code: errorCode },
+            })
+          );
+        }
+      } else if (res.status === 403) {
+        isUnauthorized = true;
+        errorMsg = "No tienes permisos para realizar esta acción.";
+      } else if (res.status === 404) {
+        errorMsg = "El registro o recurso solicitado no fue encontrado.";
+      } else if (res.status >= 500) {
+        errorMsg = "El servicio experimentó un inconveniente temporal. Por favor, intenta de nuevo en unos momentos.";
+      } else if (
+        rawError &&
+        !rawError.toLowerCase().includes("database") &&
+        !rawError.toLowerCase().includes("sql") &&
+        !rawError.toLowerCase().includes("syntax") &&
+        !rawError.toLowerCase().includes("pq:")
+      ) {
+        errorMsg = rawError;
+      }
+
+      return {
+        ok: false,
+        status: res.status,
+        data: null,
+        error: errorMsg,
+        isUnauthorized,
+      };
     }
 
     const data = await res.json();
@@ -112,8 +154,8 @@ export async function safeFetch<T = unknown>(
     clearTimeout(timer);
     const isTimeout = err instanceof Error && err.name === "AbortError";
     const errorMsg = isTimeout
-      ? "Tiempo de espera agotado al contactar con el backend."
-      : "No se pudo establecer conexión con el backend. Asegúrate de que el servidor esté encendido.";
+      ? "El servicio tardó demasiado en responder. Por favor, intenta de nuevo en unos momentos."
+      : "No se pudo comunicar con el servicio en este momento. Por favor, verifica tu conexión a internet o intenta nuevamente.";
     return { ok: false, status: 0, data: null, error: errorMsg };
   }
 }
