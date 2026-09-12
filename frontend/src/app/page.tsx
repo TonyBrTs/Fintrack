@@ -323,6 +323,7 @@ export default function SummaryPage() {
           <FinancialInsights
             expenses={filteredExpenses}
             incomes={filteredIncomes}
+            goals={currentGoals}
           />
         </div>
       </div>

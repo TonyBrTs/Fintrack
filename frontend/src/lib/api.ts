@@ -78,9 +78,12 @@ export async function safeFetch<T = unknown>(
   options: RequestInit & { timeoutMs?: number } = {}
 ): Promise<SafeFetchResult<T>> {
   const baseUrl = getApiBaseUrl();
+  const isInternalRoute = endpoint.startsWith("/api/ai");
   const url = endpoint.startsWith("http")
     ? endpoint
-    : `${baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+    : isInternalRoute
+      ? endpoint
+      : `${baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
   const timeout = options.timeoutMs ?? 7000;
   const controller = new AbortController();
