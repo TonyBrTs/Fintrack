@@ -6,7 +6,9 @@ import {
   Calendar,
   CloudOff,
   RefreshCw,
+  FileText,
 } from "lucide-react";
+import { ReportModal } from "@/components/reports/ReportModal";
 import {
   KPIBalanceIcon,
   NavIncomeIcon,
@@ -36,14 +38,16 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 export default function SummaryPage() {
-  const { currencySymbol, translate } = useSettings();
+  const { currencySymbol, translate, language } = useSettings();
   const { user } = useAuth();
+  const isEs = language === "es";
   const [expenses, setExpenses] = useState<Expense[] | null>(null);
   const [incomes, setIncomes] = useState<Income[] | null>(null);
   const [goals, setGoals] = useState<Goal[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [retryAttempt, setRetryAttempt] = useState(0);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
@@ -239,9 +243,9 @@ export default function SummaryPage() {
               {translate("common.summaryDescription") || "Vista general de tus finanzas y métricas clave"}
             </p>
           </div>
-        <div className="sm:w-auto w-full">
+        <div className="sm:w-auto w-full flex items-center gap-2.5">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border-border/80 shadow-xs font-medium text-sm">
+            <SelectTrigger className="w-full sm:w-[210px] h-10 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border-border/80 shadow-xs font-medium text-sm">
               <div className="flex items-center gap-2 truncate">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <SelectValue placeholder="Seleccionar mes" />
@@ -255,6 +259,17 @@ export default function SummaryPage() {
               ))}
             </SelectContent>
           </Select>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setIsReportModalOpen(true)}
+            className="flex items-center justify-center gap-2 px-3.5 sm:px-4 h-10 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer whitespace-nowrap shrink-0"
+            title={isEs ? "Generar reporte PDF" : "Generate PDF report"}
+          >
+            <FileText size={16} />
+            <span>{isEs ? "Reporte PDF" : "PDF Report"}</span>
+          </motion.button>
         </div>
       </div>
 
@@ -393,6 +408,16 @@ export default function SummaryPage() {
           />
         </div>
       </div>
+
+      {/* Financial Report Modal */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        expenses={expenses || []}
+        incomes={incomes || []}
+        goals={goals || []}
+        initialMonth={selectedMonth}
+      />
       </div>
     </ProtectedRoute>
   );
