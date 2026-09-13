@@ -76,19 +76,19 @@ function DesktopMenu() {
       <button
         onClick={toggleTheme}
         aria-label="Toggle theme"
-        className="p-2.5 rounded-xl text-secondary-titles hover:text-action hover:bg-secondary border border-transparent hover:border-border transition-all cursor-pointer"
+        className="p-2.5 rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition-all cursor-pointer shadow-xs"
       >
-        {mounted && theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+        {mounted && theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
       </button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button 
             aria-label="Settings"
-            className="p-2.5 rounded-xl text-secondary-titles hover:text-action hover:bg-secondary border border-transparent hover:border-border transition-all cursor-pointer outline-none flex items-center gap-1.5"
+            className="px-3 py-2 rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition-all cursor-pointer outline-none flex items-center gap-1.5 shadow-xs"
           >
-            <Globe size={19} />
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{language}</span>
+            <Globe size={18} />
+            <span className="text-xs font-bold uppercase tracking-wider">{language}</span>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end">
@@ -222,7 +222,7 @@ function MobileMenu() {
     <>
       <button
         onClick={() => setIsMenuOpen(true)}
-        className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-secondary/80 hover:bg-secondary border border-border/60 text-foreground transition-all active:scale-95 cursor-pointer shadow-xs"
+        className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:border-slate-700 text-slate-800 dark:text-slate-100 transition-all active:scale-95 cursor-pointer shadow-xs"
         aria-label="Abrir menú"
       >
         <Menu size={20} />

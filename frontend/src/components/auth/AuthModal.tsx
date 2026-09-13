@@ -309,16 +309,16 @@ export function AuthModal() {
       open={isAuthModalOpen}
       onOpenChange={(open) => !open && closeAuthModal()}
     >
-      <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border border-white/10 bg-[#0d1322]/95 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_0_1px_rgba(99,102,241,0.18)_inset] rounded-3xl text-slate-100">
+      <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#0d1322]/95 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.05)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_0_1px_rgba(99,102,241,0.18)_inset] rounded-3xl text-slate-900 dark:text-slate-100">
         <div className="pt-8 pb-2 px-6 sm:px-8 flex flex-col items-center text-center relative">
           {/* Top Brand Logo Emblem */}
           <div className="relative group mb-4">
-            <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 rounded-3xl blur-lg opacity-60 group-hover:opacity-85 transition duration-300" />
-            <BrandLogo size={60} className="relative shadow-2xl rounded-2xl" priority />
+            <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 rounded-3xl blur-lg opacity-40 dark:opacity-60 group-hover:opacity-75 transition duration-300" />
+            <BrandLogo size={60} className="relative shadow-xl dark:shadow-2xl rounded-2xl" priority />
           </div>
 
           <DialogHeader className="text-center p-0">
-            <DialogTitle className="text-2xl font-bold text-white tracking-tight">
+            <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
               {isLogin && (isEs ? "Inicia Sesión en FinTrack" : "Sign In to FinTrack")}
               {isRegister &&
                 (isEs ? "Crea tu Cuenta" : "Create Your Account")}
@@ -327,7 +327,7 @@ export function AuthModal() {
               {isUpdatePassword &&
                 (isEs ? "Nueva Contraseña" : "Create New Password")}
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-400 mt-1">
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {isLogin &&
                 (isEs
                   ? "Mantén tus finanzas en orden y controla tus ingresos y gastos"
@@ -362,13 +362,13 @@ export function AuthModal() {
                 className="space-y-1.5"
               >
                 <label
-                  className="block text-xs font-medium text-slate-300"
+                  className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
                   htmlFor="fullname"
                 >
                   {isEs ? "Nombre completo" : "Full Name"}
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                     <User size={16} />
                   </div>
                   <input
@@ -378,7 +378,7 @@ export function AuthModal() {
                     placeholder={isEs ? "ej. Alejandro Morales" : "e.g. John Doe"}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-[#0c1220]/90 border border-slate-700/70 text-slate-100 placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 focus:border-indigo-500/80 focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
                   />
                 </div>
               </motion.div>
@@ -389,13 +389,13 @@ export function AuthModal() {
           {!isUpdatePassword && (
             <div className="space-y-1.5">
               <label
-                className="block text-xs font-medium text-slate-300"
+                className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
                 htmlFor="email"
               >
                 {isEs ? "Correo Electrónico" : "Email Address"}
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                   <Mail size={16} />
                 </div>
                 <input
@@ -405,7 +405,7 @@ export function AuthModal() {
                   placeholder="nombre@correo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#0c1220]/90 border border-slate-700/70 text-slate-100 placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 focus:border-indigo-500/80 focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
                 />
               </div>
             </div>
@@ -416,7 +416,7 @@ export function AuthModal() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label
-                  className="block text-xs font-medium text-slate-300"
+                  className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
                   htmlFor="password"
                 >
                   {isUpdatePassword
@@ -431,16 +431,16 @@ export function AuthModal() {
                   <button
                     type="button"
                     onClick={() => openAuthModal("forgot_password")}
-                    className="text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium cursor-pointer"
+                    className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors font-semibold cursor-pointer"
                   >
                     {isEs ? "¿Olvidaste tu contraseña?" : "Forgot password?"}
                   </button>
                 )}
               </div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                   <svg
-                    className="w-4 h-4 text-slate-500"
+                    className="w-4 h-4 text-slate-400 dark:text-slate-500"
                     fill="none"
                     stroke="currentColor"
                     strokeLinecap="round"
@@ -465,13 +465,13 @@ export function AuthModal() {
                   }
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#0c1220]/90 border border-slate-700/70 text-slate-100 placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 focus:border-indigo-500/80 focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 transition cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -485,25 +485,25 @@ export function AuthModal() {
                       className={`h-1 flex-1 rounded-full ${
                         passwordStrength.level >= 1
                           ? passwordStrength.barColor
-                          : "bg-slate-700"
+                          : "bg-slate-200 dark:bg-slate-700"
                       }`}
                     />
                     <div
                       className={`h-1 flex-1 rounded-full ${
                         passwordStrength.level >= 2
                           ? passwordStrength.barColor
-                          : "bg-slate-700"
+                          : "bg-slate-200 dark:bg-slate-700"
                       }`}
                     />
                     <div
                       className={`h-1 flex-1 rounded-full ${
                         passwordStrength.level >= 3
                           ? passwordStrength.barColor
-                          : "bg-slate-700"
+                          : "bg-slate-200 dark:bg-slate-700"
                       }`}
                     />
                   </div>
-                  <div className="flex justify-between items-center text-[10px] text-slate-400">
+                  <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400">
                     <span>
                       {isEs ? "Fortaleza de contraseña" : "Password strength"}
                     </span>
@@ -520,15 +520,15 @@ export function AuthModal() {
           {(isRegister || isUpdatePassword) && (
             <div className="space-y-1.5">
               <label
-                className="block text-xs font-medium text-slate-300"
+                className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
                 htmlFor="confirm-password"
               >
                 {isEs ? "Confirmar contraseña" : "Confirm Password"}
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                   <svg
-                    className="w-4 h-4 text-slate-500"
+                    className="w-4 h-4 text-slate-400 dark:text-slate-500"
                     fill="none"
                     stroke="currentColor"
                     strokeLinecap="round"
@@ -549,7 +549,7 @@ export function AuthModal() {
                   }
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[#0c1220]/90 border border-slate-700/70 text-slate-100 placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 focus:border-indigo-500/80 focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
                 />
                 <button
                   type="button"
@@ -559,7 +559,7 @@ export function AuthModal() {
                       ? "Ocultar confirmación"
                       : "Ver confirmación"
                   }
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 transition cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition cursor-pointer"
                 >
                   {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -571,7 +571,7 @@ export function AuthModal() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 group relative flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.99] transition-all duration-200 shadow-[0_0_22px_rgba(99,102,241,0.45)] cursor-pointer disabled:opacity-60"
+            className="w-full mt-2 group relative flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-700 hover:to-indigo-600 active:scale-[0.99] transition-all duration-200 shadow-md shadow-blue-500/20 dark:shadow-[0_0_22px_rgba(99,102,241,0.45)] cursor-pointer disabled:opacity-60"
           >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
             <span>
@@ -593,10 +593,10 @@ export function AuthModal() {
                   aria-hidden="true"
                   className="absolute inset-0 flex items-center"
                 >
-                  <div className="w-full border-t border-slate-800" />
+                  <div className="w-full border-t border-slate-200 dark:border-slate-800" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-[#0d1323] text-slate-500 uppercase tracking-wider text-[11px] rounded-full border border-slate-800/80">
+                  <span className="px-3 bg-white text-slate-500 border border-slate-200 dark:bg-[#0d1323] dark:text-slate-400 dark:border-slate-800/80 uppercase tracking-wider text-[11px] rounded-full shadow-2xs">
                     {isLogin
                       ? isEs
                         ? "o continúa con"
@@ -613,7 +613,7 @@ export function AuthModal() {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading || isGoogleLoading}
-                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-700/60 bg-[#12192a]/80 hover:bg-slate-800 hover:border-slate-600 text-xs font-semibold text-slate-200 transition-all w-full cursor-pointer active:scale-[0.99] disabled:opacity-50 shadow-sm"
+                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700/60 bg-white hover:bg-slate-50 dark:bg-[#12192a]/80 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all w-full cursor-pointer active:scale-[0.99] disabled:opacity-50 shadow-xs hover:border-slate-400 dark:hover:border-slate-600"
               >
                 {isGoogleLoading ? (
                   <Loader2 size={16} className="animate-spin text-blue-500 mr-1" />
@@ -644,8 +644,8 @@ export function AuthModal() {
 
           {/* Bottom Switch Links */}
           {(isLogin || isRegister) && (
-            <div className="text-center mt-6 pt-4 border-t border-slate-800/80">
-              <p className="text-xs text-slate-400">
+            <div className="text-center mt-6 pt-4 border-t border-slate-200 dark:border-slate-800/80">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 {isLogin
                   ? isEs
                     ? "¿No tienes cuenta todavía?"
@@ -656,7 +656,7 @@ export function AuthModal() {
                 <button
                   type="button"
                   onClick={() => openAuthModal(isLogin ? "register" : "login")}
-                  className="font-semibold text-blue-400 hover:text-indigo-400 transition-colors ml-1 cursor-pointer"
+                  className="font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-indigo-400 transition-colors ml-1 cursor-pointer"
                 >
                   {isLogin
                     ? isEs
@@ -675,7 +675,7 @@ export function AuthModal() {
               <button
                 type="button"
                 onClick={() => openAuthModal("login")}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white cursor-pointer transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer transition-colors"
               >
                 <ArrowLeft size={13} />
                 <span>
@@ -686,9 +686,9 @@ export function AuthModal() {
           )}
 
           {/* Security Status Badge from Stitch */}
-          <div className="pt-2 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
+          <div className="pt-2 flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
             <svg
-              className="w-3 h-3 text-emerald-400"
+              className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
               fill="none"
               stroke="currentColor"
               strokeLinecap="round"

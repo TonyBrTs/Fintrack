@@ -49,7 +49,7 @@ export function BottomNavbar() {
   return (
     <nav
       aria-label="Navegación móvil inferior"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-border/70 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-1.5 px-3 shadow-2xl shadow-black/25 transition-all"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#090d16]/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800/80 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-1.5 px-3 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] dark:shadow-2xl transition-all"
     >
       <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map((item) => {
@@ -61,14 +61,14 @@ export function BottomNavbar() {
               href={item.href}
               className={`relative flex flex-col items-center justify-center flex-1 py-1.5 px-1 rounded-2xl transition-all select-none cursor-pointer min-h-[50px] active:scale-95 ${
                 isActive
-                  ? "text-foreground font-bold"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "text-slate-900 dark:text-foreground font-bold"
+                  : "text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
               }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeBottomNavTab"
-                  className="absolute inset-0 bg-secondary/80 dark:bg-secondary/40 rounded-2xl border border-border/60 shadow-xs"
+                  className="absolute inset-0 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/90 dark:border-slate-700/60 shadow-xs"
                   transition={{ type: "spring", stiffness: 450, damping: 32 }}
                 />
               )}
@@ -82,13 +82,13 @@ export function BottomNavbar() {
                     size={20}
                     strokeWidth={isActive ? 2.5 : 2}
                     className={`transition-colors ${
-                      isActive ? item.activeColor : "text-muted-foreground"
+                      isActive ? item.activeColor : "text-slate-400 dark:text-muted-foreground"
                     }`}
                   />
                 </div>
                 <span
                   className={`text-[11px] leading-tight tracking-tight transition-colors ${
-                    isActive ? "font-bold text-foreground" : "font-medium text-muted-foreground"
+                    isActive ? "font-bold text-slate-900 dark:text-foreground" : "font-medium text-slate-500 dark:text-muted-foreground"
                   }`}
                 >
                   {item.name}

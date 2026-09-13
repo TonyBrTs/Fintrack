@@ -67,7 +67,7 @@ export function AppShell({ children }: AppShellProps) {
   // Authenticated: Render full application with Header, SubNavbar, Main Content and BottomNavbar
   return (
     <>
-      <div className="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-background/80 border-b border-border/60 transition-colors duration-300">
+      <div className="sticky top-0 z-40 backdrop-blur-xl bg-white/95 dark:bg-[#090d16]/90 border-b border-slate-200 dark:border-slate-800/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-none transition-all duration-300">
         <Header />
         <SubNavbar />
       </div>
