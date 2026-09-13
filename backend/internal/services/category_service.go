@@ -73,7 +73,7 @@ func (s *categoryService) CreateCategory(ctx context.Context, userID, name, catT
 
 	catType = strings.ToLower(strings.TrimSpace(catType))
 	if catType != "expense" && catType != "income" {
-		catType = "expense"
+		return nil, errors.New("el tipo de categoría debe ser 'expense' o 'income'")
 	}
 
 	color = strings.TrimSpace(color)

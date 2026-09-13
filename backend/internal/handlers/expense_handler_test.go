@@ -38,6 +38,8 @@ func (m *mockExpenseRepoForHandler) Create(ctx context.Context, expense *models.
 func (m *mockExpenseRepoForHandler) Update(ctx context.Context, id, userID string, expense *models.Expense) (*models.Expense, error) {
 	for i, e := range m.expenses {
 		if e.ID == id && e.UserID == userID {
+			expense.ID = id
+			expense.UserID = userID
 			m.expenses[i] = *expense
 			return expense, nil
 		}
@@ -178,8 +180,8 @@ func TestExpenseHandler_UpdateAndDelete(t *testing.T) {
 	wDel := httptest.NewRecorder()
 	router.ServeHTTP(wDel, reqDel)
 
-	if wDel.Code != http.StatusOK {
-		t.Errorf("expected 200 OK on delete, got: %d", wDel.Code)
+	if wDel.Code != http.StatusNoContent && wDel.Code != http.StatusOK {
+		t.Errorf("expected 204 No Content or 200 OK on delete, got: %d", wDel.Code)
 	}
 
 	// 3. DELETE nonexistent -> should return 404

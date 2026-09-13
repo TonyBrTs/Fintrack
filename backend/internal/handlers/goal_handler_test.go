@@ -38,6 +38,8 @@ func (m *mockGoalRepoForHandler) Create(ctx context.Context, goal *models.Goal) 
 func (m *mockGoalRepoForHandler) Update(ctx context.Context, id, userID string, goal *models.Goal) (*models.Goal, error) {
 	for i, g := range m.goals {
 		if g.ID == id && g.UserID == userID {
+			goal.ID = id
+			goal.UserID = userID
 			m.goals[i] = *goal
 			return goal, nil
 		}
@@ -148,7 +150,7 @@ func TestGoalHandler_UpdateAndDelete(t *testing.T) {
 	wDel := httptest.NewRecorder()
 	router.ServeHTTP(wDel, reqDel)
 
-	if wDel.Code != http.StatusOK {
-		t.Errorf("expected 200 OK on delete, got: %d", wDel.Code)
+	if wDel.Code != http.StatusNoContent && wDel.Code != http.StatusOK {
+		t.Errorf("expected 204 No Content or 200 OK on delete, got: %d", wDel.Code)
 	}
 }

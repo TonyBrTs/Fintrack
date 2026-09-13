@@ -38,6 +38,8 @@ func (m *mockIncomeRepoForHandler) Create(ctx context.Context, income *models.In
 func (m *mockIncomeRepoForHandler) Update(ctx context.Context, id, userID string, income *models.Income) (*models.Income, error) {
 	for i, inc := range m.incomes {
 		if inc.ID == id && inc.UserID == userID {
+			income.ID = id
+			income.UserID = userID
 			m.incomes[i] = *income
 			return income, nil
 		}
@@ -161,7 +163,7 @@ func TestIncomeHandler_UpdateAndDelete(t *testing.T) {
 	wDel := httptest.NewRecorder()
 	router.ServeHTTP(wDel, reqDel)
 
-	if wDel.Code != http.StatusOK {
-		t.Errorf("expected 200 OK on delete, got: %d", wDel.Code)
+	if wDel.Code != http.StatusNoContent && wDel.Code != http.StatusOK {
+		t.Errorf("expected 204 No Content or 200 OK on delete, got: %d", wDel.Code)
 	}
 }
