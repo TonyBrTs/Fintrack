@@ -68,5 +68,5 @@ func (h *IncomeHandler) DeleteIncome(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Income not found or unauthorized"})
 		return
 	}
-	ctx.JSON(http.StatusNoContent, nil)
+	ctx.JSON(http.StatusOK, gin.H{"message": "Income deleted successfully"})
 }

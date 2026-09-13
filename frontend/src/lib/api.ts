@@ -151,7 +151,20 @@ export async function safeFetch<T = unknown>(
       };
     }
 
-    const data = await res.json();
+    if (res.status === 204) {
+      return { ok: true, status: 204, data: null as T };
+    }
+
+    let data = null;
+    const text = await res.text();
+    if (text && text.trim().length > 0) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // Non-JSON response body
+      }
+    }
+
     return { ok: true, status: res.status, data: data as T };
   } catch (err: unknown) {
     clearTimeout(timer);

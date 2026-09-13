@@ -1,7 +1,8 @@
-const CACHE_NAME = 'fintrack-v2';
+const CACHE_NAME = 'fintrack-v3';
 const STATIC_ASSETS = [
   '/',
   '/manifest.webmanifest',
+  '/favicon.ico',
   '/icon.png',
   '/icon-192.png',
   '/icon-512.png',

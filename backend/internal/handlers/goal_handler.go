@@ -68,5 +68,5 @@ func (h *GoalHandler) DeleteGoal(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Goal not found or unauthorized"})
 		return
 	}
-	ctx.JSON(http.StatusNoContent, nil)
+	ctx.JSON(http.StatusOK, gin.H{"message": "Goal deleted successfully"})
 }

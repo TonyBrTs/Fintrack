@@ -68,5 +68,5 @@ func (h *ExpenseHandler) DeleteExpense(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Expense not found or unauthorized"})
 		return
 	}
-	ctx.JSON(http.StatusNoContent, nil)
+	ctx.JSON(http.StatusOK, gin.H{"message": "Expense deleted successfully"})
 }
