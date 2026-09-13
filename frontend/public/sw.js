@@ -1,9 +1,12 @@
-const CACHE_NAME = 'fintrack-v1';
+const CACHE_NAME = 'fintrack-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.webmanifest',
+  '/icon.png',
   '/icon-192.png',
   '/icon-512.png',
+  '/icon-maskable.png',
+  '/logo.png',
 ];
 
 self.addEventListener('install', (event) => {
