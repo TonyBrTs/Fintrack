@@ -74,7 +74,6 @@ func TestGoalService_CreateWithDefaultDeadline(t *testing.T) {
 		Name:          "Fondo de Emergencia",
 		TargetAmount:  5000.00,
 		CurrentAmount: 1500.00,
-		Currency:      "USD",
 		Category:      "Ahorro",
 	}
 

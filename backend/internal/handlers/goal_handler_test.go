@@ -92,7 +92,6 @@ func TestGoalHandler_GetAndCreate(t *testing.T) {
 		"name":           "Viaje a Japón",
 		"target_amount":  6000.00,
 		"current_amount": 1000.00,
-		"currency":       "USD",
 		"category":       "Viajes",
 		"deadline":       time.Now().AddDate(1, 0, 0).Format(time.RFC3339),
 	}

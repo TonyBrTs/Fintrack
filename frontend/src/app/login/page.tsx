@@ -327,16 +327,11 @@ export default function LoginPage() {
       <header className="w-full relative z-20 border-b border-slate-800/60 bg-[#080c15]/80 backdrop-blur-md px-4 lg:px-8 py-3.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Brand Logo */}
-          <div className="flex items-center gap-2.5">
-            <BrandLogo size={32} />
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-lg tracking-tight text-white">
-                Fin<span className="text-blue-400">Track</span>
-              </span>
-              <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                PRO
-              </span>
-            </div>
+          <div className="flex items-center gap-2">
+            <BrandLogo variant="full" size={28} priority />
+            <span className="text-[9px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              PRO
+            </span>
           </div>
 
           {/* Right Header Controls: Theme & Language */}

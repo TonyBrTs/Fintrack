@@ -56,7 +56,13 @@ func (m *mockIncomeRepoForHandler) Delete(ctx context.Context, id, userID string
 }
 
 func (m *mockIncomeRepoForHandler) CountBySource(ctx context.Context, userID, source string) (int64, error) {
-	return 0, nil
+	var count int64
+	for _, inc := range m.incomes {
+		if inc.UserID == userID && inc.Source == source {
+			count++
+		}
+	}
+	return count, nil
 }
 
 func (m *mockIncomeRepoForHandler) ReassignSource(ctx context.Context, userID, oldSource, newSource string) error {

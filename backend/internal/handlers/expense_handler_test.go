@@ -56,7 +56,13 @@ func (m *mockExpenseRepoForHandler) Delete(ctx context.Context, id, userID strin
 }
 
 func (m *mockExpenseRepoForHandler) CountByCategory(ctx context.Context, userID, category string) (int64, error) {
-	return 0, nil
+	var count int64
+	for _, e := range m.expenses {
+		if e.UserID == userID && e.Category == category {
+			count++
+		}
+	}
+	return count, nil
 }
 
 func (m *mockExpenseRepoForHandler) ReassignCategory(ctx context.Context, userID, oldCat, newCat string) error {

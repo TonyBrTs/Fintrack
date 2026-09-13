@@ -29,17 +29,12 @@ import { usePathname } from 'next/navigation';
 export function Header() {
   return (
     <header className="h-16 px-4 md:px-10 lg:px-20 flex items-center justify-between transition-colors duration-300">
-      {/* Logo with modern custom mark */}
-      <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group cursor-pointer">
-        <BrandLogo size={36} className="group-hover:scale-105 transition-transform" />
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-black tracking-tight text-titles dark:text-foreground">
-            Fin<span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Track</span>
-          </span>
-          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-action/10 text-action dark:bg-blue-500/15 dark:text-blue-400 border border-action/20 dark:border-blue-500/20">
-            PRO
-          </span>
-        </div>
+      {/* Logo with theme-aware full mark */}
+      <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer">
+        <BrandLogo variant="full" size={32} priority className="group-hover:opacity-90 transition-opacity" />
+        <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-action/10 text-action dark:bg-blue-500/15 dark:text-blue-400 border border-action/20 dark:border-blue-500/20">
+          PRO
+        </span>
       </Link>
 
       {/* Right side: Icons, Auth and Avatar */}
