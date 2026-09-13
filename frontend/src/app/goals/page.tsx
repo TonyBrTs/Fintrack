@@ -9,7 +9,8 @@ import { Goal } from "@/types/index";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { RegisterGoalModal } from "@/components/goals/RegisterGoalModal";
 import { KPICard } from "@/components/ui/KPICard";
-import { Plus, Loader2, Target, Trophy, Sparkles } from "lucide-react";
+import { NavGoalsIcon } from "@/components/ui/AppIcons";
+import { Plus, Loader2, Trophy, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
 import { toast } from "sonner";
@@ -159,7 +160,7 @@ export default function GoalsPage() {
             amount={`${currencySymbol}${formatCurrency(totalSaved)}`}
             trend={`de ${currencySymbol}${formatCurrency(totalTarget)}`}
             trendType="up"
-            icon={<Target size={22} className="text-action dark:text-blue-400" />}
+            icon={<NavGoalsIcon size={22} className="text-action dark:text-blue-400" />}
           />
           <KPICard
             title="Progreso Global"
@@ -182,7 +183,7 @@ export default function GoalsPage() {
       {goals.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-card/60 dark:bg-card/40 rounded-3xl border border-dashed border-border/80">
           <div className="p-5 bg-action/10 rounded-2xl text-action">
-            <Target size={48} />
+            <NavGoalsIcon size={48} />
           </div>
           <div className="space-y-1">
             <h3 className="text-lg font-bold text-titles dark:text-foreground">

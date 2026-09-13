@@ -97,12 +97,12 @@ export function NavExpensesIcon({
   const source = resolveSource(iconSource, sourceOverride, styleOverride);
 
   if (source === "tabler") {
-    return <IconReceipt size={size} stroke={strokeWidth} className={className} />;
+    return <IconTrendingDown size={size} stroke={strokeWidth} className={className} />;
   }
   if (source === "lucide") {
     return <TrendingDown size={size} strokeWidth={strokeWidth} className={className} />;
   }
-  return <Receipt weight="duotone" size={size} className={className} />;
+  return <TrendDown weight="duotone" size={size} className={className} />;
 }
 
 export function NavIncomeIcon({

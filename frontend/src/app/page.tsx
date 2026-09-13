@@ -210,7 +210,7 @@ export default function SummaryPage() {
   if (loading || (expenses === null && !fetchError)) {
     return (
       <ProtectedRoute>
-        <DashboardLoadingState retryAttempt={retryAttempt} />
+        <DashboardLoadingState />
       </ProtectedRoute>
     );
   }
@@ -398,7 +398,7 @@ export default function SummaryPage() {
   );
 }
 
-function DashboardLoadingState({ retryAttempt }: { retryAttempt: number }) {
+function DashboardLoadingState() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto py-2">
       {/* Floating Modern Synchronization Hero Card */}
@@ -414,29 +414,15 @@ function DashboardLoadingState({ retryAttempt }: { retryAttempt: number }) {
           <div className="space-y-2 flex-1 min-w-0">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                {retryAttempt === 0
-                  ? "Sincronizando tus finanzas..."
-                  : "Conectando con el servidor seguro..."}
+                Cargando tus finanzas...
               </h2>
-              {retryAttempt > 0 && (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 animate-pulse">
-                  Reintento {retryAttempt} de 4
-                </span>
-              )}
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl">
-              {retryAttempt === 0
-                ? "Obteniendo tus gastos, ingresos y metas en tiempo real con cifrado seguro."
-                : "El servidor en la nube se está activando desde reposo. Esto puede tardar unos segundos..."}
+              Obteniendo tus gastos, ingresos y metas en tiempo real con cifrado seguro.
             </p>
             {/* Animated Progress Bar */}
             <div className="w-full max-w-md h-2 bg-slate-200/80 dark:bg-slate-800/80 rounded-full overflow-hidden mt-3">
-              <div
-                className="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-400 rounded-full transition-all duration-700 animate-pulse"
-                style={{
-                  width: retryAttempt === 0 ? "40%" : `${Math.min(90, 40 + retryAttempt * 15)}%`,
-                }}
-              />
+              <div className="h-full w-full bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-400 rounded-full animate-pulse" />
             </div>
           </div>
         </div>
