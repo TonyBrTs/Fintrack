@@ -329,9 +329,6 @@ export default function LoginPage() {
           {/* Brand Logo */}
           <div className="flex items-center gap-2">
             <BrandLogo variant="full" size={28} priority />
-            <span className="text-[9px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-              PRO
-            </span>
           </div>
 
           {/* Right Header Controls: Theme & Language */}
@@ -784,7 +781,7 @@ export default function LoginPage() {
 
       {/* Minimal Footer */}
       <footer className="w-full relative z-10 py-4 text-center text-slate-500 dark:text-slate-500 text-xs">
-        <p>© 2026 FinTrack PRO. {isEs ? "Todos los derechos reservados." : "All rights reserved."}</p>
+        <p>© 2026 FinTrack. {isEs ? "Todos los derechos reservados." : "All rights reserved."}</p>
       </footer>
     </div>
   );

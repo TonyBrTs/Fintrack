@@ -32,9 +32,6 @@ export function Header() {
       {/* Logo with theme-aware full mark */}
       <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer">
         <BrandLogo variant="full" size={32} priority className="group-hover:opacity-90 transition-opacity" />
-        <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-action/10 text-action dark:bg-blue-500/15 dark:text-blue-400 border border-action/20 dark:border-blue-500/20">
-          PRO
-        </span>
       </Link>
 
       {/* Right side: Icons, Auth and Avatar */}
