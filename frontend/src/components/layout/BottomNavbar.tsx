@@ -6,6 +6,7 @@ import {
   NavIncomeIcon,
   NavGoalsIcon,
 } from "@/components/ui/AppIcons";
+import { FileText } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -43,6 +44,13 @@ export function BottomNavbar() {
       icon: NavGoalsIcon,
       activeColor: "text-purple-500",
       badgeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+    },
+    {
+      name: translate("nav.reports") || "Reportes",
+      href: "/reports",
+      icon: FileText,
+      activeColor: "text-indigo-500",
+      badgeColor: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
     },
   ];
 

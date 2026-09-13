@@ -6,6 +6,7 @@ import {
   NavIncomeIcon,
   NavGoalsIcon,
 } from "@/components/ui/AppIcons";
+import { FileText } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -39,6 +40,12 @@ export function SubNavbar() {
       href: "/goals",
       icon: NavGoalsIcon,
       activeColor: "text-purple-500",
+    },
+    {
+      name: translate("nav.reports") || "Reportes",
+      href: "/reports",
+      icon: FileText,
+      activeColor: "text-indigo-500",
     },
   ];
 

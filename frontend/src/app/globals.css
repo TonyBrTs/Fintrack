@@ -235,10 +235,58 @@ body {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm 12mm;
+    margin: 0 !important;
   }
 
-  /* Hide everything on page when printing except the printable report */
+  /* Force light color-scheme to prevent Chrome from rendering dark page margins */
+  :root,
+  html,
+  html.dark,
+  body,
+  body.dark,
+  .dark {
+    color-scheme: light !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    --background: #ffffff !important;
+    --foreground: #0f172a !important;
+  }
+
+  /* Remove all drop shadows, glows, and filters in print */
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* Force background colors and borders to render in PDF output */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide app navigation, shell, and screen controls */
+  header,
+  nav,
+  aside,
+  footer,
+  .print-hide {
+    display: none !important;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Hide everything in body, show ONLY #printable-financial-report */
   body * {
     visibility: hidden !important;
   }
@@ -249,19 +297,19 @@ body {
   }
 
   #printable-financial-report {
-    position: fixed !important;
+    position: absolute !important;
     left: 0 !important;
     top: 0 !important;
     width: 100% !important;
-    height: auto !important;
+    max-width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 14mm 16mm !important;
     background: #ffffff !important;
+    background-color: #ffffff !important;
     color: #0f172a !important;
-    z-index: 999999 !important;
     box-shadow: none !important;
     border: none !important;
-    overflow: visible !important;
+    border-radius: 0 !important;
   }
 
   .report-section {
@@ -269,8 +317,9 @@ body {
     page-break-inside: avoid !important;
   }
 
-  .print-hide {
-    display: none !important;
+  tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }
 

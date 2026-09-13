@@ -8,7 +8,6 @@ import {
   RefreshCw,
   FileText,
 } from "lucide-react";
-import { ReportModal } from "@/components/reports/ReportModal";
 import {
   KPIBalanceIcon,
   NavIncomeIcon,
@@ -47,8 +46,6 @@ export default function SummaryPage() {
   const [loading, setLoading] = useState(true);
   const [retryAttempt, setRetryAttempt] = useState(0);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -260,16 +257,14 @@ export default function SummaryPage() {
             </SelectContent>
           </Select>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setIsReportModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-3.5 sm:px-4 h-10 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer whitespace-nowrap shrink-0"
-            title={isEs ? "Generar reporte PDF" : "Generate PDF report"}
+          <Link
+            href="/reports"
+            className="flex items-center justify-center gap-2 px-3.5 sm:px-4 h-10 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95"
+            title={isEs ? "Generar reporte y estado de cuenta" : "Financial statements and reports"}
           >
             <FileText size={16} />
             <span>{isEs ? "Reporte PDF" : "PDF Report"}</span>
-          </motion.button>
+          </Link>
         </div>
       </div>
 
@@ -408,16 +403,6 @@ export default function SummaryPage() {
           />
         </div>
       </div>
-
-      {/* Financial Report Modal */}
-      <ReportModal
-        isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
-        expenses={expenses || []}
-        incomes={incomes || []}
-        goals={goals || []}
-        initialMonth={selectedMonth}
-      />
       </div>
     </ProtectedRoute>
   );

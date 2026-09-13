@@ -67,14 +67,16 @@ export function AppShell({ children }: AppShellProps) {
   // Authenticated: Render full application with Header, SubNavbar, Main Content and BottomNavbar
   return (
     <>
-      <div className="sticky top-0 z-40 backdrop-blur-xl bg-white/95 dark:bg-[#090d16]/90 border-b border-slate-200 dark:border-slate-800/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-none transition-all duration-300">
+      <div className="print:hidden sticky top-0 z-40 backdrop-blur-xl bg-white/95 dark:bg-[#090d16]/90 border-b border-slate-200 dark:border-slate-800/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-none transition-all duration-300">
         <Header />
         <SubNavbar />
       </div>
-      <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-24 md:pb-12 pt-3 md:pt-6">
+      <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-24 md:pb-12 pt-3 md:pt-6 print:p-0 print:m-0 print:max-w-none print:w-full">
         {children}
       </main>
-      <BottomNavbar />
+      <div className="print:hidden">
+        <BottomNavbar />
+      </div>
     </>
   );
 }
