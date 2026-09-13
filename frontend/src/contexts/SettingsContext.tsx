@@ -69,14 +69,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         if (fallback !== undefined) return fallback;
         if (path.startsWith("categories.")) return path.slice("categories.".length);
         if (path.startsWith("sources.")) return path.slice("sources.".length);
-        return path;
+        return "";
       }
     }
     if (typeof result === "string") return result;
     if (fallback !== undefined) return fallback;
     if (path.startsWith("categories.")) return path.slice("categories.".length);
     if (path.startsWith("sources.")) return path.slice("sources.".length);
-    return path;
+    return "";
   };
 
   const value = {

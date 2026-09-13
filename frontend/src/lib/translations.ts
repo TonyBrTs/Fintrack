@@ -117,6 +117,8 @@ export const translations = {
       delete: "Delete",
     },
     common: {
+      transactions: "transactions",
+      noData: "No data for this period",
       loading: "Loading your finances...",
       errorTitle: "Something went wrong",
       errorMessage: "Could not load your financial data right now. Please try again.",
@@ -290,6 +292,8 @@ export const translations = {
       delete: "Eliminar",
     },
     common: {
+      transactions: "transacciones",
+      noData: "No hay datos para este período",
       loading: "Cargando tus finanzas...",
       errorTitle: "Algo no salió como esperábamos",
       errorMessage:
