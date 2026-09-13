@@ -128,31 +128,66 @@ export async function POST(req: Request) {
       sourceTotals[i.source] = (sourceTotals[i.source] || 0) + (Number(i.amount) || 0);
     });
 
-    // Goals summary
+    const now = new Date();
+    const todayStr = now.toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Goals summary with pre-calculated accurate financial metrics
     const goalsSummary = goals.map((g) => {
       const target = Number(g.target_amount) || 1;
       const current = Number(g.current_amount) || 0;
+      const remaining = Math.max(0, target - current);
       const progress = Math.min(100, Math.round((current / target) * 100));
-      return `${g.name}: ${current}/${target} (${progress}%) con límite ${g.deadline ? new Date(g.deadline).toLocaleDateString("es") : "sin fecha"}`;
+
+      if (remaining <= 0) {
+        return `"${g.name}": ¡Completada al 100%! (${currencySymbol}${current.toLocaleString("es")}/${currencySymbol}${target.toLocaleString("es")})`;
+      }
+
+      if (!g.deadline) {
+        return `"${g.name}": ${currencySymbol}${current.toLocaleString("es")}/${currencySymbol}${target.toLocaleString("es")} (${progress}%). Falta ${currencySymbol}${remaining.toLocaleString("es")} (sin fecha límite definida).`;
+      }
+
+      const deadlineDate = new Date(g.deadline);
+      const diffMs = deadlineDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.max(0.5, diffDays / 30.44);
+      const formattedDeadline = deadlineDate.toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+
+      if (diffDays <= 0) {
+        return `"${g.name}": Plazo vencido (${formattedDeadline}). Falta ${currencySymbol}${remaining.toLocaleString("es")}.`;
+      }
+
+      const monthlyNeeded = Math.ceil(remaining / diffMonths);
+
+      return `"${g.name}": Falta ${currencySymbol}${remaining.toLocaleString("es")} de ${currencySymbol}${target.toLocaleString("es")} (${progress}% completado). Fecha límite: ${formattedDeadline} (quedan ~${diffDays} días / ~${diffMonths.toFixed(1)} meses). Cuota mensual exacta requerida: ${currencySymbol}${monthlyNeeded.toLocaleString("es")}/mes`;
     });
 
     const prompt = `
 Eres un asesor financiero personal experto, empático, altamente motivador y estratégico.
-Analiza con rigor los siguientes datos financieros reales del usuario y proporciona entre 3 y 4 consejos clave:
+Analiza con rigor matemático los siguientes datos financieros reales del usuario y proporciona entre 3 y 4 consejos clave:
 
-Moneda: ${currency} (${currencySymbol})
+- Fecha actual de hoy: ${todayStr}
+- Moneda: ${currency} (${currencySymbol})
 - Total Ingresos: ${currencySymbol}${totalIncomes.toLocaleString("es")}
 - Total Gastos: ${currencySymbol}${totalExpenses.toLocaleString("es")}
 - Tasa de Ahorro: ${savingsRate.toFixed(1)}%
 - Desglose de Gastos por Categoría: ${JSON.stringify(categoryTotals)}
 - Desglose de Ingresos por Fuente: ${JSON.stringify(sourceTotals)}
-- Metas de Ahorro Activas: ${goalsSummary.length > 0 ? goalsSummary.join("; ") : "Ninguna meta registrada"}
+- Metas de Ahorro Activas (con métricas y cuotas precalculadas):
+  ${goalsSummary.length > 0 ? goalsSummary.join("\n  ") : "Ninguna meta registrada"}
 - Cantidad de transacciones registradas: ${expenses.length} gastos y ${incomes.length} ingresos
 
 Directrices de análisis:
 1. Evalúa el balance general y la tasa de ahorro (comparando con la regla 50/30/20).
 2. Si alguna categoría de gasto absorbe una parte excesiva del presupuesto, da una recomendación práctica y realista para optimizarla.
-3. Si hay metas financieras, da una sugerencia concreta de aporte periódico para cumplirlas a tiempo.
+3. Si hay metas financieras, da una sugerencia concreta para cumplirlas. IMPORTANTE: utiliza ÚNICAMENTE las cuotas mensuales y plazos ya calculados en los datos ("Cuota mensual exacta requerida: ..."). No inventes cálculos ni dividas montos de forma que contradiga los meses restantes reales.
 4. Si los gastos superan los ingresos o el ahorro es bajo, señala con empatía dónde recortar gastos hormiga o prescindibles.
 5. Mantén los títulos concisos (3 a 5 palabras) y las descripciones en máximo 2 oraciones directas, amigables y accionables en español.
 
