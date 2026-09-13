@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Check, Globe, Menu, Moon, Sun, LayoutDashboard, TrendingDown, TrendingUp, Goal, LogOut, LogIn, User as UserIcon } from 'lucide-react';
+import { Check, Globe, Menu, Moon, Sun, LogOut, LogIn, User as UserIcon } from 'lucide-react';
+import { NavSummaryIcon, NavExpensesIcon, NavIncomeIcon, NavGoalsIcon } from '@/components/ui/AppIcons';
 import { useTheme } from 'next-themes';
 import { useState, useSyncExternalStore } from 'react';
 
@@ -192,25 +193,25 @@ function MobileMenu() {
     {
       name: translate('nav.summary') || 'Resumen',
       href: '/',
-      icon: <LayoutDashboard size={18} className="text-blue-500" />,
+      icon: <NavSummaryIcon size={18} className="text-blue-500" />,
       bg: 'bg-blue-500/10 dark:bg-blue-500/20',
     },
     {
       name: translate('nav.expenses') || 'Gastos',
       href: '/expenses',
-      icon: <TrendingDown size={18} className="text-rose-500" />,
+      icon: <NavExpensesIcon size={18} className="text-rose-500" />,
       bg: 'bg-rose-500/10 dark:bg-rose-500/20',
     },
     {
       name: translate('nav.income') || 'Ingresos',
       href: '/incomes',
-      icon: <TrendingUp size={18} className="text-emerald-500" />,
+      icon: <NavIncomeIcon size={18} className="text-emerald-500" />,
       bg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
     },
     {
       name: translate('nav.goals') || 'Metas',
       href: '/goals',
-      icon: <Goal size={18} className="text-purple-500" />,
+      icon: <NavGoalsIcon size={18} className="text-purple-500" />,
       bg: 'bg-purple-500/10 dark:bg-purple-500/20',
     },
   ];

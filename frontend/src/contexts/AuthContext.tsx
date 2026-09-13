@@ -95,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithEmail = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
 
@@ -110,12 +110,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUpWithEmail = async (email: string, password: string, fullName?: string) => {
+    const trimmedEmail = email.trim();
+    const trimmedName = fullName?.trim() || "";
+
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: trimmedEmail,
       password,
       options: {
         data: {
-          full_name: fullName || "",
+          full_name: trimmedName,
         },
       },
     });
@@ -126,6 +129,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(data.session.access_token);
       setIsAuthModalOpen(false);
       return { error: null, needsEmailConfirmation: false };
+    }
+
+    // Supabase masks duplicate user registrations when email confirmation is enabled by returning empty identities:
+    if (!error && data.user && (!data.user.identities || data.user.identities.length === 0)) {
+      return {
+        error: { message: "User already registered", name: "AuthApiError", status: 400 } as unknown as AuthError,
+        needsEmailConfirmation: false,
+      };
     }
 
     // If confirmation email is enabled in Supabase
@@ -166,7 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ? `${window.location.origin}/`
         : undefined;
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: redirectUrl,
     });
     return { error };

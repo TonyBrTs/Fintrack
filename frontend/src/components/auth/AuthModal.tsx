@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, type AuthModalMode } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { toast } from "sonner";
 import {
@@ -19,9 +19,17 @@ import {
   Loader2,
   ArrowLeft,
   ArrowRight,
+  AlertCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BrandLogo } from "@/components/layout/BrandLogo";
+
+interface FormErrors {
+  fullName?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
 
 export function AuthModal() {
   const {
@@ -46,6 +54,7 @@ export function AuthModal() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const isLogin = authModalMode === "login";
   const isRegister = authModalMode === "register";
@@ -102,34 +111,76 @@ export function AuthModal() {
     }
   }, [setAuthModalMode, openAuthModal]);
 
-  const getFriendlyAuthError = (msg?: string): string => {
-    if (!msg)
-      return isEs
-        ? "Ocurrió un inconveniente. Por favor, intenta de nuevo."
-        : "An error occurred. Please try again.";
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  const getFriendlyAuthError = (
+    msg?: string
+  ): { message: string; field?: keyof FormErrors } => {
+    if (!msg) {
+      return {
+        message: isEs
+          ? "Ocurrió un inconveniente. Por favor, intenta de nuevo."
+          : "An error occurred. Please try again.",
+      };
+    }
     const lower = msg.toLowerCase();
     if (
       lower.includes("invalid login credentials") ||
-      lower.includes("invalid credentials")
+      lower.includes("invalid credentials") ||
+      lower.includes("invalid username or password")
     ) {
-      return isEs
-        ? "Correo electrónico o contraseña incorrectos."
-        : "Invalid email or password.";
+      return {
+        message: isEs
+          ? "Correo electrónico o contraseña incorrectos."
+          : "Invalid email or password.",
+        field: "password",
+      };
     }
     if (
       lower.includes("user already registered") ||
-      lower.includes("already registered")
+      lower.includes("already registered") ||
+      lower.includes("user_already_exists") ||
+      lower.includes("already in use")
     ) {
-      return isEs
-        ? "Ya existe una cuenta registrada con este correo electrónico."
-        : "An account already exists with this email.";
+      return {
+        message: isEs
+          ? "Ya existe una cuenta registrada con este correo electrónico. Inicia sesión o recupera tu contraseña."
+          : "An account already exists with this email. Please sign in or reset your password.",
+        field: "email",
+      };
     }
     if (lower.includes("email not confirmed")) {
-      return isEs
-        ? "Por favor confirma tu correo electrónico antes de ingresar."
-        : "Please confirm your email address before signing in.";
+      return {
+        message: isEs
+          ? "Por favor confirma tu correo electrónico antes de ingresar."
+          : "Please confirm your email address before signing in.",
+        field: "email",
+      };
     }
-    return msg;
+    if (
+      lower.includes("password should be at least") ||
+      lower.includes("password is too short")
+    ) {
+      return {
+        message: isEs
+          ? "La contraseña debe tener al menos 6 caracteres."
+          : "Password must be at least 6 characters.",
+        field: "password",
+      };
+    }
+    if (lower.includes("rate limit") || lower.includes("too many requests")) {
+      return {
+        message: isEs
+          ? "Demasiados intentos seguidos. Por favor espera unos momentos antes de reintentar."
+          : "Too many requests. Please wait a moment before trying again.",
+      };
+    }
+    return { message: msg };
+  };
+
+  const switchModalMode = (mode: AuthModalMode) => {
+    setErrors({});
+    setAuthModalMode(mode);
   };
 
   const handleGoogleSignIn = async () => {
@@ -137,7 +188,7 @@ export function AuthModal() {
     try {
       const { error } = await signInWithGoogle();
       if (error) {
-        toast.error(getFriendlyAuthError(error.message));
+        toast.error(getFriendlyAuthError(error.message).message);
       }
     } catch {
       toast.error(
@@ -152,37 +203,43 @@ export function AuthModal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: FormErrors = {};
 
-    // Mode: Update Password
+    // 1. Validation for Update Password
     if (isUpdatePassword) {
       if (!password) {
-        toast.error(
-          isEs
-            ? "Por favor escribe una nueva contraseña"
-            : "Please enter a new password"
-        );
-        return;
+        newErrors.password = isEs
+          ? "Por favor escribe una nueva contraseña."
+          : "Please enter a new password.";
+      } else if (password.length < 6) {
+        newErrors.password = isEs
+          ? "La contraseña debe tener al menos 6 caracteres."
+          : "Password must be at least 6 characters.";
       }
-      if (password.length < 6) {
-        toast.error(
-          isEs
-            ? "La contraseña debe tener al menos 6 caracteres"
-            : "Password must be at least 6 characters"
-        );
-        return;
+      if (!confirmPassword) {
+        newErrors.confirmPassword = isEs
+          ? "Por favor confirma tu nueva contraseña."
+          : "Please confirm your new password.";
+      } else if (password !== confirmPassword) {
+        newErrors.confirmPassword = isEs
+          ? "Las contraseñas no coinciden."
+          : "Passwords do not match.";
       }
-      if (password !== confirmPassword) {
-        toast.error(
-          isEs ? "Las contraseñas no coinciden" : "Passwords do not match"
-        );
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        toast.error(Object.values(newErrors)[0]);
         return;
       }
 
+      setErrors({});
       setIsLoading(true);
       try {
         const { error } = await updatePassword(password);
         if (error) {
-          toast.error(getFriendlyAuthError(error.message));
+          const friendly = getFriendlyAuthError(error.message);
+          toast.error(friendly.message);
+          if (friendly.field) setErrors({ [friendly.field]: friendly.message });
         } else {
           toast.success(
             isEs
@@ -199,29 +256,40 @@ export function AuthModal() {
       return;
     }
 
-    // Mode: Forgot Password
+    // 2. Validation for Forgot Password
     if (isForgotPassword) {
-      if (!email) {
-        toast.error(
-          isEs
-            ? "Por favor ingresa tu correo electrónico"
-            : "Please enter your email address"
-        );
+      const trimmedEmail = email.trim();
+      if (!trimmedEmail) {
+        newErrors.email = isEs
+          ? "Por favor ingresa tu correo electrónico."
+          : "Please enter your email address.";
+      } else if (!EMAIL_REGEX.test(trimmedEmail)) {
+        newErrors.email = isEs
+          ? "Ingresa un correo electrónico válido."
+          : "Please enter a valid email address.";
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        toast.error(Object.values(newErrors)[0]);
         return;
       }
 
+      setErrors({});
       setIsLoading(true);
       try {
-        const { error } = await resetPasswordForEmail(email);
+        const { error } = await resetPasswordForEmail(trimmedEmail);
         if (error) {
-          toast.error(getFriendlyAuthError(error.message));
+          const friendly = getFriendlyAuthError(error.message);
+          toast.error(friendly.message);
+          if (friendly.field) setErrors({ [friendly.field]: friendly.message });
         } else {
           toast.success(
             isEs
               ? "¡Enlace enviado! Revisa tu correo para restablecer tu contraseña."
               : "Recovery link sent! Check your inbox to reset your password."
           );
-          openAuthModal("login");
+          switchModalMode("login");
         }
       } finally {
         setIsLoading(false);
@@ -229,39 +297,71 @@ export function AuthModal() {
       return;
     }
 
-    // Mode: Login / Register
-    if (!email || !password) {
-      toast.error(
-        isEs
-          ? "Por favor completa todos los campos"
-          : "Please complete all fields"
-      );
+    // 3. Validation for Login & Register
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      newErrors.email = isEs
+        ? "Por favor ingresa tu correo electrónico."
+        : "Please enter your email address.";
+    } else if (!EMAIL_REGEX.test(trimmedEmail)) {
+      newErrors.email = isEs
+        ? "Ingresa un formato de correo válido (ej: usuario@correo.com)."
+        : "Please enter a valid email format (e.g. user@domain.com).";
+    }
+
+    if (isRegister) {
+      const trimmedName = fullName.trim();
+      if (!trimmedName) {
+        newErrors.fullName = isEs
+          ? "Por favor ingresa tu nombre completo."
+          : "Please enter your full name.";
+      } else if (trimmedName.length < 2) {
+        newErrors.fullName = isEs
+          ? "El nombre debe tener al menos 2 caracteres."
+          : "Name must be at least 2 characters.";
+      }
+    }
+
+    if (!password) {
+      newErrors.password = isEs
+        ? "Por favor ingresa tu contraseña."
+        : "Please enter your password.";
+    } else if (password.length < 6) {
+      newErrors.password = isEs
+        ? "La contraseña debe tener al menos 6 caracteres."
+        : "Password must be at least 6 characters.";
+    }
+
+    if (isRegister) {
+      if (!confirmPassword) {
+        newErrors.confirmPassword = isEs
+          ? "Por favor confirma tu contraseña."
+          : "Please confirm your password.";
+      } else if (password !== confirmPassword) {
+        newErrors.confirmPassword = isEs
+          ? "Las contraseñas no coinciden."
+          : "Passwords do not match.";
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error(Object.values(newErrors)[0]);
       return;
     }
 
-    if (password.length < 6) {
-      toast.error(
-        isEs
-          ? "La contraseña debe tener al menos 6 caracteres"
-          : "Password must be at least 6 characters"
-      );
-      return;
-    }
-
-    if (isRegister && password !== confirmPassword) {
-      toast.error(
-        isEs ? "Las contraseñas no coinciden" : "Passwords do not match"
-      );
-      return;
-    }
-
+    setErrors({});
     setIsLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await signInWithEmail(email, password);
+        const { error } = await signInWithEmail(trimmedEmail, password);
         if (error) {
-          toast.error(getFriendlyAuthError(error.message));
+          const friendly = getFriendlyAuthError(error.message);
+          toast.error(friendly.message);
+          if (friendly.field) {
+            setErrors({ [friendly.field]: friendly.message });
+          }
         } else {
           toast.success(isEs ? "¡Bienvenido de nuevo!" : "Welcome back!");
           setEmail("");
@@ -270,12 +370,16 @@ export function AuthModal() {
         }
       } else {
         const { error, needsEmailConfirmation } = await signUpWithEmail(
-          email,
+          trimmedEmail,
           password,
           fullName
         );
         if (error) {
-          toast.error(getFriendlyAuthError(error.message));
+          const friendly = getFriendlyAuthError(error.message);
+          toast.error(friendly.message);
+          if (friendly.field) {
+            setErrors({ [friendly.field]: friendly.message });
+          }
         } else if (needsEmailConfirmation) {
           toast.info(
             isEs
@@ -309,7 +413,7 @@ export function AuthModal() {
       open={isAuthModalOpen}
       onOpenChange={(open) => !open && closeAuthModal()}
     >
-      <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#0d1322]/95 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.05)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_0_1px_rgba(99,102,241,0.18)_inset] rounded-3xl text-slate-900 dark:text-slate-100">
+      <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#0b101d] shadow-2xl dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] rounded-3xl text-slate-900 dark:text-slate-100">
         <div className="pt-8 pb-2 px-6 sm:px-8 flex flex-col items-center text-center relative">
           {/* Top Brand Logo Emblem */}
           <div className="relative group mb-4">
@@ -374,13 +478,26 @@ export function AuthModal() {
                   <input
                     id="fullname"
                     type="text"
-                    required
                     placeholder={isEs ? "ej. Alejandro Morales" : "e.g. John Doe"}
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
+                    onChange={(e) => {
+                      setFullName(e.target.value);
+                      if (errors.fullName)
+                        setErrors((prev) => ({ ...prev, fullName: undefined }));
+                    }}
+                    className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 shadow-2xs ${
+                      errors.fullName
+                        ? "border-rose-500 dark:border-rose-500/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                        : "border-slate-300/80 dark:border-slate-800 focus:bg-white dark:focus:bg-[#060911] focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/25"
+                    }`}
                   />
                 </div>
+                {errors.fullName && (
+                  <p className="text-[11px] font-medium text-rose-500 dark:text-rose-400 flex items-center gap-1 mt-1">
+                    <AlertCircle size={12} className="shrink-0" />
+                    <span>{errors.fullName}</span>
+                  </p>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -401,13 +518,26 @@ export function AuthModal() {
                 <input
                   id="email"
                   type="email"
-                  required
                   placeholder="nombre@correo.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email)
+                      setErrors((prev) => ({ ...prev, email: undefined }));
+                  }}
+                  className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 shadow-2xs ${
+                    errors.email
+                      ? "border-rose-500 dark:border-rose-500/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                      : "border-slate-300/80 dark:border-slate-800 focus:bg-white dark:focus:bg-[#060911] focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/25"
+                  }`}
                 />
               </div>
+              {errors.email && (
+                <p className="text-[11px] font-medium text-rose-500 dark:text-rose-400 flex items-center gap-1 mt-1">
+                  <AlertCircle size={12} className="shrink-0" />
+                  <span>{errors.email}</span>
+                </p>
+              )}
             </div>
           )}
 
@@ -430,7 +560,7 @@ export function AuthModal() {
                 {isLogin && (
                   <button
                     type="button"
-                    onClick={() => openAuthModal("forgot_password")}
+                    onClick={() => switchModalMode("forgot_password")}
                     className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors font-semibold cursor-pointer"
                   >
                     {isEs ? "¿Olvidaste tu contraseña?" : "Forgot password?"}
@@ -455,17 +585,24 @@ export function AuthModal() {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  required
                   placeholder={
                     isRegister
                       ? isEs
-                        ? "Mínimo 8 caracteres..."
-                        : "Minimum 8 characters..."
+                        ? "Mínimo 6 caracteres..."
+                        : "Minimum 6 characters..."
                       : "••••••••••••"
                   }
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password)
+                      setErrors((prev) => ({ ...prev, password: undefined }));
+                  }}
+                  className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 shadow-2xs ${
+                    errors.password
+                      ? "border-rose-500 dark:border-rose-500/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                      : "border-slate-300/80 dark:border-slate-800 focus:bg-white dark:focus:bg-[#060911] focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/25"
+                  }`}
                 />
                 <button
                   type="button"
@@ -476,6 +613,12 @@ export function AuthModal() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-[11px] font-medium text-rose-500 dark:text-rose-400 flex items-center gap-1 mt-1">
+                  <AlertCircle size={12} className="shrink-0" />
+                  <span>{errors.password}</span>
+                </p>
+              )}
 
               {/* Password Strength Indicator (Register mode) */}
               {isRegister && password && (
@@ -543,13 +686,23 @@ export function AuthModal() {
                 <input
                   id="confirm-password"
                   type={showConfirmPassword ? "text" : "password"}
-                  required
                   placeholder={
                     isEs ? "Repite tu contraseña..." : "Repeat your password..."
                   }
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (errors.confirmPassword)
+                      setErrors((prev) => ({
+                        ...prev,
+                        confirmPassword: undefined,
+                      }));
+                  }}
+                  className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 shadow-2xs ${
+                    errors.confirmPassword
+                      ? "border-rose-500 dark:border-rose-500/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                      : "border-slate-300/80 dark:border-slate-800 focus:bg-white dark:focus:bg-[#060911] focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/25"
+                  }`}
                 />
                 <button
                   type="button"
@@ -564,6 +717,12 @@ export function AuthModal() {
                   {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {errors.confirmPassword && (
+                <p className="text-[11px] font-medium text-rose-500 dark:text-rose-400 flex items-center gap-1 mt-1">
+                  <AlertCircle size={12} className="shrink-0" />
+                  <span>{errors.confirmPassword}</span>
+                </p>
+              )}
             </div>
           )}
 
@@ -596,7 +755,7 @@ export function AuthModal() {
                   <div className="w-full border-t border-slate-200 dark:border-slate-800" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-white text-slate-500 border border-slate-200 dark:bg-[#0d1323] dark:text-slate-400 dark:border-slate-800/80 uppercase tracking-wider text-[11px] rounded-full shadow-2xs">
+                  <span className="px-3 bg-white text-slate-500 border border-slate-200 dark:bg-[#0b101d] dark:text-slate-400 dark:border-slate-800 uppercase tracking-wider text-[11px] rounded-full shadow-2xs">
                     {isLogin
                       ? isEs
                         ? "o continúa con"
@@ -613,7 +772,7 @@ export function AuthModal() {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading || isGoogleLoading}
-                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700/60 bg-white hover:bg-slate-50 dark:bg-[#12192a]/80 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all w-full cursor-pointer active:scale-[0.99] disabled:opacity-50 shadow-xs hover:border-slate-400 dark:hover:border-slate-600"
+                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-300/80 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-[#060911] dark:hover:bg-[#0f172a] text-xs font-bold text-slate-700 dark:text-slate-200 transition-all w-full cursor-pointer active:scale-[0.99] disabled:opacity-50 shadow-xs hover:border-slate-400 dark:hover:border-slate-700"
               >
                 {isGoogleLoading ? (
                   <Loader2 size={16} className="animate-spin text-blue-500 mr-1" />
@@ -644,18 +803,18 @@ export function AuthModal() {
 
           {/* Bottom Switch Links */}
           {(isLogin || isRegister) && (
-            <div className="text-center mt-6 pt-4 border-t border-slate-200 dark:border-slate-800/80">
+            <div className="text-center mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
               <p className="text-xs text-slate-600 dark:text-slate-400">
                 {isLogin
                   ? isEs
                     ? "¿No tienes cuenta todavía?"
                     : "Don't have an account yet?"
                   : isEs
-                  ? "¿Ya tienes una cuenta?"
-                  : "Already have an account?"}
+                    ? "¿Ya tienes una cuenta?"
+                    : "Already have an account?"}
                 <button
                   type="button"
-                  onClick={() => openAuthModal(isLogin ? "register" : "login")}
+                  onClick={() => switchModalMode(isLogin ? "register" : "login")}
                   className="font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-indigo-400 transition-colors ml-1 cursor-pointer"
                 >
                   {isLogin
@@ -663,8 +822,8 @@ export function AuthModal() {
                       ? "Regístrate aquí"
                       : "Sign up here"
                     : isEs
-                    ? "Iniciar sesión"
-                    : "Sign in"}
+                      ? "Iniciar sesión"
+                      : "Sign in"}
                 </button>
               </p>
             </div>
@@ -674,7 +833,7 @@ export function AuthModal() {
             <div className="text-center pt-2">
               <button
                 type="button"
-                onClick={() => openAuthModal("login")}
+                onClick={() => switchModalMode("login")}
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer transition-colors"
               >
                 <ArrowLeft size={13} />

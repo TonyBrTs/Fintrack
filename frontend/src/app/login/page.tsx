@@ -18,8 +18,16 @@ import {
   Sun,
   Moon,
   Globe,
+  AlertCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+interface FormErrors {
+  fullName?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,6 +55,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
     setMounted(true);
@@ -113,34 +122,78 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  const getFriendlyAuthError = (msg?: string): string => {
-    if (!msg)
-      return isEs
-        ? "Ocurrió un inconveniente. Por favor, intenta de nuevo."
-        : "An error occurred. Please try again.";
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  const getFriendlyAuthError = (
+    msg?: string
+  ): { message: string; field?: keyof FormErrors } => {
+    if (!msg) {
+      return {
+        message: isEs
+          ? "Ocurrió un inconveniente. Por favor, intenta de nuevo."
+          : "An error occurred. Please try again.",
+      };
+    }
     const lower = msg.toLowerCase();
     if (
       lower.includes("invalid login credentials") ||
-      lower.includes("invalid credentials")
+      lower.includes("invalid credentials") ||
+      lower.includes("invalid username or password")
     ) {
-      return isEs
-        ? "Correo electrónico o contraseña incorrectos."
-        : "Invalid email or password.";
+      return {
+        message: isEs
+          ? "Correo electrónico o contraseña incorrectos."
+          : "Invalid email or password.",
+        field: "password",
+      };
     }
     if (
       lower.includes("user already registered") ||
-      lower.includes("already registered")
+      lower.includes("already registered") ||
+      lower.includes("user_already_exists") ||
+      lower.includes("already in use")
     ) {
-      return isEs
-        ? "Ya existe una cuenta registrada con este correo electrónico."
-        : "An account already exists with this email.";
+      return {
+        message: isEs
+          ? "Ya existe una cuenta registrada con este correo electrónico. Inicia sesión o recupera tu contraseña."
+          : "An account already exists with this email. Please sign in or reset your password.",
+        field: "email",
+      };
     }
     if (lower.includes("email not confirmed")) {
-      return isEs
-        ? "Por favor confirma tu correo electrónico antes de ingresar."
-        : "Please confirm your email address before signing in.";
+      return {
+        message: isEs
+          ? "Por favor confirma tu correo electrónico antes de ingresar."
+          : "Please confirm your email address before signing in.",
+        field: "email",
+      };
     }
-    return msg;
+    if (
+      lower.includes("password should be at least") ||
+      lower.includes("password is too short")
+    ) {
+      return {
+        message: isEs
+          ? "La contraseña debe tener al menos 6 caracteres."
+          : "Password must be at least 6 characters.",
+        field: "password",
+      };
+    }
+    if (lower.includes("rate limit") || lower.includes("too many requests")) {
+      return {
+        message: isEs
+          ? "Demasiados intentos seguidos. Por favor espera unos momentos antes de reintentar."
+          : "Too many requests. Please wait a moment before trying again.",
+      };
+    }
+    return { message: msg };
+  };
+
+  const switchMode = (
+    newMode: "login" | "register" | "forgot_password" | "update_password"
+  ) => {
+    setErrors({});
+    setMode(newMode);
   };
 
   const handleGoogleSignIn = async () => {
@@ -148,7 +201,7 @@ export default function LoginPage() {
     try {
       const { error } = await signInWithGoogle();
       if (error) {
-        toast.error(getFriendlyAuthError(error.message));
+        toast.error(getFriendlyAuthError(error.message).message);
       }
     } catch {
       toast.error(
@@ -163,37 +216,43 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: FormErrors = {};
 
-    // Mode: Update Password
+    // 1. Validation for Update Password
     if (isUpdatePassword) {
       if (!password) {
-        toast.error(
-          isEs
-            ? "Por favor escribe una nueva contraseña"
-            : "Please enter a new password"
-        );
-        return;
+        newErrors.password = isEs
+          ? "Por favor escribe una nueva contraseña."
+          : "Please enter a new password.";
+      } else if (password.length < 6) {
+        newErrors.password = isEs
+          ? "La contraseña debe tener al menos 6 caracteres."
+          : "Password must be at least 6 characters.";
       }
-      if (password.length < 6) {
-        toast.error(
-          isEs
-            ? "La contraseña debe tener al menos 6 caracteres"
-            : "Password must be at least 6 characters"
-        );
-        return;
+      if (!confirmPassword) {
+        newErrors.confirmPassword = isEs
+          ? "Por favor confirma tu nueva contraseña."
+          : "Please confirm your new password.";
+      } else if (password !== confirmPassword) {
+        newErrors.confirmPassword = isEs
+          ? "Las contraseñas no coinciden."
+          : "Passwords do not match.";
       }
-      if (password !== confirmPassword) {
-        toast.error(
-          isEs ? "Las contraseñas no coinciden" : "Passwords do not match"
-        );
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        toast.error(Object.values(newErrors)[0]);
         return;
       }
 
+      setErrors({});
       setIsLoading(true);
       try {
         const { error } = await updatePassword(password);
         if (error) {
-          toast.error(getFriendlyAuthError(error.message));
+          const friendly = getFriendlyAuthError(error.message);
+          toast.error(friendly.message);
+          if (friendly.field) setErrors({ [friendly.field]: friendly.message });
         } else {
           toast.success(
             isEs
@@ -202,7 +261,7 @@ export default function LoginPage() {
           );
           setPassword("");
           setConfirmPassword("");
-          setMode("login");
+          switchMode("login");
         }
       } finally {
         setIsLoading(false);
@@ -210,29 +269,40 @@ export default function LoginPage() {
       return;
     }
 
-    // Mode: Forgot Password
+    // 2. Validation for Forgot Password
     if (isForgotPassword) {
-      if (!email) {
-        toast.error(
-          isEs
-            ? "Por favor ingresa tu correo electrónico"
-            : "Please enter your email address"
-        );
+      const trimmedEmail = email.trim();
+      if (!trimmedEmail) {
+        newErrors.email = isEs
+          ? "Por favor ingresa tu correo electrónico."
+          : "Please enter your email address.";
+      } else if (!EMAIL_REGEX.test(trimmedEmail)) {
+        newErrors.email = isEs
+          ? "Ingresa un correo electrónico válido."
+          : "Please enter a valid email address.";
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        toast.error(Object.values(newErrors)[0]);
         return;
       }
 
+      setErrors({});
       setIsLoading(true);
       try {
-        const { error } = await resetPasswordForEmail(email);
+        const { error } = await resetPasswordForEmail(trimmedEmail);
         if (error) {
-          toast.error(getFriendlyAuthError(error.message));
+          const friendly = getFriendlyAuthError(error.message);
+          toast.error(friendly.message);
+          if (friendly.field) setErrors({ [friendly.field]: friendly.message });
         } else {
           toast.success(
             isEs
               ? "¡Enlace enviado! Revisa tu correo para restablecer tu contraseña."
               : "Recovery link sent! Check your inbox to reset your password."
           );
-          setMode("login");
+          switchMode("login");
         }
       } finally {
         setIsLoading(false);
@@ -240,39 +310,71 @@ export default function LoginPage() {
       return;
     }
 
-    // Mode: Login / Register
-    if (!email || !password) {
-      toast.error(
-        isEs
-          ? "Por favor completa todos los campos"
-          : "Please complete all fields"
-      );
+    // 3. Validation for Login & Register
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      newErrors.email = isEs
+        ? "Por favor ingresa tu correo electrónico."
+        : "Please enter your email address.";
+    } else if (!EMAIL_REGEX.test(trimmedEmail)) {
+      newErrors.email = isEs
+        ? "Ingresa un formato de correo válido (ej: usuario@correo.com)."
+        : "Please enter a valid email format (e.g. user@domain.com).";
+    }
+
+    if (isRegister) {
+      const trimmedName = fullName.trim();
+      if (!trimmedName) {
+        newErrors.fullName = isEs
+          ? "Por favor ingresa tu nombre completo."
+          : "Please enter your full name.";
+      } else if (trimmedName.length < 2) {
+        newErrors.fullName = isEs
+          ? "El nombre debe tener al menos 2 caracteres."
+          : "Name must be at least 2 characters.";
+      }
+    }
+
+    if (!password) {
+      newErrors.password = isEs
+        ? "Por favor ingresa tu contraseña."
+        : "Please enter your password.";
+    } else if (password.length < 6) {
+      newErrors.password = isEs
+        ? "La contraseña debe tener al menos 6 caracteres."
+        : "Password must be at least 6 characters.";
+    }
+
+    if (isRegister) {
+      if (!confirmPassword) {
+        newErrors.confirmPassword = isEs
+          ? "Por favor confirma tu contraseña."
+          : "Please confirm your password.";
+      } else if (password !== confirmPassword) {
+        newErrors.confirmPassword = isEs
+          ? "Las contraseñas no coinciden."
+          : "Passwords do not match.";
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error(Object.values(newErrors)[0]);
       return;
     }
 
-    if (password.length < 6) {
-      toast.error(
-        isEs
-          ? "La contraseña debe tener al menos 6 caracteres"
-          : "Password must be at least 6 characters"
-      );
-      return;
-    }
-
-    if (isRegister && password !== confirmPassword) {
-      toast.error(
-        isEs ? "Las contraseñas no coinciden" : "Passwords do not match"
-      );
-      return;
-    }
-
+    setErrors({});
     setIsLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await signInWithEmail(email, password);
+        const { error } = await signInWithEmail(trimmedEmail, password);
         if (error) {
-          toast.error(getFriendlyAuthError(error.message));
+          const friendly = getFriendlyAuthError(error.message);
+          toast.error(friendly.message);
+          if (friendly.field) {
+            setErrors({ [friendly.field]: friendly.message });
+          }
         } else {
           toast.success(isEs ? "¡Bienvenido de nuevo!" : "Welcome back!");
           setEmail("");
@@ -281,12 +383,16 @@ export default function LoginPage() {
         }
       } else {
         const { error, needsEmailConfirmation } = await signUpWithEmail(
-          email,
+          trimmedEmail,
           password,
           fullName
         );
         if (error) {
-          toast.error(getFriendlyAuthError(error.message));
+          const friendly = getFriendlyAuthError(error.message);
+          toast.error(friendly.message);
+          if (friendly.field) {
+            setErrors({ [friendly.field]: friendly.message });
+          }
         } else if (needsEmailConfirmation) {
           toast.info(
             isEs
@@ -294,7 +400,7 @@ export default function LoginPage() {
               : "We sent a confirmation link. Please check your inbox.",
             { duration: 6000 }
           );
-          setMode("login");
+          switchMode("login");
         } else {
           toast.success(
             isEs
@@ -316,15 +422,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-slate-50 dark:bg-[#080c15] text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-500 selection:text-white antialiased relative overflow-x-hidden transition-colors duration-300">
+    <div className="bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-500 selection:text-white antialiased relative overflow-x-hidden transition-colors duration-300">
       {/* Ambient Glow Behind Central Area */}
       <div
         aria-hidden="true"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.12)_0%,rgba(99,102,241,0.06)_45%,transparent_70%)] dark:bg-[radial-gradient(circle,rgba(79,70,229,0.18)_0%,rgba(59,130,246,0.08)_45%,transparent_70%)] blur-[60px] pointer-events-none z-0"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[540px] h-[540px] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.08)_0%,rgba(99,102,241,0.04)_45%,transparent_70%)] dark:bg-[radial-gradient(circle,rgba(37,99,235,0.08)_0%,rgba(99,102,241,0.03)_45%,transparent_70%)] blur-[70px] pointer-events-none z-0"
       />
 
-      {/* Top Header - Stitch Style */}
-      <header className="w-full relative z-20 border-b border-slate-200/90 dark:border-slate-800/60 bg-white/90 dark:bg-[#080c15]/80 backdrop-blur-xl px-4 lg:px-8 py-3.5 shadow-xs dark:shadow-none transition-all">
+      {/* Top Header */}
+      <header className="w-full relative z-20 border-b border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#070b14]/90 backdrop-blur-xl px-4 lg:px-8 py-3.5 shadow-xs transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Brand Logo */}
           <div className="flex items-center gap-2">
@@ -338,7 +444,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               aria-label="Cambiar tema"
-              className="p-2 text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl transition cursor-pointer shadow-xs"
+              className="p-2 text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-[#0b101d] dark:hover:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-xl transition cursor-pointer shadow-xs"
             >
               {mounted && theme === "light" ? (
                 <Moon className="w-4 h-4" />
@@ -351,7 +457,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setLanguage(language === "es" ? "en" : "es")}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl transition cursor-pointer shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-[#0b101d] dark:hover:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-xl transition cursor-pointer shadow-xs"
             >
               <Globe className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>{language.toUpperCase()}</span>
@@ -362,8 +468,8 @@ export default function LoginPage() {
 
       {/* Main Content Area */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 my-4 sm:my-8">
-        {/* Glass Card Container */}
-        <div className="w-full max-w-[440px] rounded-3xl p-6 sm:p-8 relative z-10 transition-all bg-white/95 dark:bg-[radial-gradient(120%_120%_at_50%_10%,rgba(26,36,62,0.6)_0%,rgba(13,18,32,0.85)_100%)] backdrop-blur-xl border border-slate-200/90 dark:border-white/10 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7),0_0_0_1px_rgba(99,102,241,0.15)_inset]">
+        {/* Solid Rich Dark Card Container */}
+        <div className="w-full max-w-[440px] rounded-3xl p-6 sm:p-8 relative z-10 transition-all bg-white dark:bg-[#0b101d] border border-slate-200/90 dark:border-slate-800/90 shadow-xl dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.95)]">
           {/* Brand Logo Emblem */}
           <div className="flex justify-center mb-5">
             <div className="relative group">
@@ -431,15 +537,28 @@ export default function LoginPage() {
                     <input
                       id="fullname"
                       type="text"
-                      required
                       placeholder={
                         isEs ? "ej. Alejandro Morales" : "e.g. John Doe"
                       }
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        if (errors.fullName)
+                          setErrors((prev) => ({ ...prev, fullName: undefined }));
+                      }}
+                      className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 shadow-2xs ${
+                        errors.fullName
+                          ? "border-rose-500 dark:border-rose-500/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                          : "border-slate-300/80 dark:border-slate-800 focus:bg-white dark:focus:bg-[#060911] focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/25"
+                      }`}
                     />
                   </div>
+                  {errors.fullName && (
+                    <p className="text-[11px] font-medium text-rose-500 dark:text-rose-400 flex items-center gap-1 mt-1">
+                      <AlertCircle size={12} className="shrink-0" />
+                      <span>{errors.fullName}</span>
+                    </p>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -460,13 +579,26 @@ export default function LoginPage() {
                   <input
                     id="email"
                     type="email"
-                    required
                     placeholder="nombre@correo.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errors.email)
+                        setErrors((prev) => ({ ...prev, email: undefined }));
+                    }}
+                    className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 shadow-2xs ${
+                      errors.email
+                        ? "border-rose-500 dark:border-rose-500/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                        : "border-slate-300/80 dark:border-slate-800 focus:bg-white dark:focus:bg-[#060911] focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/25"
+                    }`}
                   />
                 </div>
+                {errors.email && (
+                  <p className="text-[11px] font-medium text-rose-500 dark:text-rose-400 flex items-center gap-1 mt-1">
+                    <AlertCircle size={12} className="shrink-0" />
+                    <span>{errors.email}</span>
+                  </p>
+                )}
               </div>
             )}
 
@@ -489,7 +621,7 @@ export default function LoginPage() {
                   {isLogin && (
                     <button
                       type="button"
-                      onClick={() => setMode("forgot_password")}
+                      onClick={() => switchMode("forgot_password")}
                       className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors font-semibold cursor-pointer"
                     >
                       {isEs ? "¿Olvidaste tu contraseña?" : "Forgot password?"}
@@ -514,17 +646,24 @@ export default function LoginPage() {
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    required
                     placeholder={
                       isRegister
                         ? isEs
-                          ? "Mínimo 8 caracteres..."
-                          : "Minimum 8 characters..."
+                          ? "Mínimo 6 caracteres..."
+                          : "Minimum 6 characters..."
                         : "••••••••••••"
                     }
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errors.password)
+                        setErrors((prev) => ({ ...prev, password: undefined }));
+                    }}
+                    className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 shadow-2xs ${
+                      errors.password
+                        ? "border-rose-500 dark:border-rose-500/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                        : "border-slate-300/80 dark:border-slate-800 focus:bg-white dark:focus:bg-[#060911] focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/25"
+                    }`}
                   />
                   <button
                     type="button"
@@ -537,6 +676,12 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-[11px] font-medium text-rose-500 dark:text-rose-400 flex items-center gap-1 mt-1">
+                    <AlertCircle size={12} className="shrink-0" />
+                    <span>{errors.password}</span>
+                  </p>
+                )}
 
                 {/* Password Strength Indicator (Register mode) */}
                 {isRegister && password && (
@@ -606,13 +751,23 @@ export default function LoginPage() {
                   <input
                     id="confirm-password"
                     type={showConfirmPassword ? "text" : "password"}
-                    required
                     placeholder={
                       isEs ? "Repite tu contraseña..." : "Repeat your password..."
                     }
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-slate-50/90 dark:bg-[#0c1220]/90 border border-slate-300 dark:border-slate-700/70 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 focus:bg-white dark:focus:bg-[#0c1220] focus:border-blue-600 dark:focus:border-indigo-500/80 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 shadow-2xs"
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (errors.confirmPassword)
+                        setErrors((prev) => ({
+                          ...prev,
+                          confirmPassword: undefined,
+                        }));
+                    }}
+                    className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-10 outline-none transition duration-200 shadow-2xs ${
+                      errors.confirmPassword
+                        ? "border-rose-500 dark:border-rose-500/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                        : "border-slate-300/80 dark:border-slate-800 focus:bg-white dark:focus:bg-[#060911] focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/25"
+                    }`}
                   />
                   <button
                     type="button"
@@ -631,6 +786,12 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
+                {errors.confirmPassword && (
+                  <p className="text-[11px] font-medium text-rose-500 dark:text-rose-400 flex items-center gap-1 mt-1">
+                    <AlertCircle size={12} className="shrink-0" />
+                    <span>{errors.confirmPassword}</span>
+                  </p>
+                )}
               </div>
             )}
 
@@ -663,7 +824,7 @@ export default function LoginPage() {
                     <div className="w-full border-t border-slate-200 dark:border-slate-800" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="px-3 bg-white text-slate-500 border border-slate-200 dark:bg-[#0d1323] dark:text-slate-400 dark:border-slate-800/80 uppercase tracking-wider text-[11px] rounded-full shadow-2xs">
+                    <span className="px-3 bg-white text-slate-500 border border-slate-200 dark:bg-[#0b101d] dark:text-slate-400 dark:border-slate-800 uppercase tracking-wider text-[11px] rounded-full shadow-2xs">
                       {isLogin
                         ? isEs
                           ? "o continúa con"
@@ -680,7 +841,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleGoogleSignIn}
                   disabled={isLoading || isGoogleLoading}
-                  className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700/60 bg-white hover:bg-slate-50 dark:bg-[#12192a]/80 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all w-full cursor-pointer active:scale-[0.99] disabled:opacity-50 shadow-xs hover:border-slate-400 dark:hover:border-slate-600"
+                  className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-300/80 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-[#060911] dark:hover:bg-[#0f172a] text-xs font-bold text-slate-700 dark:text-slate-200 transition-all w-full cursor-pointer active:scale-[0.99] disabled:opacity-50 shadow-xs hover:border-slate-400 dark:hover:border-slate-700"
                 >
                   {isGoogleLoading ? (
                     <Loader2
@@ -714,7 +875,7 @@ export default function LoginPage() {
 
             {/* Bottom Switch Links */}
             {(isLogin || isRegister) && (
-              <div className="text-center mt-6 pt-4 border-t border-slate-200 dark:border-slate-800/80">
+              <div className="text-center mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <p className="text-xs text-slate-600 dark:text-slate-400">
                   {isLogin
                     ? isEs
@@ -725,7 +886,7 @@ export default function LoginPage() {
                     : "Already have an account?"}
                   <button
                     type="button"
-                    onClick={() => setMode(isLogin ? "register" : "login")}
+                    onClick={() => switchMode(isLogin ? "register" : "login")}
                     className="font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-indigo-400 transition-colors ml-1 cursor-pointer"
                   >
                     {isLogin
@@ -744,7 +905,7 @@ export default function LoginPage() {
               <div className="text-center pt-2">
                 <button
                   type="button"
-                  onClick={() => setMode("login")}
+                  onClick={() => switchMode("login")}
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer transition-colors"
                 >
                   <ArrowLeft size={13} />

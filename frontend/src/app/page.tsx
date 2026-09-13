@@ -2,16 +2,18 @@
 
 import { KPICard } from "@/components/ui/KPICard";
 import {
-  Wallet,
-  TrendingUp,
-  TrendingDown,
-  PieChart,
   Loader2,
-  Goal as GoalIcon,
   Calendar,
   CloudOff,
   RefreshCw,
 } from "lucide-react";
+import {
+  KPIBalanceIcon,
+  NavIncomeIcon,
+  NavExpensesIcon,
+  KPISavingsIcon,
+  NavGoalsIcon,
+} from "@/components/ui/AppIcons";
 import {
   Select,
   SelectContent,
@@ -263,28 +265,28 @@ export default function SummaryPage() {
           amount={`${currencySymbol}${formatCurrency(balance)}`}
           trend={balance >= 0 ? "Estado óptimo" : "Balance negativo"}
           trendType={balance >= 0 ? "up" : "down"}
-          icon={<Wallet size={22} className="text-action dark:text-blue-400" />}
+          icon={<KPIBalanceIcon size={24} className="text-action dark:text-blue-400" />}
         />
         <KPICard
           title={translate("summary.income")}
           amount={`${currencySymbol}${formatCurrency(totalIncomesFiltered)}`}
           trend={`${filteredIncomes.length} ingresos`}
           trendType="up"
-          icon={<TrendingUp size={22} className="text-emerald-500" />}
+          icon={<NavIncomeIcon size={24} className="text-emerald-500" />}
         />
         <KPICard
           title={translate("summary.expenses")}
           amount={`${currencySymbol}${formatCurrency(totalExpensesFiltered)}`}
           trend={`${filteredExpenses.length} gastos`}
           trendType="down"
-          icon={<TrendingDown size={22} className="text-rose-500" />}
+          icon={<NavExpensesIcon size={24} className="text-rose-500" />}
         />
         <KPICard
           title={translate("summary.savings")}
           amount={`${netSavingPercentFiltered.toFixed(1)}%`}
           trend={netSavingPercentFiltered >= 20 ? "Excelente" : "Ajustado"}
           trendType={netSavingPercentFiltered >= 20 ? "up" : "neutral"}
-          icon={<PieChart size={22} className="text-amber-500" />}
+          icon={<KPISavingsIcon size={24} className="text-amber-500" />}
         />
       </section>
 
@@ -303,7 +305,7 @@ export default function SummaryPage() {
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
-                  <GoalIcon size={18} />
+                  <NavGoalsIcon size={18} />
                 </div>
                 <h2 className="text-base font-bold text-titles dark:text-foreground">
                   {translate("nav.goals")}
@@ -319,7 +321,7 @@ export default function SummaryPage() {
 
             {currentGoals.length === 0 ? (
               <div className="py-8 flex flex-col items-center justify-center text-center">
-                <GoalIcon
+                <NavGoalsIcon
                   size={36}
                   className="text-muted-foreground opacity-25 mb-2"
                 />

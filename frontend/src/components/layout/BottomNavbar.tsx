@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  LayoutDashboard,
-  TrendingDown,
-  TrendingUp,
-  Goal,
-} from "lucide-react";
+  NavSummaryIcon,
+  NavExpensesIcon,
+  NavIncomeIcon,
+  NavGoalsIcon,
+} from "@/components/ui/AppIcons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -19,28 +19,28 @@ export function BottomNavbar() {
     {
       name: translate("nav.summary") || "Resumen",
       href: "/",
-      icon: LayoutDashboard,
+      icon: NavSummaryIcon,
       activeColor: "text-blue-500",
       badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
     },
     {
       name: translate("nav.expenses") || "Gastos",
       href: "/expenses",
-      icon: TrendingDown,
+      icon: NavExpensesIcon,
       activeColor: "text-rose-500",
       badgeColor: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
     },
     {
       name: translate("nav.income") || "Ingresos",
       href: "/incomes",
-      icon: TrendingUp,
+      icon: NavIncomeIcon,
       activeColor: "text-emerald-500",
       badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
     },
     {
       name: translate("nav.goals") || "Metas",
       href: "/goals",
-      icon: Goal,
+      icon: NavGoalsIcon,
       activeColor: "text-purple-500",
       badgeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
     },

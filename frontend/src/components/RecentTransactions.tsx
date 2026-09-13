@@ -4,13 +4,11 @@ import { Expense, Income } from "@/types/index";
 import { useSettings } from "@/contexts/SettingsContext";
 import { formatCurrency } from "@/lib/utils";
 import {
-  ArrowUpRight,
-  ArrowDownRight,
   Sparkles,
-  Target,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { TxTypeIcon } from "@/components/ui/AppIcons";
 import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
@@ -190,13 +188,10 @@ export function RecentTransactions({
                         : "bg-rose-500/10 text-rose-500"
                     }`}
                   >
-                    {isIncome ? (
-                      <ArrowUpRight size={18} strokeWidth={2.5} />
-                    ) : isGoal ? (
-                      <Target size={18} strokeWidth={2.5} />
-                    ) : (
-                      <ArrowDownRight size={18} strokeWidth={2.5} />
-                    )}
+                    <TxTypeIcon
+                      type={isIncome ? "income" : isGoal ? "goal" : "expense"}
+                      size={18}
+                    />
                   </div>
                   <Badge
                     variant="info"

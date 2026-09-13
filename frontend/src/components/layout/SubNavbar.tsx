@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  LayoutDashboard,
-  TrendingUp,
-  TrendingDown,
-  Goal,
-} from "lucide-react";
+  NavSummaryIcon,
+  NavExpensesIcon,
+  NavIncomeIcon,
+  NavGoalsIcon,
+} from "@/components/ui/AppIcons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -19,25 +19,25 @@ export function SubNavbar() {
     {
       name: translate("nav.summary") || "Resumen",
       href: "/",
-      icon: LayoutDashboard,
+      icon: NavSummaryIcon,
       activeColor: "text-blue-500",
     },
     {
       name: translate("nav.expenses") || "Gastos",
       href: "/expenses",
-      icon: TrendingDown,
+      icon: NavExpensesIcon,
       activeColor: "text-rose-500",
     },
     {
       name: translate("nav.income") || "Ingresos",
       href: "/incomes",
-      icon: TrendingUp,
+      icon: NavIncomeIcon,
       activeColor: "text-emerald-500",
     },
     {
       name: translate("nav.goals") || "Metas",
       href: "/goals",
-      icon: Goal,
+      icon: NavGoalsIcon,
       activeColor: "text-purple-500",
     },
   ];
