@@ -1,102 +1,145 @@
 # FinTrack 🚀
 
-**FinTrack** es una plataforma integral y moderna para la gestión financiera personal. Diseñada con un enfoque de alto rendimiento, estética contemporánea (diseño en modo oscuro obsidian, modo claro limpio, glassmorphism y micro-animaciones fluidas), soporte multimoneda, internacionalización bilingüe y capacidades PWA.
+[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.1-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Postgres-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI%20Insights-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Architecture](https://img.shields.io/badge/Architecture-Clean%20%26%20SOLID-FF6B6B?style=for-the-badge)](./docs/SOLID_PRINCIPLES.md)
+
+**FinTrack** es una plataforma integral para la gestión y análisis de finanzas personales, diseñada con un estándar riguroso de ingeniería de software. Cuenta con una arquitectura desacoplada en el backend en **Go** basada en principios **SOLID** y **Clean Architecture**, un frontend moderno en **Next.js 16** con **Tailwind CSS v4**, autenticación segura multi-proveedor (Email, Google OAuth 2.0 y recuperación de contraseñas), persistencia en **PostgreSQL** con aislamiento multi-inquilino (*Multi-tenancy*), y un motor inteligente de asesoría financiera impulsado por **Google Gemini AI**.
 
 ---
 
-## ✨ Tecnologías Principales
+## 🌐 Enlaces en Vivo
 
-| Componente | Stack Tecnológico | Características Clave |
-| :--- | :--- | :--- |
-| **Frontend** | [Next.js 16](https://nextjs.org/) (React 19), [Tailwind CSS v4](https://tailwindcss.com/) | Radix UI, Framer Motion, Recharts, Lucide Icons, Sonner (Toasts) |
-| **Backend** | [Go 1.23](https://go.dev/), [Gin Framework](https://gin-gonic.com/) | API RESTful ultra-rápida, almacenamiento JSON local, middleware CORS |
-| **PWA** | Web App Manifest & Service Worker nativo | Instalable como Progressive Web App, caché offline de recursos estáticos |
+* 🚀 **Frontend en Producción**: [https://fintrack-six-opal.vercel.app](https://fintrack-six-opal.vercel.app)
+* ⚡ **Backend API en Producción**: [https://fintrack-ihwb.onrender.com/health](https://fintrack-ihwb.onrender.com/health)
+* 📦 **Repositorio GitHub**: [https://github.com/TonyBrTs/Fintrack](https://github.com/TonyBrTs/Fintrack)
 
 ---
 
-## 🌟 Funcionalidades Destacadas
+## 🏛️ Arquitectura del Sistema
 
-- **Dashboard Financiero Completo**: Vista en tiempo real del saldo total, ingresos, egresos, tasa de ahorro neta y consejos inteligentes (*Financial Insights*).
-- **Filtros Dinámicos con Radix UI**: Desplegables estilizados con *glassmorphism* (`backdrop-blur-2xl bg-card/95`), rotación fluida de chevron y selección por mes, categoría o fuente.
-- **Carrusel de Actividad Reciente con Loop Automático**:
-  - Avance automático continuo cada 3.5 segundos.
-  - Transición fluida en bucle infinito (*loop*).
-  - Pausa inteligente por interacción (`hover` en ratón o `touch` en móviles).
-  - Botones de navegación manuales y barra indicadora de progreso.
-- **Barra de Navegación Segmentada (`SubNavbar`)**: Píldora interactiva con indicador animado por Framer Motion (`layoutId="activeSubTab"`) e íconos cromáticos temáticos.
-- **Menú Lateral Full-Screen en Móviles**: Cajón desplegable optimizado con `createPortal` para evitar recortes de `backdrop-filter`, con controles de tema, idioma y divisas.
-- **Gestión de Metas de Ahorro**: Seguimiento de objetivos financieros, barras de progreso y cálculo de monto restante.
-- **Multimoneda Dinámica**: Compatibilidad nativa con **USD ($)**, **EUR (€)**, **GBP (£)** y **CRC (₡)**.
-- **Bilingüe (i18n)**: Soporte completo en **Español** e **Inglés**.
-- **Tema Adaptable**: Modo Claro pulido y Modo Oscuro profundo con persistencia en `localStorage`.
+```mermaid
+graph TB
+    subgraph Client ["Frontend (Next.js 16 / React 19 / PWA)"]
+        UI["Dashboard & Vistas Financieras"]
+        AuthCtx["Auth Context & Modales"]
+        AIClient["Gemini AI Client (/api/ai/insights)"]
+    end
+
+    subgraph AuthSecurity ["Autenticación & Identidad"]
+        SupabaseAuth["Supabase Auth (JWT + Google OAuth 2.0)"]
+    end
+
+    subgraph BackendGo ["Backend API (Golang / Clean Architecture)"]
+        Handlers["HTTP Handlers (Gin)"]
+        Services["Business Services (Domain Logic)"]
+        Repos["Repositories (Contracts & Implementations)"]
+    end
+
+    subgraph DataStorage ["Persistencia"]
+        GormPostgres["Supabase PostgreSQL (GORM + RLS)"]
+        MemoryJSON["JSON Fallback Storage"]
+    end
+
+    UI --> AuthCtx
+    AuthCtx -->|OAuth 2.0 / Login| SupabaseAuth
+    UI -->|Bearer JWT| Handlers
+    UI --> AIClient
+    Handlers --> Services
+    Services --> Repos
+    Repos -->|Producción| GormPostgres
+    Repos -.->|Offline / Local| MemoryJSON
+```
 
 ---
 
-## 🚀 Inicio Rápido
+## 🛡️ Principios SOLID Implementados
 
-### Requisitos Previos
+El backend de FinTrack fue refactorizado para cumplir rigurosamente con los principios **SOLID**:
 
+| Principio | Aplicación en FinTrack |
+| :--- | :--- |
+| **S - Single Responsibility** | Separación estricta en 4 capas: Handlers (solo HTTP), Services (solo lógica financiera), Repositories (solo persistencia) y Models (solo estructuras de datos). |
+| **O - Open/Closed** | El sistema es extensible a nuevas bases de datos (Redis, MongoDB, DynamoDB) implementando las interfaces de `internal/repository` sin tocar código existente. |
+| **L - Liskov Substitution** | `GormExpenseRepository` y `MemoryExpenseRepository` son 100% intercambiables; los servicios operan idénticamente con cualquiera. |
+| **I - Interface Segregation** | Interfaces granulares y segregadas (`ExpenseRepository`, `IncomeRepository`, `GoalRepository`, `CategoryRepository`) en lugar de interfaces gigantes. |
+| **D - Dependency Inversion** | Los Handlers dependen de interfaces de Services; los Services dependen de interfaces de Repositories. Inyección limpia de dependencias en `main.go`. |
+
+> 📖 Consulta el análisis completo con código y pruebas en [docs/SOLID_PRINCIPLES.md](./docs/SOLID_PRINCIPLES.md).
+
+---
+
+## ✨ Funcionalidades Principales
+
+* 📊 **Dashboard Financiero en Tiempo Real**: Balance consolidado, ingresos, egresos, tasa de ahorro neta y gráficos analíticos interactivos.
+* 🤖 **AI Financial Insights con Google Gemini**: Recomendaciones predictivas sobre hábitos de gasto con sistema de fallback en cascada y caché en memoria.
+* 🔐 **Autenticación Integral**:
+  * Inicio de sesión con correo y contraseña.
+  * **"Continuar con Google"** (Google OAuth 2.0).
+  * **"¿Olvidaste tu contraseña?"**: Flujo automatizado de recuperación por correo y restablecimiento seguro.
+* 🏷️ **Categorías Personalizadas y Protección de Integridad**:
+  * Categorías del sistema + categorías dinámicas por usuario con selector de colores e íconos Lucide.
+  * Protección referencial: si una categoría tiene movimientos asociados, la API requiere reasignación antes de permitir eliminarla.
+* 🎯 **Gestión de Metas de Ahorro**: Seguimiento de objetivos financieros con aportes en tiempo real y barras de progreso.
+* 💱 **Soporte Multimoneda Dinámico**: Dólar estadounidense (**USD**), Euro (**EUR**), Libra esterlina (**GBP**) y Colón costarricense (**CRC**).
+* 🌍 **Internacionalización Bilingüe (i18n)**: Soporte completo e instantáneo en **Español** e **Inglés**.
+* 📱 **PWA (Progressive Web App)**: Instalable en dispositivos móviles y de escritorio con service worker offline.
+
+---
+
+## 📚 Documentación Técnica Detallada
+
+Toda la arquitectura, base de datos, APIs y seguridad están documentadas a profundidad en la carpeta [`docs/`](./docs/):
+
+| Documento | Descripción |
+| :--- | :--- |
+| 🏛️ [**docs/ARCHITECTURE.md**](./docs/ARCHITECTURE.md) | Clean Architecture, diagramas C4 de contenedores, flujo de datos y multi-tenancy. |
+| 🛡️ [**docs/SOLID_PRINCIPLES.md**](./docs/SOLID_PRINCIPLES.md) | Detalle exhaustivo de los 5 principios SOLID con ejemplos antes/después y tests. |
+| 📡 [**docs/API_REFERENCE.md**](./docs/API_REFERENCE.md) | Catálogo completo de endpoints REST, headers de autorización, payloads y códigos de error. |
+| 🗄️ [**docs/DATABASE.md**](./docs/DATABASE.md) | Diagrama ERD, esquemas SQL de PostgreSQL, tipos de datos, índices y políticas RLS. |
+| 🔐 [**docs/AUTH_AND_SECURITY.md**](./docs/AUTH_AND_SECURITY.md) | Flujos de OAuth 2.0, validación de JWT Bearer en Go, recuperación de contraseñas y CORS. |
+| 🤖 [**docs/AI_INSIGHTS.md**](./docs/AI_INSIGHTS.md) | Integración con Google Gemini (2.0/1.5 Flash), prompt engineering y caché en memoria. |
+| 🚀 [**docs/DEPLOYMENT.md**](./docs/DEPLOYMENT.md) | Guía de despliegue paso a paso en Vercel, Render y Supabase con matriz de variables. |
+
+---
+
+## 🚀 Inicio Rápido en Local
+
+### Requisitos Previos:
 - [Node.js](https://nodejs.org/) v20 o superior
-- [Go](https://go.dev/) v1.23 o superior (o entorno WSL en Windows)
+- [Go](https://go.dev/) v1.22 o superior
 
----
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/TonyBrTs/Fintrack.git
+cd Fintrack
+```
 
-### 1. Configurar y Ejecutar el Backend
-
-El backend se ejecuta por defecto en el puerto `8080`.
-
+### 2. Ejecutar el Backend en Go
 ```bash
 cd backend
 go run main.go
 ```
+*El servidor arrancará en `http://localhost:8080` (utilizará almacenamiento local JSON si no detecta PostgreSQL).*
 
-> **Nota:** La API almacena los datos en archivos JSON locales (`expenses.json`, `incomes.json`, `goals.json`).
-
----
-
-### 2. Configurar y Ejecutar el Frontend
-
-El frontend se ejecuta en `http://localhost:3000`.
-
+### 3. Ejecutar el Frontend en Next.js
+En otra terminal:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+*Abre [http://localhost:3000](http://localhost:3000) en tu navegador.*
 
-Para crear la versión de producción optimizada:
-
+### 4. Ejecutar Pruebas Unitarias del Backend
 ```bash
-npm run build
-npm start
+cd backend
+go test -v ./internal/services/...
 ```
-
----
-
-## 🔌 Endpoints de la API REST
-
-### Gastos (`/api/expenses`)
-- `GET /api/expenses`: Obtener todos los gastos registrados.
-- `POST /api/expenses`: Registrar un nuevo gasto.
-- `PUT /api/expenses/:id`: Actualizar los datos de un gasto.
-- `DELETE /api/expenses/:id`: Eliminar un gasto.
-
-### Ingresos (`/api/incomes`)
-- `GET /api/incomes`: Obtener todos los ingresos registrados.
-- `POST /api/incomes`: Registrar un nuevo ingreso.
-- `PUT /api/incomes/:id`: Actualizar un ingreso existente.
-- `DELETE /api/incomes/:id`: Eliminar un ingreso.
-
-### Metas de Ahorro (`/api/goals`)
-- `GET /api/goals`: Obtener todas las metas.
-- `POST /api/goals`: Crear una nueva meta.
-- `PUT /api/goals/:id`: Actualizar o registrar aportes a una meta.
-- `DELETE /api/goals/:id`: Eliminar una meta.
-
-### Categorías Personalizadas (`/api/categories`)
-- `GET /api/categories?type=expense|income`: Obtener categorías combinadas (sistema y privadas del usuario).
-- `POST /api/categories`: Crear una nueva categoría personalizada para el usuario autenticado.
-- `DELETE /api/categories/:id?reassignTo=...`: Eliminar categoría con reasignación opcional de movimientos existentes.
 
 ---
 
@@ -104,50 +147,44 @@ npm start
 
 ```
 Fintrack/
-├── backend/
+├── backend/                        # Backend REST API en Golang
 │   ├── internal/
-│   │   ├── database/       # Conexión PostgreSQL (GORM) y AutoMigrate
-│   │   ├── middleware/     # AuthMiddleware (validación JWT con caché)
-│   │   └── models/         # Modelos de datos (Expense, Income, Goal, Category)
-│   ├── expenses.json       # Persistencia local / contingencia de gastos
-│   ├── incomes.json        # Persistencia local / contingencia de ingresos
-│   ├── goals.json          # Persistencia local / contingencia de metas
-│   ├── categories.json     # Persistencia local / contingencia de categorías
-│   ├── go.mod              # Módulos y dependencias de Go
-│   ├── main.go             # Punto de entrada del servidor Gin
-│   └── README.md
+│   │   ├── database/               # Conexión PostgreSQL (GORM) y AutoMigrate
+│   │   ├── handlers/               # Controladores HTTP (Gin Framework)
+│   │   ├── middleware/             # Auth JWT Supabase y CORS
+│   │   ├── models/                 # Entidades del dominio
+│   │   ├── repository/             # Interfaces abstractas de persistencia
+│   │   │   ├── gorm_repo/          # Implementación PostgreSQL / GORM
+│   │   │   └── memory_repo/        # Implementación Local / Fallback JSON
+│   │   └── services/               # Reglas de negocio y pruebas unitarias
+│   ├── main.go                     # Bootstrap e Inyección de Dependencias
+│   └── go.mod
 │
-├── frontend/
-│   ├── public/             # PWA manifest, service worker e iconos
-│   │   ├── sw.js           # Service Worker para caché offline
-│   │   ├── icon-192.png    # Icono PWA (192x192)
-│   │   └── icon-512.png    # Icono PWA (512x512)
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── expenses/   # Página de Gastos con filtros
-│   │   │   ├── incomes/    # Página de Ingresos con filtros
-│   │   │   ├── goals/      # Página de Metas de ahorro
-│   │   │   ├── layout.tsx  # Layout raíz con Providers y Navbar
-│   │   │   ├── page.tsx    # Dashboard / Resumen financiero
-│   │   │   └── globals.css # Tokens de diseño y utilidades
-│   │   ├── components/
-│   │   │   ├── categories/ # Modales de creación y gestión de categorías
-│   │   │   ├── expenses/   # Modales y detalles de gastos
-│   │   │   ├── incomes/    # Modales y detalles de ingresos
-│   │   │   ├── goals/      # Tarjetas y modales de metas
-│   │   │   ├── layout/     # Header, BrandLogo SVG, SubNavbar
-│   │   │   └── ui/         # Componentes Radix UI (Select, Sheet, etc.)
-│   │   ├── contexts/       # SettingsContext (idioma, divisas) y AuthContext
-│   │   ├── hooks/          # useCategories para sincronización reactiva
-│   │   ├── lib/            # Traducciones, llamadas a API y utilidades
-│   │   └── types/          # Definiciones TypeScript
-│   ├── next.config.ts
-│   ├── package.json
-│   └── README.md
+├── frontend/                       # Frontend Next.js 16 (React 19)
+│   ├── public/                     # PWA manifest, iconos y Service Worker
+│   └── src/
+│       ├── app/                    # Next.js App Router (Rutas y AI API)
+│       ├── components/             # Componentes UI organizados por dominio
+│       ├── contexts/               # Contextos globales (Auth, Currency, Language)
+│       ├── hooks/                  # Custom React Hooks
+│       ├── lib/                    # Clientes API, Supabase e i18n
+│       └── types/                  # Tipado TypeScript compartido
 │
-└── README.md               # Documentación general del proyecto
+├── docs/                           # Documentación Técnica Integral
+│   ├── ARCHITECTURE.md
+│   ├── SOLID_PRINCIPLES.md
+│   ├── API_REFERENCE.md
+│   ├── DATABASE.md
+│   ├── AUTH_AND_SECURITY.md
+│   ├── AI_INSIGHTS.md
+│   └── DEPLOYMENT.md
+│
+└── README.md                       # Documentación principal del proyecto
 ```
 
 ---
 
-_Desarrollado con ❤️ por TonyBrTs_
+## 👨‍💻 Autor
+
+Desarrollado por **TonyBrTs**  
+*Repositorio oficial*: [https://github.com/TonyBrTs/Fintrack](https://github.com/TonyBrTs/Fintrack)
