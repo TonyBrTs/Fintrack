@@ -4,7 +4,7 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Button } from "@/components/ui/button";
-import { Shield, Lock, Sparkles, ArrowRight, Loader2 } from "lucide-react";
+import { Shield, Lock, TrendingUp, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface ProtectedRouteProps {
@@ -46,27 +46,27 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
-              {isEs ? "Tus Finanzas en Línea" : "Your Finances in the Cloud"}
+              {isEs ? "Organiza tus Finanzas" : "Organize Your Finances"}
             </h2>
 
             <p className="text-sm text-muted-foreground mt-3 max-w-md leading-relaxed">
               {isEs
-                ? "Para mantener tus ingresos, gastos y metas totalmente seguros y privados, inicia sesión o crea una cuenta protegida."
-                : "To keep your income, expenses, and goals safe and private, please sign in or register your protected account."}
+                ? "Lleva el registro de tus ingresos y gastos, define metas de ahorro y toma el control de tu dinero."
+                : "Track your income and expenses, set savings goals, and take control of your money."}
             </p>
 
             {/* Feature Pills */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-6 w-full text-left">
               <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-secondary/50 border border-border/60">
-                <Lock size={15} className="text-blue-500 shrink-0" />
+                <TrendingUp size={15} className="text-blue-500 shrink-0" />
                 <span className="text-xs font-semibold text-foreground">
-                  {isEs ? "Aislamiento por usuario" : "User-isolated data"}
+                  {isEs ? "Control de ingresos y gastos" : "Income & expense tracking"}
                 </span>
               </div>
               <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-secondary/50 border border-border/60">
-                <Sparkles size={15} className="text-indigo-500 shrink-0" />
+                <Lock size={15} className="text-emerald-500 shrink-0" />
                 <span className="text-xs font-semibold text-foreground">
-                  {isEs ? "Sincronizado con Supabase" : "Supabase cloud sync"}
+                  {isEs ? "Finanzas 100% privadas" : "100% private finances"}
                 </span>
               </div>
             </div>

@@ -1,6 +1,4 @@
-import { Header } from '@/components/layout/Header';
-import { SubNavbar } from '@/components/layout/SubNavbar';
-import { BottomNavbar } from '@/components/layout/BottomNavbar';
+import { AppShell } from '@/components/layout/AppShell';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -44,6 +42,16 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
+      { url: '/logo.png', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
+    shortcut: ['/favicon.ico'],
+  },
 };
 
 import { Toaster } from '@/components/ui/sonner';
@@ -67,14 +75,7 @@ export default function RootLayout({
         >
           <AuthProvider>
             <SettingsProvider>
-              <div className="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-background/80 border-b border-border/60 transition-colors duration-300">
-                <Header />
-                <SubNavbar />
-              </div>
-              <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-24 md:pb-12 pt-3 md:pt-6">
-                {children}
-              </main>
-              <BottomNavbar />
+              <AppShell>{children}</AppShell>
               <AuthModal />
               <Toaster position="bottom-right" richColors className="mb-16 md:mb-0" />
               <ServiceWorkerRegister />
