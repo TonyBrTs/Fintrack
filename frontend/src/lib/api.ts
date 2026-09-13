@@ -85,7 +85,7 @@ export async function safeFetch<T = unknown>(
       ? endpoint
       : `${baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
-  const timeout = options.timeoutMs ?? 7000;
+  const timeout = options.timeoutMs ?? 15000;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
 
