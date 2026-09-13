@@ -10,6 +10,10 @@ export const translations = {
       language: "Language",
       currency: "Currency",
       settings: "Settings",
+      iconStyle: "Icon Style",
+      iconsPhosphor: "Phosphor (Modern Duotone)",
+      iconsTabler: "Tabler (Geometric Outline)",
+      iconsLucide: "Lucide (Classic Outline)",
     },
     summary: {
       balance: "Total Balance",
@@ -185,6 +189,10 @@ export const translations = {
       language: "Idioma",
       currency: "Moneda",
       settings: "Ajustes",
+      iconStyle: "Estilo de Íconos",
+      iconsPhosphor: "Phosphor (Duotono Moderno)",
+      iconsTabler: "Tabler (Geométrico)",
+      iconsLucide: "Lucide (Clásico Outline)",
     },
     summary: {
       balance: "Saldo Total",

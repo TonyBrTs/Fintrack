@@ -4,6 +4,7 @@ import { ExpenseDetailsSheet } from '@/components/expenses/ExpenseDetailsSheet';
 import { RegisterExpenseModal } from '@/components/expenses/RegisterExpenseModal';
 import { Badge } from '@/components/ui/Badge';
 import { KPICard } from '@/components/ui/KPICard';
+import { NavExpensesIcon } from '@/components/ui/AppIcons';
 import {
   Table,
   TableBody,
@@ -262,7 +263,7 @@ function ExpensesContent() {
           amount={`${currencySymbol}${formatCurrency(totalMonth)}`}
           trend={`${expenses.length} registros en total`}
           trendType="down"
-          icon={<TrendingDown size={22} className="text-rose-500" />}
+          icon={<NavExpensesIcon size={22} className="text-rose-500" />}
         />
         <KPICard
           title={translate('expenses.highestCategory') || 'Categoría Principal'}

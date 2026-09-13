@@ -50,7 +50,7 @@ export function Header() {
 
 function DesktopMenu() {
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage, currency, setCurrency, translate } = useSettings();
+  const { language, setLanguage, currency, setCurrency, iconSource, setIconSource, translate } = useSettings();
   const { user, signOut, openAuthModal } = useAuth();
   const mounted = useHydrated();
 
@@ -123,6 +123,23 @@ function DesktopMenu() {
               {currency === 'CRC' && <Check className="ml-auto h-4 w-4" />}
             </DropdownMenuItem>
           </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel>{translate('header.iconStyle') || 'Estilo de Íconos'}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => setIconSource('phosphor')}>
+              <span>Phosphor (Duotono)</span>
+              {iconSource === 'phosphor' && <Check className="ml-auto h-4 w-4 text-blue-500" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIconSource('tabler')}>
+              <span>Tabler (Geométrico)</span>
+              {iconSource === 'tabler' && <Check className="ml-auto h-4 w-4 text-blue-500" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIconSource('lucide')}>
+              <span>Lucide (Clásico)</span>
+              {iconSource === 'lucide' && <Check className="ml-auto h-4 w-4 text-blue-500" />}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -173,7 +190,7 @@ function DesktopMenu() {
 function MobileMenu() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage, currency, setCurrency, translate } = useSettings();
+  const { language, setLanguage, currency, setCurrency, iconSource, setIconSource, translate } = useSettings();
   const { user, signOut, openAuthModal } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const mounted = useHydrated();
@@ -393,6 +410,35 @@ function MobileMenu() {
                     }`}
                   >
                     {curr}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Icon Style Selection */}
+          <div className="space-y-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 block">
+              {translate('header.iconStyle') || 'Estilo de Íconos'}
+            </span>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { id: 'phosphor', label: 'Phosphor' },
+                { id: 'tabler', label: 'Tabler' },
+                { id: 'lucide', label: 'Lucide' },
+              ].map((style) => {
+                const isSelected = iconSource === style.id;
+                return (
+                  <button
+                    key={style.id}
+                    onClick={() => setIconSource(style.id as 'phosphor' | 'tabler' | 'lucide')}
+                    className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
+                      isSelected
+                        ? 'bg-action/10 dark:bg-blue-500/15 border-action/40 dark:border-blue-500/40 text-action dark:text-blue-400 shadow-xs'
+                        : 'bg-card/50 border-border/60 text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+                    }`}
+                  >
+                    {style.label}
                   </button>
                 );
               })}

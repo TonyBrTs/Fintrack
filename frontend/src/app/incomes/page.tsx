@@ -4,6 +4,7 @@ import { IncomeDetailsSheet } from '@/components/incomes/IncomeDetailsSheet';
 import { RegisterIncomeModal } from '@/components/incomes/RegisterIncomeModal';
 import { Badge } from '@/components/ui/Badge';
 import { KPICard } from '@/components/ui/KPICard';
+import { NavIncomeIcon } from '@/components/ui/AppIcons';
 import {
   Table,
   TableBody,
@@ -261,7 +262,7 @@ function IncomesContent() {
           amount={`${currencySymbol}${formatCurrency(totalMonth)}`}
           trend={`${incomes.length} cobros registrados`}
           trendType="up"
-          icon={<TrendingUp size={22} className="text-emerald-500" />}
+          icon={<NavIncomeIcon size={22} className="text-emerald-500" />}
         />
         <KPICard
           title={translate('income.mainSource') || 'Fuente Principal'}

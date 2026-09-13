@@ -5,12 +5,15 @@ import { translations } from "@/lib/translations";
 
 type Language = "en" | "es";
 type Currency = "USD" | "EUR" | "GBP" | "CRC";
+export type IconSource = "phosphor" | "tabler" | "lucide";
 
 interface SettingsContextType {
   language: Language;
   currency: Currency;
+  iconSource: IconSource;
   setLanguage: (lang: Language) => void;
   setCurrency: (curr: Currency) => void;
+  setIconSource: (source: IconSource) => void;
   currencySymbol: string;
   translate: (path: string, fallback?: string) => string;
 }
@@ -31,11 +34,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [language, setLanguage] = useState<Language>("en");
   const [currency, setCurrency] = useState<Currency>("USD");
+  const [iconSource, setIconSource] = useState<IconSource>("phosphor");
 
   // Load settings from localStorage on mount (Client-side only)
   useEffect(() => {
     const savedLanguage = localStorage.getItem("language") as Language;
     const savedCurrency = localStorage.getItem("currency") as Currency;
+    const savedIconSource = localStorage.getItem("iconSource") as IconSource;
 
     if (savedLanguage && ["en", "es"].includes(savedLanguage)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -43,6 +48,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     if (savedCurrency && ["USD", "EUR", "GBP", "CRC"].includes(savedCurrency)) {
       setCurrency(savedCurrency);
+    }
+    if (savedIconSource && ["phosphor", "tabler", "lucide"].includes(savedIconSource)) {
+      setIconSource(savedIconSource);
     }
   }, []);
 
@@ -58,6 +66,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem("currency", currency);
     }
   }, [currency]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("iconSource", iconSource);
+    }
+  }, [iconSource]);
 
   const translate = (path: string, fallback?: string): string => {
     const keys = path.split(".");
@@ -82,8 +96,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   const value = {
     language,
     currency,
+    iconSource,
     setLanguage,
     setCurrency,
+    setIconSource,
     currencySymbol: currencySymbols[currency],
     translate,
   };
@@ -98,7 +114,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useSettings = () => {
   const context = useContext(SettingsContext);
   if (context === undefined) {
-    throw new Error("useSettings must be used within a SettingsProvider");
+    return {
+      language: "en" as Language,
+      currency: "USD" as Currency,
+      iconSource: "phosphor" as IconSource,
+      setLanguage: () => {},
+      setCurrency: () => {},
+      setIconSource: () => {},
+      currencySymbol: "$",
+      translate: (_path: string, fallback?: string) => fallback || "",
+    };
   }
   return context;
 };
