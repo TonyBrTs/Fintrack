@@ -14,6 +14,7 @@ import { safeFetch } from "@/lib/api";
 import { Loader2, Calendar as CalendarLucide, Repeat, Sparkles, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { toast } from "sonner";
 import { useCategories } from "@/hooks/useCategories";
 import {
@@ -160,10 +161,10 @@ export function RecurringExpenseModal({
             </div>
             <div>
               <DialogTitle className="text-xl font-bold text-titles dark:text-foreground">
-                {initialData ? "Editar Gasto Fijo / Recurrente" : "Programar Gasto Fijo / Quincenal"}
+                {initialData ? "Editar Gasto Fijo" : "Nuevo Gasto Fijo"}
               </DialogTitle>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Configura un compromiso que se registre solo llegada la fecha
+                Configura un gasto para que se registre automáticamente llegada su fecha
               </p>
             </div>
           </div>
@@ -174,7 +175,7 @@ export function RecurringExpenseModal({
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
               <span>Monto ({currency})</span>
-              <span className="text-[11px] font-normal text-blue-500">Monto fijo del cobro</span>
+              <span className="text-[11px] font-normal text-blue-500">Monto del cobro</span>
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground">
@@ -199,13 +200,13 @@ export function RecurringExpenseModal({
           {/* Concepto / Descripción */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Concepto / Nombre del Compromiso
+              Concepto / Nombre
             </label>
             <Input
               required
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Ej: Renta quincenal, Internet fibra, Netflix, Préstamo auto..."
+              placeholder="Ej: Alquiler, Internet, Netflix, Gimnasio..."
               className="h-10 bg-secondary/30 border-border/80 rounded-xl text-sm"
             />
           </div>
@@ -368,12 +369,10 @@ export function RecurringExpenseModal({
               <span>Fecha de Inicio</span>
               <span className="text-[11px] font-normal text-muted-foreground">Primer ciclo</span>
             </label>
-            <Input
-              type="date"
-              required
+            <DatePicker
               value={formData.start_date}
-              onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-              className="h-10 bg-secondary/30 border-border/80 rounded-xl text-sm"
+              onChange={(val) => setFormData({ ...formData, start_date: val })}
+              className="bg-secondary/30"
             />
           </div>
 
@@ -420,7 +419,7 @@ export function RecurringExpenseModal({
               ) : initialData ? (
                 "Guardar Cambios"
               ) : (
-                "Programar Gasto Fijo"
+                "Crear Gasto Fijo"
               )}
             </Button>
           </DialogFooter>

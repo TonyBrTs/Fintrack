@@ -6,6 +6,7 @@ export const translations = {
       income: "Income",
       goals: "Goals",
       reports: "Reports",
+      settings: "Settings",
     },
     header: {
       language: "Language",
@@ -186,6 +187,7 @@ export const translations = {
       income: "Ingresos",
       goals: "Metas",
       reports: "Reportes",
+      settings: "Ajustes",
     },
     header: {
       language: "Idioma",

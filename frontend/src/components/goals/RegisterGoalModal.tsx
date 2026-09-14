@@ -21,15 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
 import { toast } from "sonner";
-
-import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface RegisterGoalModalProps {
   isOpen: boolean;
@@ -155,45 +148,11 @@ export function RegisterGoalModal({
               <label className="text-sm font-bold ml-1 flex items-center gap-2 text-titles dark:text-foreground">
                 {translate("goals.deadline")}
               </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full h-12 px-3 justify-start text-left font-normal focus-visible:ring-action hover:bg-action/5 overflow-hidden",
-                      !formData.deadline && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-                    <span className="truncate">
-                      {formData.deadline ? (
-                        format(new Date(formData.deadline + "T12:00:00"), "PPP")
-                      ) : (
-                        <span>Seleccionar fecha</span>
-                      )}
-                    </span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      formData.deadline
-                        ? new Date(formData.deadline + "T12:00:00")
-                        : undefined
-                    }
-                    onSelect={(date) => {
-                      if (date) {
-                        setFormData({
-                          ...formData,
-                          deadline: format(date, "yyyy-MM-dd"),
-                        });
-                      }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker
+                value={formData.deadline}
+                onChange={(deadline) => setFormData({ ...formData, deadline })}
+                className="h-12"
+              />
             </div>
           </div>
 

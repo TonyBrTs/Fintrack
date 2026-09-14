@@ -16,14 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon, Plus, Repeat } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Plus, Repeat } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { CategoryModal } from "@/components/categories/CategoryModal";
 import {
@@ -225,45 +219,10 @@ export function RegisterExpenseModal({
               <label className="text-sm font-bold text-titles dark:text-foreground">
                 {translate("expenses.form.date")}
               </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full h-10 px-3 justify-start text-left font-normal focus-visible:ring-action hover:bg-action/5 dark:hover:bg-action/10 overflow-hidden",
-                      !formData.date && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-                    <span className="truncate">
-                      {formData.date ? (
-                        format(new Date(formData.date + "T12:00:00"), "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      formData.date
-                        ? new Date(formData.date + "T12:00:00")
-                        : undefined
-                    }
-                    onSelect={(date) => {
-                      if (date) {
-                        setFormData({
-                          ...formData,
-                          date: format(date, "yyyy-MM-dd"),
-                        });
-                      }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker
+                value={formData.date}
+                onChange={(date) => setFormData({ ...formData, date })}
+              />
             </div>
           </div>
 
@@ -311,7 +270,7 @@ export function RegisterExpenseModal({
               <div className="flex items-center gap-2">
                 <Repeat className="w-4 h-4 text-indigo-500 shrink-0" />
                 <span className="text-xs font-bold text-titles dark:text-foreground">
-                  ¿Programar como gasto fijo automático?
+                  ¿Hacer este gasto recurrente automático?
                 </span>
               </div>
               <input
@@ -325,26 +284,26 @@ export function RegisterExpenseModal({
             {isRecurring && (
               <div className="pt-2 border-t border-border/50 flex items-center justify-between gap-2">
                 <span className="text-[11px] text-muted-foreground font-medium">
-                  Repetir cada:
+                  Frecuencia:
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => setRecurringFrequency("biweekly")}
                     className={cn(
-                      "px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                      "px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
                       recurringFrequency === "biweekly"
                         ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
                         : "bg-background border-border text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    Quincena (15 y fin de mes)
+                    Quincenal
                   </button>
                   <button
                     type="button"
                     onClick={() => setRecurringFrequency("monthly")}
                     className={cn(
-                      "px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                      "px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
                       recurringFrequency === "monthly"
                         ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
                         : "bg-background border-border text-muted-foreground hover:text-foreground"

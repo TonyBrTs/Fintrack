@@ -6,7 +6,7 @@ import {
   NavIncomeIcon,
   NavGoalsIcon,
 } from "@/components/ui/AppIcons";
-import { FileText } from "lucide-react";
+import { FileText, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -14,7 +14,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 
 export function SubNavbar() {
   const pathname = usePathname();
-  const { translate } = useSettings();
+  const { translate, openSettings, isSettingsOpen } = useSettings();
 
   const navItems = [
     {
@@ -88,6 +88,29 @@ export function SubNavbar() {
               </Link>
             );
           })}
+
+          <div className="w-px h-5 bg-slate-300/80 dark:bg-slate-700/80 mx-1 self-center" />
+
+          <button
+            type="button"
+            onClick={openSettings}
+            className={`
+              relative flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer shrink-0 select-none
+              ${
+                isSettingsOpen
+                  ? "text-slate-900 dark:text-foreground font-bold bg-white dark:bg-slate-800 shadow-sm border border-slate-200/90 dark:border-slate-700"
+                  : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground hover:bg-white/60 dark:hover:bg-slate-800/40"
+              }
+            `}
+          >
+            <Settings
+              size={16}
+              className={`transition-colors ${
+                isSettingsOpen ? "text-blue-500" : "text-slate-500 dark:text-muted-foreground"
+              }`}
+            />
+            <span>{translate("nav.settings") || "Ajustes"}</span>
+          </button>
         </div>
       </div>
     </nav>

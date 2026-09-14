@@ -16,6 +16,10 @@ interface SettingsContextType {
   setIconSource: (source: IconSource) => void;
   currencySymbol: string;
   translate: (path: string, fallback?: string) => string;
+  isSettingsOpen: boolean;
+  setIsSettingsOpen: (open: boolean) => void;
+  openSettings: () => void;
+  closeSettings: () => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(
@@ -35,6 +39,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [language, setLanguage] = useState<Language>("en");
   const [currency, setCurrency] = useState<Currency>("USD");
   const [iconSource, setIconSource] = useState<IconSource>("phosphor");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const openSettings = () => setIsSettingsOpen(true);
+  const closeSettings = () => setIsSettingsOpen(false);
 
   // Load settings from localStorage on mount (Client-side only)
   useEffect(() => {
@@ -102,6 +110,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     setIconSource,
     currencySymbol: currencySymbols[currency],
     translate,
+    isSettingsOpen,
+    setIsSettingsOpen,
+    openSettings,
+    closeSettings,
   };
 
   return (
@@ -123,6 +135,10 @@ export const useSettings = () => {
       setIconSource: () => {},
       currencySymbol: "$",
       translate: (_path: string, fallback?: string) => fallback || "",
+      isSettingsOpen: false,
+      setIsSettingsOpen: () => {},
+      openSettings: () => {},
+      closeSettings: () => {},
     };
   }
   return context;

@@ -6,7 +6,7 @@ import {
   NavIncomeIcon,
   NavGoalsIcon,
 } from "@/components/ui/AppIcons";
-import { FileText } from "lucide-react";
+import { FileText, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -14,7 +14,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 
 export function BottomNavbar() {
   const pathname = usePathname();
-  const { translate } = useSettings();
+  const { translate, openSettings, isSettingsOpen } = useSettings();
 
   const navItems = [
     {
@@ -52,27 +52,29 @@ export function BottomNavbar() {
       activeColor: "text-indigo-500",
       badgeColor: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
     },
+    {
+      name: translate("nav.settings") || "Ajustes",
+      isAction: true,
+      onClick: openSettings,
+      icon: Settings,
+      activeColor: "text-blue-500",
+      badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+      isActive: isSettingsOpen,
+    },
   ];
 
   return (
     <nav
       aria-label="Navegación móvil inferior"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#090d16]/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800/80 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-1.5 px-3 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] dark:shadow-2xl transition-all"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#090d16]/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800/80 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-1.5 px-2 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] dark:shadow-2xl transition-all"
     >
       <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = item.isAction ? item.isActive : pathname === item.href;
           const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`relative flex flex-col items-center justify-center flex-1 py-1.5 px-1 rounded-2xl transition-all select-none cursor-pointer min-h-[50px] active:scale-95 ${
-                isActive
-                  ? "text-slate-900 dark:text-foreground font-bold"
-                  : "text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
-              }`}
-            >
+
+          const content = (
+            <>
               {isActive && (
                 <motion.div
                   layoutId="activeBottomNavTab"
@@ -87,7 +89,7 @@ export function BottomNavbar() {
                   }`}
                 >
                   <Icon
-                    size={20}
+                    size={19}
                     strokeWidth={isActive ? 2.5 : 2}
                     className={`transition-colors ${
                       isActive ? item.activeColor : "text-slate-400 dark:text-muted-foreground"
@@ -95,13 +97,44 @@ export function BottomNavbar() {
                   />
                 </div>
                 <span
-                  className={`text-[11px] leading-tight tracking-tight transition-colors ${
+                  className={`text-[10px] leading-tight tracking-tight transition-colors ${
                     isActive ? "font-bold text-slate-900 dark:text-foreground" : "font-medium text-slate-500 dark:text-muted-foreground"
                   }`}
                 >
                   {item.name}
                 </span>
               </span>
+            </>
+          );
+
+          if (item.isAction) {
+            return (
+              <button
+                key="action-settings"
+                type="button"
+                onClick={item.onClick}
+                className={`relative flex flex-col items-center justify-center flex-1 py-1.5 px-0.5 rounded-2xl transition-all select-none cursor-pointer min-h-[48px] active:scale-95 ${
+                  isActive
+                    ? "text-slate-900 dark:text-foreground font-bold"
+                    : "text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
+                }`}
+              >
+                {content}
+              </button>
+            );
+          }
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href!}
+              className={`relative flex flex-col items-center justify-center flex-1 py-1.5 px-0.5 rounded-2xl transition-all select-none cursor-pointer min-h-[48px] active:scale-95 ${
+                isActive
+                  ? "text-slate-900 dark:text-foreground font-bold"
+                  : "text-slate-500 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
+              }`}
+            >
+              {content}
             </Link>
           );
         })}

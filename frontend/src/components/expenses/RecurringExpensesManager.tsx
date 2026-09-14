@@ -16,7 +16,6 @@ import {
   Edit2,
   Trash2,
   CheckCircle2,
-  AlertCircle,
   RefreshCw,
   Loader2,
   Sparkles,
@@ -39,7 +38,7 @@ interface RecurringExpensesManagerProps {
 }
 
 export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpensesManagerProps) {
-  const { currency, currencySymbol, translate } = useSettings();
+  const { currency, currencySymbol } = useSettings();
   const [items, setItems] = useState<RecurringExpense[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -73,12 +72,12 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
       if (res.ok && res.data) {
         if (res.data.processed_count > 0) {
           toast.success(
-            `✨ Se procesaron y registraron ${res.data.processed_count} gasto(s) automático(s) de tu quincena/mes.`,
+            `✨ Se registraron ${res.data.processed_count} gasto(s) automático(s) que llegaron a su fecha.`,
             { duration: 5000 }
           );
           if (onExpenseGenerated) onExpenseGenerated();
         } else {
-          toast.info("Todos tus gastos fijos están al día. Ningún cobro pendiente hoy.");
+          toast.info("Tus gastos fijos están al día. Ningún cobro pendiente hoy.");
         }
         fetchRecurring();
       }
@@ -133,7 +132,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
   };
 
   const handleDelete = async (item: RecurringExpense) => {
-    if (!confirm(`¿Eliminar la programación de "${item.description}"? Los gastos ya registrados previamente no se borrarán.`)) {
+    if (!confirm(`¿Eliminar "${item.description}"? Los gastos ya registrados previamente se conservarán.`)) {
       return;
     }
 
@@ -144,10 +143,10 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
       });
 
       if (res.ok) {
-        toast.success("Programación de gasto eliminada");
+        toast.success("Gasto fijo eliminado");
         fetchRecurring();
       } else {
-        toast.error("Error al eliminar la programación");
+        toast.error("Error al eliminar");
       }
     } finally {
       setActionLoadingId(null);
@@ -156,11 +155,6 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
 
   // Metrics
   const activeItems = useMemo(() => items.filter((i) => i.is_active), [items]);
-  const biweeklyTotal = useMemo(() => {
-    return activeItems
-      .filter((i) => i.frequency === "biweekly")
-      .reduce((acc, curr) => acc + curr.amount, 0);
-  }, [activeItems]);
 
   const monthlyTotal = useMemo(() => {
     return activeItems.reduce((acc, curr) => {
@@ -210,33 +204,31 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-transparent border border-blue-500/20">
-        <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/20 shrink-0 mt-0.5">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <div>
+    <div className="space-y-5">
+      {/* Top Bar / Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-card border border-border/70 shadow-xs">
+        <div>
+          <div className="flex items-center gap-2">
+            <Repeat className="w-5 h-5 text-indigo-500" />
             <h3 className="text-base sm:text-lg font-bold text-titles dark:text-foreground">
-              Automatización de Gastos de Quincena y Fijos
+              Gastos Fijos y Recurrentes
             </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-              FinTrack registrará estos gastos automáticamente en tu historial contable tan pronto llegue la fecha
-            </p>
           </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Se registran automáticamente en tu historial al llegar su fecha
+          </p>
         </div>
 
-        <div className="flex items-center gap-2 self-end sm:self-center">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             size="sm"
             onClick={handleSync}
             disabled={syncing}
-            className="rounded-xl font-bold text-xs h-9 px-3 border-blue-500/30 hover:bg-blue-500/10 cursor-pointer"
+            className="flex-1 sm:flex-initial rounded-xl font-bold text-xs h-9 px-3 border-border hover:bg-secondary cursor-pointer"
           >
             <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", syncing && "animate-spin text-blue-600")} />
-            <span>{syncing ? "Comprobando..." : "Sincronizar ahora"}</span>
+            <span>{syncing ? "Comprobando..." : "Sincronizar"}</span>
           </Button>
 
           <Button
@@ -245,112 +237,236 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
               setSelectedItem(null);
               setIsModalOpen(true);
             }}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs h-9 px-3.5 shadow-md shadow-blue-500/20 cursor-pointer"
+            className="flex-1 sm:flex-initial bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs h-9 px-3.5 shadow-md shadow-blue-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4 mr-1" />
-            <span>Programar Gasto</span>
+            <span>Nuevo Gasto Fijo</span>
           </Button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* KPI Cards - Compact for Mobile & Tablet */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-xs">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Compromiso por Quincena</span>
-            <Calendar className="w-4 h-4 text-blue-500" />
+            <span className="text-xs font-bold uppercase tracking-wider">Total Mensual Estimado</span>
+            <Clock className="w-4 h-4 text-indigo-500 shrink-0" />
           </div>
-          <div className="text-2xl font-black text-titles dark:text-foreground">
-            {currencySymbol}{formatCurrency(biweeklyTotal)}
-          </div>
-          <span className="text-[11px] text-muted-foreground">En gastos quincenales activos</span>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-xs">
-          <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Carga Mensual Proyectada</span>
-            <Clock className="w-4 h-4 text-indigo-500" />
-          </div>
-          <div className="text-2xl font-black text-rose-500 dark:text-rose-400">
+          <div className="text-xl sm:text-2xl font-black text-rose-500 dark:text-rose-400">
             {currencySymbol}{formatCurrency(monthlyTotal)}
           </div>
-          <span className="text-[11px] text-muted-foreground">Total estimado de gastos fijos al mes</span>
+          <span className="text-[11px] text-muted-foreground">En compromisos fijos activos</span>
         </div>
 
         <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-xs">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Compromisos Registrados</span>
-            <Repeat className="w-4 h-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-wider">Gastos Programados</span>
+            <Repeat className="w-4 h-4 text-emerald-500 shrink-0" />
           </div>
-          <div className="text-2xl font-black text-titles dark:text-foreground">
-            {activeItems.length} <span className="text-sm font-normal text-muted-foreground">/ {items.length} activos</span>
+          <div className="text-xl sm:text-2xl font-black text-titles dark:text-foreground">
+            {activeItems.length} <span className="text-xs sm:text-sm font-normal text-muted-foreground">/ {items.length} activos</span>
           </div>
-          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
-            {items.some((i) => i.auto_register) ? "⚡ Con auto-registro activado" : "Manual"}
+          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            <span>Auto-registro activado</span>
           </span>
         </div>
       </div>
 
-      {/* Table Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card dark:bg-card/75 backdrop-blur-sm border border-border/80 rounded-2xl overflow-hidden shadow-xs"
-      >
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-secondary/40">
-              <TableRow className="border-b border-border/60">
-                <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
-                  Estado
-                </TableHead>
-                <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
-                  Concepto
-                </TableHead>
-                <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
-                  Frecuencia
-                </TableHead>
-                <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
-                  Próxima Fecha
-                </TableHead>
-                <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-right">
-                  Monto Fijo
-                </TableHead>
-                <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-right">
-                  Acciones
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
-                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-blue-600" />
-                    <span className="text-xs">Cargando compromisos programados...</span>
-                  </TableCell>
-                </TableRow>
-              ) : items.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
-                    <Repeat className="w-10 h-10 mx-auto mb-2 opacity-30 text-blue-500" />
-                    <p className="font-bold text-sm text-titles dark:text-foreground">
-                      No tienes gastos fijos programados
-                    </p>
-                    <p className="text-xs text-muted-foreground max-w-sm mx-auto mt-1 mb-4">
-                      Programa el pago de tu quincena, alquiler, servicios o suscripciones para que se registren automáticamente.
-                    </p>
-                    <Button
-                      size="sm"
-                      onClick={() => setIsModalOpen(true)}
-                      className="bg-blue-600 text-white text-xs font-bold rounded-xl cursor-pointer"
+      {/* Empty State */}
+      {!loading && items.length === 0 && (
+        <div className="p-8 sm:p-12 text-center rounded-2xl bg-card border border-border/80 shadow-xs">
+          <Repeat className="w-10 h-10 mx-auto mb-2 opacity-30 text-indigo-500" />
+          <p className="font-bold text-base text-titles dark:text-foreground">
+            No tienes gastos fijos programados
+          </p>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto mt-1 mb-4">
+            Configura tus pagos habituales (renta, servicios, suscripciones) para que se registren solos al llegar la fecha.
+          </p>
+          <Button
+            size="sm"
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" />
+            Crear Primer Gasto Fijo
+          </Button>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="py-12 text-center text-muted-foreground bg-card rounded-2xl border border-border/80">
+          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-blue-600" />
+          <span className="text-xs">Cargando compromisos fijos...</span>
+        </div>
+      )}
+
+      {/* Mobile Card List (Visible on phones & small screens) */}
+      {!loading && items.length > 0 && (
+        <div className="block md:hidden space-y-3">
+          {items.map((item) => {
+            const dueInfo = formatDueDateLabel(item.next_due_date);
+            const isActionLoading = actionLoadingId === item.id;
+
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={cn(
+                  "p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3 transition-all",
+                  !item.is_active && "opacity-60 bg-secondary/20"
+                )}
+              >
+                {/* Header Row: Name, Status & Amount */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-sm text-titles dark:text-foreground truncate">
+                        {item.description}
+                      </span>
+                      <Badge
+                        variant={item.is_active ? "success" : "default"}
+                        className="text-[10px] px-2 py-0.5 font-bold shrink-0"
+                      >
+                        {item.is_active ? "Activo" : "Pausado"}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground flex-wrap">
+                      <span className={cn("w-2 h-2 rounded-full shrink-0", getCategoryColorBg(item.category))} />
+                      <span>{item.category}</span>
+                      <span>•</span>
+                      <span className="font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded-md text-[11px]">
+                        {getFrequencyBadge(item)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-base font-black text-rose-500 dark:text-rose-400 whitespace-nowrap">
+                      -{currencySymbol}{formatCurrency(item.amount)}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                      {item.currency}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Footer Row: Next Due Date & Action Buttons */}
+                <div className="flex items-center justify-between pt-2.5 border-t border-border/60 gap-2">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar className="w-3.5 h-3.5 shrink-0" />
+                    <span>Próximo:</span>
+                    <span className="font-bold text-titles dark:text-foreground">
+                      {new Date(item.next_due_date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-[10px] font-bold px-1.5 py-0.5 rounded-md whitespace-nowrap",
+                        dueInfo.urgent
+                          ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                          : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                      )}
                     >
-                      <Plus className="w-3.5 h-3.5 mr-1" />
-                      Programar Primer Gasto Fijo
+                      {dueInfo.label}
+                    </span>
+                  </div>
+
+                  {/* Actions for Mobile */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {/* Registrar hoy */}
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      title="Registrar hoy anticipadamente"
+                      onClick={() => handleExecuteNow(item)}
+                      disabled={isActionLoading}
+                      className="h-8 w-8 text-blue-600 hover:bg-blue-500/15 rounded-lg cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
                     </Button>
-                  </TableCell>
+
+                    {/* Pausar / Activar */}
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      title={item.is_active ? "Pausar" : "Reanudar"}
+                      onClick={() => handleToggleActive(item)}
+                      disabled={isActionLoading}
+                      className="h-8 w-8 text-muted-foreground hover:bg-secondary rounded-lg cursor-pointer"
+                    >
+                      {item.is_active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-500" />}
+                    </Button>
+
+                    {/* Editar */}
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      title="Editar"
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setIsModalOpen(true);
+                      }}
+                      disabled={isActionLoading}
+                      className="h-8 w-8 text-muted-foreground hover:bg-secondary rounded-lg cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </Button>
+
+                    {/* Eliminar */}
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      title="Eliminar"
+                      onClick={() => handleDelete(item)}
+                      disabled={isActionLoading}
+                      className="h-8 w-8 text-rose-500 hover:bg-rose-500/15 rounded-lg cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Desktop Table (Visible on md screens and up) */}
+      {!loading && items.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="hidden md:block bg-card dark:bg-card/75 backdrop-blur-sm border border-border/80 rounded-2xl overflow-hidden shadow-xs"
+        >
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-secondary/40">
+                <TableRow className="border-b border-border/60">
+                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
+                    Estado
+                  </TableHead>
+                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
+                    Concepto
+                  </TableHead>
+                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
+                    Frecuencia
+                  </TableHead>
+                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
+                    Próxima Fecha
+                  </TableHead>
+                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-right">
+                    Monto Fijo
+                  </TableHead>
+                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-right">
+                    Acciones
+                  </TableHead>
                 </TableRow>
-              ) : (
-                items.map((item) => {
+              </TableHeader>
+              <TableBody>
+                {items.map((item) => {
                   const dueInfo = formatDueDateLabel(item.next_due_date);
                   const isActionLoading = actionLoadingId === item.id;
 
@@ -501,12 +617,12 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                       </TableCell>
                     </TableRow>
                   );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </motion.div>
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </motion.div>
+      )}
 
       <RecurringExpenseModal
         isOpen={isModalOpen}

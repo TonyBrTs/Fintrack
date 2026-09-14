@@ -237,7 +237,7 @@ function ExpensesContent() {
             {translate('expenses.description') || 'Monitorea y categoriza todos tus egresos'}
           </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <Button
             variant="outline"
             onClick={() => setIsManageCategoriesOpen(true)}
@@ -247,17 +247,6 @@ function ExpensesContent() {
             <span>Categorías</span>
           </Button>
 
-          {activeTab === 'history' && (
-            <Button
-              variant="outline"
-              onClick={() => setIsRecurringModalOpen(true)}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl font-bold text-xs sm:text-sm h-10 px-3.5 border-indigo-500/40 hover:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 cursor-pointer"
-            >
-              <Repeat size={15} className="text-indigo-500" />
-              <span>Programar Fijo</span>
-            </Button>
-          )}
-
           {activeTab === 'recurring' ? (
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -266,7 +255,7 @@ function ExpensesContent() {
               className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
             >
               <Plus size={18} strokeWidth={2.5} />
-              <span className="truncate">Programar Gasto Fijo</span>
+              <span className="truncate">Nuevo Gasto Fijo</span>
             </motion.button>
           ) : (
             <motion.button
@@ -282,20 +271,20 @@ function ExpensesContent() {
         </div>
       </header>
 
-      {/* Tabs Switcher */}
-      <div className="flex items-center gap-2 p-1 bg-secondary/60 dark:bg-secondary/30 rounded-2xl border border-border/60 w-full sm:w-fit">
+      {/* Tabs Switcher - Mobile Responsive Segmented Control */}
+      <div className="grid grid-cols-2 sm:inline-flex items-center gap-1 p-1 bg-slate-200/70 dark:bg-slate-900/80 rounded-2xl border border-slate-300/80 dark:border-slate-800 w-full sm:w-auto shadow-xs">
         <button
           type="button"
           onClick={() => setActiveTab('history')}
           className={cn(
-            "flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer",
+            "flex items-center justify-center gap-2 py-2 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none",
             activeTab === 'history'
-              ? "bg-card text-titles dark:text-foreground shadow-xs border border-border/80"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-foreground shadow-sm border border-slate-200/90 dark:border-slate-700"
+              : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
           )}
         >
-          <Receipt className="w-4 h-4 text-blue-500" />
-          <span>Historial de Gastos</span>
+          <Receipt className="w-4 h-4 text-blue-500 shrink-0" />
+          <span>Gastos</span>
           <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground font-semibold">
             {expenses.length}
           </span>
@@ -305,18 +294,14 @@ function ExpensesContent() {
           type="button"
           onClick={() => setActiveTab('recurring')}
           className={cn(
-            "flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer",
+            "flex items-center justify-center gap-2 py-2 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none",
             activeTab === 'recurring'
-              ? "bg-card text-titles dark:text-foreground shadow-xs border border-border/80"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-foreground shadow-sm border border-slate-200/90 dark:border-slate-700"
+              : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
           )}
         >
-          <Repeat className="w-4 h-4 text-indigo-500" />
-          <span>Gastos Fijos Programados</span>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center gap-1">
-            <Sparkles className="w-2.5 h-2.5" />
-            <span>Quincena</span>
-          </span>
+          <Repeat className="w-4 h-4 text-indigo-500 shrink-0" />
+          <span>Gastos Fijos</span>
         </button>
       </div>
 

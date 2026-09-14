@@ -17,14 +17,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { DatePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
-import { CalendarIcon, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { CategoryModal } from "@/components/categories/CategoryModal";
 import {
@@ -217,45 +212,10 @@ export function EditExpenseModal({
               <label className="text-sm font-bold text-titles dark:text-foreground">
                 {translate("expenses.form.date")}
               </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full h-10 px-3 justify-start text-left font-normal focus-visible:ring-action hover:bg-action/5 dark:hover:bg-action/10 overflow-hidden",
-                      !formData.date && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-                    <span className="truncate">
-                      {formData.date ? (
-                        format(new Date(formData.date + "T12:00:00"), "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      formData.date
-                        ? new Date(formData.date + "T12:00:00")
-                        : undefined
-                    }
-                    onSelect={(date) => {
-                      if (date) {
-                        setFormData({
-                          ...formData,
-                          date: format(date, "yyyy-MM-dd"),
-                        });
-                      }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker
+                value={formData.date}
+                onChange={(date) => setFormData({ ...formData, date })}
+              />
             </div>
           </div>
 

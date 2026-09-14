@@ -772,10 +772,10 @@ export default function ReportsPage() {
                 <PopoverContent
                   align="end"
                   sideOffset={8}
-                  className="w-auto max-w-[calc(100vw-2rem)] p-4 bg-popover text-popover-foreground border-border shadow-2xl rounded-2xl z-[300]"
+                  className="w-auto max-w-[calc(100vw-2rem)] p-3.5"
                 >
-                  <div className="pb-3 mb-2 border-b border-border flex items-center justify-between">
-                    <span className="text-xs font-bold">
+                  <div className="pb-2.5 mb-2 border-b border-border/60 flex items-center justify-between">
+                    <span className="text-xs font-bold text-titles dark:text-foreground">
                       {isEs ? "Seleccionar Rango de Fechas" : "Select Date Range"}
                     </span>
                     <button
@@ -784,7 +784,7 @@ export default function ReportsPage() {
                         handleSelectPreset("this_month");
                         setIsCalendarOpen(false);
                       }}
-                      className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium cursor-pointer"
+                      className="text-[11px] text-action dark:text-blue-400 hover:underline flex items-center gap-1 font-medium cursor-pointer"
                     >
                       <RotateCcw size={11} />
                       {isEs ? "Restablecer a Este Mes" : "Reset to This Month"}
@@ -798,13 +798,12 @@ export default function ReportsPage() {
                       setPreset("custom");
                     }}
                     numberOfMonths={1}
-                    className="rounded-lg"
                   />
-                  <div className="pt-3 mt-2 border-t border-border flex justify-end">
+                  <div className="pt-2.5 mt-2 border-t border-border/60 flex justify-end">
                     <button
                       type="button"
                       onClick={() => setIsCalendarOpen(false)}
-                      className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer transition"
+                      className="px-4 py-1.5 rounded-xl bg-action hover:bg-action/90 text-white text-xs font-bold cursor-pointer transition shadow-xs"
                     >
                       {isEs ? "Aplicar Fechas" : "Apply Dates"}
                     </button>
