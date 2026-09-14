@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import { handleRecurringFallback } from "./recurringFallback";
 
 let currentToken: string | null = null;
 
@@ -129,6 +130,12 @@ export async function safeFetch<T = unknown>(
         isUnauthorized = true;
         errorMsg = "No tienes permisos para realizar esta acción.";
       } else if (res.status === 404) {
+        if (endpoint.includes("recurring-expenses") || endpoint.includes("recurring-incomes")) {
+          const fallback = await handleRecurringFallback<T>(endpoint, options);
+          if (fallback) {
+            return fallback;
+          }
+        }
         errorMsg = "El registro o recurso solicitado no fue encontrado.";
       } else if (res.status >= 500) {
         errorMsg = "El servicio experimentó un inconveniente temporal. Por favor, intenta de nuevo en unos momentos.";
@@ -168,6 +175,12 @@ export async function safeFetch<T = unknown>(
     return { ok: true, status: res.status, data: data as T };
   } catch (err: unknown) {
     clearTimeout(timer);
+    if (endpoint.includes("recurring-expenses") || endpoint.includes("recurring-incomes")) {
+      const fallback = await handleRecurringFallback<T>(endpoint, options);
+      if (fallback) {
+        return fallback;
+      }
+    }
     const isTimeout = err instanceof Error && err.name === "AbortError";
     const errorMsg = isTimeout
       ? "El servicio tardó demasiado en responder. Por favor, intenta de nuevo en unos momentos."
