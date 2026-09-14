@@ -5,28 +5,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
-import { useState, useSyncExternalStore } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import {
   Sun,
   Moon,
   LogOut,
-  LogIn,
   User as UserIcon,
-  Settings,
-  Sparkles,
-  FileText,
-  Repeat,
-  Tag,
   ShieldCheck,
 } from "lucide-react";
-import {
-  NavSummaryIcon,
-  NavExpensesIcon,
-  NavIncomeIcon,
-  NavGoalsIcon,
-} from "@/components/ui/AppIcons";
 
 const emptySubscribe = () => () => {};
 function useHydrated() {
@@ -34,7 +20,6 @@ function useHydrated() {
 }
 
 export function SettingsDrawer() {
-  const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const {
     language,
@@ -60,39 +45,6 @@ export function SettingsDrawer() {
     (user?.user_metadata?.full_name as string) ||
     user?.email?.split("@")[0] ||
     (isEs ? "Invitado" : "Guest");
-
-  const navItems = [
-    {
-      name: translate("nav.summary") || "Resumen",
-      href: "/",
-      icon: <NavSummaryIcon size={18} className="text-blue-500" />,
-      bg: "bg-blue-500/10 dark:bg-blue-500/20",
-    },
-    {
-      name: translate("nav.expenses") || "Gastos",
-      href: "/expenses",
-      icon: <NavExpensesIcon size={18} className="text-rose-500" />,
-      bg: "bg-rose-500/10 dark:bg-rose-500/20",
-    },
-    {
-      name: translate("nav.income") || "Ingresos",
-      href: "/incomes",
-      icon: <NavIncomeIcon size={18} className="text-emerald-500" />,
-      bg: "bg-emerald-500/10 dark:bg-emerald-500/20",
-    },
-    {
-      name: translate("nav.goals") || "Metas",
-      href: "/goals",
-      icon: <NavGoalsIcon size={18} className="text-purple-500" />,
-      bg: "bg-purple-500/10 dark:bg-purple-500/20",
-    },
-    {
-      name: translate("nav.reports") || "Reportes",
-      href: "/reports",
-      icon: <FileText size={18} className="text-indigo-500" />,
-      bg: "bg-indigo-500/10 dark:bg-indigo-500/20",
-    },
-  ];
 
   return (
     <Sheet
@@ -156,43 +108,7 @@ export function SettingsDrawer() {
           </div>
         )}
 
-        {/* Navigation Shortcuts */}
-        <div className="space-y-1.5">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 mb-1 block">
-            {translate("settingsDrawer.navigation") || (isEs ? "Navegación Rápida" : "Quick Navigation")}
-          </span>
-          <div className="grid grid-cols-1 gap-1">
-            {navItems.map((nav) => {
-              const isActive = pathname === nav.href;
-              return (
-                <Link
-                  key={nav.href}
-                  href={nav.href}
-                  onClick={closeSettings}
-                  className={`flex items-center justify-between p-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    isActive
-                      ? "bg-action/10 dark:bg-blue-500/15 text-action dark:text-blue-400 border border-action/20 dark:border-blue-500/30"
-                      : "hover:bg-secondary/70 text-foreground border border-transparent"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center ${nav.bg}`}
-                    >
-                      {nav.icon}
-                    </div>
-                    <span>{nav.name}</span>
-                  </div>
-                  {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-action dark:bg-blue-400 mr-2" />
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
 
-        <div className="h-px bg-border/60 w-full" />
 
         {/* Visual Theme Selection */}
         <div className="space-y-2">

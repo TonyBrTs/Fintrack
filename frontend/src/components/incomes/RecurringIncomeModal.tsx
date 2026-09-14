@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
 import { safeFetch } from "@/lib/api";
-import { Loader2, Calendar as CalendarLucide, Repeat, Sparkles, CheckCircle2 } from "lucide-react";
+import { Loader2, Calendar as CalendarLucide, Repeat, CalendarClock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -297,7 +297,7 @@ export function RecurringIncomeModal({
           {formData.frequency === "biweekly" && (
             <div className="p-3.5 rounded-xl bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-500/20 space-y-2">
               <label className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
+                <CalendarLucide className="w-3.5 h-3.5" />
                 Modalidad de Quincena
               </label>
               <div className="space-y-1.5">
@@ -417,16 +417,38 @@ export function RecurringIncomeModal({
           </div>
 
           {/* Switch de Auto-Registro */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-border/60">
-            <div>
-              <p className="text-xs font-bold text-titles dark:text-foreground">
-                Registro Automático
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                Registrar el ingreso en el balance sin requerir confirmación manual
-              </p>
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-secondary/40 border border-border/60 gap-3">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <CalendarClock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-titles dark:text-foreground block">
+                    Registro Automático
+                  </span>
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors",
+                      formData.auto_register
+                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                        : "bg-slate-500/15 text-slate-500 dark:text-slate-400 border border-slate-400/30"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full",
+                        formData.auto_register ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                      )}
+                    />
+                    {formData.auto_register ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+                <span className="text-[11px] text-muted-foreground block mt-0.5">
+                  Registra el ingreso en el balance en la fecha sin requerir acción manual
+                </span>
+              </div>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
+
+            <label className="relative inline-flex items-center cursor-pointer shrink-0">
               <input
                 type="checkbox"
                 checked={formData.auto_register}
@@ -435,7 +457,15 @@ export function RecurringIncomeModal({
                 }
                 className="sr-only peer"
               />
-              <div className="w-9 h-5 bg-slate-300 dark:bg-slate-700 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+              <div
+                className={cn(
+                  "w-10 h-5.5 rounded-full transition-colors relative cursor-pointer",
+                  "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4.5 after:w-4.5 after:transition-all after:shadow-xs",
+                  formData.auto_register
+                    ? "bg-emerald-600 dark:bg-emerald-500 after:translate-x-[18px]"
+                    : "bg-slate-300 dark:bg-slate-700 after:translate-x-0"
+                )}
+              />
             </label>
           </div>
 

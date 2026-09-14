@@ -11,14 +11,14 @@ import {
   Plus,
   Calendar,
   Clock,
-  Play,
-  Pause,
   Edit2,
   Trash2,
   CheckCircle2,
   RefreshCw,
   Loader2,
-  Sparkles,
+  CalendarClock,
+  Zap,
+  Power,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/Badge";
@@ -225,6 +225,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
             size="sm"
             onClick={handleSync}
             disabled={syncing}
+            title="Sincronizar: Comprueba gastos recurrentes cuya fecha ya venció y los registra en el balance automáticamente"
             className="flex-1 sm:flex-initial rounded-xl font-bold text-xs h-9 px-3 border-border hover:bg-secondary cursor-pointer"
           >
             <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", syncing && "animate-spin text-blue-600")} />
@@ -267,7 +268,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
             {activeItems.length} <span className="text-xs sm:text-sm font-normal text-muted-foreground">/ {items.length} activos</span>
           </div>
           <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-            <Sparkles className="w-3 h-3" />
+            <CalendarClock className="w-3 h-3" />
             <span>Auto-registro activado</span>
           </span>
         </div>
@@ -326,12 +327,26 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                       <span className="font-bold text-sm text-titles dark:text-foreground truncate">
                         {item.description}
                       </span>
-                      <Badge
-                        variant={item.is_active ? "success" : "default"}
-                        className="text-[10px] px-2 py-0.5 font-bold shrink-0"
+                      <button
+                        type="button"
+                        onClick={() => handleToggleActive(item)}
+                        disabled={isActionLoading}
+                        title={item.is_active ? "Activo • Clic para desactivar" : "Inactivo • Clic para activar"}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 transition-all cursor-pointer",
+                          item.is_active
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700"
+                        )}
                       >
-                        {item.is_active ? "Activo" : "Pausado"}
-                      </Badge>
+                        <span
+                          className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                          )}
+                        />
+                        <span>{item.is_active ? "Activo" : "Inactivo"}</span>
+                      </button>
                     </div>
 
                     <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground flex-wrap">
@@ -380,31 +395,31 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      title="Registrar hoy anticipadamente"
+                      title="Registrar ahora en el balance (adelantar cobro)"
                       onClick={() => handleExecuteNow(item)}
                       disabled={isActionLoading}
                       className="h-8 w-8 text-blue-600 hover:bg-blue-500/15 rounded-lg cursor-pointer"
                     >
-                      <CheckCircle2 className="w-4 h-4" />
+                      <Zap className="w-3.5 h-3.5 fill-current" />
                     </Button>
 
                     {/* Pausar / Activar */}
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      title={item.is_active ? "Pausar" : "Reanudar"}
+                      title={item.is_active ? "Desactivar automatización" : "Activar automatización"}
                       onClick={() => handleToggleActive(item)}
                       disabled={isActionLoading}
                       className="h-8 w-8 text-muted-foreground hover:bg-secondary rounded-lg cursor-pointer"
                     >
-                      {item.is_active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-500" />}
+                      <Power className={cn("w-3.5 h-3.5", item.is_active ? "text-emerald-500" : "text-slate-400")} />
                     </Button>
 
                     {/* Editar */}
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      title="Editar"
+                      title="Editar datos de este gasto fijo"
                       onClick={() => {
                         setSelectedItem(item);
                         setIsModalOpen(true);
@@ -419,7 +434,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      title="Eliminar"
+                      title="Eliminar este gasto fijo"
                       onClick={() => handleDelete(item)}
                       disabled={isActionLoading}
                       className="h-8 w-8 text-rose-500 hover:bg-rose-500/15 rounded-lg cursor-pointer"
@@ -445,7 +460,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
             <Table>
               <TableHeader className="bg-secondary/40">
                 <TableRow className="border-b border-border/60">
-                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
+                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
                     Estado
                   </TableHead>
                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
@@ -457,10 +472,10 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
                     Próxima Fecha
                   </TableHead>
-                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-right">
+                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
                     Monto Fijo
                   </TableHead>
-                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-right">
+                  <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
                     Acciones
                   </TableHead>
                 </TableRow>
@@ -479,13 +494,27 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                       )}
                     >
                       {/* Estado */}
-                      <TableCell className="px-4 py-3.5 whitespace-nowrap">
-                        <Badge
-                          variant={item.is_active ? "success" : "default"}
-                          className="text-[11px] font-bold"
+                      <TableCell className="px-4 py-3.5 whitespace-nowrap text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleActive(item)}
+                          disabled={isActionLoading}
+                          title={item.is_active ? "Activo • Clic para desactivar" : "Inactivo • Clic para activar"}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shadow-2xs",
+                            item.is_active
+                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
+                              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750"
+                          )}
                         >
-                          {item.is_active ? "Activo" : "Pausado"}
-                        </Badge>
+                          <span
+                            className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                            )}
+                          />
+                          <span>{item.is_active ? "Activo" : "Inactivo"}</span>
+                        </button>
                       </TableCell>
 
                       {/* Concepto & Categoría */}
@@ -551,47 +580,49 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                       </TableCell>
 
                       {/* Monto */}
-                      <TableCell className="px-4 py-3.5 text-right whitespace-nowrap">
-                        <span className="text-sm font-black text-rose-500 dark:text-rose-400">
-                          -{currencySymbol}{formatCurrency(item.amount)}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground block uppercase font-bold">
-                          {item.currency}
-                        </span>
+                      <TableCell className="px-4 py-3.5 text-center whitespace-nowrap">
+                        <div className="flex flex-col items-center justify-center">
+                          <span className="text-sm font-black text-rose-500 dark:text-rose-400">
+                            -{currencySymbol}{formatCurrency(item.amount)}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground block uppercase font-bold">
+                            {item.currency}
+                          </span>
+                        </div>
                       </TableCell>
 
                       {/* Acciones */}
-                      <TableCell className="px-4 py-3.5 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1">
+                      <TableCell className="px-4 py-3.5 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-1">
                           {/* Registrar ahora */}
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title="Registrar gasto ahora anticipadamente"
+                            title="Registrar cobro ahora (adelantar en el historial)"
                             onClick={() => handleExecuteNow(item)}
                             disabled={isActionLoading}
                             className="h-8 w-8 text-blue-600 hover:bg-blue-500/15 rounded-lg cursor-pointer"
                           >
-                            <CheckCircle2 className="w-4 h-4" />
+                            <Zap className="w-4 h-4 fill-current" />
                           </Button>
 
                           {/* Pausar / Activar */}
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title={item.is_active ? "Pausar automatización" : "Reanudar automatización"}
+                            title={item.is_active ? "Desactivar automatización" : "Activar automatización"}
                             onClick={() => handleToggleActive(item)}
                             disabled={isActionLoading}
                             className="h-8 w-8 text-muted-foreground hover:bg-secondary rounded-lg cursor-pointer"
                           >
-                            {item.is_active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-500" />}
+                            <Power className={cn("w-3.5 h-3.5", item.is_active ? "text-emerald-500" : "text-slate-400")} />
                           </Button>
 
                           {/* Editar */}
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title="Editar programación"
+                            title="Editar datos de este gasto fijo"
                             onClick={() => {
                               setSelectedItem(item);
                               setIsModalOpen(true);
@@ -606,7 +637,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title="Eliminar programación"
+                            title="Eliminar este gasto fijo"
                             onClick={() => handleDelete(item)}
                             disabled={isActionLoading}
                             className="h-8 w-8 text-rose-500 hover:bg-rose-500/15 rounded-lg cursor-pointer"

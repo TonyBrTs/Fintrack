@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
 import { safeFetch } from "@/lib/api";
-import { Loader2, Calendar as CalendarLucide, Repeat, Sparkles, CheckCircle2 } from "lucide-react";
+import { Loader2, Calendar as CalendarLucide, Repeat, CalendarClock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -377,24 +377,54 @@ export function RecurringExpenseModal({
           </div>
 
           {/* Interruptor de Automatización */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/40 border border-border/60">
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-secondary/40 border border-border/60 gap-3">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <CalendarClock className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
               <div>
-                <span className="text-xs font-bold text-titles dark:text-foreground block">
-                  Registro 100% Automático
-                </span>
-                <span className="text-[11px] text-muted-foreground block">
-                  FinTrack creará el gasto al llegar la fecha sin que tengas que intervenir
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-titles dark:text-foreground block">
+                    Registro Automático
+                  </span>
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors",
+                      formData.auto_register
+                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                        : "bg-slate-500/15 text-slate-500 dark:text-slate-400 border border-slate-400/30"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full",
+                        formData.auto_register ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                      )}
+                    />
+                    {formData.auto_register ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+                <span className="text-[11px] text-muted-foreground block mt-0.5">
+                  Registra el gasto en el balance en la fecha sin requerir acción manual
                 </span>
               </div>
             </div>
-            <input
-              type="checkbox"
-              checked={formData.auto_register}
-              onChange={(e) => setFormData({ ...formData, auto_register: e.target.checked })}
-              className="w-4 h-4 accent-blue-600 rounded cursor-pointer"
-            />
+
+            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                checked={formData.auto_register}
+                onChange={(e) => setFormData({ ...formData, auto_register: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div
+                className={cn(
+                  "w-10 h-5.5 rounded-full transition-colors relative cursor-pointer",
+                  "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4.5 after:w-4.5 after:transition-all after:shadow-xs",
+                  formData.auto_register
+                    ? "bg-blue-600 dark:bg-blue-500 after:translate-x-[18px]"
+                    : "bg-slate-300 dark:bg-slate-700 after:translate-x-0"
+                )}
+              />
+            </label>
           </div>
 
           <DialogFooter className="pt-2 gap-2 sm:gap-0">

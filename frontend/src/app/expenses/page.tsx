@@ -42,7 +42,6 @@ import {
   Receipt,
   Repeat,
   Search,
-  Sparkles,
   Tag,
   TrendingDown,
 } from 'lucide-react';
