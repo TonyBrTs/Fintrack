@@ -98,7 +98,7 @@ export function SettingsDrawer() {
     <Sheet
       isOpen={isSettingsOpen}
       onClose={closeSettings}
-      title={translate("header.settings") || "Ajustes y Configuración"}
+      title={translate("settingsDrawer.title") || (isEs ? "Ajustes y Configuración" : "Settings & Preferences")}
     >
       <div className="flex flex-col gap-5 pb-8">
         {/* User Profile Card */}
@@ -128,7 +128,7 @@ export function SettingsDrawer() {
                 closeSettings();
               }}
               className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer shrink-0"
-              title={isEs ? "Cerrar sesión" : "Sign out"}
+              title={translate("settingsDrawer.signOut") || (isEs ? "Cerrar sesión" : "Sign out")}
             >
               <LogOut size={18} />
             </button>
@@ -139,9 +139,10 @@ export function SettingsDrawer() {
               <UserIcon size={20} />
             </div>
             <p className="text-xs font-semibold text-foreground">
-              {isEs
-                ? "Inicia sesión para sincronizar tus finanzas"
-                : "Sign in to protect your finances"}
+              {translate("settingsDrawer.signInPrompt") ||
+                (isEs
+                  ? "Inicia sesión para sincronizar tus finanzas"
+                  : "Sign in to synchronize and protect your finances")}
             </p>
             <button
               onClick={() => {
@@ -150,7 +151,7 @@ export function SettingsDrawer() {
               }}
               className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs cursor-pointer"
             >
-              {isEs ? "Iniciar Sesión" : "Sign In"}
+              {translate("settingsDrawer.signIn") || (isEs ? "Iniciar Sesión" : "Sign In")}
             </button>
           </div>
         )}
@@ -158,7 +159,7 @@ export function SettingsDrawer() {
         {/* Navigation Shortcuts */}
         <div className="space-y-1.5">
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 mb-1 block">
-            {isEs ? "Navegación Rápida" : "Navigation"}
+            {translate("settingsDrawer.navigation") || (isEs ? "Navegación Rápida" : "Quick Navigation")}
           </span>
           <div className="grid grid-cols-1 gap-1">
             {navItems.map((nav) => {
@@ -196,7 +197,7 @@ export function SettingsDrawer() {
         {/* Visual Theme Selection */}
         <div className="space-y-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 block">
-            {isEs ? "Tema Visual" : "Theme"}
+            {translate("settingsDrawer.theme") || (isEs ? "Tema Visual" : "Visual Theme")}
           </span>
           <div className="grid grid-cols-2 gap-1.5 p-1 bg-secondary/60 dark:bg-card/50 rounded-xl border border-border/50">
             <button
@@ -208,7 +209,7 @@ export function SettingsDrawer() {
               }`}
             >
               <Sun size={15} className="text-amber-500" />
-              <span>{isEs ? "Claro" : "Light"}</span>
+              <span>{translate("settingsDrawer.light") || (isEs ? "Claro" : "Light")}</span>
             </button>
             <button
               onClick={() => setTheme("dark")}
@@ -219,7 +220,7 @@ export function SettingsDrawer() {
               }`}
             >
               <Moon size={15} className="text-blue-400" />
-              <span>{isEs ? "Oscuro" : "Dark"}</span>
+              <span>{translate("settingsDrawer.dark") || (isEs ? "Oscuro" : "Dark")}</span>
             </button>
           </div>
         </div>
@@ -227,7 +228,7 @@ export function SettingsDrawer() {
         {/* Currency Selection */}
         <div className="space-y-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 block">
-            {translate("header.currency") || "Moneda Principal"}
+            {translate("settingsDrawer.currency") || (isEs ? "Moneda Principal" : "Main Currency")}
           </span>
           <div className="grid grid-cols-4 gap-1.5">
             {(["USD", "EUR", "GBP", "CRC"] as const).map((curr) => {
@@ -252,7 +253,7 @@ export function SettingsDrawer() {
         {/* Language Selection */}
         <div className="space-y-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 block">
-            {translate("header.language") || "Idioma"}
+            {translate("settingsDrawer.language") || (isEs ? "Idioma" : "Language")}
           </span>
           <div className="grid grid-cols-2 gap-1.5 p-1 bg-secondary/60 dark:bg-card/50 rounded-xl border border-border/50">
             <button
@@ -281,7 +282,7 @@ export function SettingsDrawer() {
         {/* Icon Style Selection */}
         <div className="space-y-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 block">
-            {translate("header.iconStyle") || "Estilo de Íconos"}
+            {translate("settingsDrawer.iconStyle") || (isEs ? "Estilo de Íconos" : "Icon Style")}
           </span>
           <div className="grid grid-cols-3 gap-1.5">
             {[
@@ -317,7 +318,7 @@ export function SettingsDrawer() {
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
             <span>FinTrack v2.0 • Supabase Auth</span>
           </div>
-          <span>Cloud Safe</span>
+          <span>{translate("settingsDrawer.cloudSafe") || (isEs ? "Protegido en la Nube" : "Cloud Protected")}</span>
         </div>
       </div>
     </Sheet>

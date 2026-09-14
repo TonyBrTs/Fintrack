@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Moon, Sun, LogOut, LogIn, Settings } from "lucide-react";
+import { Moon, Sun, LogOut, LogIn, Settings, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 import { BrandLogo } from "./BrandLogo";
@@ -24,7 +24,8 @@ function useHydrated() {
 
 export function Header() {
   const { theme, setTheme } = useTheme();
-  const { translate, openSettings } = useSettings();
+  const { translate, openSettings, language } = useSettings();
+  const isEs = language === "es";
   const { user, signOut, openAuthModal } = useAuth();
   const mounted = useHydrated();
 
@@ -57,45 +58,43 @@ export function Header() {
           />
         </Link>
 
-        {/* Right Actions: Theme Toggle, Settings Button, Profile / Auth */}
+        {/* Right Actions: Theme Toggle, Mobile Hamburger Menu, Profile / Auth */}
         <div className="flex items-center gap-2 sm:gap-2.5">
           {/* Theme Quick Switcher */}
           <button
             onClick={toggleTheme}
-            aria-label="Alternar tema"
+            aria-label={isEs ? "Alternar tema" : "Toggle theme"}
             className="p-2 sm:p-2.5 rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition-all cursor-pointer shadow-xs"
           >
             {mounted && theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          {/* Unified Settings Button (Opens SettingsDrawer) */}
+          {/* Mobile Hamburger Menu (Opens Drawer on Mobile) */}
           <button
             onClick={openSettings}
-            aria-label="Configuración y Ajustes"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition-all cursor-pointer shadow-xs"
+            aria-label={isEs ? "Menú de navegación y ajustes" : "Navigation and settings menu"}
+            className="md:hidden p-2 sm:p-2.5 rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition-all cursor-pointer shadow-xs"
           >
-            <Settings size={18} className="text-slate-600 dark:text-slate-300" />
-            <span className="text-xs font-bold hidden sm:inline">
-              {translate("header.settings") || "Ajustes"}
-            </span>
+            <Menu size={19} />
           </button>
 
           {/* Profile / Auth */}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-2 pl-0.5 cursor-pointer">
-                  <Avatar
-                    size="lg"
-                    className="ring-2 ring-blue-500/30 hover:ring-blue-500/60 transition-all"
-                  >
+                <button
+                  type="button"
+                  aria-label={isEs ? "Perfil y Ajustes" : "Profile and Settings"}
+                  className="flex items-center gap-2 p-0.5 rounded-full ring-2 ring-blue-500/30 hover:ring-blue-500/70 transition-all cursor-pointer outline-none focus-visible:ring-action"
+                >
+                  <Avatar size="lg">
                     <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-xs">
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                </div>
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-60" align="end">
+              <DropdownMenuContent className="w-64" align="end">
                 <div className="px-3 py-2">
                   <p className="text-xs font-bold text-foreground truncate">
                     {displayName}
@@ -109,8 +108,11 @@ export function Header() {
                   onClick={openSettings}
                   className="cursor-pointer"
                 >
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Configuración y Preferencias</span>
+                  <Settings className="mr-2 h-4 w-4 text-action dark:text-blue-400" />
+                  <span>
+                    {translate("settingsDrawer.preferences") ||
+                      (isEs ? "Ajustes y Preferencias" : "Settings & Preferences")}
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -118,7 +120,10 @@ export function Header() {
                   className="text-rose-500 hover:text-rose-600 cursor-pointer focus:text-rose-600 focus:bg-rose-500/10"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Cerrar Sesión</span>
+                  <span>
+                    {translate("settingsDrawer.signOut") ||
+                      (isEs ? "Cerrar Sesión" : "Sign Out")}
+                  </span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -128,8 +133,12 @@ export function Header() {
               className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-xs transition-all cursor-pointer"
             >
               <LogIn size={14} />
-              <span className="hidden sm:inline">Iniciar Sesión</span>
-              <span className="sm:hidden">Entrar</span>
+              <span className="hidden sm:inline">
+                {translate("settingsDrawer.signIn") || (isEs ? "Iniciar Sesión" : "Sign In")}
+              </span>
+              <span className="sm:hidden">
+                {isEs ? "Entrar" : "Log In"}
+              </span>
             </button>
           )}
         </div>
