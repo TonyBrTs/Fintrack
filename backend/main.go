@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+	"time"
 
 	"github.com/TonyBrTs/fintrack-backend/internal/database"
 	"github.com/TonyBrTs/fintrack-backend/internal/handlers"
@@ -16,10 +18,11 @@ import (
 )
 
 const (
-	expensesFile   = "expenses.json"
-	incomesFile    = "incomes.json"
-	goalsFile      = "goals.json"
-	categoriesFile = "categories.json"
+	expensesFile          = "expenses.json"
+	incomesFile           = "incomes.json"
+	goalsFile             = "goals.json"
+	categoriesFile        = "categories.json"
+	recurringExpensesFile = "recurring_expenses.json"
 )
 
 func main() {
@@ -36,10 +39,11 @@ func main() {
 
 	// 3. Instantiate Repositories (Liskov Substitution Principle: GORM or Memory fallback)
 	var (
-		expenseRepo  repository.ExpenseRepository
-		incomeRepo   repository.IncomeRepository
-		goalRepo     repository.GoalRepository
-		categoryRepo repository.CategoryRepository
+		expenseRepo   repository.ExpenseRepository
+		incomeRepo    repository.IncomeRepository
+		goalRepo      repository.GoalRepository
+		categoryRepo  repository.CategoryRepository
+		recurringRepo repository.RecurringExpenseRepository
 	)
 
 	if db != nil {
@@ -48,12 +52,14 @@ func main() {
 		incomeRepo = gorm_repo.NewGormIncomeRepository(db)
 		goalRepo = gorm_repo.NewGormGoalRepository(db)
 		categoryRepo = gorm_repo.NewGormCategoryRepository(db)
+		recurringRepo = gorm_repo.NewGormRecurringExpenseRepository(db)
 	} else {
 		log.Println("[Storage] Initializing Memory & JSON fallback repositories...")
 		expenseRepo = memory_repo.NewMemoryExpenseRepository(expensesFile)
 		incomeRepo = memory_repo.NewMemoryIncomeRepository(incomesFile)
 		goalRepo = memory_repo.NewMemoryGoalRepository(goalsFile)
 		categoryRepo = memory_repo.NewMemoryCategoryRepository(categoriesFile)
+		recurringRepo = memory_repo.NewMemoryRecurringExpenseRepository(recurringExpensesFile)
 	}
 
 	// 4. Instantiate Services (Dependency Inversion: Injecting Repositories)
@@ -61,12 +67,28 @@ func main() {
 	incomeService := services.NewIncomeService(incomeRepo)
 	goalService := services.NewGoalService(goalRepo)
 	categoryService := services.NewCategoryService(categoryRepo, expenseRepo, incomeRepo)
+	recurringService := services.NewRecurringExpenseService(recurringRepo, expenseRepo)
 
 	// 5. Instantiate Handlers (Single Responsibility: Pure HTTP mapping)
 	expenseHandler := handlers.NewExpenseHandler(expenseService)
 	incomeHandler := handlers.NewIncomeHandler(incomeService)
 	goalHandler := handlers.NewGoalHandler(goalService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
+	recurringHandler := handlers.NewRecurringExpenseHandler(recurringService)
+
+	// Background scheduler for due recurring expenses (checks periodically)
+	go func() {
+		ticker := time.NewTicker(1 * time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			count, err := recurringService.ProcessAllDueExpenses(context.Background())
+			if err != nil {
+				log.Printf("[Scheduler] Error processing recurring expenses: %v\n", err)
+			} else if count > 0 {
+				log.Printf("[Scheduler] Automatically processed %d due recurring expenses.\n", count)
+			}
+		}
+	}()
 
 	// 6. Setup Gin Router & Middlewares
 	router := gin.Default()
@@ -84,6 +106,14 @@ func main() {
 		api.POST("/expenses", expenseHandler.CreateExpense)
 		api.PUT("/expenses/:id", expenseHandler.UpdateExpense)
 		api.DELETE("/expenses/:id", expenseHandler.DeleteExpense)
+
+		// Recurring / Fixed Expenses API
+		api.GET("/recurring-expenses", recurringHandler.GetRecurringExpenses)
+		api.POST("/recurring-expenses", recurringHandler.CreateRecurringExpense)
+		api.PUT("/recurring-expenses/:id", recurringHandler.UpdateRecurringExpense)
+		api.DELETE("/recurring-expenses/:id", recurringHandler.DeleteRecurringExpense)
+		api.POST("/recurring-expenses/sync", recurringHandler.SyncDueExpenses)
+		api.POST("/recurring-expenses/:id/execute-now", recurringHandler.ExecuteNow)
 
 		// Incomes API
 		api.GET("/incomes", incomeHandler.GetIncomes)
@@ -114,3 +144,4 @@ func main() {
 		log.Fatalf("Server failed to run: %v", err)
 	}
 }
+

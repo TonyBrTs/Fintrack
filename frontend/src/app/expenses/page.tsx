@@ -2,6 +2,8 @@
 
 import { ExpenseDetailsSheet } from '@/components/expenses/ExpenseDetailsSheet';
 import { RegisterExpenseModal } from '@/components/expenses/RegisterExpenseModal';
+import { RecurringExpensesManager } from '@/components/expenses/RecurringExpensesManager';
+import { RecurringExpenseModal } from '@/components/expenses/RecurringExpenseModal';
 import { Badge } from '@/components/ui/Badge';
 import { KPICard } from '@/components/ui/KPICard';
 import { NavExpensesIcon } from '@/components/ui/AppIcons';
@@ -27,8 +29,9 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { safeFetch } from '@/lib/api';
 import { useCategories } from '@/hooks/useCategories';
 import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
-import { formatCurrency } from '@/lib/utils';
-import type { Expense } from '@/types/index';
+import { cn, formatCurrency } from '@/lib/utils';
+import type { Expense, RecurringSyncResult } from '@/types/index';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import {
   AlertCircle,
@@ -36,7 +39,10 @@ import {
   Filter,
   Loader2,
   Plus,
+  Receipt,
+  Repeat,
   Search,
+  Sparkles,
   Tag,
   TrendingDown,
 } from 'lucide-react';
@@ -58,10 +64,12 @@ function ExpensesContent() {
   const { user, openAuthModal } = useAuth();
   const { categories: userCatList } = useCategories("expense");
   const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<'history' | 'recurring'>('history');
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRecurringModalOpen, setIsRecurringModalOpen] = useState(false);
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -73,6 +81,7 @@ function ExpensesContent() {
     const id = searchParams.get('id');
     if (id && expenses.length > 0) {
       const expense = expenses.find((e) => e.id.toString() === id);
+
       if (expense) {
         setSelectedExpense(expense);
         setIsDetailsOpen(true);
@@ -110,6 +119,19 @@ function ExpensesContent() {
       return;
     }
     fetchExpenses();
+
+    // Sincronización automática de gastos fijos pendientes de la quincena/mes
+    safeFetch<RecurringSyncResult>('/api/recurring-expenses/sync', { method: 'POST' })
+      .then((res) => {
+        if (res.ok && res.data && res.data.processed_count > 0) {
+          toast.success(
+            `✨ Se registraron automáticamente ${res.data.processed_count} gasto(s) fijos de tu quincena/mes.`,
+            { duration: 6000 }
+          );
+          fetchExpenses();
+        }
+      })
+      .catch(() => {});
   }, [user]);
 
   const safeExpenses = useMemo(() => Array.isArray(expenses) ? expenses : [], [expenses]);
@@ -215,7 +237,7 @@ function ExpensesContent() {
             {translate('expenses.description') || 'Monitorea y categoriza todos tus egresos'}
           </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto flex-wrap sm:flex-nowrap">
           <Button
             variant="outline"
             onClick={() => setIsManageCategoriesOpen(true)}
@@ -225,21 +247,88 @@ function ExpensesContent() {
             <span>Categorías</span>
           </Button>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setIsModalOpen(true)}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
-          >
-            <Plus size={18} strokeWidth={2.5} />
-            <span className="truncate">{translate('expenses.register') || 'Registrar Gasto'}</span>
-          </motion.button>
+          {activeTab === 'history' && (
+            <Button
+              variant="outline"
+              onClick={() => setIsRecurringModalOpen(true)}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl font-bold text-xs sm:text-sm h-10 px-3.5 border-indigo-500/40 hover:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 cursor-pointer"
+            >
+              <Repeat size={15} className="text-indigo-500" />
+              <span>Programar Fijo</span>
+            </Button>
+          )}
+
+          {activeTab === 'recurring' ? (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setIsRecurringModalOpen(true)}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
+            >
+              <Plus size={18} strokeWidth={2.5} />
+              <span className="truncate">Programar Gasto Fijo</span>
+            </motion.button>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setIsModalOpen(true)}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
+            >
+              <Plus size={18} strokeWidth={2.5} />
+              <span className="truncate">{translate('expenses.register') || 'Registrar Gasto'}</span>
+            </motion.button>
+          )}
         </div>
       </header>
+
+      {/* Tabs Switcher */}
+      <div className="flex items-center gap-2 p-1 bg-secondary/60 dark:bg-secondary/30 rounded-2xl border border-border/60 w-full sm:w-fit">
+        <button
+          type="button"
+          onClick={() => setActiveTab('history')}
+          className={cn(
+            "flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer",
+            activeTab === 'history'
+              ? "bg-card text-titles dark:text-foreground shadow-xs border border-border/80"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Receipt className="w-4 h-4 text-blue-500" />
+          <span>Historial de Gastos</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground font-semibold">
+            {expenses.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('recurring')}
+          className={cn(
+            "flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer",
+            activeTab === 'recurring'
+              ? "bg-card text-titles dark:text-foreground shadow-xs border border-border/80"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Repeat className="w-4 h-4 text-indigo-500" />
+          <span>Gastos Fijos Programados</span>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center gap-1">
+            <Sparkles className="w-2.5 h-2.5" />
+            <span>Quincena</span>
+          </span>
+        </button>
+      </div>
 
       <RegisterExpenseModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchExpenses}
+      />
+
+      <RecurringExpenseModal
+        isOpen={isRecurringModalOpen}
+        onClose={() => setIsRecurringModalOpen(false)}
         onSuccess={fetchExpenses}
       />
 
@@ -255,6 +344,12 @@ function ExpensesContent() {
         expense={selectedExpense}
         onSuccess={fetchExpenses}
       />
+
+      {activeTab === 'recurring' ? (
+        <RecurringExpensesManager onExpenseGenerated={fetchExpenses} />
+      ) : (
+        <>
+
 
       {/* KPI Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
@@ -393,6 +488,8 @@ function ExpensesContent() {
           </TableBody>
         </Table>
       </motion.section>
+      </>
+      )}
     </div>
   );
 }

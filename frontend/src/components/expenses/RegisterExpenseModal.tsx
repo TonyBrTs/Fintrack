@@ -23,7 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus, Repeat } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { CategoryModal } from "@/components/categories/CategoryModal";
 import {
@@ -49,6 +49,8 @@ export function RegisterExpenseModal({
   const { categories: categoryList } = useCategories("expense");
   const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringFrequency, setRecurringFrequency] = useState<"biweekly" | "monthly">("biweekly");
   const [formData, setFormData] = useState({
     amount: "",
     category: "Alimentación",
@@ -91,7 +93,31 @@ export function RegisterExpenseModal({
         return;
       }
 
-      toast.success(translate("expenses.form.success"));
+      // Si el usuario marcó hacer recurrente este gasto (quincena / mes)
+      if (isRecurring) {
+        await safeFetch("/api/recurring-expenses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            description: formData.description,
+            amount: parsedAmount,
+            currency,
+            category: formData.category,
+            payment_method: formData.payment_method,
+            frequency: recurringFrequency,
+            biweekly_type: "15_and_last_day",
+            billing_day: 15,
+            start_date: new Date(formData.date + "T12:00:00").toISOString(),
+            auto_register: true,
+          }),
+        });
+      }
+
+      toast.success(
+        isRecurring
+          ? "Gasto registrado y programado automáticamente para futuras fechas."
+          : translate("expenses.form.success")
+      );
       onSuccess();
       onClose();
       // Reset form
@@ -102,6 +128,7 @@ export function RegisterExpenseModal({
         date: new Date().toISOString().split("T")[0],
         payment_method: "Tarjeta de Crédito",
       });
+      setIsRecurring(false);
     } catch {
       toast.error(translate("expenses.form.error") || "Error al registrar el gasto");
     } finally {
@@ -276,6 +303,58 @@ export function RegisterExpenseModal({
               placeholder="..."
               className="min-h-24 resize-none"
             />
+          </div>
+
+          {/* Opción para convertir en Gasto Fijo Recurrente */}
+          <div className="p-3.5 rounded-2xl bg-secondary/40 border border-border/80 space-y-2.5">
+            <label className="flex items-center justify-between cursor-pointer">
+              <div className="flex items-center gap-2">
+                <Repeat className="w-4 h-4 text-indigo-500 shrink-0" />
+                <span className="text-xs font-bold text-titles dark:text-foreground">
+                  ¿Programar como gasto fijo automático?
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={isRecurring}
+                onChange={(e) => setIsRecurring(e.target.checked)}
+                className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+              />
+            </label>
+
+            {isRecurring && (
+              <div className="pt-2 border-t border-border/50 flex items-center justify-between gap-2">
+                <span className="text-[11px] text-muted-foreground font-medium">
+                  Repetir cada:
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setRecurringFrequency("biweekly")}
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                      recurringFrequency === "biweekly"
+                        ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                        : "bg-background border-border text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    Quincena (15 y fin de mes)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRecurringFrequency("monthly")}
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                      recurringFrequency === "monthly"
+                        ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                        : "bg-background border-border text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    Mensual
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-3">

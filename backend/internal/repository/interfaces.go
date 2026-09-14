@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/TonyBrTs/fintrack-backend/internal/models"
 )
@@ -42,3 +43,15 @@ type CategoryRepository interface {
 	Create(ctx context.Context, category *models.Category) error
 	Delete(ctx context.Context, id, userID string) error
 }
+
+// RecurringExpenseRepository defines persistence operations for recurring/fixed expenses.
+type RecurringExpenseRepository interface {
+	FindByUserID(ctx context.Context, userID string) ([]models.RecurringExpense, error)
+	FindByIDAndUserID(ctx context.Context, id, userID string) (*models.RecurringExpense, error)
+	FindPendingDue(ctx context.Context, userID string, until time.Time) ([]models.RecurringExpense, error)
+	FindAllPendingDue(ctx context.Context, until time.Time) ([]models.RecurringExpense, error)
+	Create(ctx context.Context, recurring *models.RecurringExpense) error
+	Update(ctx context.Context, id, userID string, recurring *models.RecurringExpense) (*models.RecurringExpense, error)
+	Delete(ctx context.Context, id, userID string) error
+}
+
