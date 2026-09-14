@@ -7,6 +7,7 @@ import {
   CloudOff,
   RefreshCw,
   FileText,
+  BarChart3,
 } from "lucide-react";
 import {
   KPIBalanceIcon,
@@ -233,7 +234,11 @@ export default function SummaryPage() {
         {/* Header & Filter */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-titles dark:text-foreground">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 mb-2">
+              <BarChart3 size={12} className="text-blue-500" />
+              <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">{isEs ? "Panel General" : "Dashboard"}</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-titles dark:text-foreground">
               {translate("nav.summary") || "Resumen"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">

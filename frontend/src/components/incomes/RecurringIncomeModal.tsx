@@ -327,11 +327,32 @@ export function RecurringIncomeModal({
 
           {/* Opción específica de Cobro Mensual (Día del mes) */}
           {formData.frequency === "monthly" && (
-            <div className="p-3.5 rounded-xl bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-500/20 space-y-2">
-              <label className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
-                <span>Día del mes que recibes el pago</span>
-                <span className="text-[11px] font-normal text-muted-foreground">Día 1 al 31</span>
+            <div className="p-3.5 rounded-xl bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-500/20 space-y-3">
+              <label className="text-xs font-bold text-emerald-700 dark:text-emerald-300 block">
+                Día del mes que recibes el pago
               </label>
+              {/* Quick select pills */}
+              <div className="flex flex-wrap gap-1.5">
+                {[1, 5, 10, 15, 20, 25, "Último"].map((d) => {
+                  const val = d === "Último" ? 31 : Number(d);
+                  const isSelected = formData.billing_day === val;
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, billing_day: val })}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                        isSelected
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-secondary/40 border-border/60 text-muted-foreground hover:border-emerald-400 hover:text-emerald-600"
+                      }`}
+                    >
+                      {d === "Último" ? "Último día" : `Día ${d}`}
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Custom number input */}
               <div className="flex items-center gap-3">
                 <Input
                   type="number"
@@ -350,6 +371,28 @@ export function RecurringIncomeModal({
                 <span className="text-xs text-muted-foreground">
                   de cada mes (si el mes tiene menos días, se ejecutará el último día).
                 </span>
+              </div>
+              {/* Live preview of next 3 due dates */}
+              <div className="text-[11px] text-muted-foreground bg-emerald-500/5 border border-emerald-500/15 rounded-lg px-3 py-2">
+                <span className="font-semibold text-emerald-700 dark:text-emerald-400">Próximos cobros: </span>
+                {(() => {
+                  const day = Math.min(formData.billing_day || 15, 31);
+                  const now = new Date();
+                  const dates: string[] = [];
+                  let y = now.getFullYear();
+                  let m = now.getMonth();
+                  while (dates.length < 3) {
+                    const lastOfMonth = new Date(y, m + 1, 0).getDate();
+                    const d = Math.min(day, lastOfMonth);
+                    const dt = new Date(y, m, d);
+                    if (dt >= now) {
+                      dates.push(dt.toLocaleDateString("es-CR", { day: "numeric", month: "short", year: "numeric" }));
+                    }
+                    m++;
+                    if (m > 11) { m = 0; y++; }
+                  }
+                  return dates.join(" · ");
+                })()}
               </div>
             </div>
           )}

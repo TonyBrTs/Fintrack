@@ -179,8 +179,8 @@ func TestRecurringExpenseService_ProcessDueExpensesCatchUp(t *testing.T) {
 		t.Fatalf("expected at least 1 created expense, got %d", len(created))
 	}
 
-	if created[0].Description != "Alquiler de Casa" {
-		t.Errorf("expected description 'Alquiler de Casa', got '%s'", created[0].Description)
+	if created[0].Description != "[Recurrente] Alquiler de Casa" {
+		t.Errorf("expected description '[Recurrente] Alquiler de Casa', got '%s'", created[0].Description)
 	}
 	if created[0].Amount != 350000 {
 		t.Errorf("expected amount 350000, got %f", created[0].Amount)
@@ -190,5 +190,45 @@ func TestRecurringExpenseService_ProcessDueExpensesCatchUp(t *testing.T) {
 	updatedRule, _ := mockRecurring.FindByIDAndUserID(ctx, "rule-1", userID)
 	if !updatedRule.NextDueDate.After(pastDate) {
 		t.Errorf("expected next due date to be advanced past %v, got %v", pastDate, updatedRule.NextDueDate)
+	}
+}
+
+func TestRecurringExpenseService_ExecuteNow_PreventsCycleDuplicate(t *testing.T) {
+	mockRecurring := &MockRecurringRepository{}
+	mockExpense := &MockExpenseRepository{}
+	svc := services.NewRecurringExpenseService(mockRecurring, mockExpense)
+
+	ctx := context.Background()
+	userID := "user-dup-test"
+
+	rule := models.RecurringExpense{
+		ID:            "rule-dup",
+		UserID:        userID,
+		Description:   "Internet Fibra",
+		Amount:        35000,
+		Currency:      "CRC",
+		Category:      "Servicios",
+		PaymentMethod: "Transferencia",
+		Frequency:     models.FrequencyMonthly,
+		BillingDay:    15,
+		NextDueDate:   time.Now().UTC().AddDate(0, 0, 5),
+		IsActive:      true,
+		AutoRegister:  true,
+	}
+	_ = mockRecurring.Create(ctx, &rule)
+
+	// First execution succeeds
+	exp, err := svc.ExecuteNow(ctx, "rule-dup", userID)
+	if err != nil {
+		t.Fatalf("first execution failed: %v", err)
+	}
+	if exp.Description != "[Recurrente] Internet Fibra" {
+		t.Errorf("expected prefix [Recurrente], got %s", exp.Description)
+	}
+
+	// Second execution in the same cycle must fail
+	_, err = svc.ExecuteNow(ctx, "rule-dup", userID)
+	if err == nil {
+		t.Fatal("expected error on second execution in same cycle, got nil")
 	}
 }

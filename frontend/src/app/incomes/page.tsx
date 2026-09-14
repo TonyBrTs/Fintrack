@@ -226,7 +226,11 @@ function IncomesContent() {
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-titles dark:text-foreground">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-2">
+            <TrendingUp size={12} className="text-emerald-500" />
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Flujo de Capital</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-titles dark:text-foreground">
             {translate('income.title') || 'Ingresos'}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">

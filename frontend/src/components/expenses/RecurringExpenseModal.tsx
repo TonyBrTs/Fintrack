@@ -290,12 +290,34 @@ export function RecurringExpenseModal({
 
             {/* Opciones específicas para Mensual */}
             {formData.frequency === "monthly" && (
-              <div className="pt-2 mt-2 border-t border-blue-500/20 flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold text-muted-foreground">
-                  Día del mes a ejecutar:
+              <div className="pt-3 mt-2 border-t border-blue-500/20 space-y-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                  Día del mes a cobrar:
                 </span>
+                {/* Quick select pills */}
+                <div className="flex flex-wrap gap-1.5">
+                  {[1, 5, 10, 15, 20, 25, "Último"].map((d) => {
+                    const val = d === "Último" ? 31 : Number(d);
+                    const isSelected = formData.billing_day === val;
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, billing_day: val })}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-blue-600 text-white border-blue-600"
+                            : "bg-secondary/40 border-border/60 text-muted-foreground hover:border-blue-400 hover:text-blue-600"
+                        }`}
+                      >
+                        {d === "Último" ? "Último día" : `Día ${d}`}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Custom number input */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Día</span>
+                  <span className="text-xs text-muted-foreground">O escribe un día:</span>
                   <input
                     type="number"
                     min={1}
@@ -305,6 +327,28 @@ export function RecurringExpenseModal({
                     className="w-16 h-8 text-center font-bold text-sm bg-background border border-border rounded-lg"
                   />
                   <span className="text-xs text-muted-foreground">de cada mes</span>
+                </div>
+                {/* Live preview of next 3 due dates */}
+                <div className="text-[11px] text-muted-foreground bg-secondary/30 rounded-lg px-3 py-2">
+                  <span className="font-semibold text-foreground/70">Próximos cobros: </span>
+                  {(() => {
+                    const day = Math.min(formData.billing_day || 15, 31);
+                    const now = new Date();
+                    const dates: string[] = [];
+                    let y = now.getFullYear();
+                    let m = now.getMonth();
+                    while (dates.length < 3) {
+                      const lastOfMonth = new Date(y, m + 1, 0).getDate();
+                      const d = Math.min(day, lastOfMonth);
+                      const dt = new Date(y, m, d);
+                      if (dt >= now) {
+                        dates.push(dt.toLocaleDateString("es-CR", { day: "numeric", month: "short", year: "numeric" }));
+                      }
+                      m++;
+                      if (m > 11) { m = 0; y++; }
+                    }
+                    return dates.join(" · ");
+                  })()}
                 </div>
               </div>
             )}

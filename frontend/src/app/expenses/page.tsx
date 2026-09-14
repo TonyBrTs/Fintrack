@@ -229,7 +229,11 @@ function ExpensesContent() {
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-titles dark:text-foreground">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 mb-2">
+            <TrendingDown size={12} className="text-rose-500" />
+            <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Control de Egresos</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-titles dark:text-foreground">
             {translate('expenses.title') || 'Gastos'}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">

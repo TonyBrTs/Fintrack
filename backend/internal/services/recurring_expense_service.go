@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/TonyBrTs/fintrack-backend/internal/models"
@@ -167,7 +168,7 @@ func (s *recurringExpenseService) ProcessDueExpenses(ctx context.Context, userID
 				UserID:        itemCopy.UserID,
 				Amount:        itemCopy.Amount,
 				Currency:      itemCopy.Currency,
-				Description:   itemCopy.Description,
+				Description:   formatRecurringDescription(itemCopy.Description),
 				Category:      itemCopy.Category,
 				PaymentMethod: itemCopy.PaymentMethod,
 				Date:          expenseDate,
@@ -221,7 +222,7 @@ func (s *recurringExpenseService) ProcessAllDueExpenses(ctx context.Context) (in
 				UserID:        itemCopy.UserID,
 				Amount:        itemCopy.Amount,
 				Currency:      itemCopy.Currency,
-				Description:   itemCopy.Description,
+				Description:   formatRecurringDescription(itemCopy.Description),
 				Category:      itemCopy.Category,
 				PaymentMethod: itemCopy.PaymentMethod,
 				Date:          itemCopy.NextDueDate,
@@ -251,12 +252,16 @@ func (s *recurringExpenseService) ExecuteNow(ctx context.Context, id, userID str
 	}
 
 	now := time.Now().UTC()
+	if AlreadyExecutedThisCycle(item.Frequency, item.BiweeklyType, item.LastExecutedAt, now) {
+		return nil, errors.New("este cobro recurrente ya fue registrado en el ciclo actual. No se puede duplicar en el mismo período")
+	}
+
 	expense := models.Expense{
 		ID:            fmt.Sprintf("%d", now.UnixNano()),
 		UserID:        userID,
 		Amount:        item.Amount,
 		Currency:      item.Currency,
-		Description:   item.Description,
+		Description:   formatRecurringDescription(item.Description),
 		Category:      item.Category,
 		PaymentMethod: item.PaymentMethod,
 		Date:          now,
@@ -273,6 +278,55 @@ func (s *recurringExpenseService) ExecuteNow(ctx context.Context, id, userID str
 
 	_, _ = s.recurringRepo.Update(ctx, item.ID, item.UserID, item)
 	return &expense, nil
+}
+
+// formatRecurringDescription prefixes recurring descriptions to clearly identify them
+func formatRecurringDescription(desc string) string {
+	const prefix = "[Recurrente] "
+	if strings.HasPrefix(desc, prefix) {
+		return desc
+	}
+	return prefix + desc
+}
+
+// AlreadyExecutedThisCycle checks whether an execution has already occurred in the active cycle
+func AlreadyExecutedThisCycle(frequency, biweeklyType string, lastExecutedAt *time.Time, now time.Time) bool {
+	if lastExecutedAt == nil || lastExecutedAt.IsZero() {
+		return false
+	}
+
+	last := lastExecutedAt.UTC()
+	current := now.UTC()
+
+	switch frequency {
+	case models.FrequencyBiweekly:
+		if biweeklyType == models.FrequencyBiweekly || biweeklyType == models.Biweekly15AndLast {
+			// Check if both 'last' and 'current' fall into the same month and same quincena half
+			if last.Year() == current.Year() && last.Month() == current.Month() {
+				lastIsFirstHalf := last.Day() <= 15
+				currentIsFirstHalf := current.Day() <= 15
+				return lastIsFirstHalf == currentIsFirstHalf
+			}
+			return false
+		}
+		// every 15 days: prevent duplicate if less than 14 days have passed
+		return current.Sub(last) < 14*24*time.Hour
+
+	case models.FrequencyMonthly:
+		// Check if executed in the same year and month
+		return last.Year() == current.Year() && last.Month() == current.Month()
+
+	case models.FrequencyWeekly:
+		// Prevent duplicate if executed within 6 days
+		return current.Sub(last) < 6*24*time.Hour
+
+	case models.FrequencyYearly:
+		// Prevent duplicate if executed within the same year
+		return last.Year() == current.Year()
+
+	default:
+		return last.Year() == current.Year() && last.Month() == current.Month()
+	}
 }
 
 // Helper: Last day of given month

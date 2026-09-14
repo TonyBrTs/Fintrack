@@ -128,7 +128,11 @@ export default function GoalsPage() {
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-titles dark:text-foreground">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 mb-2">
+            <Trophy size={12} className="text-amber-500" />
+            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Objetivos Financieros</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-titles dark:text-foreground">
             {translate("goals.title") || "Metas Financieras"}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">

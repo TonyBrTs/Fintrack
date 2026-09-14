@@ -101,6 +101,30 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
     fetchRecurring();
   }, [fetchRecurring]);
 
+  // Checks if a recurring item was already manually executed within the current billing cycle
+  const isAlreadyExecutedThisPeriod = (item: RecurringIncome): boolean => {
+    if (!item.last_executed_at) return false;
+    const last = new Date(item.last_executed_at);
+    const now = new Date();
+    if (item.frequency === "biweekly") {
+      const sameMonth = last.getFullYear() === now.getFullYear() && last.getMonth() === now.getMonth();
+      if (!sameMonth) return false;
+      const lastIsFirst = last.getDate() <= 15;
+      const nowIsFirst = now.getDate() <= 15;
+      return lastIsFirst === nowIsFirst;
+    }
+    if (item.frequency === "monthly") {
+      return last.getFullYear() === now.getFullYear() && last.getMonth() === now.getMonth();
+    }
+    if (item.frequency === "weekly") {
+      return (now.getTime() - last.getTime()) < 6 * 24 * 60 * 60 * 1000;
+    }
+    if (item.frequency === "yearly") {
+      return last.getFullYear() === now.getFullYear();
+    }
+    return false;
+  };
+
   const handleToggleActive = async (item: RecurringIncome) => {
     try {
       setActionLoadingId(item.id);
@@ -124,10 +148,6 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
   };
 
   const handleExecuteNow = async (item: RecurringIncome) => {
-    if (!confirm(`¿Deseas registrar "${item.description}" por ${currencySymbol}${formatCurrency(item.amount)} como cobrado ahora mismo?`)) {
-      return;
-    }
-
     try {
       setActionLoadingId(item.id);
       const res = await safeFetch<{ message: string; income: any }>(`/api/recurring-incomes/${item.id}/execute-now`, {
@@ -447,13 +467,22 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={isLoadingThis || !item.is_active}
+                      disabled={isLoadingThis || !item.is_active || isAlreadyExecutedThisPeriod(item)}
                       onClick={() => handleExecuteNow(item)}
-                      title="Registrar cobro ahora (adelantar en el historial)"
-                      className="flex-1 rounded-xl text-xs font-bold h-8 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer"
+                      title={
+                        isAlreadyExecutedThisPeriod(item)
+                          ? "Ya registrado en este ciclo"
+                          : "Registrar cobro ahora (adelantar en el historial)"
+                      }
+                      className={cn(
+                        "flex-1 rounded-xl text-xs font-bold h-8 border cursor-pointer",
+                        isAlreadyExecutedThisPeriod(item)
+                          ? "text-slate-400 border-slate-300/30 opacity-50 cursor-not-allowed"
+                          : "text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                      )}
                     >
                       <Zap className="w-3 h-3 mr-1 fill-current" />
-                      Cobrar Ahora
+                      {isAlreadyExecutedThisPeriod(item) ? "Ya Registrado" : "Cobrar Ahora"}
                     </Button>
 
                     <Button
@@ -619,10 +648,19 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title="Cobrar ahora (adelantar registro de ingreso en el balance)"
-                            disabled={isLoadingThis || !item.is_active}
+                            title={
+                              isAlreadyExecutedThisPeriod(item)
+                                ? "Ya registrado en este ciclo"
+                                : "Cobrar ahora (adelantar registro de ingreso en el balance)"
+                            }
+                            disabled={isLoadingThis || !item.is_active || isAlreadyExecutedThisPeriod(item)}
                             onClick={() => handleExecuteNow(item)}
-                            className="h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15 rounded-lg cursor-pointer"
+                            className={cn(
+                              "h-8 w-8 rounded-lg cursor-pointer",
+                              isAlreadyExecutedThisPeriod(item)
+                                ? "text-slate-400 opacity-50 cursor-not-allowed"
+                                : "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15"
+                            )}
                           >
                             <Zap className="w-4 h-4 fill-current" />
                           </Button>

@@ -92,6 +92,30 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
     fetchRecurring();
   }, [fetchRecurring]);
 
+  // Checks if a recurring item was already manually executed within the current billing cycle
+  const isAlreadyExecutedThisPeriod = (item: RecurringExpense): boolean => {
+    if (!item.last_executed_at) return false;
+    const last = new Date(item.last_executed_at);
+    const now = new Date();
+    if (item.frequency === "biweekly") {
+      const sameMonth = last.getFullYear() === now.getFullYear() && last.getMonth() === now.getMonth();
+      if (!sameMonth) return false;
+      const lastIsFirst = last.getDate() <= 15;
+      const nowIsFirst = now.getDate() <= 15;
+      return lastIsFirst === nowIsFirst;
+    }
+    if (item.frequency === "monthly") {
+      return last.getFullYear() === now.getFullYear() && last.getMonth() === now.getMonth();
+    }
+    if (item.frequency === "weekly") {
+      return (now.getTime() - last.getTime()) < 6 * 24 * 60 * 60 * 1000;
+    }
+    if (item.frequency === "yearly") {
+      return last.getFullYear() === now.getFullYear();
+    }
+    return false;
+  };
+
   const handleToggleActive = async (item: RecurringExpense) => {
     try {
       setActionLoadingId(item.id);
@@ -395,10 +419,19 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      title="Registrar ahora en el balance (adelantar cobro)"
+                      title={
+                        isAlreadyExecutedThisPeriod(item)
+                          ? "Ya registrado en este ciclo"
+                          : "Registrar ahora en el balance (adelantar cobro)"
+                      }
                       onClick={() => handleExecuteNow(item)}
-                      disabled={isActionLoading}
-                      className="h-8 w-8 text-blue-600 hover:bg-blue-500/15 rounded-lg cursor-pointer"
+                      disabled={isActionLoading || isAlreadyExecutedThisPeriod(item)}
+                      className={cn(
+                        "h-8 w-8 rounded-lg cursor-pointer",
+                        isAlreadyExecutedThisPeriod(item)
+                          ? "text-slate-400 opacity-50 cursor-not-allowed"
+                          : "text-blue-600 hover:bg-blue-500/15"
+                      )}
                     >
                       <Zap className="w-3.5 h-3.5 fill-current" />
                     </Button>
@@ -598,10 +631,19 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title="Registrar cobro ahora (adelantar en el historial)"
+                            title={
+                              isAlreadyExecutedThisPeriod(item)
+                                ? "Ya registrado en este ciclo"
+                                : "Registrar cobro ahora (adelantar en el historial)"
+                            }
                             onClick={() => handleExecuteNow(item)}
-                            disabled={isActionLoading}
-                            className="h-8 w-8 text-blue-600 hover:bg-blue-500/15 rounded-lg cursor-pointer"
+                            disabled={isActionLoading || isAlreadyExecutedThisPeriod(item)}
+                            className={cn(
+                              "h-8 w-8 rounded-lg cursor-pointer",
+                              isAlreadyExecutedThisPeriod(item)
+                                ? "text-slate-400 opacity-50 cursor-not-allowed"
+                                : "text-blue-600 hover:bg-blue-500/15"
+                            )}
                           >
                             <Zap className="w-4 h-4 fill-current" />
                           </Button>

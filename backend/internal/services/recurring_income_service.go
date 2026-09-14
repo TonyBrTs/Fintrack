@@ -163,7 +163,7 @@ func (s *recurringIncomeService) ProcessDueIncomes(ctx context.Context, userID s
 				UserID:        itemCopy.UserID,
 				Amount:        itemCopy.Amount,
 				Currency:      itemCopy.Currency,
-				Description:   itemCopy.Description,
+				Description:   formatRecurringDescription(itemCopy.Description),
 				Source:        itemCopy.Source,
 				PaymentMethod: itemCopy.PaymentMethod,
 				Date:          incomeDate,
@@ -216,7 +216,7 @@ func (s *recurringIncomeService) ProcessAllDueIncomes(ctx context.Context) (int,
 				UserID:        itemCopy.UserID,
 				Amount:        itemCopy.Amount,
 				Currency:      itemCopy.Currency,
-				Description:   itemCopy.Description,
+				Description:   formatRecurringDescription(itemCopy.Description),
 				Source:        itemCopy.Source,
 				PaymentMethod: itemCopy.PaymentMethod,
 				Date:          itemCopy.NextDueDate,
@@ -246,12 +246,16 @@ func (s *recurringIncomeService) ExecuteNow(ctx context.Context, id, userID stri
 	}
 
 	now := time.Now().UTC()
+	if AlreadyExecutedThisCycle(item.Frequency, item.BiweeklyType, item.LastExecutedAt, now) {
+		return nil, errors.New("este cobro recurrente ya fue registrado en el ciclo actual. No se puede duplicar en el mismo período")
+	}
+
 	income := models.Income{
 		ID:            fmt.Sprintf("%d", now.UnixNano()),
 		UserID:        userID,
 		Amount:        item.Amount,
 		Currency:      item.Currency,
-		Description:   item.Description,
+		Description:   formatRecurringDescription(item.Description),
 		Source:        item.Source,
 		PaymentMethod: item.PaymentMethod,
 		Date:          now,

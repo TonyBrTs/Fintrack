@@ -601,15 +601,12 @@ export default function ReportsPage() {
         {/* Page Top Header (Screen Only) */}
         <div className="print-hide print:hidden flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-border/60">
           <div className="space-y-1">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors mb-1 cursor-pointer"
-            >
-              <ArrowLeft size={14} />
-              <span>{isEs ? "Volver al Resumen" : "Back to Summary"}</span>
-            </Link>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 mb-2">
+              <FileSpreadsheet size={12} className="text-blue-500" />
+              <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">{isEs ? "Auditoría y Exportación" : "Audit & Export"}</span>
+            </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-titles dark:text-foreground">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-titles dark:text-foreground">
                 {isEs ? "Reportes y Estados de Cuenta" : "Financial Reports & Statements"}
               </h1>
               <span className="text-[11px] sm:text-xs font-mono font-bold px-2.5 py-0.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
@@ -618,23 +615,12 @@ export default function ReportsPage() {
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground">
               {isEs
-                ? "Configura el período exacto y exporta en PDF oficial, libro de Excel (.xlsx) o archivo CSV."
-                : "Configure your date range and export as an official PDF, Excel workbook (.xlsx), or CSV."}
+                ? "Configura el período exacto y exporta en libro de Excel (.xlsx) o archivo CSV."
+                : "Configure your date range and export as an Excel workbook (.xlsx), or CSV."}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0">
-            {/* PDF / Print Button */}
-            <button
-              onClick={handlePrint}
-              disabled={loading}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 h-10 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/35 transition-all cursor-pointer active:scale-95 disabled:opacity-50 whitespace-nowrap"
-              title={isEs ? "Imprimir o Guardar como PDF" : "Print or Save as PDF"}
-            >
-              <Printer size={15} />
-              <span>{isEs ? "PDF / Imprimir" : "PDF / Print"}</span>
-            </button>
-
             {/* Excel (.xlsx) Button */}
             <button
               onClick={handleExportExcel}
