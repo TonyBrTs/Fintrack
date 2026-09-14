@@ -6,7 +6,6 @@ import {
   Calendar,
   CloudOff,
   RefreshCw,
-  FileText,
   BarChart3,
 } from "lucide-react";
 import {
@@ -35,7 +34,6 @@ import { RecentTransactions } from "@/components/RecentTransactions";
 import { FinancialInsights } from "@/components/FinancialInsights";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { motion } from "framer-motion";
-import Link from "next/link";
 
 export default function SummaryPage() {
   const { currencySymbol, translate, language } = useSettings();
@@ -261,15 +259,6 @@ export default function SummaryPage() {
               ))}
             </SelectContent>
           </Select>
-
-          <Link
-            href="/reports"
-            className="flex items-center justify-center gap-2 px-3.5 sm:px-4 h-10 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95"
-            title={isEs ? "Generar reporte y estado de cuenta" : "Financial statements and reports"}
-          >
-            <FileText size={16} />
-            <span>{isEs ? "Reporte PDF" : "PDF Report"}</span>
-          </Link>
         </div>
       </div>
 
