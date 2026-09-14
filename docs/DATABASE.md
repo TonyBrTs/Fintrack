@@ -12,11 +12,29 @@ erDiagram
     USERS ||--o{ INCOMES : "recibe"
     USERS ||--o{ GOALS : "establece"
     USERS ||--o{ CATEGORIES : "personaliza"
+    USERS ||--o{ RECURRING_EXPENSES : "programa"
 
     USERS {
         uuid id PK "auth.users en Supabase"
         string email
         string raw_user_meta_data
+    }
+
+    RECURRING_EXPENSES {
+        string id PK "rec-<UnixNano>"
+        uuid user_id FK "Multi-tenancy"
+        numeric amount "12,2 dígitos"
+        varchar currency "USD, EUR, GBP, CRC"
+        text description
+        varchar category "Nombre de categoría"
+        varchar payment_method "Forma de pago"
+        varchar frequency "biweekly, monthly, etc."
+        varchar biweekly_type "15_and_last_day, every_15_days"
+        int billing_day "Día 1-31"
+        timestamptz start_date "Inicio de vigencia"
+        timestamptz next_due_date "Próximo cobro indexado"
+        boolean is_active "Activo o pausado"
+        boolean auto_register "Ejecución automática"
     }
 
     EXPENSES {
@@ -136,6 +154,39 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_categories_user_name_type
 ON categories(user_id, LOWER(name), type);
 ```
 
+### Tabla `recurring_expenses` (Gastos Fijos y Recurrentes)
+```sql
+CREATE TABLE IF NOT EXISTS recurring_expenses (
+    id VARCHAR(64) PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    description TEXT NOT NULL,
+    amount NUMERIC(12, 2) NOT NULL CHECK (amount > 0),
+    currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+    category VARCHAR(100) NOT NULL,
+    payment_method VARCHAR(100) NOT NULL,
+    frequency VARCHAR(20) NOT NULL DEFAULT 'biweekly',
+    biweekly_type VARCHAR(30) DEFAULT '15_and_last_day',
+    billing_day INT DEFAULT 15 CHECK (billing_day >= 1 AND billing_day <= 31),
+    start_date TIMESTAMPTZ NOT NULL,
+    end_date TIMESTAMPTZ,
+    next_due_date TIMESTAMPTZ NOT NULL,
+    last_executed_at TIMESTAMPTZ,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    auto_register BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_recurring_user_due 
+ON recurring_expenses(user_id, next_due_date ASC);
+
+CREATE INDEX IF NOT EXISTS idx_recurring_active_due 
+ON recurring_expenses(is_active, auto_register, next_due_date ASC);
+
+CREATE INDEX IF NOT EXISTS idx_recurring_user_category 
+ON recurring_expenses(user_id, category);
+```
+
 ---
 
 ## 🛡️ 3. Políticas de Seguridad a Nivel de Fila (RLS)
@@ -148,6 +199,7 @@ ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE incomes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recurring_expenses ENABLE ROW LEVEL SECURITY;
 
 -- Política de aislamiento para gastos
 CREATE POLICY "Users can only access their own expenses" 
@@ -170,6 +222,12 @@ WITH CHECK (auth.uid() = user_id);
 -- Política de aislamiento para categorías
 CREATE POLICY "Users can only access their own categories" 
 ON categories FOR ALL 
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- Política de aislamiento para gastos fijos y recurrentes
+CREATE POLICY "Users can only access their own recurring expenses" 
+ON recurring_expenses FOR ALL 
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 ```
