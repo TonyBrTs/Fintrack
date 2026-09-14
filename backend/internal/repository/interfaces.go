@@ -55,3 +55,13 @@ type RecurringExpenseRepository interface {
 	Delete(ctx context.Context, id, userID string) error
 }
 
+// RecurringIncomeRepository defines persistence operations for recurring/fixed incomes.
+type RecurringIncomeRepository interface {
+	FindByUserID(ctx context.Context, userID string) ([]models.RecurringIncome, error)
+	FindByIDAndUserID(ctx context.Context, id, userID string) (*models.RecurringIncome, error)
+	FindPendingDue(ctx context.Context, userID string, until time.Time) ([]models.RecurringIncome, error)
+	FindAllPendingDue(ctx context.Context, until time.Time) ([]models.RecurringIncome, error)
+	Create(ctx context.Context, recurring *models.RecurringIncome) error
+	Update(ctx context.Context, id, userID string, recurring *models.RecurringIncome) (*models.RecurringIncome, error)
+	Delete(ctx context.Context, id, userID string) error
+}

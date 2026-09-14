@@ -246,7 +246,27 @@ Elimina una categoría personalizada con protección de integridad referencial.
 
 ---
 
-## 🤖 5. Análisis con IA (`/api/ai/insights`)
+## 🔄 5. Módulo de Transacciones Fijas y Recurrentes
+
+### Gastos Fijos (`/api/recurring-expenses`)
+- `GET /api/recurring-expenses`: Lista gastos fijos programados del usuario.
+- `POST /api/recurring-expenses`: Crea una regla de gasto recurrente (quincenal, mensual, etc.).
+- `PUT /api/recurring-expenses/:id`: Actualiza configuración de frecuencia, monto o activa/pausa la regla.
+- `DELETE /api/recurring-expenses/:id`: Elimina la regla (los gastos ya registrados previamente se conservan).
+- `POST /api/recurring-expenses/sync`: Sincroniza y registra automáticamente los gastos vencidos hasta la fecha.
+- `POST /api/recurring-expenses/:id/execute-now`: Fuerza el cobro/registro anticipado de un gasto hoy.
+
+### Ingresos Fijos (`/api/recurring-incomes`)
+- `GET /api/recurring-incomes`: Lista ingresos fijos programados del usuario (salario, honorarios, etc.).
+- `POST /api/recurring-incomes`: Crea una regla de ingreso recurrente.
+- `PUT /api/recurring-incomes/:id`: Actualiza la regla (monto, día de cobro, fuente, activo/pausado).
+- `DELETE /api/recurring-incomes/:id`: Elimina la regla.
+- `POST /api/recurring-incomes/sync`: Sincroniza y registra automáticamente los ingresos vencidos hasta la fecha.
+- `POST /api/recurring-incomes/:id/execute-now`: Fuerza el registro anticipado de un ingreso recibido hoy.
+
+---
+
+## 🤖 6. Análisis con IA (`/api/ai/insights`)
 
 ### `POST /api/ai/insights`
 Genera recomendaciones financieras avanzadas utilizando modelos de **Google Gemini** con fallback automático.

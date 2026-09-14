@@ -62,6 +62,8 @@ export const translations = {
     },
     income: {
       title: "Income",
+      recurringTitle: "Fixed Incomes",
+      newRecurring: "New Fixed Income",
       description: "Recording and analysis of your income.",
       register: "Register Income",
       edit: "Edit",
@@ -261,6 +263,8 @@ export const translations = {
     },
     income: {
       title: "Ingresos",
+      recurringTitle: "Ingresos Fijos",
+      newRecurring: "Nuevo Ingreso Fijo",
       description: "Registro y análisis de tus ingresos.",
       register: "Registrar Ingreso",
       edit: "Editar",

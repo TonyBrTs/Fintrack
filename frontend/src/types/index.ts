@@ -85,3 +85,29 @@ export interface RecurringSyncResult {
   expenses: Expense[];
 }
 
+export interface RecurringIncome {
+  id: string;
+  user_id?: string;
+  description: string;
+  amount: number;
+  currency: string;
+  source: IncomeSource;
+  payment_method: string;
+  frequency: RecurringFrequency;
+  biweekly_type?: BiweeklyType;
+  billing_day?: number;
+  start_date: string | Date;
+  end_date?: string | Date | null;
+  next_due_date: string | Date;
+  last_executed_at?: string | Date | null;
+  is_active: boolean;
+  auto_register: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface RecurringIncomeSyncResult {
+  processed_count: number;
+  incomes: Income[];
+}
+

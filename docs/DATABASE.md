@@ -13,6 +13,7 @@ erDiagram
     USERS ||--o{ GOALS : "establece"
     USERS ||--o{ CATEGORIES : "personaliza"
     USERS ||--o{ RECURRING_EXPENSES : "programa"
+    USERS ||--o{ RECURRING_INCOMES : "programa"
 
     USERS {
         uuid id PK "auth.users en Supabase"
@@ -28,6 +29,23 @@ erDiagram
         text description
         varchar category "Nombre de categoría"
         varchar payment_method "Forma de pago"
+        varchar frequency "biweekly, monthly, etc."
+        varchar biweekly_type "15_and_last_day, every_15_days"
+        int billing_day "Día 1-31"
+        timestamptz start_date "Inicio de vigencia"
+        timestamptz next_due_date "Próximo vencimiento indexado"
+        boolean is_active "Activo o pausado"
+        boolean auto_register "Ejecución automática"
+    }
+
+    RECURRING_INCOMES {
+        string id PK "rec-<UnixNano>"
+        uuid user_id FK "Multi-tenancy"
+        numeric amount "12,2 dígitos"
+        varchar currency "USD, EUR, GBP, CRC"
+        text description
+        varchar source "Fuente de ingreso"
+        varchar payment_method "Forma de cobro"
         varchar frequency "biweekly, monthly, etc."
         varchar biweekly_type "15_and_last_day, every_15_days"
         int billing_day "Día 1-31"
@@ -187,6 +205,46 @@ CREATE INDEX IF NOT EXISTS idx_recurring_user_category
 ON recurring_expenses(user_id, category);
 ```
 
+### Tabla `recurring_incomes` (Ingresos Fijos y Recurrentes)
+```sql
+CREATE TABLE IF NOT EXISTS recurring_incomes (
+    id VARCHAR(64) PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    description TEXT NOT NULL,
+    amount NUMERIC(12, 2) NOT NULL CHECK (amount > 0),
+    currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+    source VARCHAR(100) NOT NULL,
+    payment_method VARCHAR(100) NOT NULL,
+    frequency VARCHAR(20) NOT NULL DEFAULT 'biweekly' 
+        CHECK (frequency IN ('weekly', 'biweekly', 'monthly', 'yearly')),
+    biweekly_type VARCHAR(30) DEFAULT '15_and_last_day' 
+        CHECK (biweekly_type IS NULL OR biweekly_type IN ('15_and_last_day', 'every_15_days')),
+    billing_day INT DEFAULT 15 
+        CHECK (billing_day IS NULL OR (billing_day >= 1 AND billing_day <= 31)),
+    start_date TIMESTAMPTZ NOT NULL,
+    end_date TIMESTAMPTZ,
+    next_due_date TIMESTAMPTZ NOT NULL,
+    last_executed_at TIMESTAMPTZ,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    auto_register BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT chk_recurring_incomes_dates CHECK (end_date IS NULL OR end_date >= start_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_recurring_incomes_user_due 
+ON recurring_incomes(user_id, next_due_date ASC);
+
+CREATE INDEX IF NOT EXISTS idx_recurring_incomes_active_due 
+ON recurring_incomes(is_active, auto_register, next_due_date ASC);
+
+CREATE INDEX IF NOT EXISTS idx_recurring_incomes_user_source 
+ON recurring_incomes(user_id, source);
+
+CREATE INDEX IF NOT EXISTS idx_recurring_incomes_user_id 
+ON recurring_incomes(user_id);
+```
+
 ---
 
 ## 🛡️ 3. Políticas de Seguridad a Nivel de Fila (RLS)
@@ -200,6 +258,7 @@ ALTER TABLE incomes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recurring_expenses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recurring_incomes ENABLE ROW LEVEL SECURITY;
 
 -- Política de aislamiento para gastos
 CREATE POLICY "Users can only access their own expenses" 
@@ -230,4 +289,11 @@ CREATE POLICY "Users can only access their own recurring expenses"
 ON recurring_expenses FOR ALL 
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
+
+-- Política de aislamiento para ingresos fijos y recurrentes
+CREATE POLICY "Users can only access their own recurring incomes" 
+ON recurring_incomes FOR ALL 
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 ```
+

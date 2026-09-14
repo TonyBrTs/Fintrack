@@ -2,6 +2,8 @@
 
 import { IncomeDetailsSheet } from '@/components/incomes/IncomeDetailsSheet';
 import { RegisterIncomeModal } from '@/components/incomes/RegisterIncomeModal';
+import { RecurringIncomesManager } from '@/components/incomes/RecurringIncomesManager';
+import { RecurringIncomeModal } from '@/components/incomes/RecurringIncomeModal';
 import { Badge } from '@/components/ui/Badge';
 import { KPICard } from '@/components/ui/KPICard';
 import { NavIncomeIcon } from '@/components/ui/AppIcons';
@@ -27,8 +29,9 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { safeFetch } from '@/lib/api';
 import { useCategories } from '@/hooks/useCategories';
 import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
-import { formatCurrency } from '@/lib/utils';
-import type { Income } from '@/types/index';
+import { cn, formatCurrency } from '@/lib/utils';
+import type { Income, RecurringIncomeSyncResult } from '@/types/index';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import {
   AlertCircle,
@@ -37,6 +40,7 @@ import {
   HandCoins,
   Loader2,
   Plus,
+  Repeat,
   Search,
   Tag,
   TrendingUp,
@@ -57,10 +61,12 @@ function IncomesContent() {
   const { user, openAuthModal } = useAuth();
   const { categories: userSourceList } = useCategories("income");
   const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<'history' | 'recurring'>('history');
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRecurringModalOpen, setIsRecurringModalOpen] = useState(false);
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -109,6 +115,19 @@ function IncomesContent() {
       return;
     }
     fetchIncomes();
+
+    // Sincronización automática de ingresos fijos pendientes de la quincena/mes
+    safeFetch<RecurringIncomeSyncResult>('/api/recurring-incomes/sync', { method: 'POST' })
+      .then((res) => {
+        if (res.ok && res.data && res.data.processed_count > 0) {
+          toast.success(
+            `✨ Se registraron automáticamente ${res.data.processed_count} ingreso(s) fijos de tu quincena/mes.`,
+            { duration: 6000 }
+          );
+          fetchIncomes();
+        }
+      })
+      .catch(() => {});
   }, [user]);
 
   const safeIncomes = useMemo(() => Array.isArray(incomes) ? incomes : [], [incomes]);
@@ -224,21 +243,73 @@ function IncomesContent() {
             <span>Fuentes</span>
           </Button>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setIsModalOpen(true)}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all cursor-pointer h-10"
-          >
-            <Plus size={18} strokeWidth={2.5} />
-            <span className="truncate">{translate('income.register') || 'Registrar Ingreso'}</span>
-          </motion.button>
+          {activeTab === 'recurring' ? (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setIsRecurringModalOpen(true)}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all cursor-pointer h-10"
+            >
+              <Plus size={18} strokeWidth={2.5} />
+              <span className="truncate">Nuevo Ingreso Fijo</span>
+            </motion.button>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setIsModalOpen(true)}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all cursor-pointer h-10"
+            >
+              <Plus size={18} strokeWidth={2.5} />
+              <span className="truncate">{translate('income.register') || 'Registrar Ingreso'}</span>
+            </motion.button>
+          )}
         </div>
       </header>
+
+      {/* Tabs Switcher - Mobile Responsive Segmented Control */}
+      <div className="grid grid-cols-2 sm:inline-flex items-center gap-1 p-1 bg-slate-200/70 dark:bg-slate-900/80 rounded-2xl border border-slate-300/80 dark:border-slate-800 w-full sm:w-auto shadow-xs">
+        <button
+          type="button"
+          onClick={() => setActiveTab('history')}
+          className={cn(
+            "flex items-center justify-center gap-2 py-2 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none",
+            activeTab === 'history'
+              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-foreground shadow-sm border border-slate-200/90 dark:border-slate-700"
+              : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
+          )}
+        >
+          <HandCoins className="w-4 h-4 text-emerald-500 shrink-0" />
+          <span>Ingresos</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground font-semibold">
+            {incomes.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('recurring')}
+          className={cn(
+            "flex items-center justify-center gap-2 py-2 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none",
+            activeTab === 'recurring'
+              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-foreground shadow-sm border border-slate-200/90 dark:border-slate-700"
+              : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
+          )}
+        >
+          <Repeat className="w-4 h-4 text-teal-500 shrink-0" />
+          <span>Ingresos Fijos</span>
+        </button>
+      </div>
 
       <RegisterIncomeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchIncomes}
+      />
+
+      <RecurringIncomeModal
+        isOpen={isRecurringModalOpen}
+        onClose={() => setIsRecurringModalOpen(false)}
         onSuccess={fetchIncomes}
       />
 
@@ -255,6 +326,10 @@ function IncomesContent() {
         onSuccess={fetchIncomes}
       />
 
+      {activeTab === 'recurring' ? (
+        <RecurringIncomesManager onIncomeGenerated={fetchIncomes} />
+      ) : (
+        <>
       {/* KPI Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
         <KPICard
@@ -388,6 +463,8 @@ function IncomesContent() {
           </TableBody>
         </Table>
       </motion.section>
+      </>
+      )}
     </div>
   );
 }

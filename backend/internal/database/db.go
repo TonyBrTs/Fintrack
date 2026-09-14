@@ -31,7 +31,7 @@ func InitDB() (*gorm.DB, error) {
 	}
 
 	// AutoMigrate ensures columns match models
-	err = db.AutoMigrate(&models.Expense{}, &models.Income{}, &models.Goal{}, &models.Category{}, &models.RecurringExpense{})
+	err = db.AutoMigrate(&models.Expense{}, &models.Income{}, &models.Goal{}, &models.Category{}, &models.RecurringExpense{}, &models.RecurringIncome{})
 	if err != nil {
 		log.Printf("[Database] AutoMigrate warning: %v\n", err)
 	}

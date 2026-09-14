@@ -23,6 +23,7 @@ const (
 	goalsFile             = "goals.json"
 	categoriesFile        = "categories.json"
 	recurringExpensesFile = "recurring_expenses.json"
+	recurringIncomesFile  = "recurring_incomes.json"
 )
 
 func main() {
@@ -39,11 +40,12 @@ func main() {
 
 	// 3. Instantiate Repositories (Liskov Substitution Principle: GORM or Memory fallback)
 	var (
-		expenseRepo   repository.ExpenseRepository
-		incomeRepo    repository.IncomeRepository
-		goalRepo      repository.GoalRepository
-		categoryRepo  repository.CategoryRepository
-		recurringRepo repository.RecurringExpenseRepository
+		expenseRepo         repository.ExpenseRepository
+		incomeRepo          repository.IncomeRepository
+		goalRepo            repository.GoalRepository
+		categoryRepo        repository.CategoryRepository
+		recurringRepo       repository.RecurringExpenseRepository
+		recurringIncomeRepo repository.RecurringIncomeRepository
 	)
 
 	if db != nil {
@@ -53,6 +55,7 @@ func main() {
 		goalRepo = gorm_repo.NewGormGoalRepository(db)
 		categoryRepo = gorm_repo.NewGormCategoryRepository(db)
 		recurringRepo = gorm_repo.NewGormRecurringExpenseRepository(db)
+		recurringIncomeRepo = gorm_repo.NewGormRecurringIncomeRepository(db)
 	} else {
 		log.Println("[Storage] Initializing Memory & JSON fallback repositories...")
 		expenseRepo = memory_repo.NewMemoryExpenseRepository(expensesFile)
@@ -60,6 +63,7 @@ func main() {
 		goalRepo = memory_repo.NewMemoryGoalRepository(goalsFile)
 		categoryRepo = memory_repo.NewMemoryCategoryRepository(categoriesFile)
 		recurringRepo = memory_repo.NewMemoryRecurringExpenseRepository(recurringExpensesFile)
+		recurringIncomeRepo = memory_repo.NewMemoryRecurringIncomeRepository(recurringIncomesFile)
 	}
 
 	// 4. Instantiate Services (Dependency Inversion: Injecting Repositories)
@@ -68,6 +72,7 @@ func main() {
 	goalService := services.NewGoalService(goalRepo)
 	categoryService := services.NewCategoryService(categoryRepo, expenseRepo, incomeRepo)
 	recurringService := services.NewRecurringExpenseService(recurringRepo, expenseRepo)
+	recurringIncomeService := services.NewRecurringIncomeService(recurringIncomeRepo, incomeRepo)
 
 	// 5. Instantiate Handlers (Single Responsibility: Pure HTTP mapping)
 	expenseHandler := handlers.NewExpenseHandler(expenseService)
@@ -75,17 +80,25 @@ func main() {
 	goalHandler := handlers.NewGoalHandler(goalService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	recurringHandler := handlers.NewRecurringExpenseHandler(recurringService)
+	recurringIncomeHandler := handlers.NewRecurringIncomeHandler(recurringIncomeService)
 
-	// Background scheduler for due recurring expenses (checks periodically)
+	// Background scheduler for due recurring transactions (checks periodically)
 	go func() {
 		ticker := time.NewTicker(1 * time.Hour)
 		defer ticker.Stop()
 		for range ticker.C {
-			count, err := recurringService.ProcessAllDueExpenses(context.Background())
+			expCount, err := recurringService.ProcessAllDueExpenses(context.Background())
 			if err != nil {
 				log.Printf("[Scheduler] Error processing recurring expenses: %v\n", err)
-			} else if count > 0 {
-				log.Printf("[Scheduler] Automatically processed %d due recurring expenses.\n", count)
+			} else if expCount > 0 {
+				log.Printf("[Scheduler] Automatically processed %d due recurring expenses.\n", expCount)
+			}
+
+			incCount, err := recurringIncomeService.ProcessAllDueIncomes(context.Background())
+			if err != nil {
+				log.Printf("[Scheduler] Error processing recurring incomes: %v\n", err)
+			} else if incCount > 0 {
+				log.Printf("[Scheduler] Automatically processed %d due recurring incomes.\n", incCount)
 			}
 		}
 	}()
@@ -120,6 +133,14 @@ func main() {
 		api.POST("/incomes", incomeHandler.CreateIncome)
 		api.PUT("/incomes/:id", incomeHandler.UpdateIncome)
 		api.DELETE("/incomes/:id", incomeHandler.DeleteIncome)
+
+		// Recurring / Fixed Incomes API
+		api.GET("/recurring-incomes", recurringIncomeHandler.GetRecurringIncomes)
+		api.POST("/recurring-incomes", recurringIncomeHandler.CreateRecurringIncome)
+		api.PUT("/recurring-incomes/:id", recurringIncomeHandler.UpdateRecurringIncome)
+		api.DELETE("/recurring-incomes/:id", recurringIncomeHandler.DeleteRecurringIncome)
+		api.POST("/recurring-incomes/sync", recurringIncomeHandler.SyncDueIncomes)
+		api.POST("/recurring-incomes/:id/execute-now", recurringIncomeHandler.ExecuteNow)
 
 		// Goals API
 		api.GET("/goals", goalHandler.GetGoals)
