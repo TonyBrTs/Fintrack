@@ -3,8 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/TonyBrTs/fintrack-backend/internal/models"
