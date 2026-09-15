@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
@@ -56,9 +56,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setToken(session?.access_token ?? null);
+      const nextUser = session?.user ?? null;
+      const nextToken = session?.access_token ?? null;
+
+      // Preserve user object reference if user identity and metadata haven't changed
+      // This prevents all pages and hooks from re-triggering fetches when switching browser tabs
+      setUser((prevUser) => {
+        if (!prevUser && !nextUser) return null;
+        if (
+          prevUser &&
+          nextUser &&
+          prevUser.id === nextUser.id &&
+          prevUser.updated_at === nextUser.updated_at
+        ) {
+          return prevUser;
+        }
+        return nextUser;
+      });
+
+      setSession((prevSession) => {
+        if (!prevSession && !session) return null;
+        if (
+          prevSession &&
+          session &&
+          prevSession.access_token === nextToken &&
+          prevSession.user?.id === nextUser?.id
+        ) {
+          return prevSession;
+        }
+        return session;
+      });
+
+      setToken((prevToken) => (prevToken === nextToken ? prevToken : nextToken));
       setIsLoading(false);
 
       if (event === "PASSWORD_RECOVERY") {
@@ -209,23 +238,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthModalOpen(false);
   };
 
-  const value = {
-    user,
-    session,
-    token,
-    isLoading,
-    signInWithEmail,
-    signUpWithEmail,
-    signInWithGoogle,
-    resetPasswordForEmail,
-    updatePassword,
-    signOut,
-    isAuthModalOpen,
-    authModalMode,
-    openAuthModal,
-    closeAuthModal,
-    setAuthModalMode,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      session,
+      token,
+      isLoading,
+      signInWithEmail,
+      signUpWithEmail,
+      signInWithGoogle,
+      resetPasswordForEmail,
+      updatePassword,
+      signOut,
+      isAuthModalOpen,
+      authModalMode,
+      openAuthModal,
+      closeAuthModal,
+      setAuthModalMode,
+    }),
+    [user, session, token, isLoading, isAuthModalOpen, authModalMode]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

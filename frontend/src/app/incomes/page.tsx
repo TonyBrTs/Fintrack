@@ -85,9 +85,9 @@ function IncomesContent() {
     }
   }, [searchParams, incomes]);
 
-  const fetchIncomes = async () => {
+  const fetchIncomes = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const res = await safeFetch<Income[]>('/api/incomes');
 
       if (!res.ok) {
@@ -124,11 +124,11 @@ function IncomesContent() {
             `✨ Se registraron automáticamente ${res.data.processed_count} ingreso(s) fijos de tu quincena/mes.`,
             { duration: 6000 }
           );
-          fetchIncomes();
+          fetchIncomes(true);
         }
       })
       .catch(() => {});
-  }, [user]);
+  }, [user?.id]);
 
   const safeIncomes = useMemo(() => Array.isArray(incomes) ? incomes : [], [incomes]);
 

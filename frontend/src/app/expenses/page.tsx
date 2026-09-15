@@ -88,9 +88,9 @@ function ExpensesContent() {
     }
   }, [searchParams, expenses]);
 
-  const fetchExpenses = async () => {
+  const fetchExpenses = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const res = await safeFetch<Expense[]>('/api/expenses');
 
       if (!res.ok) {
@@ -127,11 +127,11 @@ function ExpensesContent() {
             `✨ Se registraron automáticamente ${res.data.processed_count} gasto(s) fijos de tu quincena/mes.`,
             { duration: 6000 }
           );
-          fetchExpenses();
+          fetchExpenses(true);
         }
       })
       .catch(() => {});
-  }, [user]);
+  }, [user?.id]);
 
   const safeExpenses = useMemo(() => Array.isArray(expenses) ? expenses : [], [expenses]);
 

@@ -97,9 +97,9 @@ export default function ReportsPage() {
   const [notes, setNotes] = useState("");
 
   // Load all user financial data
-  const fetchReportData = async () => {
+  const fetchReportData = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const [expRes, incRes, goalRes] = await Promise.all([
         safeFetch<Expense[]>("/api/expenses", { timeoutMs: 15000 }),
@@ -133,7 +133,7 @@ export default function ReportsPage() {
 
   useEffect(() => {
     fetchReportData();
-  }, [user]);
+  }, [user?.id]);
 
   // Preset Selection
   const handleSelectPreset = (p: PeriodPreset) => {
@@ -673,7 +673,7 @@ export default function ReportsPage() {
               <span>{error}</span>
             </div>
             <button
-              onClick={fetchReportData}
+              onClick={() => fetchReportData()}
               className="px-3 py-1 bg-rose-600 text-white rounded-lg text-xs font-bold hover:bg-rose-700 transition cursor-pointer"
             >
               {isEs ? "Reintentar" : "Retry"}

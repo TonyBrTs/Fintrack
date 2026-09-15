@@ -153,7 +153,7 @@ export default function SummaryPage() {
     }
 
     fetchData(true);
-  }, [user, fetchData]);
+  }, [user?.id, fetchData]);
 
   const currentExpenses = Array.isArray(expenses) ? expenses : [];
   const currentIncomes = Array.isArray(incomes) ? incomes : [];
@@ -208,7 +208,7 @@ export default function SummaryPage() {
         100
       : 0;
 
-  if (loading || (expenses === null && !fetchError)) {
+  if ((loading && expenses === null) || (expenses === null && !fetchError)) {
     return (
       <ProtectedRoute>
         <DashboardLoadingState />

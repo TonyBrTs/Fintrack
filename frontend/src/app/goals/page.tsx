@@ -76,7 +76,7 @@ export default function GoalsPage() {
       return;
     }
     fetchGoals();
-  }, [user]);
+  }, [user?.id]);
 
   const safeGoals = useMemo(() => Array.isArray(goals) ? goals : [], [goals]);
 

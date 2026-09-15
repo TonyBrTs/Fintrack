@@ -67,7 +67,7 @@ export function useCategories(filterType?: "expense" | "income") {
     } finally {
       setLoading(false);
     }
-  }, [user, filterType]);
+  }, [user?.id, filterType]);
 
   useEffect(() => {
     fetchCategories();
