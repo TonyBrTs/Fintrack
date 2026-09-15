@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import * as XLSX from "xlsx";
+import { exportFinancialReportExcel } from "@/lib/excelExport";
 import { toast } from "sonner";
 import {
   Printer,
@@ -317,181 +317,40 @@ export default function ReportsPage() {
     return paymentMethodTranslations[pm] || pm;
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
-      const wb = XLSX.utils.book_new();
-
-      // 1. Hoja Resumen
-      const summaryAoa: (string | number)[][] = [
-        [isEs ? "FINTRACK - ESTADO FINANCIERO Y RENDICIÓN DE FONDOS" : "FINTRACK - OFFICIAL FINANCIAL STATEMENT"],
-        [],
-        [isEs ? "Referencia Contable:" : "Audit Reference:", reportReference],
-        [isEs ? "Titular:" : "Account Holder:", user?.user_metadata?.full_name || user?.email || (isEs ? "Titular FinTrack" : "Account Holder")],
-        [isEs ? "Correo Electrónico:" : "Email:", user?.email || "N/A"],
-        [isEs ? "Período Consultado:" : "Consulted Period:", periodLabel],
-        [isEs ? "Fecha de Emisión:" : "Issued Date:", generatedAt],
-        [],
-        [isEs ? "RESUMEN EJECUTIVO Y BALANCE NETO" : "EXECUTIVE SUMMARY & NET BALANCE"],
-        [isEs ? "Concepto Contable" : "Ledger Concept", isEs ? "Monto Consolidado" : "Consolidated Amount", isEs ? "Moneda" : "Currency"],
-        [
-          isEs ? "(+) Total Ingresos Percibidos" : "(+) Total Incomes Received",
-          Number(totalIncome.toFixed(2)),
-          currencySymbol,
-        ],
-        [
-          isEs ? "(-) Total Egresos Realizados" : "(-) Total Outflows Executed",
-          Number(totalExpense.toFixed(2)),
-          currencySymbol,
-        ],
-        [
-          isEs ? "(=) Balance Financiero Neto" : "(=) Net Financial Balance",
-          Number(netSavings.toFixed(2)),
-          currencySymbol,
-        ],
-        [
-          isEs ? "Tasa de Ahorro (%)" : "Savings Rate (%)",
-          Number(savingsRate.toFixed(2)),
-          "%",
-        ],
-        [
-          isEs ? "Total Operaciones en Período" : "Total Operations in Period",
-          filteredExpenses.length + filteredIncomes.length,
-          "",
-        ],
-      ];
-
-      if (notes.trim()) {
-        summaryAoa.push([]);
-        summaryAoa.push([isEs ? "OBSERVACIONES CONTABLES:" : "ACCOUNTING NOTES:"]);
-        summaryAoa.push([notes]);
-      }
-
-      const wsSummary = XLSX.utils.aoa_to_sheet(summaryAoa);
-      wsSummary["!cols"] = [{ wch: 38 }, { wch: 22 }, { wch: 12 }];
-      XLSX.utils.book_append_sheet(wb, wsSummary, isEs ? "Resumen" : "Summary");
-
-      // 2. Hoja Egresos
-      if (filteredExpenses.length > 0) {
-        const expHeaders = [
-          isEs ? "Fecha" : "Date",
-          isEs ? "Concepto / Descripción" : "Description / Concept",
-          isEs ? "Categoría" : "Category",
-          isEs ? "Medio de Pago" : "Payment Method",
-          isEs ? "Monto" : "Amount",
-          isEs ? "Moneda" : "Currency",
-        ];
-        const expRows: (string | number)[][] = filteredExpenses.map((e) => [
-          formatDateDisplay(e.date),
-          e.description || (isEs ? "Sin descripción" : "No concept"),
-          translateCategory(e.category),
-          translatePaymentMethod(e.payment_method),
-          Number(e.amount) || 0,
-          currencySymbol,
-        ]);
-        expRows.push([
-          isEs ? `TOTAL EGRESOS (${filteredExpenses.length})` : `TOTAL OUTFLOWS (${filteredExpenses.length})`,
-          "",
-          "",
-          "",
-          Number(totalExpense.toFixed(2)),
-          currencySymbol,
-        ]);
-        const wsExpenses = XLSX.utils.aoa_to_sheet([expHeaders, ...expRows]);
-        wsExpenses["!cols"] = [
-          { wch: 14 },
-          { wch: 35 },
-          { wch: 20 },
-          { wch: 22 },
-          { wch: 16 },
-          { wch: 10 },
-        ];
-        XLSX.utils.book_append_sheet(wb, wsExpenses, isEs ? "Egresos" : "Expenses");
-      }
-
-      // 3. Hoja Ingresos
-      if (filteredIncomes.length > 0) {
-        const incHeaders = [
-          isEs ? "Fecha" : "Date",
-          isEs ? "Concepto / Descripción" : "Description / Concept",
-          isEs ? "Origen / Fuente" : "Source",
-          isEs ? "Medio de Acreditación" : "Payment Method",
-          isEs ? "Monto" : "Amount",
-          isEs ? "Moneda" : "Currency",
-        ];
-        const incRows: (string | number)[][] = filteredIncomes.map((i) => [
-          formatDateDisplay(i.date),
-          i.description || (isEs ? "Abono a cuenta" : "Deposit"),
-          translateSource(i.source),
-          translatePaymentMethod(i.payment_method),
-          Number(i.amount) || 0,
-          currencySymbol,
-        ]);
-        incRows.push([
-          isEs ? `TOTAL INGRESOS (${filteredIncomes.length})` : `TOTAL INFLOWS (${filteredIncomes.length})`,
-          "",
-          "",
-          "",
-          Number(totalIncome.toFixed(2)),
-          currencySymbol,
-        ]);
-        const wsIncomes = XLSX.utils.aoa_to_sheet([incHeaders, ...incRows]);
-        wsIncomes["!cols"] = [
-          { wch: 14 },
-          { wch: 35 },
-          { wch: 20 },
-          { wch: 22 },
-          { wch: 16 },
-          { wch: 10 },
-        ];
-        XLSX.utils.book_append_sheet(wb, wsIncomes, isEs ? "Ingresos" : "Incomes");
-      }
-
-      // 4. Hoja Metas
-      if (goals.length > 0) {
-        const goalHeaders = [
-          isEs ? "Objetivo / Meta" : "Goal Target",
-          isEs ? "Fondo Actual" : "Current Amount",
-          isEs ? "Meta Proyectada" : "Target Cap",
-          isEs ? "Progreso (%)" : "Progress (%)",
-          isEs ? "Remanente" : "Remaining",
-          isEs ? "Estado" : "Status",
-          isEs ? "Moneda" : "Currency",
-        ];
-        const goalRows: (string | number)[][] = goals.map((g) => {
-          const pct = g.target_amount > 0 ? (g.current_amount / g.target_amount) * 100 : 0;
-          const rem = Math.max(0, g.target_amount - g.current_amount);
-          const isDone = g.current_amount >= g.target_amount;
-          return [
-            g.name,
-            Number(g.current_amount) || 0,
-            Number(g.target_amount) || 0,
-            Number(pct.toFixed(1)),
-            Number(rem.toFixed(2)),
-            isDone ? (isEs ? "100% CUMPLIDA" : "COMPLETED") : (isEs ? "EN PROGRESO" : "IN PROGRESS"),
-            currencySymbol,
-          ];
-        });
-        const wsGoals = XLSX.utils.aoa_to_sheet([goalHeaders, ...goalRows]);
-        wsGoals["!cols"] = [
-          { wch: 30 },
-          { wch: 16 },
-          { wch: 16 },
-          { wch: 14 },
-          { wch: 16 },
-          { wch: 16 },
-          { wch: 10 },
-        ];
-        XLSX.utils.book_append_sheet(wb, wsGoals, isEs ? "Metas" : "Goals");
-      }
+      await exportFinancialReportExcel({
+        reportReference,
+        user: {
+          name: (user?.user_metadata?.full_name as string) || undefined,
+          email: user?.email || undefined,
+        },
+        periodLabel,
+        generatedAt,
+        currencySymbol,
+        notes,
+        isEs,
+        totalIncome,
+        totalExpense,
+        netSavings,
+        savingsRate,
+        filteredExpenses,
+        filteredIncomes,
+        goals,
+        formatDateDisplay,
+        translateCategory,
+        translateSource,
+        translatePaymentMethod,
+      });
 
       const filename = `FinTrack-Reporte-${reportReference}.xlsx`;
-      XLSX.writeFile(wb, filename);
       toast.success(
         isEs
           ? `Reporte Excel descargado: ${filename}`
           : `Excel report downloaded: ${filename}`
       );
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error(
         isEs
           ? "No se pudo generar el archivo Excel."
