@@ -33,6 +33,7 @@ import { SummaryCharts } from "@/components/SummaryCharts";
 import { RecentTransactions } from "@/components/RecentTransactions";
 import { FinancialInsights } from "@/components/FinancialInsights";
 import { BrandLogo } from "@/components/layout/BrandLogo";
+import { PageLoadingState } from "@/components/ui/PageLoadingState";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -211,7 +212,7 @@ export default function SummaryPage() {
   if ((loading && expenses === null) || (expenses === null && !fetchError)) {
     return (
       <ProtectedRoute>
-        <DashboardLoadingState />
+        <PageLoadingState message={isEs ? "Cargando tus finanzas..." : "Loading your finances..."} />
       </ProtectedRoute>
     );
   }
@@ -407,78 +408,6 @@ export default function SummaryPage() {
   );
 }
 
-function DashboardLoadingState() {
-  return (
-    <div className="space-y-8 max-w-7xl mx-auto py-2">
-      {/* Floating Modern Synchronization Hero Card */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-white/95 via-blue-50/50 to-indigo-50/40 dark:from-[#0d1322]/90 dark:via-[#090d18]/85 dark:to-blue-950/25 border border-slate-200/90 dark:border-white/10 shadow-xl backdrop-blur-xl transition-all">
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 rounded-full bg-blue-500/10 dark:bg-blue-600/15 blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
-          <div className="relative shrink-0">
-            <BrandLogo size={56} className="shadow-lg rounded-2xl animate-pulse" priority />
-            <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white shadow-md border-2 border-white dark:border-[#0d1322]">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            </span>
-          </div>
-          <div className="space-y-2 flex-1 min-w-0">
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                Cargando tus finanzas...
-              </h2>
-            </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl">
-              Obteniendo tus gastos, ingresos y metas en tiempo real con cifrado seguro.
-            </p>
-            {/* Animated Progress Bar */}
-            <div className="w-full max-w-md h-2 bg-slate-200/80 dark:bg-slate-800/80 rounded-full overflow-hidden mt-3">
-              <div className="h-full w-full bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-400 rounded-full animate-pulse" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* KPI Cards Skeletons with Shimmer */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="rounded-2xl p-6 bg-white/80 dark:bg-card/60 border border-slate-200/80 dark:border-border/60 shadow-xs space-y-4 animate-pulse"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-3.5 w-24 bg-slate-200 dark:bg-slate-800 rounded-md" />
-              <div className="w-10 h-10 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80" />
-            </div>
-            <div className="h-7 w-32 bg-slate-200 dark:bg-slate-800 rounded-lg" />
-            <div className="h-4 w-20 bg-slate-200/60 dark:bg-slate-800/60 rounded-md" />
-          </div>
-        ))}
-      </div>
-
-      {/* Grid Bottom Skeletons */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 rounded-3xl p-6 bg-white/80 dark:bg-card/60 border border-slate-200/80 dark:border-border/60 shadow-xs space-y-4 animate-pulse min-h-[300px]">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-border/40">
-            <div className="h-5 w-40 bg-slate-200 dark:bg-slate-800 rounded-md" />
-            <div className="h-4 w-20 bg-slate-200 dark:bg-slate-800 rounded-md" />
-          </div>
-          <div className="space-y-3 pt-2">
-            {[1, 2, 3, 4].map((j) => (
-              <div key={j} className="h-14 bg-slate-100/80 dark:bg-slate-800/40 rounded-2xl" />
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-3xl p-6 bg-white/80 dark:bg-card/60 border border-slate-200/80 dark:border-border/60 shadow-xs space-y-4 animate-pulse min-h-[300px]">
-          <div className="h-5 w-32 bg-slate-200 dark:bg-slate-800 rounded-md" />
-          <div className="space-y-3 pt-4">
-            <div className="h-20 bg-slate-100/80 dark:bg-slate-800/40 rounded-2xl" />
-            <div className="h-20 bg-slate-100/80 dark:bg-slate-800/40 rounded-2xl" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function DashboardErrorState({
   error,

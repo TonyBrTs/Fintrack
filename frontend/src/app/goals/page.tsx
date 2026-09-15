@@ -10,6 +10,7 @@ import { GoalCard } from "@/components/goals/GoalCard";
 import { RegisterGoalModal } from "@/components/goals/RegisterGoalModal";
 import { KPICard } from "@/components/ui/KPICard";
 import { NavGoalsIcon } from "@/components/ui/AppIcons";
+import { PageLoadingState } from "@/components/ui/PageLoadingState";
 import { Plus, Loader2, Trophy, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
@@ -99,12 +100,7 @@ export default function GoalsPage() {
 
   if (loading && goals.length === 0) {
     return (
-      <main className="max-w-7xl mx-auto px-4 lg:px-20 py-24 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 text-action animate-spin opacity-60" />
-        <p className="text-muted-foreground font-medium animate-pulse text-sm">
-          {translate("common.loading") || "Cargando metas..."}
-        </p>
-      </main>
+      <PageLoadingState message={translate("common.loading") || "Cargando metas..."} />
     );
   }
 

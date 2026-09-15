@@ -12,6 +12,7 @@ import { translations } from "@/lib/translations";
 import type { Expense, Income, Goal } from "@/types/index";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
+import { PageLoadingState } from "@/components/ui/PageLoadingState";
 import {
   Popover,
   PopoverContent,
@@ -658,11 +659,8 @@ export default function ReportsPage() {
 
         {/* Loading / Error States for Screen */}
         {loading && (
-          <div className="print-hide print:hidden py-16 flex flex-col items-center justify-center gap-3 text-center">
-            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-            <p className="text-sm text-muted-foreground font-medium">
-              {isEs ? "Cargando libro contable..." : "Loading financial records..."}
-            </p>
+          <div className="print-hide print:hidden">
+            <PageLoadingState message={isEs ? "Cargando libro contable..." : "Loading financial records..."} />
           </div>
         )}
 

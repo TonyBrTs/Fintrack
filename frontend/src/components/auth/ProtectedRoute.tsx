@@ -4,6 +4,7 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Button } from "@/components/ui/button";
+import { PageLoadingState } from "@/components/ui/PageLoadingState";
 import { Shield, Lock, TrendingUp, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -18,12 +19,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-        <p className="text-sm font-medium text-muted-foreground animate-pulse">
-          {isEs ? "Cargando sesión segura..." : "Verifying secure session..."}
-        </p>
-      </div>
+      <PageLoadingState
+        message={isEs ? "Cargando sesión segura..." : "Verifying secure session..."}
+      />
     );
   }
 
