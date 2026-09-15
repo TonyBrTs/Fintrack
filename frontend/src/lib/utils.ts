@@ -107,25 +107,96 @@ export function parseCalendarDate(dateInput: string | Date | null | undefined): 
   return new Date(dateInput);
 }
 
-const SPANISH_MONTHS_SHORT = [
-  "ene.", "feb.", "mar.", "abr.", "may.", "jun.",
-  "jul.", "ago.", "set.", "oct.", "nov.", "dic."
-];
+const MONTHS_SHORT: Record<string, string[]> = {
+  es: ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "set.", "oct.", "nov.", "dic."],
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+};
 
 /**
- * Formats a calendar date safely into "30 set." without timezone shifting or browser locale bugs.
+ * Formats a calendar date safely into "30 set." or "Sep 30" without timezone shifting or browser locale bugs.
  */
 export function formatCalendarDate(
   dateInput: string | Date | null | undefined,
+  language: string = "es",
   includeYear: boolean = false
 ): string {
   if (!dateInput) return "";
   const d = parseCalendarDate(dateInput);
   const day = d.getDate();
-  const month = SPANISH_MONTHS_SHORT[d.getMonth()] || "";
-  if (includeYear) {
-    return `${day} ${month} ${d.getFullYear()}`;
+  const langKey = language === "en" ? "en" : "es";
+  const months = MONTHS_SHORT[langKey];
+  const month = months[d.getMonth()] || "";
+
+  if (langKey === "en") {
+    return includeYear ? `${month} ${day}, ${d.getFullYear()}` : `${month} ${day}`;
   }
-  return `${day} ${month}`;
+  return includeYear ? `${day} ${month} ${d.getFullYear()}` : `${day} ${month}`;
+}
+
+/**
+ * Formats due date urgency label bilingual (es/en)
+ */
+export function formatDueDateLabel(dueDateStr: string | Date, language: string = "es") {
+  const target = parseCalendarDate(dueDateStr);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+
+  const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 3600 * 24));
+  const isEn = language === "en";
+
+  if (diffDays === 0) return { label: isEn ? "Today!" : "¡Hoy!", urgent: true };
+  if (diffDays === 1) return { label: isEn ? "Tomorrow" : "Mañana", urgent: true };
+  if (diffDays > 1 && diffDays <= 31) {
+    return { label: isEn ? `In ${diffDays} days` : `En ${diffDays} días`, urgent: false };
+  }
+  if (diffDays > 31) {
+    const months = Math.round(diffDays / 30);
+    return {
+      label: isEn
+        ? `In ${months} ${months === 1 ? "month" : "months"}`
+        : `En ${months} meses`,
+      urgent: false,
+    };
+  }
+  if (diffDays < 0) {
+    const abs = Math.abs(diffDays);
+    return {
+      label: isEn ? `Overdue by ${abs}d` : `Venció hace ${abs}d`,
+      urgent: true,
+    };
+  }
+
+  return {
+    label: isEn ? `In ${diffDays} days` : `En ${diffDays} días`,
+    urgent: false,
+  };
+}
+
+/**
+ * Formats recurring frequencies bilingual (es/en)
+ */
+export function formatFrequencyLabel(
+  frequency: string,
+  biweeklyType?: string,
+  billingDay?: number,
+  language: string = "es"
+): string {
+  const isEn = language === "en";
+  switch (frequency) {
+    case "biweekly":
+      if (biweeklyType === "every_15_days") {
+        return isEn ? "Biweekly (every 15 days)" : "Quincenal (c/ 15 días)";
+      }
+      return isEn ? "Biweekly (15th & end of month)" : "Quincenal (15 y fin de mes)";
+    case "monthly":
+      return isEn ? `Monthly (Day ${billingDay || 15})` : `Mensual (Día ${billingDay || 15})`;
+    case "weekly":
+      return isEn ? "Weekly" : "Semanal";
+    case "yearly":
+      return isEn ? "Yearly" : "Anual";
+    default:
+      return frequency;
+  }
 }
 

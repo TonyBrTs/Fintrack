@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn, formatLiveNumber, parseLiveNumber, getTodayLocal } from "@/lib/utils";
+import { cn, formatLiveNumber, parseLiveNumber, getTodayLocal, formatCalendarDate } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +40,7 @@ export function RecurringIncomeModal({
   onSuccess,
   initialData,
 }: RecurringIncomeModalProps) {
-  const { translate, currency, currencySymbol } = useSettings();
+  const { translate, currency, currencySymbol, language } = useSettings();
   const { categories: sourceList } = useCategories("income");
   const [loading, setLoading] = useState(false);
 
@@ -391,7 +391,7 @@ export function RecurringIncomeModal({
                     const d = Math.min(day, lastOfMonth);
                     const dt = new Date(y, m, d);
                     if (dt >= now) {
-                      dates.push(dt.toLocaleDateString("es-CR", { day: "numeric", month: "short", year: "numeric" }));
+                      dates.push(formatCalendarDate(dt, language, true));
                     }
                     m++;
                     if (m > 11) { m = 0; y++; }

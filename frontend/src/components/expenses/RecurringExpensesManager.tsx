@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { formatCurrency, getCategoryColorBg, cn, formatCalendarDate, parseCalendarDate } from "@/lib/utils";
+import {
+  formatCurrency,
+  getCategoryColorBg,
+  cn,
+  formatCalendarDate,
+  parseCalendarDate,
+  formatDueDateLabel,
+  formatFrequencyLabel,
+} from "@/lib/utils";
 import { useSettings } from "@/contexts/SettingsContext";
 import { safeFetch } from "@/lib/api";
 import { toast } from "sonner";
@@ -41,7 +49,7 @@ interface RecurringExpensesManagerProps {
 }
 
 export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpensesManagerProps) {
-  const { currency, currencySymbol } = useSettings();
+  const { currency, currencySymbol, language, translate } = useSettings();
   const [items, setItems] = useState<RecurringExpense[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -202,43 +210,6 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
     }, 0);
   }, [activeItems]);
 
-  const formatDueDateLabel = (dueDateStr: string | Date) => {
-    const target = parseCalendarDate(dueDateStr);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    target.setHours(0, 0, 0, 0);
-
-    const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 3600 * 24));
-
-    if (diffDays === 0) return { label: "¡Hoy!", urgent: true };
-    if (diffDays === 1) return { label: "Mañana", urgent: true };
-    if (diffDays > 1 && diffDays <= 31) return { label: `En ${diffDays} días`, urgent: false };
-    if (diffDays > 31) return { label: `En ${Math.round(diffDays / 30)} meses`, urgent: false };
-    if (diffDays < 0) return { label: `Venció hace ${Math.abs(diffDays)}d`, urgent: true };
-
-    return {
-      label: `En ${diffDays} días`,
-      urgent: false,
-    };
-  };
-
-  const getFrequencyBadge = (item: RecurringExpense) => {
-    switch (item.frequency) {
-      case "biweekly":
-        return item.biweekly_type === "every_15_days" 
-          ? "Quincenal (c/ 15 días)" 
-          : "Quincenal (15 y fin de mes)";
-      case "monthly":
-        return `Mensual (Día ${item.billing_day || 15})`;
-      case "weekly":
-        return "Semanal";
-      case "yearly":
-        return "Anual";
-      default:
-        return item.frequency;
-    }
-  };
-
   return (
     <div className="space-y-5">
       {/* Top Bar / Actions */}
@@ -247,11 +218,11 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
           <div className="flex items-center gap-2">
             <Repeat className="w-5 h-5 text-indigo-500" />
             <h3 className="text-base sm:text-lg font-bold text-titles dark:text-foreground">
-              Gastos Fijos y Recurrentes
+              {translate("recurring.expensesTitle", "Gastos Fijos y Recurrentes")}
             </h3>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Se registran automáticamente en tu historial al llegar su fecha
+            {translate("recurring.expensesSubtitle", "Se registran automáticamente en tu historial al llegar su fecha")}
           </p>
         </div>
 
@@ -261,11 +232,11 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
             size="sm"
             onClick={handleSync}
             disabled={syncing}
-            title="Sincronizar: Comprueba gastos recurrentes cuya fecha ya venció y los registra en el balance automáticamente"
+            title={language === "en" ? "Sync due recurring expenses" : "Sincronizar gastos vencidos"}
             className="flex-1 sm:flex-initial rounded-xl font-bold text-xs h-9 px-3 border-border hover:bg-secondary cursor-pointer"
           >
             <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", syncing && "animate-spin text-blue-600")} />
-            <span>{syncing ? "Comprobando..." : "Sincronizar"}</span>
+            <span>{syncing ? (language === "en" ? "Checking..." : "Comprobando...") : translate("recurring.sync", "Sincronizar")}</span>
           </Button>
 
           <Button
@@ -277,7 +248,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
             className="flex-1 sm:flex-initial bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs h-9 px-3.5 shadow-md shadow-blue-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4 mr-1" />
-            <span>Nuevo Gasto Fijo</span>
+            <span>{translate("recurring.newExpense", "Nuevo Gasto Fijo")}</span>
           </Button>
         </div>
       </div>
@@ -286,26 +257,35 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-xs">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Mensual Estimado</span>
+            <span className="text-xs font-bold uppercase tracking-wider">
+              {translate("recurring.estimatedMonthly", "Total Mensual Estimado")}
+            </span>
             <Clock className="w-4 h-4 text-indigo-500 shrink-0" />
           </div>
           <div className="text-xl sm:text-2xl font-black text-rose-500 dark:text-rose-400">
             {currencySymbol}{formatCurrency(monthlyTotal)}
           </div>
-          <span className="text-[11px] text-muted-foreground">En compromisos fijos activos</span>
+          <span className="text-[11px] text-muted-foreground">
+            {translate("recurring.activeExpensesDesc", "En compromisos fijos activos")}
+          </span>
         </div>
 
         <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-xs">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Gastos Programados</span>
+            <span className="text-xs font-bold uppercase tracking-wider">
+              {translate("recurring.scheduledExpenses", "Gastos Programados")}
+            </span>
             <Repeat className="w-4 h-4 text-emerald-500 shrink-0" />
           </div>
           <div className="text-xl sm:text-2xl font-black text-titles dark:text-foreground">
-            {activeItems.length} <span className="text-xs sm:text-sm font-normal text-muted-foreground">/ {items.length} activos</span>
+            {activeItems.length}{" "}
+            <span className="text-xs sm:text-sm font-normal text-muted-foreground">
+              / {items.length} {translate("recurring.activeRatio", "activos")}
+            </span>
           </div>
           <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
             <CalendarClock className="w-3 h-3" />
-            <span>Auto-registro activado</span>
+            <span>{translate("recurring.autoRegisterActive", "Auto-registro activado")}</span>
           </span>
         </div>
       </div>
@@ -315,10 +295,10 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
         <div className="p-8 sm:p-12 text-center rounded-2xl bg-card border border-border/80 shadow-xs">
           <Repeat className="w-10 h-10 mx-auto mb-2 opacity-30 text-indigo-500" />
           <p className="font-bold text-base text-titles dark:text-foreground">
-            No tienes gastos fijos programados
+            {translate("recurring.noExpensesTitle", "No tienes gastos fijos programados")}
           </p>
           <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto mt-1 mb-4">
-            Configura tus pagos habituales (renta, servicios, suscripciones) para que se registren solos al llegar la fecha.
+            {translate("recurring.noExpensesDesc", "Configura tus pagos habituales (renta, servicios, suscripciones) para que se registren solos al llegar la fecha.")}
           </p>
           <Button
             size="sm"
@@ -326,7 +306,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
             className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 mr-1" />
-            Crear Primer Gasto Fijo
+            {translate("recurring.createFirstExpense", "Crear Primer Gasto Fijo")}
           </Button>
         </div>
       )}
@@ -335,7 +315,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
       {loading && (
         <div className="py-12 text-center text-muted-foreground bg-card rounded-2xl border border-border/80">
           <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-blue-600" />
-          <span className="text-xs">Cargando compromisos fijos...</span>
+          <span className="text-xs">{language === "en" ? "Loading fixed expenses..." : "Cargando compromisos fijos..."}</span>
         </div>
       )}
 
@@ -343,7 +323,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
       {!loading && items.length > 0 && (
         <div className="block md:hidden space-y-3">
           {items.map((item) => {
-            const dueInfo = formatDueDateLabel(item.next_due_date);
+            const dueInfo = formatDueDateLabel(item.next_due_date, language);
             const isActionLoading = actionLoadingId === item.id;
             const alreadyExecuted = isAlreadyExecutedThisPeriod(item);
             const isExpanded = !!expandedIds[item.id];
@@ -378,9 +358,9 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                   {/* Próximo cobro limpio */}
                   <div className="flex items-center gap-1.5 min-w-0 text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
-                    <span>Cobro:</span>
+                    <span>{translate("recurring.dueOn", "Cobro:")}</span>
                     <span className="font-bold text-foreground">
-                      {formatCalendarDate(item.next_due_date)}
+                      {formatCalendarDate(item.next_due_date, language)}
                     </span>
                     <span
                       className={cn(
@@ -401,7 +381,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                       checked={item.is_active}
                       disabled={isActionLoading}
                       onCheckedChange={() => handleToggleActive(item)}
-                      title={item.is_active ? "Gasto activo • Clic para pausar" : "Gasto pausado • Clic para activar"}
+                      title={item.is_active ? (language === "en" ? "Active • Click to pause" : "Gasto activo • Clic para pausar") : (language === "en" ? "Paused • Click to activate" : "Gasto pausado • Clic para activar")}
                     />
                   </div>
                 </div>
@@ -413,8 +393,8 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     size="sm"
                     title={
                       alreadyExecuted
-                        ? "Ya registrado en este ciclo"
-                        : "Registrar ahora en el balance (adelantar cobro)"
+                        ? (language === "en" ? "Already recorded in current cycle" : "Ya registrado en este ciclo")
+                        : (language === "en" ? "Record now into balance" : "Registrar ahora en el balance (adelantar cobro)")
                     }
                     onClick={() => handleExecuteNow(item)}
                     disabled={isActionLoading || !item.is_active || alreadyExecuted}
@@ -426,7 +406,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     )}
                   >
                     <Zap className="w-3.5 h-3.5 mr-1 fill-current" />
-                    {alreadyExecuted ? "Ya Registrado" : "Registrar Ahora"}
+                    {alreadyExecuted ? translate("recurring.alreadyRegistered", "Ya Registrado") : translate("recurring.registerNow", "Registrar Ahora")}
                   </Button>
 
                   <Button
@@ -435,7 +415,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     onClick={() => toggleExpand(item.id)}
                     className="h-8.5 px-2.5 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/60 cursor-pointer flex items-center gap-1 font-medium shrink-0"
                   >
-                    <span>{isExpanded ? "Ocultar" : "Detalles"}</span>
+                    <span>{isExpanded ? translate("recurring.hide", "Ocultar") : translate("recurring.details", "Detalles")}</span>
                     <ChevronDown
                       className={cn(
                         "w-3.5 h-3.5 transition-transform duration-200",
@@ -457,7 +437,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     <div className="grid grid-cols-2 gap-2 text-xs bg-secondary/30 p-2.5 rounded-xl border border-border/30">
                       <div>
                         <span className="text-[10px] text-muted-foreground uppercase font-bold block">
-                          Categoría
+                          {translate("recurring.category", "Categoría")}
                         </span>
                         <div className="flex items-center gap-1.5 mt-0.5 font-medium text-foreground">
                           <span
@@ -472,28 +452,28 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
 
                       <div>
                         <span className="text-[10px] text-muted-foreground uppercase font-bold block">
-                          Frecuencia
+                          {translate("recurring.frequency", "Frecuencia")}
                         </span>
                         <span className="font-medium text-foreground block mt-0.5 truncate">
-                          {getFrequencyBadge(item)}
+                          {formatFrequencyLabel(item.frequency, item.biweekly_type, item.billing_day, language)}
                         </span>
                       </div>
 
                       <div>
                         <span className="text-[10px] text-muted-foreground uppercase font-bold block">
-                          Medio de Pago
+                          {translate("recurring.paymentMethod", "Medio de Pago")}
                         </span>
                         <span className="font-medium text-foreground block mt-0.5 truncate">
-                          {item.payment_method || "No especificado"}
+                          {item.payment_method || (language === "en" ? "Not specified" : "No especificado")}
                         </span>
                       </div>
 
                       <div>
                         <span className="text-[10px] text-muted-foreground uppercase font-bold block">
-                          Modo de Cobro
+                          {translate("recurring.mode", "Modo de Cobro")}
                         </span>
                         <span className="font-medium text-foreground block mt-0.5 truncate">
-                          {item.auto_register ? "Automático al vencer" : "Manual"}
+                          {item.auto_register ? translate("recurring.autoOnDue", "Automático al vencer") : translate("recurring.manual", "Manual")}
                         </span>
                       </div>
                     </div>
@@ -511,7 +491,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                         className="flex-1 rounded-xl text-xs font-semibold h-8 hover:bg-secondary cursor-pointer"
                       >
                         <Edit2 className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
-                        Editar gasto
+                        {translate("recurring.editExpense", "Editar gasto")}
                       </Button>
 
                       <Button
@@ -522,7 +502,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                         className="flex-1 rounded-xl text-xs font-semibold h-8 text-rose-500 border-rose-500/20 hover:bg-rose-500/10 cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-                        Eliminar
+                        {translate("recurring.delete", "Eliminar")}
                       </Button>
                     </div>
                   </motion.div>
@@ -545,28 +525,28 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
               <TableHeader className="bg-secondary/40">
                 <TableRow className="border-b border-border/60">
                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
-                    Estado
+                    {language === "en" ? "Status" : "Estado"}
                   </TableHead>
                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
-                    Concepto
+                    {translate("expenses.table.description", "Concepto")}
                   </TableHead>
                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
-                    Frecuencia
+                    {translate("recurring.frequency", "Frecuencia")}
                   </TableHead>
                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground">
-                    Próxima Fecha
+                    {translate("recurring.nextDue", "Próxima Fecha")}
                   </TableHead>
                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
-                    Monto Fijo
+                    {language === "en" ? "Fixed Amount" : "Monto Fijo"}
                   </TableHead>
                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
-                    Acciones
+                    {language === "en" ? "Actions" : "Acciones"}
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {items.map((item) => {
-                  const dueInfo = formatDueDateLabel(item.next_due_date);
+                  const dueInfo = formatDueDateLabel(item.next_due_date, language);
                   const isActionLoading = actionLoadingId === item.id;
 
                   return (
@@ -585,7 +565,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                             checked={item.is_active}
                             disabled={isActionLoading}
                             onCheckedChange={() => handleToggleActive(item)}
-                            title={item.is_active ? "Gasto activo • Clic para pausar" : "Gasto pausado • Clic para activar"}
+                            title={item.is_active ? (language === "en" ? "Active • Click to pause" : "Gasto activo • Clic para pausar") : (language === "en" ? "Paused • Click to activate" : "Gasto pausado • Clic para activar")}
                           />
                         </div>
                       </TableCell>
@@ -613,7 +593,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                       {/* Frecuencia */}
                       <TableCell className="px-4 py-3.5 whitespace-nowrap">
                         <span className="text-xs font-medium bg-secondary/60 px-2.5 py-1 rounded-lg border border-border/50 text-foreground">
-                          {getFrequencyBadge(item)}
+                          {formatFrequencyLabel(item.frequency, item.biweekly_type, item.billing_day, language)}
                         </span>
                       </TableCell>
 
@@ -627,7 +607,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                                 dueInfo.urgent ? "text-amber-600 dark:text-amber-400" : "text-titles dark:text-foreground"
                               )}
                             >
-                              {formatCalendarDate(item.next_due_date)}
+                              {formatCalendarDate(item.next_due_date, language)}
                             </span>
                             <span
                               className={cn(
