@@ -20,7 +20,9 @@ import {
   Zap,
   Power,
   CalendarClock,
+  ChevronDown,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -56,6 +58,11 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
   const [selectedItem, setSelectedItem] = useState<RecurringIncome | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RecurringIncome | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const fetchRecurring = useCallback(async () => {
     try {
@@ -370,137 +377,198 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
             {items.map((item) => {
               const dueInfo = formatDueDateLabel(item.next_due_date);
               const isLoadingThis = actionLoadingId === item.id;
+              const alreadyExecuted = isAlreadyExecutedThisPeriod(item);
+              const isExpanded = !!expandedIds[item.id];
 
               return (
-                <div
+                <motion.div
                   key={item.id}
+                  layout
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
                   className={cn(
-                    "p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3 transition-all",
-                    !item.is_active && "opacity-60 bg-secondary/15"
+                    "p-3.5 sm:p-4 rounded-2xl bg-card border border-border/80 shadow-2xs space-y-2.5 transition-all",
+                    !item.is_active && "opacity-65 bg-secondary/15"
                   )}
                 >
-                  {/* Header Row: Title, Subtitle, and Amount + Status Toggle */}
-                  <div className="flex items-start justify-between gap-3">
+                  {/* Fila 1: Concepto Principal y Monto */}
+                  <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-sm sm:text-base text-titles dark:text-foreground truncate">
+                      <h4 className="font-bold text-sm text-titles dark:text-foreground truncate">
                         {item.description}
                       </h4>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
-                        <Badge
-                          variant={sourceBadgeVariants[item.source] || "default"}
-                          className="text-[10px] px-2 py-0.5 font-bold"
-                        >
-                          {item.source}
-                        </Badge>
-                        <span>•</span>
-                        <span className="font-medium text-foreground/80">
-                          {getFrequencyBadge(item)}
-                        </span>
-                      </div>
                     </div>
-
-                    {/* Amount & Active Switch on the Right */}
-                    <div className="text-right shrink-0 flex flex-col items-end gap-1">
-                      <span className="text-base font-black text-emerald-600 dark:text-emerald-400 block whitespace-nowrap">
+                    <div className="text-right shrink-0">
+                      <span className="text-base font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                         +{currencySymbol}{formatCurrency(item.amount)}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => handleToggleActive(item)}
-                        disabled={isLoadingThis}
-                        title={item.is_active ? "Activo • Clic para pausar" : "Pausado • Clic para activar"}
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold transition-all cursor-pointer shadow-2xs active:scale-95",
-                          item.is_active
-                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
-                            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700 hover:bg-slate-200"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "w-1.5 h-1.5 rounded-full",
-                            item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                          )}
-                        />
-                        <span>{item.is_active ? "Activo" : "Pausado"}</span>
-                      </button>
                     </div>
                   </div>
 
-                  {/* Due Date Indicator Banner */}
-                  <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-secondary/40 border border-border/40 text-xs">
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <Clock className="w-3.5 h-3.5 shrink-0" />
-                      <span>Próximo cobro:</span>
+                  {/* Fila 2: Próximo Cobro & Toggle Activo */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40 text-xs">
+                    {/* Próximo cobro limpio */}
+                    <div className="flex items-center gap-1.5 min-w-0 text-muted-foreground">
+                      <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                      <span>Cobro:</span>
                       <span className="font-bold text-foreground">
                         {formatCalendarDate(item.next_due_date)}
                       </span>
+                      <span
+                        className={cn(
+                          "text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0",
+                          dueInfo.urgent
+                            ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/25"
+                            : "bg-secondary/60 text-muted-foreground"
+                        )}
+                      >
+                        {dueInfo.label}
+                      </span>
                     </div>
-                    <span
-                      className={cn(
-                        "text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap",
-                        dueInfo.urgent
-                          ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25"
-                          : "text-muted-foreground font-medium"
-                      )}
-                    >
-                      {dueInfo.label}
-                    </span>
+
+                    {/* Switch de Activo/Pausado */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span
+                        className={cn(
+                          "text-[11px] font-semibold select-none",
+                          item.is_active
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {item.is_active ? "Activo" : "Pausado"}
+                      </span>
+                      <Switch
+                        size="sm"
+                        checked={item.is_active}
+                        disabled={isLoadingThis}
+                        onCheckedChange={() => handleToggleActive(item)}
+                        title={item.is_active ? "Ingreso activo • Clic para pausar" : "Ingreso pausado • Clic para activar"}
+                      />
+                    </div>
                   </div>
 
-                  {/* Actions Bar for Mobile */}
-                  <div className="flex items-center justify-between pt-1 border-t border-border/40 gap-2">
-                    {/* Cobrar Ahora button */}
+                  {/* Fila 3: Botón de Cobro Principal y Botón Detalles */}
+                  <div className="flex items-center justify-between gap-2 pt-1">
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={isLoadingThis || !item.is_active || isAlreadyExecutedThisPeriod(item)}
+                      disabled={isLoadingThis || !item.is_active || alreadyExecuted}
                       onClick={() => handleExecuteNow(item)}
                       title={
-                        isAlreadyExecutedThisPeriod(item)
+                        alreadyExecuted
                           ? "Ya registrado en este ciclo"
                           : "Registrar cobro ahora (adelantar en el historial)"
                       }
                       className={cn(
                         "flex-1 rounded-xl text-xs font-bold h-8.5 border cursor-pointer",
-                        isAlreadyExecutedThisPeriod(item)
+                        alreadyExecuted
                           ? "text-slate-400 border-slate-300/30 opacity-50 cursor-not-allowed"
                           : "text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
                       )}
                     >
                       <Zap className="w-3.5 h-3.5 mr-1 fill-current" />
-                      {isAlreadyExecutedThisPeriod(item) ? "Ya Registrado" : "Cobrar Ahora"}
+                      {alreadyExecuted ? "Ya Registrado" : "Cobrar Ahora"}
                     </Button>
 
-                    {/* Quick Edit and Delete buttons */}
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        disabled={isLoadingThis}
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setIsModalOpen(true);
-                        }}
-                        title="Editar datos de este ingreso fijo"
-                        className="h-8.5 w-8.5 text-muted-foreground hover:bg-secondary rounded-xl cursor-pointer"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        disabled={isLoadingThis}
-                        onClick={() => handleDelete(item)}
-                        title="Eliminar este ingreso fijo"
-                        className="h-8.5 w-8.5 text-rose-500 hover:bg-rose-500/15 rounded-xl cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleExpand(item.id)}
+                      className="h-8.5 px-2.5 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/60 cursor-pointer flex items-center gap-1 font-medium shrink-0"
+                    >
+                      <span>{isExpanded ? "Ocultar" : "Detalles"}</span>
+                      <ChevronDown
+                        className={cn(
+                          "w-3.5 h-3.5 transition-transform duration-200",
+                          isExpanded && "rotate-180"
+                        )}
+                      />
+                    </Button>
                   </div>
-                </div>
+
+                  {/* Sección Desplegable de Detalles */}
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="pt-2 border-t border-border/40 space-y-2.5 overflow-hidden"
+                    >
+                      <div className="grid grid-cols-2 gap-2 text-xs bg-secondary/30 p-2.5 rounded-xl border border-border/30">
+                        <div>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                            Fuente
+                          </span>
+                          <div className="mt-0.5 font-medium text-foreground">
+                            <Badge
+                              variant={sourceBadgeVariants[item.source] || "default"}
+                              className="text-[10px] px-2 py-0.5 font-bold"
+                            >
+                              {item.source}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                            Frecuencia
+                          </span>
+                          <span className="font-medium text-foreground block mt-0.5 truncate">
+                            {getFrequencyBadge(item)}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                            Medio de Pago
+                          </span>
+                          <span className="font-medium text-foreground block mt-0.5 truncate">
+                            {item.payment_method || "No especificado"}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                            Modo de Cobro
+                          </span>
+                          <span className="font-medium text-foreground block mt-0.5 truncate">
+                            {item.auto_register ? "Automático al vencer" : "Manual"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Botones de Editar y Eliminar dentro de Detalles */}
+                      <div className="flex items-center gap-2 pt-0.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={isLoadingThis}
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setIsModalOpen(true);
+                          }}
+                          className="flex-1 rounded-xl text-xs font-semibold h-8 hover:bg-secondary cursor-pointer"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+                          Editar ingreso
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={isLoadingThis}
+                          onClick={() => handleDelete(item)}
+                          className="flex-1 rounded-xl text-xs font-semibold h-8 text-rose-500 border-rose-500/20 hover:bg-rose-500/10 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                          Eliminar
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
               );
             })}
           </div>
@@ -600,26 +668,25 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                       </TableCell>
 
                       <TableCell className="px-5 py-4 text-center whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleActive(item)}
-                          disabled={isLoadingThis}
-                          title={item.is_active ? "Activo • Clic para desactivar" : "Inactivo • Clic para activar"}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shadow-2xs",
-                            item.is_active
-                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
-                              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750"
-                          )}
-                        >
+                        <div className="inline-flex items-center justify-center gap-2">
+                          <Switch
+                            size="sm"
+                            checked={item.is_active}
+                            disabled={isLoadingThis}
+                            onCheckedChange={() => handleToggleActive(item)}
+                            title={item.is_active ? "Ingreso activo • Clic para pausar" : "Ingreso pausado • Clic para activar"}
+                          />
                           <span
                             className={cn(
-                              "w-1.5 h-1.5 rounded-full",
-                              item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                              "text-xs font-semibold select-none",
+                              item.is_active
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-muted-foreground"
                             )}
-                          />
-                          <span>{item.is_active ? "Activo" : "Inactivo"}</span>
-                        </button>
+                          >
+                            {item.is_active ? "Activo" : "Pausado"}
+                          </span>
+                        </div>
                       </TableCell>
 
                       <TableCell className="px-5 py-4 text-center whitespace-nowrap">

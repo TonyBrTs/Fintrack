@@ -19,7 +19,9 @@ import {
   CalendarClock,
   Zap,
   Power,
+  ChevronDown,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -47,6 +49,11 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
   const [selectedItem, setSelectedItem] = useState<RecurringExpense | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RecurringExpense | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const fetchRecurring = useCallback(async () => {
     try {
@@ -339,87 +346,78 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
             const dueInfo = formatDueDateLabel(item.next_due_date);
             const isActionLoading = actionLoadingId === item.id;
             const alreadyExecuted = isAlreadyExecutedThisPeriod(item);
+            const isExpanded = !!expandedIds[item.id];
 
             return (
               <motion.div
                 key={item.id}
+                layout
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                  "p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3 transition-all",
-                  !item.is_active && "opacity-60 bg-secondary/15"
+                  "p-3.5 sm:p-4 rounded-2xl bg-card border border-border/80 shadow-2xs space-y-2.5 transition-all",
+                  !item.is_active && "opacity-65 bg-secondary/15"
                 )}
               >
-                {/* Header Row: Title, Category, Amount + Status Toggle */}
-                <div className="flex items-start justify-between gap-3">
+                {/* Fila 1: Concepto Principal y Monto */}
+                <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-bold text-sm sm:text-base text-titles dark:text-foreground truncate">
+                    <h4 className="font-bold text-sm text-titles dark:text-foreground truncate">
                       {item.description}
                     </h4>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
-                      <span className="inline-flex items-center gap-1 bg-secondary/60 px-2 py-0.5 rounded-md text-[11px] font-medium">
-                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", getCategoryColorBg(item.category))} />
-                        <span>{item.category}</span>
-                      </span>
-                      <span>•</span>
-                      <span className="font-medium text-foreground/80">
-                        {getFrequencyBadge(item)}
-                      </span>
-                    </div>
                   </div>
-
-                  {/* Amount & Active Switch on the Right */}
-                  <div className="text-right shrink-0 flex flex-col items-end gap-1">
-                    <div className="text-base font-black text-rose-500 dark:text-rose-400 whitespace-nowrap">
+                  <div className="text-right shrink-0">
+                    <span className="text-base font-black text-rose-500 dark:text-rose-400 whitespace-nowrap">
                       -{currencySymbol}{formatCurrency(item.amount)}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleActive(item)}
-                      disabled={isActionLoading}
-                      title={item.is_active ? "Activo • Clic para pausar" : "Pausado • Clic para activar"}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold transition-all cursor-pointer shadow-2xs active:scale-95",
-                        item.is_active
-                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
-                          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700 hover:bg-slate-200"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                        )}
-                      />
-                      <span>{item.is_active ? "Activo" : "Pausado"}</span>
-                    </button>
+                    </span>
                   </div>
                 </div>
 
-                {/* Due Date Indicator Banner */}
-                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-secondary/40 border border-border/40 text-xs">
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar className="w-3.5 h-3.5 shrink-0" />
-                    <span>Próximo cobro:</span>
+                {/* Fila 2: Próximo Cobro & Toggle Activo */}
+                <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40 text-xs">
+                  {/* Próximo cobro limpio */}
+                  <div className="flex items-center gap-1.5 min-w-0 text-muted-foreground">
+                    <Calendar className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                    <span>Cobro:</span>
                     <span className="font-bold text-foreground">
                       {formatCalendarDate(item.next_due_date)}
                     </span>
+                    <span
+                      className={cn(
+                        "text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0",
+                        dueInfo.urgent
+                          ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/25"
+                          : "bg-secondary/60 text-muted-foreground"
+                      )}
+                    >
+                      {dueInfo.label}
+                    </span>
                   </div>
-                  <span
-                    className={cn(
-                      "text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap",
-                      dueInfo.urgent
-                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25"
-                        : "text-muted-foreground font-medium"
-                    )}
-                  >
-                    {dueInfo.label}
-                  </span>
+
+                  {/* Switch de Activo/Pausado */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span
+                      className={cn(
+                        "text-[11px] font-semibold select-none",
+                        item.is_active
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {item.is_active ? "Activo" : "Pausado"}
+                    </span>
+                    <Switch
+                      size="sm"
+                      checked={item.is_active}
+                      disabled={isActionLoading}
+                      onCheckedChange={() => handleToggleActive(item)}
+                      title={item.is_active ? "Gasto activo • Clic para pausar" : "Gasto pausado • Clic para activar"}
+                    />
+                  </div>
                 </div>
 
-                {/* Actions Bar for Mobile */}
-                <div className="flex items-center justify-between pt-1 border-t border-border/40 gap-2">
-                  {/* Registrar Hoy button */}
+                {/* Fila 3: Botón de Cobro Principal y Botón Detalles */}
+                <div className="flex items-center justify-between gap-2 pt-1">
                   <Button
                     variant="outline"
                     size="sm"
@@ -441,34 +439,104 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     {alreadyExecuted ? "Ya Registrado" : "Registrar Ahora"}
                   </Button>
 
-                  {/* Quick Edit and Delete buttons */}
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      title="Editar datos de este gasto fijo"
-                      onClick={() => {
-                        setSelectedItem(item);
-                        setIsModalOpen(true);
-                      }}
-                      disabled={isActionLoading}
-                      className="h-8.5 w-8.5 text-muted-foreground hover:bg-secondary rounded-xl cursor-pointer"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      title="Eliminar este gasto fijo"
-                      onClick={() => handleDelete(item)}
-                      disabled={isActionLoading}
-                      className="h-8.5 w-8.5 text-rose-500 hover:bg-rose-500/15 rounded-xl cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleExpand(item.id)}
+                    className="h-8.5 px-2.5 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/60 cursor-pointer flex items-center gap-1 font-medium shrink-0"
+                  >
+                    <span>{isExpanded ? "Ocultar" : "Detalles"}</span>
+                    <ChevronDown
+                      className={cn(
+                        "w-3.5 h-3.5 transition-transform duration-200",
+                        isExpanded && "rotate-180"
+                      )}
+                    />
+                  </Button>
                 </div>
+
+                {/* Sección Desplegable de Detalles */}
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="pt-2 border-t border-border/40 space-y-2.5 overflow-hidden"
+                  >
+                    <div className="grid grid-cols-2 gap-2 text-xs bg-secondary/30 p-2.5 rounded-xl border border-border/30">
+                      <div>
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                          Categoría
+                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5 font-medium text-foreground">
+                          <span
+                            className={cn(
+                              "w-2 h-2 rounded-full shrink-0",
+                              getCategoryColorBg(item.category)
+                            )}
+                          />
+                          <span className="truncate">{item.category}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                          Frecuencia
+                        </span>
+                        <span className="font-medium text-foreground block mt-0.5 truncate">
+                          {getFrequencyBadge(item)}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                          Medio de Pago
+                        </span>
+                        <span className="font-medium text-foreground block mt-0.5 truncate">
+                          {item.payment_method || "No especificado"}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                          Modo de Cobro
+                        </span>
+                        <span className="font-medium text-foreground block mt-0.5 truncate">
+                          {item.auto_register ? "Automático al vencer" : "Manual"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Botones de Editar y Eliminar dentro de Detalles */}
+                    <div className="flex items-center gap-2 pt-0.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setIsModalOpen(true);
+                        }}
+                        disabled={isActionLoading}
+                        className="flex-1 rounded-xl text-xs font-semibold h-8 hover:bg-secondary cursor-pointer"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+                        Editar gasto
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(item)}
+                        disabled={isActionLoading}
+                        className="flex-1 rounded-xl text-xs font-semibold h-8 text-rose-500 border-rose-500/20 hover:bg-rose-500/10 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                        Eliminar
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
             );
           })}
@@ -521,26 +589,25 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     >
                       {/* Estado */}
                       <TableCell className="px-4 py-3.5 whitespace-nowrap text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleActive(item)}
-                          disabled={isActionLoading}
-                          title={item.is_active ? "Activo • Clic para pausar" : "Pausado • Clic para activar"}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shadow-2xs",
-                            item.is_active
-                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
-                              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750"
-                          )}
-                        >
+                        <div className="inline-flex items-center justify-center gap-2">
+                          <Switch
+                            size="sm"
+                            checked={item.is_active}
+                            disabled={isActionLoading}
+                            onCheckedChange={() => handleToggleActive(item)}
+                            title={item.is_active ? "Gasto activo • Clic para pausar" : "Gasto pausado • Clic para activar"}
+                          />
                           <span
                             className={cn(
-                              "w-1.5 h-1.5 rounded-full",
-                              item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                              "text-xs font-semibold select-none",
+                              item.is_active
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-muted-foreground"
                             )}
-                          />
-                          <span>{item.is_active ? "Activo" : "Pausado"}</span>
-                        </button>
+                          >
+                            {item.is_active ? "Activo" : "Pausado"}
+                          </span>
+                        </div>
                       </TableCell>
 
                       {/* Concepto & Categoría */}

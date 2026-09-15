@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 import { useCategories } from "@/hooks/useCategories";
 import {
   Select,
@@ -456,29 +457,17 @@ export function RecurringExpenseModal({
               </div>
             </div>
 
-            <label className="relative inline-flex items-center cursor-pointer shrink-0">
-              <input
-                type="checkbox"
-                checked={formData.auto_register}
-                onChange={(e) => setFormData({ ...formData, auto_register: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div
-                className={cn(
-                  "w-10 h-5.5 rounded-full transition-colors relative cursor-pointer",
-                  "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4.5 after:w-4.5 after:transition-all after:shadow-xs",
-                  formData.auto_register
-                    ? "bg-blue-600 dark:bg-blue-500 after:translate-x-[18px]"
-                    : "bg-slate-300 dark:bg-slate-700 after:translate-x-0"
-                )}
-              />
-            </label>
+            <Switch
+              checked={formData.auto_register}
+              onCheckedChange={(checked) => setFormData({ ...formData, auto_register: checked })}
+              activeColor="bg-blue-600"
+            />
           </div>
 
           {/* Switch de Estado (Activo / Pausado) */}
           <div className="flex items-center justify-between p-3.5 rounded-xl bg-secondary/40 border border-border/60 gap-3">
             <div className="flex items-start gap-2.5 min-w-0">
-              <Power className={cn("w-4 h-4 shrink-0 mt-0.5", formData.is_active ? "text-blue-600 dark:text-blue-400" : "text-slate-400")} />
+              <Power className={cn("w-4 h-4 shrink-0 mt-0.5", formData.is_active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")} />
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-titles dark:text-foreground block">
@@ -509,25 +498,11 @@ export function RecurringExpenseModal({
               </div>
             </div>
 
-            <label className="relative inline-flex items-center cursor-pointer shrink-0">
-              <input
-                type="checkbox"
-                checked={formData.is_active}
-                onChange={(e) =>
-                  setFormData({ ...formData, is_active: e.target.checked })
-                }
-                className="sr-only peer"
-              />
-              <div
-                className={cn(
-                  "w-10 h-5.5 rounded-full transition-colors relative cursor-pointer",
-                  "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4.5 after:w-4.5 after:transition-all after:shadow-xs",
-                  formData.is_active
-                    ? "bg-blue-600 dark:bg-blue-500 after:translate-x-[18px]"
-                    : "bg-slate-300 dark:bg-slate-700 after:translate-x-0"
-                )}
-              />
-            </label>
+            <Switch
+              checked={formData.is_active}
+              onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+              activeColor="bg-emerald-500"
+            />
           </div>
 
           <DialogFooter className="pt-2 gap-2 sm:gap-0">
