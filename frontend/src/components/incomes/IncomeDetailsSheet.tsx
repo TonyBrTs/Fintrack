@@ -16,6 +16,7 @@ import {
   ArrowUpRight,
   Check,
   Copy,
+  Repeat,
 } from "lucide-react";
 import { EditIncomeModal } from "./EditIncomeModal";
 import { useState } from "react";
@@ -48,7 +49,7 @@ export function IncomeDetailsSheet({
   onClose,
   onSuccess,
 }: IncomeDetailsSheetProps) {
-  const { translate, currencySymbol, currency } = useSettings();
+  const { translate, currencySymbol, currency, language } = useSettings();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -113,9 +114,17 @@ export function IncomeDetailsSheet({
               <ArrowUpRight className="w-7 h-7" strokeWidth={2.5} />
             </div>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 mb-2">
-              {translate("income.title") || "Ingreso"}
-            </span>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                {translate("income.title") || "Ingreso"}
+              </span>
+              {(income.id.startsWith("rec_") || income.id.startsWith("rec-")) && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/25">
+                  <Repeat className="w-3 h-3" />
+                  {language === "en" ? "Recurring" : "Recurrente"}
+                </span>
+              )}
+            </div>
 
             <div className="flex items-baseline justify-center gap-1.5">
               <span className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
@@ -205,7 +214,7 @@ export function IncomeDetailsSheet({
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-background/80 border border-border/60 text-xs sm:text-sm text-foreground leading-relaxed">
-                {income.description || "Sin descripción"}
+                {income.description.replace(/^\[Recurrente\]\s*/i, "") || "Sin descripción"}
               </div>
             </div>
 
@@ -222,7 +231,7 @@ export function IncomeDetailsSheet({
                 type="button"
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-background hover:bg-secondary/70 border border-border/60 text-muted-foreground hover:text-foreground transition-colors cursor-pointer text-xs font-mono"
               >
-                <span>{String(income.id).slice(0, 10)}...</span>
+                <span>{income.id}</span>
                 {copied ? (
                   <Check className="w-3.5 h-3.5 text-emerald-500" />
                 ) : (

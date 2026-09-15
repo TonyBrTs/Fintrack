@@ -22,7 +22,9 @@ func (s *incomeService) GetIncomes(ctx context.Context, userID string) ([]models
 }
 
 func (s *incomeService) CreateIncome(ctx context.Context, userID string, income *models.Income) (*models.Income, error) {
-	income.ID = fmt.Sprintf("%d", time.Now().UnixNano())
+	if income.ID == "" {
+		income.ID = GenerateShortID("inc_")
+	}
 	income.UserID = userID
 	if income.Date.IsZero() {
 		income.Date = time.Now()

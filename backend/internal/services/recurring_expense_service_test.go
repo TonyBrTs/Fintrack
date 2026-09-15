@@ -3,6 +3,7 @@ package services_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -179,8 +180,11 @@ func TestRecurringExpenseService_ProcessDueExpensesCatchUp(t *testing.T) {
 		t.Fatalf("expected at least 1 created expense, got %d", len(created))
 	}
 
-	if created[0].Description != "[Recurrente] Alquiler de Casa" {
-		t.Errorf("expected description '[Recurrente] Alquiler de Casa', got '%s'", created[0].Description)
+	if created[0].Description != "Alquiler de Casa" {
+		t.Errorf("expected description 'Alquiler de Casa', got '%s'", created[0].Description)
+	}
+	if !strings.HasPrefix(created[0].ID, "rec_") {
+		t.Errorf("expected ID prefix 'rec_', got '%s'", created[0].ID)
 	}
 	if created[0].Amount != 350000 {
 		t.Errorf("expected amount 350000, got %f", created[0].Amount)
@@ -222,8 +226,11 @@ func TestRecurringExpenseService_ExecuteNow_PreventsCycleDuplicate(t *testing.T)
 	if err != nil {
 		t.Fatalf("first execution failed: %v", err)
 	}
-	if exp.Description != "[Recurrente] Internet Fibra" {
-		t.Errorf("expected prefix [Recurrente], got %s", exp.Description)
+	if exp.Description != "Internet Fibra" {
+		t.Errorf("expected clean description 'Internet Fibra', got %s", exp.Description)
+	}
+	if !strings.HasPrefix(exp.ID, "rec_") {
+		t.Errorf("expected ID prefix 'rec_', got '%s'", exp.ID)
 	}
 
 	// Second execution in the same cycle must fail

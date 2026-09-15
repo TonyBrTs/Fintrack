@@ -445,11 +445,18 @@ function ExpensesContent() {
                     </div>
                   </TableCell>
                   <TableCell className="px-5 py-4 text-sm font-semibold text-titles dark:text-foreground">
-                    {expense.category === 'Metas'
-                      ? `${translate('goals.contributionToGoal') || 'Aporte a meta'}: ${
-                          expense.description.split(': ')[1] || expense.description
-                        }`
-                      : expense.description}
+                    <div className="flex items-center gap-1.5">
+                      <span>
+                        {expense.category === 'Metas'
+                          ? `${translate('goals.contributionToGoal') || 'Aporte a meta'}: ${
+                              expense.description.split(': ')[1] || expense.description
+                            }`
+                          : expense.description.replace(/^\[Recurrente\]\s*/i, '')}
+                      </span>
+                      {(expense.id.startsWith('rec_') || expense.id.startsWith('rec-')) && (
+                        <Repeat className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="px-5 py-4">
                     <Badge

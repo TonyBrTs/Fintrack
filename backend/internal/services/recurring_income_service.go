@@ -67,7 +67,7 @@ func (s *recurringIncomeService) CreateRecurringIncome(ctx context.Context, user
 		item.BillingDay = 15
 	}
 
-	item.ID = fmt.Sprintf("%d", time.Now().UnixNano())
+	item.ID = GenerateShortID("rule_")
 	item.UserID = userID
 	item.IsActive = true
 	item.AutoRegister = true
@@ -159,11 +159,11 @@ func (s *recurringIncomeService) ProcessDueIncomes(ctx context.Context, userID s
 
 			incomeDate := itemCopy.NextDueDate
 			income := models.Income{
-				ID:            fmt.Sprintf("%d", time.Now().UnixNano()),
+				ID:            GenerateShortID("rec_"),
 				UserID:        itemCopy.UserID,
 				Amount:        itemCopy.Amount,
 				Currency:      itemCopy.Currency,
-				Description:   formatRecurringDescription(itemCopy.Description),
+				Description:   CleanRecurringDescription(itemCopy.Description),
 				Source:        itemCopy.Source,
 				PaymentMethod: itemCopy.PaymentMethod,
 				Date:          incomeDate,
@@ -212,11 +212,11 @@ func (s *recurringIncomeService) ProcessAllDueIncomes(ctx context.Context) (int,
 			}
 
 			income := models.Income{
-				ID:            fmt.Sprintf("%d", time.Now().UnixNano()),
+				ID:            GenerateShortID("rec_"),
 				UserID:        itemCopy.UserID,
 				Amount:        itemCopy.Amount,
 				Currency:      itemCopy.Currency,
-				Description:   formatRecurringDescription(itemCopy.Description),
+				Description:   CleanRecurringDescription(itemCopy.Description),
 				Source:        itemCopy.Source,
 				PaymentMethod: itemCopy.PaymentMethod,
 				Date:          itemCopy.NextDueDate,
@@ -251,11 +251,11 @@ func (s *recurringIncomeService) ExecuteNow(ctx context.Context, id, userID stri
 	}
 
 	income := models.Income{
-		ID:            fmt.Sprintf("%d", now.UnixNano()),
+		ID:            GenerateShortID("rec_"),
 		UserID:        userID,
 		Amount:        item.Amount,
 		Currency:      item.Currency,
-		Description:   formatRecurringDescription(item.Description),
+		Description:   CleanRecurringDescription(item.Description),
 		Source:        item.Source,
 		PaymentMethod: item.PaymentMethod,
 		Date:          now,

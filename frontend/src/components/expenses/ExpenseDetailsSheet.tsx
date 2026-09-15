@@ -16,6 +16,7 @@ import {
   ArrowDownRight,
   Check,
   Copy,
+  Repeat,
 } from "lucide-react";
 import { EditExpenseModal } from "./EditExpenseModal";
 import { useState } from "react";
@@ -50,7 +51,7 @@ export function ExpenseDetailsSheet({
   onClose,
   onSuccess,
 }: ExpenseDetailsSheetProps) {
-  const { translate, currencySymbol, currency } = useSettings();
+  const { translate, currencySymbol, currency, language } = useSettings();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -118,9 +119,17 @@ export function ExpenseDetailsSheet({
               <ArrowDownRight className="w-7 h-7" strokeWidth={2.5} />
             </div>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/15 text-rose-700 dark:text-rose-300 mb-2">
-              {translate("expenses.title") || "Gasto"}
-            </span>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/15 text-rose-700 dark:text-rose-300">
+                {translate("expenses.title") || "Gasto"}
+              </span>
+              {(expense.id.startsWith("rec_") || expense.id.startsWith("rec-")) && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/25">
+                  <Repeat className="w-3 h-3" />
+                  {language === "en" ? "Recurring" : "Recurrente"}
+                </span>
+              )}
+            </div>
 
             <div className="flex items-baseline justify-center gap-1.5">
               <span className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
@@ -222,7 +231,7 @@ export function ExpenseDetailsSheet({
                     </span>
                   </div>
                 ) : (
-                  expense.description || "Sin descripción"
+                  expense.description.replace(/^\[Recurrente\]\s*/i, "") || "Sin descripción"
                 )}
               </div>
             </div>
@@ -242,7 +251,7 @@ export function ExpenseDetailsSheet({
                 type="button"
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-background hover:bg-secondary/70 border border-border/60 text-muted-foreground hover:text-foreground transition-colors cursor-pointer text-xs font-mono"
               >
-                <span>{String(expense.id).slice(0, 10)}...</span>
+                <span>{expense.id}</span>
                 {copied ? (
                   <Check className="w-3.5 h-3.5 text-emerald-500" />
                 ) : (

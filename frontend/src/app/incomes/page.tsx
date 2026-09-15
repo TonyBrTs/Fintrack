@@ -440,7 +440,12 @@ function IncomesContent() {
                     </div>
                   </TableCell>
                   <TableCell className="px-5 py-4 text-sm font-semibold text-titles dark:text-foreground">
-                    {income.description}
+                    <div className="flex items-center gap-1.5">
+                      <span>{income.description.replace(/^\[Recurrente\]\s*/i, '')}</span>
+                      {(income.id.startsWith('rec_') || income.id.startsWith('rec-')) && (
+                        <Repeat className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="px-5 py-4">
                     <Badge

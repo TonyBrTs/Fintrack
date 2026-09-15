@@ -22,7 +22,9 @@ func (s *expenseService) GetExpenses(ctx context.Context, userID string) ([]mode
 }
 
 func (s *expenseService) CreateExpense(ctx context.Context, userID string, expense *models.Expense) (*models.Expense, error) {
-	expense.ID = fmt.Sprintf("%d", time.Now().UnixNano())
+	if expense.ID == "" {
+		expense.ID = GenerateShortID("exp_")
+	}
 	expense.UserID = userID
 	if expense.Date.IsZero() {
 		expense.Date = time.Now()

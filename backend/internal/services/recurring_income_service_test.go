@@ -3,6 +3,7 @@ package services_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -176,8 +177,11 @@ func TestRecurringIncomeService_ProcessDueIncomes(t *testing.T) {
 		t.Fatalf("expected at least 1 created income, got %d", len(created))
 	}
 
-	if created[0].Description != "[Recurrente] Salario de Quincena" {
-		t.Errorf("expected description '[Recurrente] Salario de Quincena', got '%s'", created[0].Description)
+	if created[0].Description != "Salario de Quincena" {
+		t.Errorf("expected description 'Salario de Quincena', got '%s'", created[0].Description)
+	}
+	if !strings.HasPrefix(created[0].ID, "rec_") {
+		t.Errorf("expected ID prefix 'rec_', got '%s'", created[0].ID)
 	}
 	if created[0].Amount != 950000 {
 		t.Errorf("expected amount 950000, got %f", created[0].Amount)
@@ -222,8 +226,11 @@ func TestRecurringIncomeService_ExecuteNow(t *testing.T) {
 	if nowIncome.Amount != 600 {
 		t.Errorf("expected 600, got %f", nowIncome.Amount)
 	}
-	if nowIncome.Description != "[Recurrente] Cobro Freelance" {
-		t.Errorf("expected '[Recurrente] Cobro Freelance', got %s", nowIncome.Description)
+	if nowIncome.Description != "Cobro Freelance" {
+		t.Errorf("expected 'Cobro Freelance', got %s", nowIncome.Description)
+	}
+	if !strings.HasPrefix(nowIncome.ID, "rec_") {
+		t.Errorf("expected ID prefix 'rec_', got '%s'", nowIncome.ID)
 	}
 
 	// Second execution in the same cycle must fail

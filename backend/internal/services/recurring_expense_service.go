@@ -68,7 +68,7 @@ func (s *recurringExpenseService) CreateRecurringExpense(ctx context.Context, us
 		item.BillingDay = 15
 	}
 
-	item.ID = fmt.Sprintf("%d", time.Now().UnixNano())
+	item.ID = GenerateShortID("rule_")
 	item.UserID = userID
 	item.IsActive = true
 	item.AutoRegister = true
@@ -164,11 +164,11 @@ func (s *recurringExpenseService) ProcessDueExpenses(ctx context.Context, userID
 			// Create real Expense record
 			expenseDate := itemCopy.NextDueDate
 			expense := models.Expense{
-				ID:            fmt.Sprintf("%d", time.Now().UnixNano()),
+				ID:            GenerateShortID("rec_"),
 				UserID:        itemCopy.UserID,
 				Amount:        itemCopy.Amount,
 				Currency:      itemCopy.Currency,
-				Description:   formatRecurringDescription(itemCopy.Description),
+				Description:   CleanRecurringDescription(itemCopy.Description),
 				Category:      itemCopy.Category,
 				PaymentMethod: itemCopy.PaymentMethod,
 				Date:          expenseDate,
@@ -218,11 +218,11 @@ func (s *recurringExpenseService) ProcessAllDueExpenses(ctx context.Context) (in
 			}
 
 			expense := models.Expense{
-				ID:            fmt.Sprintf("%d", time.Now().UnixNano()),
+				ID:            GenerateShortID("rec_"),
 				UserID:        itemCopy.UserID,
 				Amount:        itemCopy.Amount,
 				Currency:      itemCopy.Currency,
-				Description:   formatRecurringDescription(itemCopy.Description),
+				Description:   CleanRecurringDescription(itemCopy.Description),
 				Category:      itemCopy.Category,
 				PaymentMethod: itemCopy.PaymentMethod,
 				Date:          itemCopy.NextDueDate,
@@ -257,11 +257,11 @@ func (s *recurringExpenseService) ExecuteNow(ctx context.Context, id, userID str
 	}
 
 	expense := models.Expense{
-		ID:            fmt.Sprintf("%d", now.UnixNano()),
+		ID:            GenerateShortID("rec_"),
 		UserID:        userID,
 		Amount:        item.Amount,
 		Currency:      item.Currency,
-		Description:   formatRecurringDescription(item.Description),
+		Description:   CleanRecurringDescription(item.Description),
 		Category:      item.Category,
 		PaymentMethod: item.PaymentMethod,
 		Date:          now,
@@ -280,13 +280,9 @@ func (s *recurringExpenseService) ExecuteNow(ctx context.Context, id, userID str
 	return &expense, nil
 }
 
-// formatRecurringDescription prefixes recurring descriptions to clearly identify them
+// formatRecurringDescription keeps compatibility while ensuring descriptions stay clean
 func formatRecurringDescription(desc string) string {
-	const prefix = "[Recurrente] "
-	if strings.HasPrefix(desc, prefix) {
-		return desc
-	}
-	return prefix + desc
+	return CleanRecurringDescription(desc)
 }
 
 // AlreadyExecutedThisCycle checks whether an execution has already occurred in the active cycle
