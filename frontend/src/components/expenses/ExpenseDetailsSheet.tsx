@@ -2,7 +2,8 @@
 
 import { Sheet } from "@/components/ui/Sheet";
 import { useSettings } from "@/contexts/SettingsContext";
-import { Badge } from "@/components/ui/Badge";
+import { useCategories } from "@/hooks/useCategories";
+import { CategoryBadge } from "@/components/categories/CategoryBadge";
 import type { Expense } from "@/types/index";
 import {
   Calendar,
@@ -32,19 +33,6 @@ interface ExpenseDetailsSheetProps {
   onSuccess?: () => void;
 }
 
-const categoryColors: Record<
-  string,
-  "success" | "warning" | "error" | "info" | "default"
-> = {
-  Alimentación: "success",
-  Transporte: "info",
-  Servicios: "warning",
-  Entretenimiento: "error",
-  Salud: "error",
-  Metas: "info",
-  Otros: "default",
-};
-
 export function ExpenseDetailsSheet({
   expense,
   isOpen,
@@ -52,6 +40,7 @@ export function ExpenseDetailsSheet({
   onSuccess,
 }: ExpenseDetailsSheetProps) {
   const { translate, currencySymbol, currency, language } = useSettings();
+  const { categories } = useCategories("expense");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -159,12 +148,12 @@ export function ExpenseDetailsSheet({
                   {translate("expenses.details.category")}
                 </span>
               </div>
-              <Badge
-                variant={categoryColors[expense.category] || "default"}
-                className="text-xs px-3 py-1 font-bold shadow-xs"
-              >
-                {categoryName}
-              </Badge>
+              <CategoryBadge
+                category={expense.category}
+                categories={categories}
+                label={categoryName}
+                size="md"
+              />
             </div>
 
             <div className="h-px bg-border/50 w-full" />

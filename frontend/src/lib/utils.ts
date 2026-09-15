@@ -55,29 +55,206 @@ export function parseLiveNumber(val: string): string {
   return val.replace(/,/g, "");
 }
 
+export interface CategoryColorTheme {
+  name: string;
+  bg: string;
+  text: string;
+  border: string;
+  dot: string;
+  badge: string;
+  hex: string;
+}
+
+export const CATEGORY_COLOR_PALETTE: Record<string, CategoryColorTheme> = {
+  emerald: {
+    name: "emerald",
+    bg: "bg-emerald-500/10 dark:bg-emerald-500/20",
+    text: "text-emerald-700 dark:text-emerald-300",
+    border: "border-emerald-500/30",
+    dot: "bg-emerald-500",
+    badge: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+    hex: "#10b981",
+  },
+  blue: {
+    name: "blue",
+    bg: "bg-blue-500/10 dark:bg-blue-500/20",
+    text: "text-blue-700 dark:text-blue-300",
+    border: "border-blue-500/30",
+    dot: "bg-blue-500",
+    badge: "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30",
+    hex: "#3b82f6",
+  },
+  purple: {
+    name: "purple",
+    bg: "bg-purple-500/10 dark:bg-purple-500/20",
+    text: "text-purple-700 dark:text-purple-300",
+    border: "border-purple-500/30",
+    dot: "bg-purple-500",
+    badge: "bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30",
+    hex: "#8b5cf6",
+  },
+  amber: {
+    name: "amber",
+    bg: "bg-amber-500/10 dark:bg-amber-500/20",
+    text: "text-amber-700 dark:text-amber-300",
+    border: "border-amber-500/30",
+    dot: "bg-amber-500",
+    badge: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
+    hex: "#f59e0b",
+  },
+  rose: {
+    name: "rose",
+    bg: "bg-rose-500/10 dark:bg-rose-500/20",
+    text: "text-rose-700 dark:text-rose-300",
+    border: "border-rose-500/30",
+    dot: "bg-rose-500",
+    badge: "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30",
+    hex: "#f43f5e",
+  },
+  cyan: {
+    name: "cyan",
+    bg: "bg-cyan-500/10 dark:bg-cyan-500/20",
+    text: "text-cyan-700 dark:text-cyan-300",
+    border: "border-cyan-500/30",
+    dot: "bg-cyan-500",
+    badge: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border-cyan-500/30",
+    hex: "#06b6d4",
+  },
+  indigo: {
+    name: "indigo",
+    bg: "bg-indigo-500/10 dark:bg-indigo-500/20",
+    text: "text-indigo-700 dark:text-indigo-300",
+    border: "border-indigo-500/30",
+    dot: "bg-indigo-500",
+    badge: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30",
+    hex: "#6366f1",
+  },
+  pink: {
+    name: "pink",
+    bg: "bg-pink-500/10 dark:bg-pink-500/20",
+    text: "text-pink-700 dark:text-pink-300",
+    border: "border-pink-500/30",
+    dot: "bg-pink-500",
+    badge: "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/30",
+    hex: "#ec4899",
+  },
+  orange: {
+    name: "orange",
+    bg: "bg-orange-500/10 dark:bg-orange-500/20",
+    text: "text-orange-700 dark:text-orange-300",
+    border: "border-orange-500/30",
+    dot: "bg-orange-500",
+    badge: "bg-orange-500/15 text-orange-700 dark:text-orange-300 border-orange-500/30",
+    hex: "#f97316",
+  },
+  teal: {
+    name: "teal",
+    bg: "bg-teal-500/10 dark:bg-teal-500/20",
+    text: "text-teal-700 dark:text-teal-300",
+    border: "border-teal-500/30",
+    dot: "bg-teal-500",
+    badge: "bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30",
+    hex: "#14b8a6",
+  },
+  slate: {
+    name: "slate",
+    bg: "bg-slate-500/10 dark:bg-slate-500/20",
+    text: "text-slate-700 dark:text-slate-300",
+    border: "border-slate-500/30",
+    dot: "bg-slate-500",
+    badge: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/30",
+    hex: "#64748b",
+  },
+};
+
+export const DEFAULT_CATEGORY_COLORS: Record<string, string> = {
+  // Expenses
+  alimentación: "emerald",
+  alimentacion: "emerald",
+  transporte: "blue",
+  servicios: "amber",
+  entretenimiento: "purple",
+  salud: "rose",
+  metas: "cyan",
+  otros: "slate",
+  // Incomes
+  salario: "emerald",
+  freelance: "blue",
+  inversiones: "purple",
+  regalo: "pink",
+};
+
+/**
+ * Returns full color theme for any category name or color key.
+ * Automatically looks up in user categories list, falls back to system defaults,
+ * or deterministically hashes the name to a vibrant palette color.
+ */
+export function getCategoryStyle(
+  categoryNameOrColor?: string | null,
+  categoryList?: Array<{ name: string; color?: string }>
+): CategoryColorTheme {
+  const fallback = CATEGORY_COLOR_PALETTE.slate;
+  if (!categoryNameOrColor) return fallback;
+
+  const trimmed = categoryNameOrColor.trim();
+  const normalized = trimmed.toLowerCase();
+
+  // 1. Direct color key match (e.g. "emerald", "purple")
+  if (CATEGORY_COLOR_PALETTE[normalized]) {
+    return CATEGORY_COLOR_PALETTE[normalized];
+  }
+
+  // 2. Lookup in provided categoryList (user's custom categories or state)
+  if (categoryList && Array.isArray(categoryList)) {
+    const found = categoryList.find(
+      (c) => c.name.trim().toLowerCase() === normalized
+    );
+    if (found?.color) {
+      const colorKey = found.color.toLowerCase();
+      if (CATEGORY_COLOR_PALETTE[colorKey]) {
+        return CATEGORY_COLOR_PALETTE[colorKey];
+      }
+    }
+  }
+
+  // 3. Lookup in system default categories
+  if (DEFAULT_CATEGORY_COLORS[normalized]) {
+    const colorKey = DEFAULT_CATEGORY_COLORS[normalized];
+    if (CATEGORY_COLOR_PALETTE[colorKey]) {
+      return CATEGORY_COLOR_PALETTE[colorKey];
+    }
+  }
+
+  // 4. Stable deterministic hash so any unexpected category gets a consistent color
+  const paletteKeys = [
+    "emerald",
+    "blue",
+    "purple",
+    "amber",
+    "rose",
+    "cyan",
+    "indigo",
+    "pink",
+    "teal",
+  ];
+  let hash = 0;
+  for (let i = 0; i < trimmed.length; i++) {
+    hash = (hash << 5) - hash + trimmed.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % paletteKeys.length;
+  return CATEGORY_COLOR_PALETTE[paletteKeys[index]] || fallback;
+}
+
 /**
  * Returns static Tailwind CSS classes for category color dots and badges.
+ * Supports both color keys ("emerald") and category names ("Alimentación").
  */
-export function getCategoryColorBg(color?: string): string {
-  switch (color?.toLowerCase()) {
-    case "emerald":
-      return "bg-emerald-500";
-    case "purple":
-      return "bg-purple-500";
-    case "amber":
-      return "bg-amber-500";
-    case "rose":
-      return "bg-rose-500";
-    case "cyan":
-      return "bg-cyan-500";
-    case "indigo":
-      return "bg-indigo-500";
-    case "slate":
-      return "bg-slate-500";
-    case "blue":
-    default:
-      return "bg-blue-500";
-  }
+export function getCategoryColorBg(
+  colorOrCategory?: string,
+  categoryList?: Array<{ name: string; color?: string }>
+): string {
+  return getCategoryStyle(colorOrCategory, categoryList).dot;
 }
 
 /**

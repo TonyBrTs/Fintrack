@@ -13,7 +13,7 @@ import { Trash2, Plus, Shield, Tag, AlertTriangle, Loader2, X } from "lucide-rea
 import { useCategories } from "@/hooks/useCategories";
 import { Category } from "@/types";
 import { CategoryModal } from "./CategoryModal";
-import { getCategoryColorBg } from "@/lib/utils";
+import { getCategoryColorBg, cn } from "@/lib/utils";
 
 interface ManageCategoriesModalProps {
   isOpen: boolean;
@@ -152,7 +152,10 @@ export function ManageCategoriesModal({
                     key={cat.id}
                     className="flex items-center justify-between p-2.5 rounded-xl bg-secondary/20 border border-border/40 text-xs font-medium text-muted-foreground"
                   >
-                    <span className="truncate">{cat.name}</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", getCategoryColorBg(cat.color || cat.name))} />
+                      <span className="truncate">{cat.name}</span>
+                    </div>
                     <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground font-semibold shrink-0 ml-1.5">
                       Sistema
                     </span>

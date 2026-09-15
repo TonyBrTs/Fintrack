@@ -15,7 +15,8 @@ import {
 } from "recharts";
 import { Expense, Income } from "@/types/index";
 import { useSettings } from "@/contexts/SettingsContext";
-import { formatCurrency } from "@/lib/utils";
+import { useCategories } from "@/hooks/useCategories";
+import { formatCurrency, getCategoryStyle } from "@/lib/utils";
 import { PieChart as PieIcon, BarChart3 } from "lucide-react";
 
 interface SummaryChartsProps {
@@ -23,16 +24,6 @@ interface SummaryChartsProps {
   incomes: Income[];
   currentMonthExpenses?: Expense[];
 }
-
-const MODERN_COLORS = [
-  "#2563eb", // Primary Blue
-  "#10b981", // Emerald
-  "#f59e0b", // Amber
-  "#8b5cf6", // Purple
-  "#06b6d4", // Cyan
-  "#f43f5e", // Rose
-  "#64748b", // Slate
-];
 
 interface ChartDataItem {
   name: string;
@@ -45,6 +36,7 @@ export function SummaryCharts({
   currentMonthExpenses,
 }: SummaryChartsProps) {
   const { translate, currencySymbol } = useSettings();
+  const { categories } = useCategories("expense");
 
   const expensesForPie = currentMonthExpenses || expenses;
 
@@ -135,12 +127,15 @@ export function SummaryCharts({
                   dataKey="value"
                   stroke="none"
                 >
-                  {categoryData.map((entry: ChartDataItem, index: number) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={MODERN_COLORS[index % MODERN_COLORS.length]}
-                    />
-                  ))}
+                  {categoryData.map((entry: ChartDataItem, index: number) => {
+                    const style = getCategoryStyle(entry.name, categories);
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={style.hex}
+                      />
+                    );
+                  })}
                 </Pie>
                 <Tooltip
                   formatter={(value: unknown) => [

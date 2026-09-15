@@ -41,14 +41,16 @@ import {
 } from "@/components/ui/table";
 import { RecurringExpenseModal } from "./RecurringExpenseModal";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
+import { useCategories } from "@/hooks/useCategories";
 import type { RecurringExpense, RecurringSyncResult } from "@/types/index";
 
-interface RecurringExpensesManagerProps {
+export function RecurringExpensesManager({
+  onExpenseGenerated,
+}: {
   onExpenseGenerated?: () => void;
-}
-
-export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpensesManagerProps) {
-  const { currency, currencySymbol, language, translate } = useSettings();
+}) {
+  const { translate, currencySymbol, language } = useSettings();
+  const { categories } = useCategories("expense");
   const [items, setItems] = useState<RecurringExpense[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -345,6 +347,15 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     <h4 className="font-bold text-sm text-titles dark:text-foreground truncate">
                       {item.description}
                     </h4>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span
+                        className={cn(
+                          "w-2 h-2 rounded-full shrink-0",
+                          getCategoryColorBg(item.category, categories)
+                        )}
+                      />
+                      <span className="text-[11px] text-muted-foreground font-medium truncate">{item.category}</span>
+                    </div>
                   </div>
                   <div className="text-right shrink-0">
                     <span className="text-base font-black text-rose-500 dark:text-rose-400 whitespace-nowrap">
@@ -579,8 +590,8 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <span
                               className={cn(
-                                "w-2 h-2 rounded-full",
-                                getCategoryColorBg(item.category)
+                                "w-2 h-2 rounded-full shrink-0",
+                                getCategoryColorBg(item.category, categories)
                               )}
                             />
                             <span className="text-xs text-muted-foreground">{item.category}</span>

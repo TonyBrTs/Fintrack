@@ -2,7 +2,8 @@
 
 import { Expense, Income } from "@/types/index";
 import { useSettings } from "@/contexts/SettingsContext";
-import { formatCurrency } from "@/lib/utils";
+import { useCategories } from "@/hooks/useCategories";
+import { formatCurrency, getCategoryStyle, cn } from "@/lib/utils";
 import {
   Sparkles,
   ChevronLeft,
@@ -32,6 +33,7 @@ export function RecentTransactions({
   incomes,
 }: RecentTransactionsProps) {
   const { translate, currencySymbol } = useSettings();
+  const { categories } = useCategories();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -212,12 +214,23 @@ export function RecentTransactions({
                       : tx.description}
                   </p>
                   <div className="flex justify-between items-end pt-1 border-t border-border/40">
-                    <div>
-                      <p className="text-[11px] text-muted-foreground font-semibold">
-                        {isIncome
-                          ? translate(`sources.${(tx as Income).source}`) || (tx as Income).source
-                          : translate(`categories.${(tx as Expense).category}`) || (tx as Expense).category}
-                      </p>
+                    <div className="min-w-0 pr-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span
+                          className={cn(
+                            "w-2 h-2 rounded-full shrink-0",
+                            getCategoryStyle(
+                              isIncome ? (tx as Income).source : (tx as Expense).category,
+                              categories
+                            ).dot
+                          )}
+                        />
+                        <p className="text-[11px] text-muted-foreground font-semibold truncate max-w-[130px]">
+                          {isIncome
+                            ? translate(`sources.${(tx as Income).source}`) || (tx as Income).source
+                            : translate(`categories.${(tx as Expense).category}`) || (tx as Expense).category}
+                        </p>
+                      </div>
                       <p className="text-[10px] text-muted-foreground/70">
                         {new Date(tx.date).toLocaleDateString(undefined, {
                           month: "short",

@@ -29,7 +29,8 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { safeFetch } from '@/lib/api';
 import { useCategories } from '@/hooks/useCategories';
 import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
-import { cn, formatCurrency } from '@/lib/utils';
+import { CategoryBadge } from '@/components/categories/CategoryBadge';
+import { cn, formatCurrency, getCategoryStyle } from '@/lib/utils';
 import type { Expense, RecurringSyncResult } from '@/types/index';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -47,16 +48,6 @@ import {
 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
-
-const categoryColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default'> = {
-  Alimentación: 'success',
-  Transporte: 'info',
-  Servicios: 'warning',
-  Entretenimiento: 'error',
-  Salud: 'error',
-  Otros: 'default',
-  Metas: 'warning',
-};
 
 function ExpensesContent() {
   const { currency, currencySymbol, translate } = useSettings();
@@ -385,7 +376,15 @@ function ExpensesContent() {
               <SelectItem value="all">Todas las categorías</SelectItem>
               {categoriesList.map((cat) => (
                 <SelectItem key={cat} value={cat}>
-                  {translate(`categories.${cat}`) || cat}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "w-2 h-2 rounded-full shrink-0",
+                        getCategoryStyle(cat, userCatList).dot
+                      )}
+                    />
+                    <span>{translate(`categories.${cat}`) || cat}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -460,12 +459,11 @@ function ExpensesContent() {
                     </div>
                   </TableCell>
                   <TableCell className="px-5 py-4">
-                    <Badge
-                      variant={categoryColors[expense.category] || 'default'}
-                      className="text-xs px-3 py-1 font-bold shadow-2xs"
-                    >
-                      {translate(`categories.${expense.category}`) || expense.category}
-                    </Badge>
+                    <CategoryBadge
+                      category={expense.category}
+                      categories={userCatList}
+                      label={translate(`categories.${expense.category}`) || expense.category}
+                    />
                   </TableCell>
                   <TableCell className="px-5 py-4 text-right">
                     <div className="flex flex-col items-end">

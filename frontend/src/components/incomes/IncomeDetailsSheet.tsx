@@ -2,7 +2,8 @@
 
 import { Sheet } from "@/components/ui/Sheet";
 import { useSettings } from "@/contexts/SettingsContext";
-import { Badge } from "@/components/ui/Badge";
+import { useCategories } from "@/hooks/useCategories";
+import { CategoryBadge } from "@/components/categories/CategoryBadge";
 import type { Income } from "@/types/index";
 import {
   Calendar,
@@ -32,17 +33,6 @@ interface IncomeDetailsSheetProps {
   onSuccess?: () => void;
 }
 
-const sourceColors: Record<
-  string,
-  "success" | "warning" | "error" | "info" | "default"
-> = {
-  Salario: "success",
-  Freelance: "info",
-  Inversiones: "warning",
-  Regalo: "success",
-  Otros: "default",
-};
-
 export function IncomeDetailsSheet({
   income,
   isOpen,
@@ -50,6 +40,7 @@ export function IncomeDetailsSheet({
   onSuccess,
 }: IncomeDetailsSheetProps) {
   const { translate, currencySymbol, currency, language } = useSettings();
+  const { categories } = useCategories("income");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -154,12 +145,12 @@ export function IncomeDetailsSheet({
                   {translate("income.details.source")}
                 </span>
               </div>
-              <Badge
-                variant={sourceColors[income.source] || "default"}
-                className="text-xs px-3 py-1 font-bold shadow-xs"
-              >
-                {sourceName}
-              </Badge>
+              <CategoryBadge
+                category={income.source}
+                categories={categories}
+                label={sourceName}
+                size="md"
+              />
             </div>
 
             <div className="h-px bg-border/50 w-full" />

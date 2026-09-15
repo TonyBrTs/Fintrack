@@ -31,6 +31,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/Badge";
+import { CategoryBadge } from "@/components/categories/CategoryBadge";
 import {
   Table,
   TableBody,
@@ -41,15 +42,9 @@ import {
 } from "@/components/ui/table";
 import { RecurringIncomeModal } from "./RecurringIncomeModal";
 import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
+import { useCategories } from "@/hooks/useCategories";
+import { getCategoryColorBg } from "@/lib/utils";
 import type { RecurringIncome, RecurringIncomeSyncResult } from "@/types/index";
-
-const sourceBadgeVariants: Record<string, "success" | "info" | "warning" | "default"> = {
-  Salario: "success",
-  Freelance: "info",
-  Inversiones: "warning",
-  Regalo: "success",
-  Otros: "default",
-};
 
 interface RecurringIncomesManagerProps {
   onIncomeGenerated?: () => void;
@@ -57,6 +52,7 @@ interface RecurringIncomesManagerProps {
 
 export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesManagerProps) {
   const { currency, currencySymbol, language, translate } = useSettings();
+  const { categories } = useCategories("income");
   const [items, setItems] = useState<RecurringIncome[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -377,6 +373,17 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                       <h4 className="font-bold text-sm text-titles dark:text-foreground truncate">
                         {item.description}
                       </h4>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span
+                          className={cn(
+                            "w-2 h-2 rounded-full shrink-0",
+                            getCategoryColorBg(item.source, categories)
+                          )}
+                        />
+                        <span className="text-[11px] text-muted-foreground font-medium truncate">
+                          {translate(`sources.${item.source}`) || item.source}
+                        </span>
+                      </div>
                     </div>
                     <div className="text-right shrink-0">
                       <span className="text-base font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
@@ -472,12 +479,12 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                             {translate("recurring.source", "Fuente")}
                           </span>
                           <div className="mt-0.5 font-medium text-foreground">
-                            <Badge
-                              variant={sourceBadgeVariants[item.source] || "default"}
-                              className="text-[10px] px-2 py-0.5 font-bold"
-                            >
-                              {item.source}
-                            </Badge>
+                            <CategoryBadge
+                              category={item.source}
+                              categories={categories}
+                              label={translate(`sources.${item.source}`) || item.source}
+                              size="sm"
+                            />
                           </div>
                         </div>
 
@@ -606,12 +613,12 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                       </TableCell>
 
                       <TableCell className="px-5 py-4 text-center whitespace-nowrap">
-                        <Badge
-                          variant={sourceBadgeVariants[item.source] || "default"}
-                          className="text-xs px-2.5 py-0.5 font-bold"
-                        >
-                          {item.source}
-                        </Badge>
+                        <CategoryBadge
+                          category={item.source}
+                          categories={categories}
+                          label={translate(`sources.${item.source}`) || item.source}
+                          size="sm"
+                        />
                       </TableCell>
 
                       <TableCell className="px-5 py-4 text-xs font-semibold text-muted-foreground text-center whitespace-nowrap">

@@ -29,7 +29,8 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { safeFetch } from '@/lib/api';
 import { useCategories } from '@/hooks/useCategories';
 import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
-import { cn, formatCurrency } from '@/lib/utils';
+import { CategoryBadge } from '@/components/categories/CategoryBadge';
+import { cn, formatCurrency, getCategoryStyle } from '@/lib/utils';
 import type { Income, RecurringIncomeSyncResult } from '@/types/index';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -47,14 +48,6 @@ import {
 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
-
-const sourceColors: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default'> = {
-  Salario: 'success',
-  Freelance: 'info',
-  Inversiones: 'warning',
-  Regalo: 'success',
-  Otros: 'default',
-};
 
 function IncomesContent() {
   const { currency, currencySymbol, translate } = useSettings();
@@ -380,7 +373,15 @@ function IncomesContent() {
               <SelectItem value="all">Todas las fuentes</SelectItem>
               {sourcesList.map((src) => (
                 <SelectItem key={src} value={src}>
-                  {translate(`sources.${src}`) || src}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "w-2 h-2 rounded-full shrink-0",
+                        getCategoryStyle(src, userSourceList).dot
+                      )}
+                    />
+                    <span>{translate(`sources.${src}`) || src}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -449,12 +450,11 @@ function IncomesContent() {
                     </div>
                   </TableCell>
                   <TableCell className="px-5 py-4">
-                    <Badge
-                      variant={sourceColors[income.source] || 'default'}
-                      className="text-xs px-3 py-1 font-bold shadow-2xs"
-                    >
-                      {translate(`sources.${income.source}`) || income.source}
-                    </Badge>
+                    <CategoryBadge
+                      category={income.source}
+                      categories={userSourceList}
+                      label={translate(`sources.${income.source}`) || income.source}
+                    />
                   </TableCell>
                   <TableCell className="px-5 py-4 text-right">
                     <div className="flex flex-col items-end">
