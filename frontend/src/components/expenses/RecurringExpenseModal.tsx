@@ -460,7 +460,7 @@ export function RecurringExpenseModal({
             <Switch
               checked={formData.auto_register}
               onCheckedChange={(checked) => setFormData({ ...formData, auto_register: checked })}
-              activeColor="bg-blue-600"
+              colorScheme="blue"
             />
           </div>
 
@@ -501,7 +501,7 @@ export function RecurringExpenseModal({
             <Switch
               checked={formData.is_active}
               onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-              activeColor="bg-emerald-500"
+              colorScheme="emerald"
             />
           </div>
 

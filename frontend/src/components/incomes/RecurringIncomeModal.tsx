@@ -501,7 +501,7 @@ export function RecurringIncomeModal({
               onCheckedChange={(checked) =>
                 setFormData({ ...formData, auto_register: checked })
               }
-              activeColor="bg-emerald-600"
+              colorScheme="emerald"
             />
           </div>
 
@@ -544,7 +544,7 @@ export function RecurringIncomeModal({
               onCheckedChange={(checked) =>
                 setFormData({ ...formData, is_active: checked })
               }
-              activeColor="bg-emerald-500"
+              colorScheme="emerald"
             />
           </div>
 
