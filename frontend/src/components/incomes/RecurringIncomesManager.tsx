@@ -25,7 +25,6 @@ import {
   Loader2,
   TrendingUp,
   Zap,
-  Power,
   CalendarClock,
   ChevronDown,
 } from "lucide-react";
@@ -669,17 +668,6 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                             )}
                           >
                             <Zap className="w-4 h-4 fill-current" />
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            title={item.is_active ? (language === "en" ? "Deactivate auto-collection" : "Desactivar cobro automático") : (language === "en" ? "Activate auto-collection" : "Activar cobro automático")}
-                            disabled={isLoadingThis}
-                            onClick={() => handleToggleActive(item)}
-                            className="h-8 w-8 text-muted-foreground hover:bg-secondary rounded-lg cursor-pointer"
-                          >
-                            <Power className={cn("w-3.5 h-3.5", item.is_active ? "text-emerald-500" : "text-slate-400")} />
                           </Button>
 
                           <Button

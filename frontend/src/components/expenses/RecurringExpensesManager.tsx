@@ -26,7 +26,6 @@ import {
   Loader2,
   CalendarClock,
   Zap,
-  Power,
   ChevronDown,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -662,18 +661,6 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                             )}
                           >
                             <Zap className="w-4 h-4 fill-current" />
-                          </Button>
-
-                          {/* Pausar / Activar */}
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            title={item.is_active ? "Desactivar automatización" : "Activar automatización"}
-                            onClick={() => handleToggleActive(item)}
-                            disabled={isActionLoading}
-                            className="h-8 w-8 text-muted-foreground hover:bg-secondary rounded-lg cursor-pointer"
-                          >
-                            <Power className={cn("w-3.5 h-3.5", item.is_active ? "text-emerald-500" : "text-slate-400")} />
                           </Button>
 
                           {/* Editar */}
