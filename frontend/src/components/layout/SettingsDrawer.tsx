@@ -1,7 +1,7 @@
 "use client";
 
 import { Sheet } from "@/components/ui/Sheet";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
@@ -46,6 +46,11 @@ export function SettingsDrawer() {
     user?.email?.split("@")[0] ||
     (isEs ? "Invitado" : "Guest");
 
+  const avatarUrl =
+    (user?.user_metadata?.avatar_url as string) ||
+    (user?.user_metadata?.picture as string) ||
+    undefined;
+
   return (
     <Sheet
       isOpen={isSettingsOpen}
@@ -58,6 +63,13 @@ export function SettingsDrawer() {
           <div className="flex items-center justify-between p-3.5 bg-secondary/50 dark:bg-card/60 border border-border/60 rounded-2xl">
             <div className="flex items-center gap-3 min-w-0">
               <Avatar size="lg" className="ring-2 ring-blue-500/30 shrink-0">
+                {avatarUrl && (
+                  <AvatarImage
+                    src={avatarUrl}
+                    alt={displayName}
+                    referrerPolicy="no-referrer"
+                  />
+                )}
                 <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm">
                   {userInitials}
                 </AvatarFallback>

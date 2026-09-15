@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +41,11 @@ export function Header() {
     (user?.user_metadata?.full_name as string) ||
     user?.email?.split("@")[0] ||
     "Usuario";
+
+  const avatarUrl =
+    (user?.user_metadata?.avatar_url as string) ||
+    (user?.user_metadata?.picture as string) ||
+    undefined;
 
   return (
     <>
@@ -89,6 +94,13 @@ export function Header() {
                     className="flex items-center gap-2 p-0.5 rounded-full ring-2 ring-blue-500/30 hover:ring-blue-500/70 transition-all cursor-pointer outline-none focus-visible:ring-action"
                   >
                     <Avatar size="lg">
+                      {avatarUrl && (
+                        <AvatarImage
+                          src={avatarUrl}
+                          alt={displayName}
+                          referrerPolicy="no-referrer"
+                        />
+                      )}
                       <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-xs">
                         {userInitials}
                       </AvatarFallback>
