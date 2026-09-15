@@ -430,27 +430,9 @@ export function RecurringExpenseModal({
             <div className="flex items-start gap-2.5 min-w-0">
               <CalendarClock className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-titles dark:text-foreground block">
-                    Registro Automático
-                  </span>
-                  <span
-                    className={cn(
-                      "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors",
-                      formData.auto_register
-                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                        : "bg-slate-500/15 text-slate-500 dark:text-slate-400 border border-slate-400/30"
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        formData.auto_register ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                      )}
-                    />
-                    {formData.auto_register ? "Activo" : "Inactivo"}
-                  </span>
-                </div>
+                <span className="text-xs font-bold text-titles dark:text-foreground block">
+                  Registro Automático
+                </span>
                 <span className="text-[11px] text-muted-foreground block mt-0.5">
                   Registra el gasto en el balance en la fecha sin requerir acción manual
                 </span>
@@ -469,27 +451,9 @@ export function RecurringExpenseModal({
             <div className="flex items-start gap-2.5 min-w-0">
               <Power className={cn("w-4 h-4 shrink-0 mt-0.5", formData.is_active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")} />
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-titles dark:text-foreground block">
-                    Estado del Gasto Fijo
-                  </span>
-                  <span
-                    className={cn(
-                      "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors",
-                      formData.is_active
-                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                        : "bg-slate-500/15 text-slate-500 dark:text-slate-400 border border-slate-400/30"
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        formData.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                      )}
-                    />
-                    {formData.is_active ? "Activo" : "Pausado"}
-                  </span>
-                </div>
+                <span className="text-xs font-bold text-titles dark:text-foreground block">
+                  Estado del Gasto Fijo
+                </span>
                 <span className="text-[11px] text-muted-foreground block mt-0.5">
                   {formData.is_active
                     ? "El gasto está vigente y programado para sus pagos"

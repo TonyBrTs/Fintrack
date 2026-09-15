@@ -36,8 +36,8 @@ const currencySymbols: Record<Currency, string> = {
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [language, setLanguage] = useState<Language>("en");
-  const [currency, setCurrency] = useState<Currency>("USD");
+  const [language, setLanguage] = useState<Language>("es");
+  const [currency, setCurrency] = useState<Currency>("CRC");
   const [iconSource, setIconSource] = useState<IconSource>("phosphor");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 

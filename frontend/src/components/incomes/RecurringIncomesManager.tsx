@@ -427,17 +427,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                     </div>
 
                     {/* Switch de Activo/Pausado */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span
-                        className={cn(
-                          "text-[11px] font-semibold select-none",
-                          item.is_active
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-muted-foreground"
-                        )}
-                      >
-                        {item.is_active ? "Activo" : "Pausado"}
-                      </span>
+                    <div className="flex items-center shrink-0">
                       <Switch
                         size="sm"
                         checked={item.is_active}
@@ -668,7 +658,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                       </TableCell>
 
                       <TableCell className="px-5 py-4 text-center whitespace-nowrap">
-                        <div className="inline-flex items-center justify-center gap-2">
+                        <div className="inline-flex items-center justify-center">
                           <Switch
                             size="sm"
                             checked={item.is_active}
@@ -676,16 +666,6 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                             onCheckedChange={() => handleToggleActive(item)}
                             title={item.is_active ? "Ingreso activo • Clic para pausar" : "Ingreso pausado • Clic para activar"}
                           />
-                          <span
-                            className={cn(
-                              "text-xs font-semibold select-none",
-                              item.is_active
-                                ? "text-emerald-600 dark:text-emerald-400"
-                                : "text-muted-foreground"
-                            )}
-                          >
-                            {item.is_active ? "Activo" : "Pausado"}
-                          </span>
                         </div>
                       </TableCell>
 

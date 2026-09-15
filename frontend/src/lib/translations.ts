@@ -256,7 +256,7 @@ export const translations = {
       jun: "Jun",
       jul: "Jul",
       aug: "Ago",
-      sep: "Sep",
+      sep: "Set",
       oct: "Oct",
       nov: "Nov",
       dec: "Dic",

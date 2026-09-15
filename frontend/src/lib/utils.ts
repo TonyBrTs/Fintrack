@@ -107,12 +107,25 @@ export function parseCalendarDate(dateInput: string | Date | null | undefined): 
   return new Date(dateInput);
 }
 
+const SPANISH_MONTHS_SHORT = [
+  "ene.", "feb.", "mar.", "abr.", "may.", "jun.",
+  "jul.", "ago.", "set.", "oct.", "nov.", "dic."
+];
+
 /**
- * Formats a calendar date safely into "30 set." without timezone shifting.
+ * Formats a calendar date safely into "30 set." without timezone shifting or browser locale bugs.
  */
-export function formatCalendarDate(dateInput: string | Date | null | undefined): string {
+export function formatCalendarDate(
+  dateInput: string | Date | null | undefined,
+  includeYear: boolean = false
+): string {
   if (!dateInput) return "";
   const d = parseCalendarDate(dateInput);
-  return d.toLocaleDateString("es-CR", { day: "numeric", month: "short" });
+  const day = d.getDate();
+  const month = SPANISH_MONTHS_SHORT[d.getMonth()] || "";
+  if (includeYear) {
+    return `${day} ${month} ${d.getFullYear()}`;
+  }
+  return `${day} ${month}`;
 }
 
