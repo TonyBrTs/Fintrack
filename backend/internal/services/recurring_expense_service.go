@@ -343,21 +343,24 @@ func CalculateInitialDueDate(frequency, biweeklyType string, billingDay int, sta
 		if biweeklyType == models.FrequencyBiweekly || biweeklyType == models.Biweekly15AndLast {
 			lastDay := LastDayOfMonth(y, m)
 			if d <= 15 {
-				return time.Date(y, m, 15, 0, 0, 0, 0, time.UTC)
+				return time.Date(y, m, 15, 12, 0, 0, 0, time.UTC)
 			}
-			return time.Date(y, m, lastDay, 0, 0, 0, 0, time.UTC)
+			return time.Date(y, m, lastDay, 12, 0, 0, 0, time.UTC)
 		}
 		// every 15 days from start
-		return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+		return time.Date(y, m, d, 12, 0, 0, 0, time.UTC)
 
 	case models.FrequencyMonthly:
 		lastDay := LastDayOfMonth(y, m)
 		day := billingDay
+		if day <= 0 {
+			day = 15
+		}
 		if day > lastDay {
 			day = lastDay
 		}
 		if d <= day {
-			return time.Date(y, m, day, 0, 0, 0, 0, time.UTC)
+			return time.Date(y, m, day, 12, 0, 0, 0, time.UTC)
 		}
 		// already passed this month, move to next month
 		nextMonth := m + 1
@@ -368,19 +371,22 @@ func CalculateInitialDueDate(frequency, biweeklyType string, billingDay int, sta
 		}
 		nextLastDay := LastDayOfMonth(nextYear, nextMonth)
 		nextDay := billingDay
+		if nextDay <= 0 {
+			nextDay = 15
+		}
 		if nextDay > nextLastDay {
 			nextDay = nextLastDay
 		}
-		return time.Date(nextYear, nextMonth, nextDay, 0, 0, 0, 0, time.UTC)
+		return time.Date(nextYear, nextMonth, nextDay, 12, 0, 0, 0, time.UTC)
 
 	case models.FrequencyWeekly:
-		return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+		return time.Date(y, m, d, 12, 0, 0, 0, time.UTC)
 
 	case models.FrequencyYearly:
-		return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+		return time.Date(y, m, d, 12, 0, 0, 0, time.UTC)
 
 	default:
-		return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+		return time.Date(y, m, d, 12, 0, 0, 0, time.UTC)
 	}
 }
 
@@ -394,11 +400,11 @@ func CalculateNextDueDate(frequency, biweeklyType string, billingDay int, curren
 			lastDay := LastDayOfMonth(y, m)
 			if d < 15 {
 				// Move to 15th of current month
-				return time.Date(y, m, 15, 0, 0, 0, 0, time.UTC)
+				return time.Date(y, m, 15, 12, 0, 0, 0, time.UTC)
 			}
 			if d >= 15 && d < lastDay {
 				// Move to last day of current month
-				return time.Date(y, m, lastDay, 0, 0, 0, 0, time.UTC)
+				return time.Date(y, m, lastDay, 12, 0, 0, 0, time.UTC)
 			}
 			// It was the last day (or later) of the month, move to 15th of next month
 			nextMonth := m + 1
@@ -407,7 +413,7 @@ func CalculateNextDueDate(frequency, biweeklyType string, billingDay int, curren
 				nextMonth = 1
 				nextYear++
 			}
-			return time.Date(nextYear, nextMonth, 15, 0, 0, 0, 0, time.UTC)
+			return time.Date(nextYear, nextMonth, 15, 12, 0, 0, 0, time.UTC)
 		}
 		// every 15 days
 		return currentDue.AddDate(0, 0, 15)
@@ -427,7 +433,7 @@ func CalculateNextDueDate(frequency, biweeklyType string, billingDay int, curren
 		if day > lastDay {
 			day = lastDay
 		}
-		return time.Date(nextYear, nextMonth, day, 0, 0, 0, 0, time.UTC)
+		return time.Date(nextYear, nextMonth, day, 12, 0, 0, 0, time.UTC)
 
 	case models.FrequencyWeekly:
 		return currentDue.AddDate(0, 0, 7)

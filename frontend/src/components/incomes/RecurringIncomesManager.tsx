@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, formatCalendarDate, parseCalendarDate } from "@/lib/utils";
 import { useSettings } from "@/contexts/SettingsContext";
 import { safeFetch } from "@/lib/api";
 import { toast } from "sonner";
@@ -207,21 +207,21 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
   }, [activeItems]);
 
   const formatDueDateLabel = (dueDateStr: string | Date) => {
-    const d = new Date(dueDateStr);
+    const target = parseCalendarDate(dueDateStr);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const target = new Date(d);
     target.setHours(0, 0, 0, 0);
 
     const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 3600 * 24));
 
     if (diffDays === 0) return { label: "¡Hoy!", urgent: true };
     if (diffDays === 1) return { label: "Mañana", urgent: true };
-    if (diffDays > 1 && diffDays <= 7) return { label: `En ${diffDays} días`, urgent: false };
+    if (diffDays > 1 && diffDays <= 31) return { label: `En ${diffDays} días`, urgent: false };
+    if (diffDays > 31) return { label: `En ${Math.round(diffDays / 30)} meses`, urgent: false };
     if (diffDays < 0) return { label: `Venció hace ${Math.abs(diffDays)}d`, urgent: true };
 
     return {
-      label: d.toLocaleDateString(undefined, { day: "numeric", month: "short" }),
+      label: `En ${diffDays} días`,
       urgent: false,
     };
   };
@@ -322,11 +322,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                   {activeItems[0].description}
                 </span>
                 <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
-                  {new Date(activeItems[0].next_due_date).toLocaleDateString(undefined, {
-                    day: "numeric",
-                    month: "short",
-                  })} (
-                  {formatDueDateLabel(activeItems[0].next_due_date).label})
+                  {formatCalendarDate(activeItems[0].next_due_date)} • {formatDueDateLabel(activeItems[0].next_due_date).label}
                 </p>
               </>
             ) : (
@@ -379,81 +375,65 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                 <div
                   key={item.id}
                   className={cn(
-                    "p-3.5 sm:p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3 transition-all",
+                    "p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3 transition-all",
                     !item.is_active && "opacity-60 bg-secondary/15"
                   )}
                 >
-                  {/* Header Row: Title, Status, Source, & Amount */}
+                  {/* Header Row: Title, Subtitle, and Amount + Status Toggle */}
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1 space-y-1.5">
-                      {/* Title + Active/Inactive toggle */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-sm text-titles dark:text-foreground truncate max-w-[200px]">
-                          {item.description}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleActive(item)}
-                          disabled={isLoadingThis}
-                          title={item.is_active ? "Activo • Clic para desactivar" : "Inactivo • Clic para activar"}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 transition-all cursor-pointer",
-                            item.is_active
-                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700"
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "w-1.5 h-1.5 rounded-full",
-                              item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                            )}
-                          />
-                          <span>{item.is_active ? "Activo" : "Inactivo"}</span>
-                        </button>
-                      </div>
-
-                      {/* Metadata tags */}
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-bold text-sm sm:text-base text-titles dark:text-foreground truncate">
+                        {item.description}
+                      </h4>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
                         <Badge
                           variant={sourceBadgeVariants[item.source] || "default"}
                           className="text-[10px] px-2 py-0.5 font-bold"
                         >
                           {item.source}
                         </Badge>
-                        <span className="font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md text-[11px]">
+                        <span>•</span>
+                        <span className="font-medium text-foreground/80">
                           {getFrequencyBadge(item)}
                         </span>
-                        {item.auto_register ? (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                            Auto
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground">
-                            Manual
-                          </span>
-                        )}
                       </div>
                     </div>
 
-                    {/* Amount */}
-                    <div className="text-right shrink-0">
+                    {/* Amount & Active Switch on the Right */}
+                    <div className="text-right shrink-0 flex flex-col items-end gap-1">
                       <span className="text-base font-black text-emerald-600 dark:text-emerald-400 block whitespace-nowrap">
                         +{currencySymbol}{formatCurrency(item.amount)}
                       </span>
-                      <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">
-                        {currency}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleActive(item)}
+                        disabled={isLoadingThis}
+                        title={item.is_active ? "Activo • Clic para pausar" : "Pausado • Clic para activar"}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold transition-all cursor-pointer shadow-2xs active:scale-95",
+                          item.is_active
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
+                            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700 hover:bg-slate-200"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                          )}
+                        />
+                        <span>{item.is_active ? "Activo" : "Pausado"}</span>
+                      </button>
                     </div>
                   </div>
 
                   {/* Due Date Indicator Banner */}
-                  <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-secondary/40 border border-border/40 text-xs">
+                  <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-secondary/40 border border-border/40 text-xs">
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Clock className="w-3.5 h-3.5 shrink-0" />
                       <span>Próximo cobro:</span>
                       <span className="font-bold text-foreground">
-                        {new Date(item.next_due_date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                        {formatCalendarDate(item.next_due_date)}
                       </span>
                     </div>
                     <span
@@ -461,7 +441,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                         "text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap",
                         dueInfo.urgent
                           ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25"
-                          : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                          : "text-muted-foreground font-medium"
                       )}
                     >
                       {dueInfo.label}
@@ -492,19 +472,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                       {isAlreadyExecutedThisPeriod(item) ? "Ya Registrado" : "Cobrar Ahora"}
                     </Button>
 
-                    {/* Icon Actions */}
+                    {/* Quick Edit and Delete buttons */}
                     <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        disabled={isLoadingThis}
-                        onClick={() => handleToggleActive(item)}
-                        title={item.is_active ? "Desactivar cobro automático" : "Activar cobro automático"}
-                        className="h-8.5 w-8.5 text-muted-foreground hover:bg-secondary rounded-xl cursor-pointer"
-                      >
-                        <Power className={cn("w-3.5 h-3.5", item.is_active ? "text-emerald-500" : "text-slate-400")} />
-                      </Button>
-
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -541,25 +510,25 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
             <Table>
               <TableHeader className="bg-secondary/40">
                 <TableRow className="border-b border-border/60">
-                  <TableHead className="px-5 py-3 text-xs font-bold uppercase text-muted-foreground">
+                  <TableHead className="px-5 py-3.5 text-xs font-bold uppercase text-muted-foreground">
                     Concepto
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-xs font-bold uppercase text-muted-foreground text-center">
+                  <TableHead className="px-5 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
                     Fuente
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-xs font-bold uppercase text-muted-foreground text-center">
+                  <TableHead className="px-5 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
                     Frecuencia
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-xs font-bold uppercase text-muted-foreground text-center">
-                    Próximo Cobro
+                  <TableHead className="px-5 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
+                    Próxima Fecha
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-xs font-bold uppercase text-muted-foreground text-center">
+                  <TableHead className="px-5 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
                     Monto
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-xs font-bold uppercase text-muted-foreground text-center">
+                  <TableHead className="px-5 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
                     Estado
                   </TableHead>
-                  <TableHead className="px-5 py-3 text-xs font-bold uppercase text-muted-foreground text-center">
+                  <TableHead className="px-5 py-3.5 text-xs font-bold uppercase text-muted-foreground text-center">
                     Acciones
                   </TableHead>
                 </TableRow>
@@ -611,7 +580,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                                 : "text-titles dark:text-foreground"
                             )}
                           >
-                            {new Date(item.next_due_date).toLocaleDateString()}
+                            {formatCalendarDate(item.next_due_date)}
                           </span>
                           <span className="text-[11px] text-muted-foreground font-semibold">
                             {dueInfo.label}

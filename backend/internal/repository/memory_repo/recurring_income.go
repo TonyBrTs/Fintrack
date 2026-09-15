@@ -90,7 +90,7 @@ func (r *MemoryRecurringIncomeRepository) FindPendingDue(ctx context.Context, us
 
 	var result []models.RecurringIncome
 	for _, item := range r.items {
-		if (item.UserID == userID || item.UserID == "") && item.IsActive && !item.NextDueDate.After(until) {
+		if (item.UserID == userID || item.UserID == "") && item.IsActive && item.AutoRegister && !item.NextDueDate.After(until) {
 			result = append(result, item)
 		}
 	}
@@ -103,7 +103,7 @@ func (r *MemoryRecurringIncomeRepository) FindAllPendingDue(ctx context.Context,
 
 	var result []models.RecurringIncome
 	for _, item := range r.items {
-		if item.IsActive && !item.NextDueDate.After(until) {
+		if item.IsActive && item.AutoRegister && !item.NextDueDate.After(until) {
 			result = append(result, item)
 		}
 	}

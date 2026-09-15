@@ -80,3 +80,39 @@ export function getCategoryColorBg(color?: string): string {
   }
 }
 
+/**
+ * Returns today's date in local YYYY-MM-DD format (avoids UTC offset shifts).
+ */
+export function getTodayLocal(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Parses any date (string or Date) into a local Date without UTC offset regressions.
+ * e.g. "2026-09-30T00:00:00Z" -> Date object for Sep 30 locally.
+ */
+export function parseCalendarDate(dateInput: string | Date | null | undefined): Date {
+  if (!dateInput) return new Date();
+  if (typeof dateInput === "string") {
+    const datePart = dateInput.split("T")[0];
+    const parts = datePart.split("-").map(Number);
+    if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+      return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+    }
+  }
+  return new Date(dateInput);
+}
+
+/**
+ * Formats a calendar date safely into "30 set." without timezone shifting.
+ */
+export function formatCalendarDate(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) return "";
+  const d = parseCalendarDate(dateInput);
+  return d.toLocaleDateString("es-CR", { day: "numeric", month: "short" });
+}
+

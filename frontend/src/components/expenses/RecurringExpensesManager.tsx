@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { formatCurrency, getCategoryColorBg, cn } from "@/lib/utils";
+import { formatCurrency, getCategoryColorBg, cn, formatCalendarDate, parseCalendarDate } from "@/lib/utils";
 import { useSettings } from "@/contexts/SettingsContext";
 import { safeFetch } from "@/lib/api";
 import { toast } from "sonner";
@@ -196,21 +196,21 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
   }, [activeItems]);
 
   const formatDueDateLabel = (dueDateStr: string | Date) => {
-    const d = new Date(dueDateStr);
+    const target = parseCalendarDate(dueDateStr);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const target = new Date(d);
     target.setHours(0, 0, 0, 0);
 
     const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 3600 * 24));
 
     if (diffDays === 0) return { label: "¡Hoy!", urgent: true };
     if (diffDays === 1) return { label: "Mañana", urgent: true };
-    if (diffDays > 1 && diffDays <= 7) return { label: `En ${diffDays} días`, urgent: false };
+    if (diffDays > 1 && diffDays <= 31) return { label: `En ${diffDays} días`, urgent: false };
+    if (diffDays > 31) return { label: `En ${Math.round(diffDays / 30)} meses`, urgent: false };
     if (diffDays < 0) return { label: `Venció hace ${Math.abs(diffDays)}d`, urgent: true };
 
     return {
-      label: d.toLocaleDateString(undefined, { day: "numeric", month: "short" }),
+      label: `En ${diffDays} días`,
       urgent: false,
     };
   };
@@ -346,79 +346,63 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                  "p-3.5 sm:p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3 transition-all",
+                  "p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3 transition-all",
                   !item.is_active && "opacity-60 bg-secondary/15"
                 )}
               >
-                {/* Header Row: Title, Status, Category, & Amount */}
+                {/* Header Row: Title, Category, Amount + Status Toggle */}
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1 space-y-1.5">
-                    {/* Title + Active/Inactive toggle */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-sm text-titles dark:text-foreground truncate max-w-[200px]">
-                        {item.description}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleToggleActive(item)}
-                        disabled={isActionLoading}
-                        title={item.is_active ? "Activo • Clic para desactivar" : "Inactivo • Clic para activar"}
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 transition-all cursor-pointer",
-                          item.is_active
-                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "w-1.5 h-1.5 rounded-full",
-                            item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                          )}
-                        />
-                        <span>{item.is_active ? "Activo" : "Inactivo"}</span>
-                      </button>
-                    </div>
-
-                    {/* Metadata tags */}
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-bold text-sm sm:text-base text-titles dark:text-foreground truncate">
+                      {item.description}
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
                       <span className="inline-flex items-center gap-1 bg-secondary/60 px-2 py-0.5 rounded-md text-[11px] font-medium">
                         <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", getCategoryColorBg(item.category))} />
                         <span>{item.category}</span>
                       </span>
-                      <span className="font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md text-[11px]">
+                      <span>•</span>
+                      <span className="font-medium text-foreground/80">
                         {getFrequencyBadge(item)}
                       </span>
-                      {item.auto_register ? (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                          Auto
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground">
-                          Manual
-                        </span>
-                      )}
                     </div>
                   </div>
 
-                  {/* Amount */}
-                  <div className="text-right shrink-0">
+                  {/* Amount & Active Switch on the Right */}
+                  <div className="text-right shrink-0 flex flex-col items-end gap-1">
                     <div className="text-base font-black text-rose-500 dark:text-rose-400 whitespace-nowrap">
                       -{currencySymbol}{formatCurrency(item.amount)}
                     </div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">
-                      {item.currency}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleActive(item)}
+                      disabled={isActionLoading}
+                      title={item.is_active ? "Activo • Clic para pausar" : "Pausado • Clic para activar"}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold transition-all cursor-pointer shadow-2xs active:scale-95",
+                        item.is_active
+                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
+                          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700 hover:bg-slate-200"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full",
+                          item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                        )}
+                      />
+                      <span>{item.is_active ? "Activo" : "Pausado"}</span>
+                    </button>
                   </div>
                 </div>
 
                 {/* Due Date Indicator Banner */}
-                <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-secondary/40 border border-border/40 text-xs">
+                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-secondary/40 border border-border/40 text-xs">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5 shrink-0" />
                     <span>Próximo cobro:</span>
                     <span className="font-bold text-foreground">
-                      {new Date(item.next_due_date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                      {formatCalendarDate(item.next_due_date)}
                     </span>
                   </div>
                   <span
@@ -426,7 +410,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                       "text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap",
                       dueInfo.urgent
                         ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25"
-                        : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+                        : "text-muted-foreground font-medium"
                     )}
                   >
                     {dueInfo.label}
@@ -457,19 +441,8 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                     {alreadyExecuted ? "Ya Registrado" : "Registrar Ahora"}
                   </Button>
 
-                  {/* Icon Actions */}
+                  {/* Quick Edit and Delete buttons */}
                   <div className="flex items-center gap-1 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      title={item.is_active ? "Desactivar automatización" : "Activar automatización"}
-                      onClick={() => handleToggleActive(item)}
-                      disabled={isActionLoading}
-                      className="h-8.5 w-8.5 text-muted-foreground hover:bg-secondary rounded-xl cursor-pointer"
-                    >
-                      <Power className={cn("w-3.5 h-3.5", item.is_active ? "text-emerald-500" : "text-slate-400")} />
-                    </Button>
-
                     <Button
                       variant="ghost"
                       size="icon-sm"
@@ -552,7 +525,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                           type="button"
                           onClick={() => handleToggleActive(item)}
                           disabled={isActionLoading}
-                          title={item.is_active ? "Activo • Clic para desactivar" : "Inactivo • Clic para activar"}
+                          title={item.is_active ? "Activo • Clic para pausar" : "Pausado • Clic para activar"}
                           className={cn(
                             "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shadow-2xs",
                             item.is_active
@@ -566,7 +539,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                               item.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
                             )}
                           />
-                          <span>{item.is_active ? "Activo" : "Inactivo"}</span>
+                          <span>{item.is_active ? "Activo" : "Pausado"}</span>
                         </button>
                       </TableCell>
 
@@ -607,11 +580,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
                                 dueInfo.urgent ? "text-amber-600 dark:text-amber-400" : "text-titles dark:text-foreground"
                               )}
                             >
-                              {new Date(item.next_due_date).toLocaleDateString(undefined, {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })}
+                              {formatCalendarDate(item.next_due_date)}
                             </span>
                             <span
                               className={cn(

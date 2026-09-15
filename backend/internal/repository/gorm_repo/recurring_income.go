@@ -41,7 +41,7 @@ func (r *GormRecurringIncomeRepository) FindByIDAndUserID(ctx context.Context, i
 func (r *GormRecurringIncomeRepository) FindPendingDue(ctx context.Context, userID string, until time.Time) ([]models.RecurringIncome, error) {
 	var items []models.RecurringIncome
 	err := r.db.WithContext(ctx).
-		Where("user_id = ? AND is_active = ? AND next_due_date <= ?", userID, true, until).
+		Where("user_id = ? AND is_active = ? AND auto_register = ? AND next_due_date <= ?", userID, true, true, until).
 		Find(&items).Error
 	return items, err
 }
@@ -49,7 +49,7 @@ func (r *GormRecurringIncomeRepository) FindPendingDue(ctx context.Context, user
 func (r *GormRecurringIncomeRepository) FindAllPendingDue(ctx context.Context, until time.Time) ([]models.RecurringIncome, error) {
 	var items []models.RecurringIncome
 	err := r.db.WithContext(ctx).
-		Where("is_active = ? AND next_due_date <= ?", true, until).
+		Where("is_active = ? AND auto_register = ? AND next_due_date <= ?", true, true, until).
 		Find(&items).Error
 	return items, err
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn, formatLiveNumber, parseLiveNumber, getCategoryColorBg } from "@/lib/utils";
+import { cn, formatLiveNumber, parseLiveNumber, getCategoryColorBg, getTodayLocal } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
 import { safeFetch } from "@/lib/api";
-import { Loader2, Calendar as CalendarLucide, Repeat, CalendarClock, CheckCircle2 } from "lucide-react";
+import { Loader2, Calendar as CalendarLucide, Repeat, CalendarClock, CheckCircle2, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -51,8 +51,9 @@ export function RecurringExpenseModal({
     frequency: "biweekly" as RecurringFrequency,
     biweekly_type: "15_and_last_day" as BiweeklyType,
     billing_day: 15,
-    start_date: new Date().toISOString().split("T")[0],
+    start_date: getTodayLocal(),
     auto_register: true,
+    is_active: true,
   });
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export function RecurringExpenseModal({
           ? initialData.start_date.split("T")[0] 
           : new Date(initialData.start_date).toISOString().split("T")[0],
         auto_register: initialData.auto_register ?? true,
+        is_active: initialData.is_active ?? true,
       });
     } else {
       setFormData({
@@ -79,8 +81,9 @@ export function RecurringExpenseModal({
         frequency: "biweekly",
         biweekly_type: "15_and_last_day",
         billing_day: 15,
-        start_date: new Date().toISOString().split("T")[0],
+        start_date: getTodayLocal(),
         auto_register: true,
+        is_active: true,
       });
     }
   }, [initialData, isOpen]);
@@ -119,8 +122,9 @@ export function RecurringExpenseModal({
         frequency: formData.frequency,
         biweekly_type: formData.frequency === "biweekly" ? formData.biweekly_type : undefined,
         billing_day: Number(formData.billing_day) || 15,
-        start_date: new Date(formData.start_date + "T00:00:00Z").toISOString(),
+        start_date: new Date(formData.start_date + "T12:00:00Z").toISOString(),
         auto_register: formData.auto_register,
+        is_active: formData.is_active,
       };
 
       const url = initialData ? `/api/recurring-expenses/${initialData.id}` : "/api/recurring-expenses";
@@ -464,6 +468,61 @@ export function RecurringExpenseModal({
                   "w-10 h-5.5 rounded-full transition-colors relative cursor-pointer",
                   "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4.5 after:w-4.5 after:transition-all after:shadow-xs",
                   formData.auto_register
+                    ? "bg-blue-600 dark:bg-blue-500 after:translate-x-[18px]"
+                    : "bg-slate-300 dark:bg-slate-700 after:translate-x-0"
+                )}
+              />
+            </label>
+          </div>
+
+          {/* Switch de Estado (Activo / Pausado) */}
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-secondary/40 border border-border/60 gap-3">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <Power className={cn("w-4 h-4 shrink-0 mt-0.5", formData.is_active ? "text-blue-600 dark:text-blue-400" : "text-slate-400")} />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-titles dark:text-foreground block">
+                    Estado del Gasto Fijo
+                  </span>
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors",
+                      formData.is_active
+                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                        : "bg-slate-500/15 text-slate-500 dark:text-slate-400 border border-slate-400/30"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full",
+                        formData.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                      )}
+                    />
+                    {formData.is_active ? "Activo" : "Pausado"}
+                  </span>
+                </div>
+                <span className="text-[11px] text-muted-foreground block mt-0.5">
+                  {formData.is_active
+                    ? "El gasto está vigente y programado para sus pagos"
+                    : "El gasto está pausado y no generará movimientos"}
+                </span>
+              </div>
+            </div>
+
+            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                checked={formData.is_active}
+                onChange={(e) =>
+                  setFormData({ ...formData, is_active: e.target.checked })
+                }
+                className="sr-only peer"
+              />
+              <div
+                className={cn(
+                  "w-10 h-5.5 rounded-full transition-colors relative cursor-pointer",
+                  "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4.5 after:w-4.5 after:transition-all after:shadow-xs",
+                  formData.is_active
                     ? "bg-blue-600 dark:bg-blue-500 after:translate-x-[18px]"
                     : "bg-slate-300 dark:bg-slate-700 after:translate-x-0"
                 )}

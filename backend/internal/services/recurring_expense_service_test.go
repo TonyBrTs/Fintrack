@@ -47,7 +47,7 @@ func (m *MockRecurringRepository) FindPendingDue(ctx context.Context, userID str
 	}
 	var res []models.RecurringExpense
 	for _, item := range m.items {
-		if item.UserID == userID && item.IsActive && !item.NextDueDate.After(until) {
+		if item.UserID == userID && item.IsActive && item.AutoRegister && !item.NextDueDate.After(until) {
 			res = append(res, item)
 		}
 	}
@@ -60,7 +60,7 @@ func (m *MockRecurringRepository) FindAllPendingDue(ctx context.Context, until t
 	}
 	var res []models.RecurringExpense
 	for _, item := range m.items {
-		if item.IsActive && !item.NextDueDate.After(until) {
+		if item.IsActive && item.AutoRegister && !item.NextDueDate.After(until) {
 			res = append(res, item)
 		}
 	}
