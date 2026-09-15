@@ -49,13 +49,8 @@ export const getApiHeaders = (extraHeaders: Record<string, string> = {}): Record
     }
   }
 
-  const clientDate = typeof window !== "undefined"
-    ? new Date().toLocaleDateString("en-CA")
-    : new Date().toISOString().split("T")[0];
-
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "X-Client-Date": clientDate,
     ...extraHeaders,
   };
 
