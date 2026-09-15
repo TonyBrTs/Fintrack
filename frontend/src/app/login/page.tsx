@@ -339,7 +339,7 @@ export default function LoginPage() {
       newErrors.password = isEs
         ? "Por favor ingresa tu contraseña."
         : "Please enter your password.";
-    } else if (password.length < 6) {
+    } else if (isRegister && password.length < 6) {
       newErrors.password = isEs
         ? "La contraseña debe tener al menos 6 caracteres."
         : "Password must be at least 6 characters.";
