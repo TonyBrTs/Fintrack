@@ -309,9 +309,9 @@ export default function SummaryPage() {
         </div>
 
         {/* Goals Progress in Summary */}
-        <div className="bg-card/90 dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl border border-border/80 dark:border-border/60 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-card/90 dark:bg-card/75 backdrop-blur-sm p-6 lg:p-5 rounded-3xl border border-border/80 dark:border-border/60 shadow-sm hover:shadow-md transition-all flex flex-col justify-between lg:max-h-[235px]">
           <div>
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-5 lg:mb-3">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
                   <NavGoalsIcon size={18} />
@@ -329,7 +329,7 @@ export default function SummaryPage() {
             </div>
 
             {currentGoals.length === 0 ? (
-              <div className="py-8 flex flex-col items-center justify-center text-center">
+              <div className="py-8 lg:py-6 flex flex-col items-center justify-center text-center">
                 <NavGoalsIcon
                   size={36}
                   className="text-muted-foreground opacity-25 mb-2"
@@ -339,19 +339,19 @@ export default function SummaryPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {currentGoals.slice(0, 3).map((goal) => {
+              <div className="space-y-4 lg:space-y-2 lg:max-h-[140px] lg:overflow-y-auto lg:pr-1 scrollbar-thin">
+                {currentGoals.slice(0, 6).map((goal) => {
                   const progress = Math.min(
                     (goal.current_amount / goal.target_amount) * 100,
                     100,
                   );
                   return (
-                    <div key={goal.id} className="space-y-1.5 p-3 rounded-2xl bg-secondary/40 border border-border/40">
+                    <div key={goal.id} className="space-y-1.5 lg:space-y-1 p-3 lg:p-2.5 rounded-2xl lg:rounded-xl bg-secondary/40 border border-border/40">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="font-bold truncate max-w-44 text-titles dark:text-foreground">
+                        <span className="font-bold truncate pr-2 min-w-0 text-titles dark:text-foreground">
                           {goal.name}
                         </span>
-                        <span className="font-extrabold text-action dark:text-blue-400">
+                        <span className="font-extrabold shrink-0 text-action dark:text-blue-400">
                           {progress.toFixed(0)}%
                         </span>
                       </div>
@@ -374,9 +374,9 @@ export default function SummaryPage() {
             )}
           </div>
 
-          {currentGoals.length > 3 && (
-            <p className="text-[11px] text-center text-muted-foreground pt-4 border-t border-border/40 mt-4">
-              + {currentGoals.length - 3} metas activas en tu lista
+          {currentGoals.length > 6 && (
+            <p className="text-[11px] text-center text-muted-foreground pt-4 lg:pt-2 border-t border-border/40 mt-4 lg:mt-2">
+              + {currentGoals.length - 6} metas activas en tu lista
             </p>
           )}
         </div>

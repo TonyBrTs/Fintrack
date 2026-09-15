@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/TonyBrTs/fintrack-backend/internal/models"
 	"github.com/TonyBrTs/fintrack-backend/internal/services"
@@ -76,7 +77,25 @@ func (h *RecurringIncomeHandler) DeleteRecurringIncome(ctx *gin.Context) {
 func (h *RecurringIncomeHandler) SyncDueIncomes(ctx *gin.Context) {
 	userID := ctx.GetString("userID")
 
-	created, err := h.service.ProcessDueIncomes(ctx.Request.Context(), userID)
+	var clientDate *time.Time
+	if clientDateStr := ctx.Query("client_date"); clientDateStr != "" {
+		if t, err := time.Parse("2006-01-02", clientDateStr); err == nil {
+			clientDate = &t
+		}
+	} else if headerDate := ctx.GetHeader("X-Client-Date"); headerDate != "" {
+		if t, err := time.Parse("2006-01-02", headerDate); err == nil {
+			clientDate = &t
+		}
+	}
+
+	var created []models.Income
+	var err error
+	if clientDate != nil {
+		created, err = h.service.ProcessDueIncomes(ctx.Request.Context(), userID, *clientDate)
+	} else {
+		created, err = h.service.ProcessDueIncomes(ctx.Request.Context(), userID)
+	}
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sync recurring incomes"})
 		return

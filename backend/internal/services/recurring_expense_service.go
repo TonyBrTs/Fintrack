@@ -15,7 +15,7 @@ type RecurringExpenseService interface {
 	CreateRecurringExpense(ctx context.Context, userID string, item *models.RecurringExpense) (*models.RecurringExpense, error)
 	UpdateRecurringExpense(ctx context.Context, id, userID string, item *models.RecurringExpense) (*models.RecurringExpense, error)
 	DeleteRecurringExpense(ctx context.Context, id, userID string) error
-	ProcessDueExpenses(ctx context.Context, userID string) ([]models.Expense, error)
+	ProcessDueExpenses(ctx context.Context, userID string, clientDate ...time.Time) ([]models.Expense, error)
 	ProcessAllDueExpenses(ctx context.Context) (int, error)
 	ExecuteNow(ctx context.Context, id, userID string) (*models.Expense, error)
 }
@@ -133,10 +133,17 @@ func (s *recurringExpenseService) DeleteRecurringExpense(ctx context.Context, id
 }
 
 // ProcessDueExpenses synchronizes and creates real expenses for all due items of the user
-func (s *recurringExpenseService) ProcessDueExpenses(ctx context.Context, userID string) ([]models.Expense, error) {
-	now := time.Now().UTC()
-	// Consider anything due on or before today (end of today)
-	endOfToday := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999999999, time.UTC)
+func (s *recurringExpenseService) ProcessDueExpenses(ctx context.Context, userID string, clientDate ...time.Time) ([]models.Expense, error) {
+	var endOfToday time.Time
+	if len(clientDate) > 0 && !clientDate[0].IsZero() {
+		cd := clientDate[0]
+		endOfToday = time.Date(cd.Year(), cd.Month(), cd.Day(), 23, 59, 59, 999999999, time.UTC)
+	} else {
+		// Fallback to Costa Rica local time (CST, UTC-6) so Render's UTC server clock doesn't advance day early at 6 PM
+		loc := time.FixedZone("CST", -6*3600)
+		nowLocal := time.Now().In(loc)
+		endOfToday = time.Date(nowLocal.Year(), nowLocal.Month(), nowLocal.Day(), 23, 59, 59, 999999999, time.UTC)
+	}
 
 	dueItems, err := s.recurringRepo.FindPendingDue(ctx, userID, endOfToday)
 	if err != nil {
@@ -193,8 +200,9 @@ func (s *recurringExpenseService) ProcessDueExpenses(ctx context.Context, userID
 
 // ProcessAllDueExpenses is called by background scheduler for all active users
 func (s *recurringExpenseService) ProcessAllDueExpenses(ctx context.Context) (int, error) {
-	now := time.Now().UTC()
-	endOfToday := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999999999, time.UTC)
+	loc := time.FixedZone("CST", -6*3600)
+	nowLocal := time.Now().In(loc)
+	endOfToday := time.Date(nowLocal.Year(), nowLocal.Month(), nowLocal.Day(), 23, 59, 59, 999999999, time.UTC)
 
 	dueItems, err := s.recurringRepo.FindAllPendingDue(ctx, endOfToday)
 	if err != nil {

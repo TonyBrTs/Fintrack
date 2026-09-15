@@ -117,7 +117,8 @@ function IncomesContent() {
     fetchIncomes();
 
     // Sincronización automática de ingresos fijos pendientes de la quincena/mes
-    safeFetch<RecurringIncomeSyncResult>('/api/recurring-incomes/sync', { method: 'POST' })
+    const localDate = new Date().toLocaleDateString('en-CA');
+    safeFetch<RecurringIncomeSyncResult>(`/api/recurring-incomes/sync?client_date=${localDate}`, { method: 'POST' })
       .then((res) => {
         if (res.ok && res.data && res.data.processed_count > 0) {
           toast.success(

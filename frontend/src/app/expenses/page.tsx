@@ -120,7 +120,8 @@ function ExpensesContent() {
     fetchExpenses();
 
     // Sincronización automática de gastos fijos pendientes de la quincena/mes
-    safeFetch<RecurringSyncResult>('/api/recurring-expenses/sync', { method: 'POST' })
+    const localDate = new Date().toLocaleDateString('en-CA');
+    safeFetch<RecurringSyncResult>(`/api/recurring-expenses/sync?client_date=${localDate}`, { method: 'POST' })
       .then((res) => {
         if (res.ok && res.data && res.data.processed_count > 0) {
           toast.success(

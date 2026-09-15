@@ -84,7 +84,7 @@ export default function RootLayout({
             <SettingsProvider>
               <AppShell>{children}</AppShell>
               <AuthModal />
-              <Toaster position="bottom-right" richColors className="mb-16 md:mb-0" />
+              <Toaster position="top-right" richColors />
               <ServiceWorkerRegister />
             </SettingsProvider>
           </AuthProvider>

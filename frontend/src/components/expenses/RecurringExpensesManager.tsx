@@ -81,7 +81,8 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
   const handleSync = async () => {
     try {
       setSyncing(true);
-      const res = await safeFetch<RecurringSyncResult>("/api/recurring-expenses/sync", {
+      const localDate = new Date().toLocaleDateString("en-CA");
+      const res = await safeFetch<RecurringSyncResult>(`/api/recurring-expenses/sync?client_date=${localDate}`, {
         method: "POST",
       });
 

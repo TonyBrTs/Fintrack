@@ -89,7 +89,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
   const handleSync = async () => {
     try {
       setSyncing(true);
-      const res = await safeFetch<RecurringIncomeSyncResult>("/api/recurring-incomes/sync", {
+      const localDate = new Date().toLocaleDateString("en-CA");
+      const res = await safeFetch<RecurringIncomeSyncResult>(`/api/recurring-incomes/sync?client_date=${localDate}`, {
         method: "POST",
       });
 
