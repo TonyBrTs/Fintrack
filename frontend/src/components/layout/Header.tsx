@@ -69,6 +69,7 @@ export function Header() {
           <button
             onClick={toggleTheme}
             aria-label={isEs ? "Alternar tema" : "Toggle theme"}
+            title={mounted && theme === "dark" ? (isEs ? "Cambiar a modo claro" : "Switch to light mode") : (isEs ? "Cambiar a modo oscuro" : "Switch to dark mode")}
             className="hidden md:flex p-2 sm:p-2.5 rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition-all cursor-pointer shadow-xs"
           >
             {mounted && theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
@@ -78,6 +79,7 @@ export function Header() {
           <button
             onClick={openSettings}
             aria-label={isEs ? "Menú de navegación y ajustes" : "Navigation and settings menu"}
+            title={isEs ? "Menú de navegación y ajustes" : "Navigation and settings menu"}
             className="md:hidden p-2 sm:p-2.5 rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition-all cursor-pointer shadow-xs"
           >
             <Menu size={20} />
@@ -91,6 +93,7 @@ export function Header() {
                   <button
                     type="button"
                     aria-label={isEs ? "Perfil y Ajustes" : "Profile and Settings"}
+                    title={`${displayName} • ${isEs ? "Perfil y Ajustes" : "Profile & Settings"}`}
                     className="flex items-center gap-2 p-0.5 rounded-full ring-2 ring-blue-500/30 hover:ring-blue-500/70 transition-all cursor-pointer outline-none focus-visible:ring-action"
                   >
                     <Avatar size="lg">

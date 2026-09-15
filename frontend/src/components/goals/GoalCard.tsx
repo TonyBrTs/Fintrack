@@ -38,6 +38,11 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
           <div className="flex justify-between items-start mb-6">
             <div className="flex items-center gap-3">
               <div
+                title={
+                  isCompleted
+                    ? translate("goals.completed") || "Meta cumplida (100%)"
+                    : `${progress.toFixed(0)}% completada`
+                }
                 className={`p-3 rounded-2xl border transition-transform group-hover:scale-105 ${
                   isCompleted
                     ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
@@ -69,6 +74,7 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
                 <button
                   onClick={() => onDelete(goal.id)}
                   aria-label="Delete goal"
+                  title={translate("common.delete") || "Eliminar meta"}
                   className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all opacity-40 group-hover:opacity-100 cursor-pointer"
                 >
                   <Trash2 size={16} />

@@ -51,7 +51,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 
 function IncomesContent() {
-  const { currency, currencySymbol, translate } = useSettings();
+  const { currency, currencySymbol, translate, language } = useSettings();
   const { user, openAuthModal } = useAuth();
   const { categories: userSourceList } = useCategories("income");
   const searchParams = useSearchParams();
@@ -441,7 +441,12 @@ function IncomesContent() {
                     <div className="flex items-center gap-1.5">
                       <span>{income.description.replace(/^\[Recurrente\]\s*/i, '')}</span>
                       {(income.id.startsWith('rec_') || income.id.startsWith('rec-')) && (
-                        <Repeat className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <span
+                          title={language === 'en' ? 'Automatic recurring income' : 'Ingreso recurrente automático'}
+                          className="inline-flex items-center cursor-help"
+                        >
+                          <Repeat className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        </span>
                       )}
                     </div>
                   </TableCell>
@@ -462,7 +467,10 @@ function IncomesContent() {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="px-2 py-4 text-right pr-4">
+                  <TableCell
+                    className="px-2 py-4 text-right pr-4"
+                    title={language === 'en' ? 'View income details' : 'Ver detalles del ingreso'}
+                  >
                     <ChevronRight className="w-4 h-4 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all inline" />
                   </TableCell>
                 </TableRow>

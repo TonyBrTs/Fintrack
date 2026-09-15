@@ -8,7 +8,9 @@ export interface ExcelExportData {
   };
   periodLabel: string;
   generatedAt: string;
-  currencySymbol: string;
+  currencyCode?: string;
+  currency?: string;
+  currencySymbol?: string;
   notes?: string;
   isEs: boolean;
   totalIncome: number;
@@ -46,7 +48,6 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
     user,
     periodLabel,
     generatedAt,
-    currencySymbol,
     notes,
     isEs,
     totalIncome,
@@ -61,6 +62,8 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
     translateSource,
     translatePaymentMethod,
   } = data;
+
+  const currencyCode = data.currencyCode || data.currency || data.currencySymbol || "CRC";
 
   const wb = new ExcelJS.Workbook();
   wb.creator = "FinTrack Financial App";
@@ -83,7 +86,8 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
     right: { style: "thin", color: { argb: "E2E8F0" } },
   };
 
-  const currencyFormat = `"${currencySymbol}"#,##0.00;[Red]("${currencySymbol}"#,##0.00);"${currencySymbol}"0.00`;
+  // Standard accounting format for amounts (currency abbreviation is presented in the Currency column)
+  const numberFormat = `#,##0.00;[Red](#,##0.00);0.00`;
 
   // Helper to style a header row
   const applyHeaderStyle = (row: ExcelJS.Row, fillHex: string) => {
@@ -209,7 +213,7 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
     {
       label: isEs ? "(+) Total Ingresos Percibidos" : "(+) Total Inflows Received",
       amount: totalIncome,
-      currency: currencySymbol,
+      currency: currencyCode,
       note: isEs ? "100% ingresos base" : "100% base inflows",
       fontColor: "047857",
       bold: true,
@@ -217,7 +221,7 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
     {
       label: isEs ? "(-) Total Egresos Realizados" : "(-) Total Outflows Executed",
       amount: totalExpense,
-      currency: currencySymbol,
+      currency: currencyCode,
       note: totalIncome > 0 ? `${((totalExpense / totalIncome) * 100).toFixed(1)}% de ingresos` : "---",
       fontColor: "B91C1C",
       bold: true,
@@ -225,7 +229,7 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
     {
       label: isEs ? "(=) Balance Financiero Neto" : "(=) Net Financial Balance",
       amount: netSavings,
-      currency: currencySymbol,
+      currency: currencyCode,
       note: netSavings >= 0 ? (isEs ? "Superávit neto" : "Net surplus") : (isEs ? "Déficit neto" : "Net deficit"),
       fontColor: netSavings >= 0 ? "065F46" : "991B1B",
       bold: true,
@@ -273,7 +277,7 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
     } else if (item.isCount) {
       cellAmt.numFmt = "#,##0";
     } else {
-      cellAmt.numFmt = currencyFormat;
+      cellAmt.numFmt = numberFormat;
     }
 
     const cellCur = wsSummary.getCell(`D${currentKpiRow}`);
@@ -392,12 +396,12 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
 
       const cAmt = r.getCell(5);
       cAmt.value = Number(exp.amount) || 0;
-      cAmt.numFmt = currencyFormat;
+      cAmt.numFmt = numberFormat;
       cAmt.alignment = { vertical: "middle", horizontal: "right" };
       cAmt.font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: "991B1B" } };
 
       const cCur = r.getCell(6);
-      cCur.value = currencySymbol;
+      cCur.value = currencyCode;
       cCur.alignment = { vertical: "middle", horizontal: "center" };
       cCur.font = { name: FONT_FAMILY, size: 9, color: { argb: "64748B" } };
 
@@ -420,8 +424,8 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
       ? `TOTAL EGRESOS DEL PERÍODO (${filteredExpenses.length} transacciones)`
       : `TOTAL OUTFLOWS IN PERIOD (${filteredExpenses.length} transactions)`;
     totalRow.getCell(5).value = { formula: `SUM(E4:E${currentExpRow - 1})`, result: totalExpense };
-    totalRow.getCell(5).numFmt = currencyFormat;
-    totalRow.getCell(6).value = currencySymbol;
+    totalRow.getCell(5).numFmt = numberFormat;
+    totalRow.getCell(6).value = currencyCode;
 
     for (let c = 1; c <= 6; c++) {
       const cell = totalRow.getCell(c);
@@ -500,12 +504,12 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
 
       const cAmt = r.getCell(5);
       cAmt.value = Number(inc.amount) || 0;
-      cAmt.numFmt = currencyFormat;
+      cAmt.numFmt = numberFormat;
       cAmt.alignment = { vertical: "middle", horizontal: "right" };
       cAmt.font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: "047857" } };
 
       const cCur = r.getCell(6);
-      cCur.value = currencySymbol;
+      cCur.value = currencyCode;
       cCur.alignment = { vertical: "middle", horizontal: "center" };
       cCur.font = { name: FONT_FAMILY, size: 9, color: { argb: "64748B" } };
 
@@ -528,8 +532,8 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
       ? `TOTAL INGRESOS DEL PERÍODO (${filteredIncomes.length} transacciones)`
       : `TOTAL INFLOWS IN PERIOD (${filteredIncomes.length} transactions)`;
     totalRow.getCell(5).value = { formula: `SUM(E4:E${currentIncRow - 1})`, result: totalIncome };
-    totalRow.getCell(5).numFmt = currencyFormat;
-    totalRow.getCell(6).value = currencySymbol;
+    totalRow.getCell(5).numFmt = numberFormat;
+    totalRow.getCell(6).value = currencyCode;
 
     for (let c = 1; c <= 6; c++) {
       const cell = totalRow.getCell(c);
@@ -599,12 +603,12 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
 
       const cCur = r.getCell(2);
       cCur.value = Number(g.current_amount) || 0;
-      cCur.numFmt = currencyFormat;
+      cCur.numFmt = numberFormat;
       cCur.alignment = { vertical: "middle", horizontal: "right" };
 
       const cTgt = r.getCell(3);
       cTgt.value = Number(g.target_amount) || 0;
-      cTgt.numFmt = currencyFormat;
+      cTgt.numFmt = numberFormat;
       cTgt.alignment = { vertical: "middle", horizontal: "right" };
 
       const cPct = r.getCell(4);
@@ -615,7 +619,7 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
 
       const cRem = r.getCell(5);
       cRem.value = rem;
-      cRem.numFmt = currencyFormat;
+      cRem.numFmt = numberFormat;
       cRem.alignment = { vertical: "middle", horizontal: "right" };
 
       const cStatus = r.getCell(6);
@@ -636,7 +640,7 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
       };
 
       const cCurrency = r.getCell(7);
-      cCurrency.value = currencySymbol;
+      cCurrency.value = currencyCode;
       cCurrency.alignment = { vertical: "middle", horizontal: "center" };
       cCurrency.font = { name: FONT_FAMILY, size: 9, color: { argb: "64748B" } };
 

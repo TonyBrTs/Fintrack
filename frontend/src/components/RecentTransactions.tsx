@@ -8,6 +8,7 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  Repeat,
 } from "lucide-react";
 import { TxTypeIcon } from "@/components/ui/AppIcons";
 import { Badge } from "@/components/ui/Badge";
@@ -32,7 +33,7 @@ export function RecentTransactions({
   expenses,
   incomes,
 }: RecentTransactionsProps) {
-  const { translate, currencySymbol } = useSettings();
+  const { translate, currencySymbol, language } = useSettings();
   const { categories } = useCategories();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -189,6 +190,13 @@ export function RecentTransactions({
                         ? "bg-amber-500/10 text-amber-500"
                         : "bg-rose-500/10 text-rose-500"
                     }`}
+                    title={
+                      isIncome
+                        ? (language === "en" ? "Income" : "Ingreso")
+                        : isGoal
+                        ? (language === "en" ? "Goal contribution" : "Aporte a meta")
+                        : (language === "en" ? "Expense" : "Gasto")
+                    }
                   >
                     <TxTypeIcon
                       type={isIncome ? "income" : isGoal ? "goal" : "expense"}
@@ -204,15 +212,25 @@ export function RecentTransactions({
                 </div>
 
                 <div className="space-y-2">
-                  <p className="font-bold text-sm truncate text-titles dark:text-foreground group-hover:text-action dark:group-hover:text-blue-400 transition-colors">
-                    {isGoal
-                      ? `${translate("goals.contributionToGoal")}: ${
-                          tx.description.includes(": ")
-                            ? tx.description.split(": ")[1]
-                            : tx.description
-                        }`
-                      : tx.description}
-                  </p>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <p className="font-bold text-sm truncate text-titles dark:text-foreground group-hover:text-action dark:group-hover:text-blue-400 transition-colors">
+                      {isGoal
+                        ? `${translate("goals.contributionToGoal")}: ${
+                            tx.description.includes(": ")
+                              ? tx.description.split(": ")[1]
+                              : tx.description
+                          }`
+                        : tx.description}
+                    </p>
+                    {(tx.id.startsWith("rec_") || tx.id.startsWith("rec-")) && (
+                      <span
+                        title={language === "en" ? "Automatic recurring transaction" : "Transacción recurrente automática"}
+                        className="inline-flex items-center shrink-0 cursor-help"
+                      >
+                        <Repeat className="w-3.5 h-3.5 text-indigo-500" />
+                      </span>
+                    )}
+                  </div>
                   <div className="flex justify-between items-end pt-1 border-t border-border/40">
                     <div className="min-w-0 pr-2">
                       <div className="flex items-center gap-1.5 min-w-0">

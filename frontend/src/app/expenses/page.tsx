@@ -51,7 +51,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 
 function ExpensesContent() {
-  const { currency, currencySymbol, translate } = useSettings();
+  const { currency, currencySymbol, translate, language } = useSettings();
   const { user, openAuthModal } = useAuth();
   const { categories: userCatList } = useCategories("expense");
   const searchParams = useSearchParams();
@@ -450,7 +450,12 @@ function ExpensesContent() {
                           : expense.description.replace(/^\[Recurrente\]\s*/i, '')}
                       </span>
                       {(expense.id.startsWith('rec_') || expense.id.startsWith('rec-')) && (
-                        <Repeat className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                        <span
+                          title={language === 'en' ? 'Automatic recurring expense' : 'Gasto recurrente automático'}
+                          className="inline-flex items-center cursor-help"
+                        >
+                          <Repeat className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                        </span>
                       )}
                     </div>
                   </TableCell>
@@ -471,7 +476,10 @@ function ExpensesContent() {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="px-2 py-4 text-right pr-4">
+                  <TableCell
+                    className="px-2 py-4 text-right pr-4"
+                    title={language === "en" ? "View expense details" : "Ver detalles del gasto"}
+                  >
                     <ChevronRight className="w-4 h-4 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all inline" />
                   </TableCell>
                 </TableRow>

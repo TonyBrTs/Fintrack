@@ -67,7 +67,7 @@ function parseLocalDate(d: Date | string): Date {
 }
 
 export default function ReportsPage() {
-  const { currencySymbol, language } = useSettings();
+  const { currency, currencySymbol, language } = useSettings();
   const { user } = useAuth();
   const isEs = language === "es";
 
@@ -327,6 +327,7 @@ export default function ReportsPage() {
         },
         periodLabel,
         generatedAt,
+        currencyCode: currency,
         currencySymbol,
         notes,
         isEs,
@@ -422,7 +423,7 @@ export default function ReportsPage() {
             tx.catOrSource,
             tx.paymentMethod,
             tx.amount.toFixed(2),
-            currencySymbol,
+            currency,
           ]
             .map(escapeCSV)
             .join(",")

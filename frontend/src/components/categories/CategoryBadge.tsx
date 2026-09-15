@@ -38,6 +38,7 @@ export function CategoryBadge({
 
   return (
     <span
+      title={textLabel}
       className={cn(
         "inline-flex items-center rounded-full font-bold tracking-tight shadow-2xs transition-all select-none border",
         theme.badge,
