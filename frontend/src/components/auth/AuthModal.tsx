@@ -161,6 +161,14 @@ export function AuthModal() {
       lower.includes("password should be at least") ||
       lower.includes("password is too short")
     ) {
+      if (isLogin) {
+        return {
+          message: isEs
+            ? "Correo electrónico o contraseña incorrectos."
+            : "Invalid email or password.",
+          field: "password",
+        };
+      }
       return {
         message: isEs
           ? "La contraseña debe tener al menos 6 caracteres."
@@ -326,7 +334,7 @@ export function AuthModal() {
       newErrors.password = isEs
         ? "Por favor ingresa tu contraseña."
         : "Please enter your password.";
-    } else if (password.length < 6) {
+    } else if (isRegister && password.length < 6) {
       newErrors.password = isEs
         ? "La contraseña debe tener al menos 6 caracteres."
         : "Password must be at least 6 characters.";

@@ -172,6 +172,14 @@ export default function LoginPage() {
       lower.includes("password should be at least") ||
       lower.includes("password is too short")
     ) {
+      if (isLogin) {
+        return {
+          message: isEs
+            ? "Correo electrónico o contraseña incorrectos."
+            : "Invalid email or password.",
+          field: "password",
+        };
+      }
       return {
         message: isEs
           ? "La contraseña debe tener al menos 6 caracteres."
