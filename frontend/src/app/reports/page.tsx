@@ -615,12 +615,23 @@ export default function ReportsPage() {
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground">
               {isEs
-                ? "Configura el período exacto y exporta en libro de Excel (.xlsx) o archivo CSV."
-                : "Configure your date range and export as an Excel workbook (.xlsx), or CSV."}
+                ? "Configura el período exacto y exporta en PDF oficial, libro de Excel (.xlsx) o archivo CSV."
+                : "Configure your date range and export as an official PDF, Excel workbook (.xlsx), or CSV."}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0">
+            {/* PDF / Print Button */}
+            <button
+              onClick={handlePrint}
+              disabled={loading}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 h-10 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/35 transition-all cursor-pointer active:scale-95 disabled:opacity-50 whitespace-nowrap"
+              title={isEs ? "Imprimir o Guardar como PDF" : "Print or Save as PDF"}
+            >
+              <Printer size={15} />
+              <span>{isEs ? "PDF / Imprimir" : "PDF / Print"}</span>
+            </button>
+
             {/* Excel (.xlsx) Button */}
             <button
               onClick={handleExportExcel}

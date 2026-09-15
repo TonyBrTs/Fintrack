@@ -34,6 +34,7 @@ import { RecentTransactions } from "@/components/RecentTransactions";
 import { FinancialInsights } from "@/components/FinancialInsights";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function SummaryPage() {
   const { currencySymbol, translate, language } = useSettings();
@@ -230,37 +231,41 @@ export default function SummaryPage() {
     <ProtectedRoute>
       <div className="space-y-8 max-w-7xl mx-auto">
         {/* Header & Filter */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
               <BarChart3 size={12} className="text-blue-500" />
-              <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">{isEs ? "Panel General" : "Dashboard"}</span>
+              <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+                {isEs ? "Panel General" : "Dashboard"}
+              </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-titles dark:text-foreground">
-              {translate("nav.summary") || "Resumen"}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {translate("common.summaryDescription") || "Vista general de tus finanzas y métricas clave"}
-            </p>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
+                {translate("nav.summary") || "Resumen"}
+              </h1>
+              <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
+                {translate("common.summaryDescription") || "Visualiza tu salud financiera de un vistazo — saldo, movimientos y metas del período."}
+              </p>
+            </div>
           </div>
-        <div className="sm:w-auto w-full flex items-center gap-2.5">
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-full sm:w-[210px] h-10 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border-border/80 shadow-xs font-medium text-sm">
-              <div className="flex items-center gap-2 truncate">
-                <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Seleccionar mes" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              {generateMonthOptions().map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="sm:w-auto w-full flex items-center gap-2.5 shrink-0">
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-full sm:w-[210px] h-10 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border-border/80 shadow-xs font-medium text-sm">
+                <div className="flex items-center gap-2 truncate">
+                  <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <SelectValue placeholder="Seleccionar mes" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                {generateMonthOptions().map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
 
       {/* KPI Cards Row */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">

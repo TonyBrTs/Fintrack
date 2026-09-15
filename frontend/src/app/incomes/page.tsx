@@ -224,18 +224,20 @@ function IncomesContent() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-2">
+      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
             <TrendingUp size={12} className="text-emerald-500" />
-            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Flujo de Capital</span>
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Flujo de Capital</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-titles dark:text-foreground">
-            {translate('income.title') || 'Ingresos'}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {translate('income.description') || 'Gestiona y analiza tus fuentes de capital'}
-          </p>
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
+              {translate('income.title') || 'Ingresos'}
+            </h1>
+            <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
+              {translate('income.description') || 'Registra y analiza todas tus fuentes de capital — salario, freelance, inversiones y más.'}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <Button

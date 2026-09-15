@@ -126,18 +126,20 @@ export default function GoalsPage() {
       />
 
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/40">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 mb-2">
+      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
             <Trophy size={12} className="text-amber-500" />
-            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Objetivos Financieros</span>
+            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Objetivos Financieros</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-titles dark:text-foreground">
-            {translate("goals.title") || "Metas Financieras"}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {translate("goals.description") || "Define tus objetivos de ahorro y sigue tu progreso"}
-          </p>
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
+              {translate("goals.title") || "Metas Financieras"}
+            </h1>
+            <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
+              {translate("goals.description") || "Define tus objetivos de ahorro, visualiza tu avance y celebra cada logro."}
+            </p>
+          </div>
         </div>
         <motion.button
           whileHover={{ scale: 1.02 }}

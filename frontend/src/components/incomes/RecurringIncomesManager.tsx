@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RecurringIncomeModal } from "./RecurringIncomeModal";
+import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
 import type { RecurringIncome, RecurringIncomeSyncResult } from "@/types/index";
 
 const sourceBadgeVariants: Record<string, "success" | "info" | "warning" | "default"> = {
@@ -53,6 +54,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
   const [syncing, setSyncing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<RecurringIncome | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<RecurringIncome | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   const fetchRecurring = useCallback(async () => {
@@ -166,14 +168,16 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
     }
   };
 
-  const handleDelete = async (item: RecurringIncome) => {
-    if (!confirm(`¿Eliminar "${item.description}"? Los ingresos ya registrados previamente se conservarán.`)) {
-      return;
-    }
+  const handleDelete = (item: RecurringIncome) => {
+    setDeleteTarget(item);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      setActionLoadingId(item.id);
-      const res = await safeFetch(`/api/recurring-incomes/${item.id}`, {
+      setActionLoadingId(deleteTarget.id);
+      const res = await safeFetch(`/api/recurring-incomes/${deleteTarget.id}`, {
         method: "DELETE",
       });
 
@@ -185,6 +189,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
       }
     } finally {
       setActionLoadingId(null);
+      setDeleteTarget(null);
     }
   };
 
@@ -720,6 +725,17 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
           if (onIncomeGenerated) onIncomeGenerated();
         }}
         initialData={selectedItem}
+      />
+
+      <DeleteConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        loading={!!actionLoadingId}
+        title="Eliminar ingreso fijo"
+        description={`¿Eliminar "${deleteTarget?.description}"? Los ingresos ya registrados previamente se conservarán.`}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
       />
     </div>
   );

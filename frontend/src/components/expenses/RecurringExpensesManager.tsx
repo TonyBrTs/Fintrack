@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RecurringExpenseModal } from "./RecurringExpenseModal";
+import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import type { RecurringExpense, RecurringSyncResult } from "@/types/index";
 
 interface RecurringExpensesManagerProps {
@@ -44,6 +45,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
   const [syncing, setSyncing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<RecurringExpense | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<RecurringExpense | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   const fetchRecurring = useCallback(async () => {
@@ -155,14 +157,16 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
     }
   };
 
-  const handleDelete = async (item: RecurringExpense) => {
-    if (!confirm(`¿Eliminar "${item.description}"? Los gastos ya registrados previamente se conservarán.`)) {
-      return;
-    }
+  const handleDelete = (item: RecurringExpense) => {
+    setDeleteTarget(item);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      setActionLoadingId(item.id);
-      const res = await safeFetch(`/api/recurring-expenses/${item.id}`, {
+      setActionLoadingId(deleteTarget.id);
+      const res = await safeFetch(`/api/recurring-expenses/${deleteTarget.id}`, {
         method: "DELETE",
       });
 
@@ -174,6 +178,7 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
       }
     } finally {
       setActionLoadingId(null);
+      setDeleteTarget(null);
     }
   };
 
@@ -708,6 +713,17 @@ export function RecurringExpensesManager({ onExpenseGenerated }: RecurringExpens
           if (onExpenseGenerated) onExpenseGenerated();
         }}
         initialData={selectedItem}
+      />
+
+      <DeleteConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        loading={!!actionLoadingId}
+        title="Eliminar gasto fijo"
+        description={`¿Eliminar "${deleteTarget?.description}"? Los gastos ya registrados previamente se conservarán.`}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
       />
     </div>
   );
