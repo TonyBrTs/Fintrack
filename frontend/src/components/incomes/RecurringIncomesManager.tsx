@@ -379,16 +379,16 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                 <div
                   key={item.id}
                   className={cn(
-                    "p-4 rounded-2xl bg-card border transition-all shadow-xs space-y-3",
-                    item.is_active
-                      ? "border-border/80"
-                      : "border-border/40 opacity-60 bg-secondary/15"
+                    "p-3.5 sm:p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3 transition-all",
+                    !item.is_active && "opacity-60 bg-secondary/15"
                   )}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-titles dark:text-foreground">
+                  {/* Header Row: Title, Status, Source, & Amount */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      {/* Title + Active/Inactive toggle */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-sm text-titles dark:text-foreground truncate max-w-[200px]">
                           {item.description}
                         </span>
                         <button
@@ -412,63 +412,65 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                           <span>{item.is_active ? "Activo" : "Inactivo"}</span>
                         </button>
                       </div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
+
+                      {/* Metadata tags */}
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
                         <Badge
                           variant={sourceBadgeVariants[item.source] || "default"}
                           className="text-[10px] px-2 py-0.5 font-bold"
                         >
                           {item.source}
                         </Badge>
-                        <span className="text-[11px] text-muted-foreground">
-                          • {getFrequencyBadge(item)}
+                        <span className="font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md text-[11px]">
+                          {getFrequencyBadge(item)}
                         </span>
+                        {item.auto_register ? (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            Auto
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground">
+                            Manual
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <span className="text-base font-black text-emerald-600 dark:text-emerald-400 block">
+                    {/* Amount */}
+                    <div className="text-right shrink-0">
+                      <span className="text-base font-black text-emerald-600 dark:text-emerald-400 block whitespace-nowrap">
                         +{currencySymbol}{formatCurrency(item.amount)}
                       </span>
-                      <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">
                         {currency}
                       </span>
                     </div>
                   </div>
 
-                  {/* Due Date Indicator */}
-                  <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Próximo cobro:</span>
-                      <span
-                        className={cn(
-                          "font-bold",
-                          dueInfo.urgent
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-foreground"
-                        )}
-                      >
-                        {new Date(item.next_due_date).toLocaleDateString(undefined, {
-                          day: "numeric",
-                          month: "short",
-                        })}{" "}
-                        ({dueInfo.label})
+                  {/* Due Date Indicator Banner */}
+                  <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-secondary/40 border border-border/40 text-xs">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="w-3.5 h-3.5 shrink-0" />
+                      <span>Próximo cobro:</span>
+                      <span className="font-bold text-foreground">
+                        {new Date(item.next_due_date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                       </span>
                     </div>
-
-                    {item.auto_register ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
-                        Auto
-                      </span>
-                    ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-semibold">
-                        Manual
-                      </span>
-                    )}
+                    <span
+                      className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap",
+                        dueInfo.urgent
+                          ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25"
+                          : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                      )}
+                    >
+                      {dueInfo.label}
+                    </span>
                   </div>
 
-                  {/* Actions Buttons */}
-                  <div className="flex items-center justify-between pt-2 border-t border-border/50 gap-2">
+                  {/* Actions Bar for Mobile */}
+                  <div className="flex items-center justify-between pt-1 border-t border-border/40 gap-2">
+                    {/* Cobrar Ahora button */}
                     <Button
                       variant="outline"
                       size="sm"
@@ -480,51 +482,54 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                           : "Registrar cobro ahora (adelantar en el historial)"
                       }
                       className={cn(
-                        "flex-1 rounded-xl text-xs font-bold h-8 border cursor-pointer",
+                        "flex-1 rounded-xl text-xs font-bold h-8.5 border cursor-pointer",
                         isAlreadyExecutedThisPeriod(item)
                           ? "text-slate-400 border-slate-300/30 opacity-50 cursor-not-allowed"
                           : "text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
                       )}
                     >
-                      <Zap className="w-3 h-3 mr-1 fill-current" />
+                      <Zap className="w-3.5 h-3.5 mr-1 fill-current" />
                       {isAlreadyExecutedThisPeriod(item) ? "Ya Registrado" : "Cobrar Ahora"}
                     </Button>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={isLoadingThis}
-                      onClick={() => handleToggleActive(item)}
-                      title={item.is_active ? "Desactivar cobro automático" : "Activar cobro automático"}
-                      className="rounded-xl text-xs font-bold h-8 px-2 text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      <Power className={cn("w-3.5 h-3.5", item.is_active ? "text-emerald-500" : "text-slate-400")} />
-                    </Button>
+                    {/* Icon Actions */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        disabled={isLoadingThis}
+                        onClick={() => handleToggleActive(item)}
+                        title={item.is_active ? "Desactivar cobro automático" : "Activar cobro automático"}
+                        className="h-8.5 w-8.5 text-muted-foreground hover:bg-secondary rounded-xl cursor-pointer"
+                      >
+                        <Power className={cn("w-3.5 h-3.5", item.is_active ? "text-emerald-500" : "text-slate-400")} />
+                      </Button>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={isLoadingThis}
-                      onClick={() => {
-                        setSelectedItem(item);
-                        setIsModalOpen(true);
-                      }}
-                      title="Editar datos de este ingreso fijo"
-                      className="rounded-xl text-xs font-bold h-8 px-2 text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        disabled={isLoadingThis}
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setIsModalOpen(true);
+                        }}
+                        title="Editar datos de este ingreso fijo"
+                        className="h-8.5 w-8.5 text-muted-foreground hover:bg-secondary rounded-xl cursor-pointer"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </Button>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={isLoadingThis}
-                      onClick={() => handleDelete(item)}
-                      title="Eliminar este ingreso fijo"
-                      className="rounded-xl text-xs font-bold h-8 px-2 text-rose-500 hover:bg-rose-500/10 cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        disabled={isLoadingThis}
+                        onClick={() => handleDelete(item)}
+                        title="Eliminar este ingreso fijo"
+                        className="h-8.5 w-8.5 text-rose-500 hover:bg-rose-500/15 rounded-xl cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               );
