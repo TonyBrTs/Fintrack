@@ -1,8 +1,9 @@
-﻿package services
+package services
 
 import (
 	"context"
 	"log"
+	"sync"
 	"time"
 )
 
@@ -13,6 +14,7 @@ type RecurringScheduler struct {
 	incomeService  RecurringIncomeService
 	interval       time.Duration
 	stopChan       chan struct{}
+	stopOnce       sync.Once
 }
 
 // NewRecurringScheduler creates a new instance of RecurringScheduler.
@@ -50,12 +52,9 @@ func (s *RecurringScheduler) Start(ctx context.Context) {
 
 // Stop terminates the scheduler loop gracefully.
 func (s *RecurringScheduler) Stop() {
-	select {
-	case <-s.stopChan:
-		// already closed
-	default:
+	s.stopOnce.Do(func() {
 		close(s.stopChan)
-	}
+	})
 }
 
 // runCycle executes one evaluation cycle for both due expenses and incomes.
