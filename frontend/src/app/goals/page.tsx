@@ -4,7 +4,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useState, useEffect, useMemo } from "react";
-import { safeFetch } from "@/lib/api";
+import { goalService } from "@/services";
 import { Goal } from "@/types/index";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { RegisterGoalModal } from "@/components/goals/RegisterGoalModal";
@@ -30,7 +30,7 @@ export default function GoalsPage() {
   const fetchGoals = async () => {
     try {
       setLoading(true);
-      const res = await safeFetch<Goal[]>("/api/goals");
+      const res = await goalService.getGoals();
       if (res.ok) {
         setGoals(Array.isArray(res.data) ? res.data : []);
       }
@@ -52,9 +52,7 @@ export default function GoalsPage() {
 
     try {
       setIsDeleting(true);
-      const res = await safeFetch(`/api/goals/${goalToDelete}`, {
-        method: "DELETE",
-      });
+      const res = await goalService.deleteGoal(goalToDelete);
       if (res.ok) {
         setIsDeleteDialogOpen(false);
         fetchGoals();

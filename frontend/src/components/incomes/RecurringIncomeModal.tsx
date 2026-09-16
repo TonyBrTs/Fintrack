@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
-import { safeFetch } from "@/lib/api";
+import { recurringService } from "@/services";
 import { Loader2, Calendar as CalendarLucide, Repeat, CalendarClock, CheckCircle2, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -129,14 +129,9 @@ export function RecurringIncomeModal({
         is_active: formData.is_active,
       };
 
-      const url = initialData ? `/api/recurring-incomes/${initialData.id}` : "/api/recurring-incomes";
-      const method = initialData ? "PUT" : "POST";
-
-      const res = await safeFetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = initialData
+        ? await recurringService.updateRecurringIncome(initialData.id, payload)
+        : await recurringService.createRecurringIncome(payload);
 
       if (!res.ok) {
         toast.error(res.error || "Error al guardar el ingreso recurrente");

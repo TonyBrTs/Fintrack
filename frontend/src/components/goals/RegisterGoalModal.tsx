@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2, Goal, CalendarIcon } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { safeFetch } from "@/lib/api";
+import { goalService } from "@/services";
 import { cn, formatLiveNumber, parseLiveNumber } from "@/lib/utils";
 import {
   Dialog,
@@ -59,14 +59,11 @@ export function RegisterGoalModal({
         return;
       }
 
-      const res = await safeFetch("/api/goals", {
-        method: "POST",
-        body: JSON.stringify({
-          ...formData,
-          target_amount: parsedTarget,
-          current_amount: parseFloat(parseLiveNumber(formData.current_amount)) || 0,
-          deadline: new Date(formData.deadline + "T12:00:00").toISOString(),
-        }),
+      const res = await goalService.createGoal({
+        ...formData,
+        target_amount: parsedTarget,
+        current_amount: parseFloat(parseLiveNumber(formData.current_amount)) || 0,
+        deadline: new Date(formData.deadline + "T12:00:00").toISOString(),
       });
 
       if (res.ok) {

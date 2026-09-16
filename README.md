@@ -98,7 +98,8 @@ Toda la arquitectura, base de datos, APIs y seguridad están documentadas a prof
 | Documento | Descripción |
 | :--- | :--- |
 | 🏛️ [**docs/ARCHITECTURE.md**](./docs/ARCHITECTURE.md) | Clean Architecture, diagramas C4 de contenedores, flujo de datos y multi-tenancy. |
-| 🛡️ [**docs/SOLID_PRINCIPLES.md**](./docs/SOLID_PRINCIPLES.md) | Detalle exhaustivo de los 5 principios SOLID con ejemplos antes/después y tests. |
+| 🛡️ [**docs/SOLID_PRINCIPLES.md**](./docs/SOLID_PRINCIPLES.md) | Detalle exhaustivo de los 5 principios SOLID en Go y TypeScript/React con ejemplos. |
+| 📜 [**docs/decisions/**](./docs/decisions/) | Registros de Decisiones de Arquitectura (ADRs de 001 a 005). |
 | 📡 [**docs/API_REFERENCE.md**](./docs/API_REFERENCE.md) | Catálogo completo de endpoints REST, headers de autorización, payloads y códigos de error. |
 | 🗄️ [**docs/DATABASE.md**](./docs/DATABASE.md) | Diagrama ERD, esquemas SQL de PostgreSQL, tipos de datos, índices y políticas RLS. |
 | 🔐 [**docs/AUTH_AND_SECURITY.md**](./docs/AUTH_AND_SECURITY.md) | Flujos de OAuth 2.0, validación de JWT Bearer en Go, recuperación de contraseñas y CORS. |
@@ -156,7 +157,10 @@ Fintrack/
 │   │   ├── repository/             # Interfaces abstractas de persistencia
 │   │   │   ├── gorm_repo/          # Implementación PostgreSQL / GORM
 │   │   │   └── memory_repo/        # Implementación Local / Fallback JSON
-│   │   └── services/               # Reglas de negocio y pruebas unitarias
+│   │   └── services/               # Lógica de negocio, Scheduler y pruebas unitarias
+│   │       ├── interfaces.go       # Contratos centralizados de servicios
+│   │       ├── scheduler.go        # Background RecurringScheduler worker
+│   │       └── ...
 │   ├── main.go                     # Bootstrap e Inyección de Dependencias
 │   └── go.mod
 │
@@ -167,10 +171,18 @@ Fintrack/
 │       ├── components/             # Componentes UI organizados por dominio
 │       ├── contexts/               # Contextos globales (Auth, Currency, Language)
 │       ├── hooks/                  # Custom React Hooks
-│       ├── lib/                    # Clientes API, Supabase e i18n
+│       ├── services/               # Capa de Servicios desacoplada (SRP / DIP)
+│       │   ├── expenseService.ts   # CRUD y sincronización de gastos
+│       │   ├── incomeService.ts    # CRUD y sincronización de ingresos
+│       │   ├── goalService.ts      # Metas y aportes
+│       │   ├── categoryService.ts  # Categorías y reasignación
+│       │   ├── recurringService.ts # Programaciones y ejecuciones
+│       │   └── index.ts            # Barrel file unificado
+│       ├── lib/                    # Clientes API, Supabase, Excel e i18n
 │       └── types/                  # Tipado TypeScript compartido
 │
 ├── docs/                           # Documentación Técnica Integral
+│   ├── decisions/                  # Architecture Decision Records (ADR 001 - 005)
 │   ├── ARCHITECTURE.md
 │   ├── SOLID_PRINCIPLES.md
 │   ├── API_REFERENCE.md

@@ -1,6 +1,6 @@
 "use client";
 
-import { safeFetch } from "@/lib/api";
+import { expenseService } from "@/services";
 import { useState, useEffect } from "react";
 import { cn, formatLiveNumber, parseLiveNumber, getCategoryColorBg } from "@/lib/utils";
 import type { Expense, ExpenseCategory } from "@/types/index";
@@ -90,20 +90,16 @@ export function EditExpenseModal({
         return;
       }
 
-      const endpoint = expense
-        ? `/api/expenses/${expense.id}`
-        : `/api/expenses`;
-      const method = expense ? "PUT" : "POST";
+      const payload = {
+        ...formData,
+        amount: parsedAmount,
+        currency,
+        date: new Date(formData.date + "T12:00:00").toISOString(),
+      };
 
-      const res = await safeFetch(endpoint, {
-        method,
-        body: JSON.stringify({
-          ...formData,
-          amount: parsedAmount,
-          currency,
-          date: new Date(formData.date + "T12:00:00").toISOString(),
-        }),
-      });
+      const res = expense
+        ? await expenseService.updateExpense(expense.id, payload)
+        : await expenseService.createExpense(payload);
 
       if (!res.ok) {
         toast.error(res.error || translate("expenses.form.error") || "Error al procesar el gasto");

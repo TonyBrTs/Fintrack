@@ -26,7 +26,7 @@ import { Button } from '@/components/ui/button';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { safeFetch } from '@/lib/api';
+import { expenseService } from '@/services';
 import { useCategories } from '@/hooks/useCategories';
 import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
 import { CategoryBadge } from '@/components/categories/CategoryBadge';
@@ -83,7 +83,7 @@ function ExpensesContent() {
   const fetchExpenses = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      const res = await safeFetch<Expense[]>('/api/expenses');
+      const res = await expenseService.getExpenses();
 
       if (!res.ok) {
         if (res.isUnauthorized) {
@@ -113,7 +113,7 @@ function ExpensesContent() {
 
     // Sincronización automática de gastos fijos pendientes de la quincena/mes
     const localDate = new Date().toLocaleDateString('en-CA');
-    safeFetch<RecurringSyncResult>(`/api/recurring-expenses/sync?client_date=${localDate}`, { method: 'POST' })
+    expenseService.syncRecurringExpenses(localDate)
       .then((res) => {
         if (res.ok && res.data && res.data.processed_count > 0) {
           toast.success(

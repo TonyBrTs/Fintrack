@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/TonyBrTs/fintrack-backend/internal/models"
 )
@@ -55,3 +56,34 @@ type CategoryService interface {
 	CreateCategory(ctx context.Context, userID, name, catType, color, icon string) (*models.CategoryResponse, error)
 	DeleteCategory(ctx context.Context, id, userID, reassignTo string) (*DeleteCategoryResult, error)
 }
+
+// RecurringExpenseService defines business operations for recurring expenses.
+type RecurringExpenseService interface {
+	GetRecurringExpenses(ctx context.Context, userID string) ([]models.RecurringExpense, error)
+	GetRecurringExpenseByID(ctx context.Context, id, userID string) (*models.RecurringExpense, error)
+	CreateRecurringExpense(ctx context.Context, userID string, item *models.RecurringExpense) (*models.RecurringExpense, error)
+	UpdateRecurringExpense(ctx context.Context, id, userID string, item *models.RecurringExpense) (*models.RecurringExpense, error)
+	DeleteRecurringExpense(ctx context.Context, id, userID string) error
+	ProcessDueExpenses(ctx context.Context, userID string, clientDate ...time.Time) ([]models.Expense, error)
+	ProcessAllDueExpenses(ctx context.Context) (int, error)
+	ExecuteNow(ctx context.Context, id, userID string) (*models.Expense, error)
+}
+
+// RecurringIncomeService defines business operations for recurring incomes.
+type RecurringIncomeService interface {
+	GetRecurringIncomes(ctx context.Context, userID string) ([]models.RecurringIncome, error)
+	GetRecurringIncomeByID(ctx context.Context, id, userID string) (*models.RecurringIncome, error)
+	CreateRecurringIncome(ctx context.Context, userID string, item *models.RecurringIncome) (*models.RecurringIncome, error)
+	UpdateRecurringIncome(ctx context.Context, id, userID string, item *models.RecurringIncome) (*models.RecurringIncome, error)
+	DeleteRecurringIncome(ctx context.Context, id, userID string) error
+	ProcessDueIncomes(ctx context.Context, userID string, clientDate ...time.Time) ([]models.Income, error)
+	ProcessAllDueIncomes(ctx context.Context) (int, error)
+	ExecuteNow(ctx context.Context, id, userID string) (*models.Income, error)
+}
+
+// Scheduler defines the lifecycle contract for background tasks.
+type Scheduler interface {
+	Start(ctx context.Context)
+	Stop()
+}
+

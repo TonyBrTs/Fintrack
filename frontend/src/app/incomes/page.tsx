@@ -26,7 +26,7 @@ import { Button } from '@/components/ui/button';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { safeFetch } from '@/lib/api';
+import { incomeService } from '@/services';
 import { useCategories } from '@/hooks/useCategories';
 import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
 import { CategoryBadge } from '@/components/categories/CategoryBadge';
@@ -82,7 +82,7 @@ function IncomesContent() {
   const fetchIncomes = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      const res = await safeFetch<Income[]>('/api/incomes');
+      const res = await incomeService.getIncomes();
 
       if (!res.ok) {
         if (res.isUnauthorized) {
@@ -112,7 +112,7 @@ function IncomesContent() {
 
     // Sincronización automática de ingresos fijos pendientes de la quincena/mes
     const localDate = new Date().toLocaleDateString('en-CA');
-    safeFetch<RecurringIncomeSyncResult>(`/api/recurring-incomes/sync?client_date=${localDate}`, { method: 'POST' })
+    incomeService.syncRecurringIncomes(localDate)
       .then((res) => {
         if (res.ok && res.data && res.data.processed_count > 0) {
           toast.success(

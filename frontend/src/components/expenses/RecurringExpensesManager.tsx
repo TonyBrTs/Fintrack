@@ -11,7 +11,7 @@ import {
   formatFrequencyLabel,
 } from "@/lib/utils";
 import { useSettings } from "@/contexts/SettingsContext";
-import { safeFetch } from "@/lib/api";
+import { recurringService } from "@/services";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
@@ -67,7 +67,7 @@ export function RecurringExpensesManager({
   const fetchRecurring = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await safeFetch<RecurringExpense[]>("/api/recurring-expenses");
+      const res = await recurringService.getRecurringExpenses();
       if (res.ok && Array.isArray(res.data)) {
         setItems(res.data);
       } else {
@@ -84,9 +84,7 @@ export function RecurringExpensesManager({
     try {
       setSyncing(true);
       const localDate = new Date().toLocaleDateString("en-CA");
-      const res = await safeFetch<RecurringSyncResult>(`/api/recurring-expenses/sync?client_date=${localDate}`, {
-        method: "POST",
-      });
+      const res = await recurringService.syncRecurringExpenses(localDate);
 
       if (res.ok && res.data) {
         if (res.data.processed_count > 0) {
@@ -138,10 +136,8 @@ export function RecurringExpensesManager({
   const handleToggleActive = async (item: RecurringExpense) => {
     try {
       setActionLoadingId(item.id);
-      const res = await safeFetch(`/api/recurring-expenses/${item.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_active: !item.is_active }),
+      const res = await recurringService.updateRecurringExpense(item.id, {
+        is_active: !item.is_active,
       });
 
       if (res.ok) {
@@ -158,9 +154,7 @@ export function RecurringExpensesManager({
   const handleExecuteNow = async (item: RecurringExpense) => {
     try {
       setActionLoadingId(item.id);
-      const res = await safeFetch(`/api/recurring-expenses/${item.id}/execute-now`, {
-        method: "POST",
-      });
+      const res = await recurringService.executeRecurringExpenseNow(item.id);
 
       if (res.ok) {
         toast.success(`✨ Se registró "${item.description}" como gasto realizado hoy.`);
@@ -183,9 +177,7 @@ export function RecurringExpensesManager({
 
     try {
       setActionLoadingId(deleteTarget.id);
-      const res = await safeFetch(`/api/recurring-expenses/${deleteTarget.id}`, {
-        method: "DELETE",
-      });
+      const res = await recurringService.deleteRecurringExpense(deleteTarget.id);
 
       if (res.ok) {
         toast.success("Gasto fijo eliminado");

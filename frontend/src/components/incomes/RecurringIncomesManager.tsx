@@ -10,7 +10,7 @@ import {
   formatFrequencyLabel,
 } from "@/lib/utils";
 import { useSettings } from "@/contexts/SettingsContext";
-import { safeFetch } from "@/lib/api";
+import { recurringService } from "@/services";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
@@ -69,7 +69,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
   const fetchRecurring = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await safeFetch<RecurringIncome[]>("/api/recurring-incomes");
+      const res = await recurringService.getRecurringIncomes();
       if (res.ok && Array.isArray(res.data)) {
         setItems(res.data);
       } else {
@@ -86,9 +86,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
     try {
       setSyncing(true);
       const localDate = new Date().toLocaleDateString("en-CA");
-      const res = await safeFetch<RecurringIncomeSyncResult>(`/api/recurring-incomes/sync?client_date=${localDate}`, {
-        method: "POST",
-      });
+      const res = await recurringService.syncRecurringIncomes(localDate);
 
       if (res.ok && res.data) {
         if (res.data.processed_count > 0) {
@@ -140,10 +138,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
   const handleToggleActive = async (item: RecurringIncome) => {
     try {
       setActionLoadingId(item.id);
-      const res = await safeFetch(`/api/recurring-incomes/${item.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_active: !item.is_active }),
+      const res = await recurringService.updateRecurringIncome(item.id, {
+        is_active: !item.is_active,
       });
 
       if (res.ok) {
@@ -162,9 +158,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
   const handleExecuteNow = async (item: RecurringIncome) => {
     try {
       setActionLoadingId(item.id);
-      const res = await safeFetch<{ message: string; income: any }>(`/api/recurring-incomes/${item.id}/execute-now`, {
-        method: "POST",
-      });
+      const res = await recurringService.executeRecurringIncomeNow(item.id);
 
       if (res.ok) {
         toast.success(`✨ Se registró "${item.description}" como ingreso recibido hoy.`);
@@ -187,9 +181,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
 
     try {
       setActionLoadingId(deleteTarget.id);
-      const res = await safeFetch(`/api/recurring-incomes/${deleteTarget.id}`, {
-        method: "DELETE",
-      });
+      const res = await recurringService.deleteRecurringIncome(deleteTarget.id);
 
       if (res.ok) {
         toast.success("Ingreso fijo eliminado");

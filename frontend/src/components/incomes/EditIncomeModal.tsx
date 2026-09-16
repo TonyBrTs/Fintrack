@@ -1,6 +1,6 @@
 "use client";
 
-import { safeFetch } from "@/lib/api";
+import { incomeService } from "@/services";
 import { useState, useEffect } from "react";
 import { cn, formatLiveNumber, parseLiveNumber, getCategoryColorBg } from "@/lib/utils";
 import type { Income, IncomeSource } from "@/types/index";
@@ -83,16 +83,13 @@ export function EditIncomeModal({
         return;
       }
 
-      const endpoint = `/api/incomes/${income?.id}`;
+      if (!income?.id) return;
 
-      const res = await safeFetch(endpoint, {
-        method: "PUT",
-        body: JSON.stringify({
-          ...formData,
-          amount: parsedAmount,
-          currency,
-          date: new Date(formData.date + "T12:00:00").toISOString(),
-        }),
+      const res = await incomeService.updateIncome(income.id, {
+        ...formData,
+        amount: parsedAmount,
+        currency,
+        date: new Date(formData.date + "T12:00:00").toISOString(),
       });
 
       if (!res.ok) {

@@ -82,28 +82,11 @@ func main() {
 	recurringHandler := handlers.NewRecurringExpenseHandler(recurringService)
 	recurringIncomeHandler := handlers.NewRecurringIncomeHandler(recurringIncomeService)
 
-	// Background scheduler for due recurring transactions (checks periodically)
-	go func() {
-		ticker := time.NewTicker(1 * time.Hour)
-		defer ticker.Stop()
-		for range ticker.C {
-			expCount, err := recurringService.ProcessAllDueExpenses(context.Background())
-			if err != nil {
-				log.Printf("[Scheduler] Error processing recurring expenses: %v\n", err)
-			} else if expCount > 0 {
-				log.Printf("[Scheduler] Automatically processed %d due recurring expenses.\n", expCount)
-			}
+	// 6. Background scheduler for due recurring transactions (Single Responsibility Principle)
+	scheduler := services.NewRecurringScheduler(recurringService, recurringIncomeService, 1*time.Hour)
+	scheduler.Start(context.Background())
 
-			incCount, err := recurringIncomeService.ProcessAllDueIncomes(context.Background())
-			if err != nil {
-				log.Printf("[Scheduler] Error processing recurring incomes: %v\n", err)
-			} else if incCount > 0 {
-				log.Printf("[Scheduler] Automatically processed %d due recurring incomes.\n", incCount)
-			}
-		}
-	}()
-
-	// 6. Setup Gin Router & Middlewares
+	// 7. Setup Gin Router & Middlewares
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
 

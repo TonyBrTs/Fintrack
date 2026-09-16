@@ -9,17 +9,6 @@ import (
 	"github.com/TonyBrTs/fintrack-backend/internal/repository"
 )
 
-type RecurringExpenseService interface {
-	GetRecurringExpenses(ctx context.Context, userID string) ([]models.RecurringExpense, error)
-	GetRecurringExpenseByID(ctx context.Context, id, userID string) (*models.RecurringExpense, error)
-	CreateRecurringExpense(ctx context.Context, userID string, item *models.RecurringExpense) (*models.RecurringExpense, error)
-	UpdateRecurringExpense(ctx context.Context, id, userID string, item *models.RecurringExpense) (*models.RecurringExpense, error)
-	DeleteRecurringExpense(ctx context.Context, id, userID string) error
-	ProcessDueExpenses(ctx context.Context, userID string, clientDate ...time.Time) ([]models.Expense, error)
-	ProcessAllDueExpenses(ctx context.Context) (int, error)
-	ExecuteNow(ctx context.Context, id, userID string) (*models.Expense, error)
-}
-
 type recurringExpenseService struct {
 	recurringRepo repository.RecurringExpenseRepository
 	expenseRepo   repository.ExpenseRepository

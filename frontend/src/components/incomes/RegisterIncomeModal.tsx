@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
-import { safeFetch } from "@/lib/api";
+import { incomeService } from "@/services";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,14 +65,11 @@ export function RegisterIncomeModal({
         return;
       }
 
-      const res = await safeFetch("/api/incomes", {
-        method: "POST",
-        body: JSON.stringify({
-          ...formData,
-          amount: parsedAmount,
-          currency,
-          date: new Date(formData.date + "T12:00:00").toISOString(),
-        }),
+      const res = await incomeService.createIncome({
+        ...formData,
+        amount: parsedAmount,
+        currency,
+        date: new Date(formData.date + "T12:00:00").toISOString(),
       });
 
       if (!res.ok) {

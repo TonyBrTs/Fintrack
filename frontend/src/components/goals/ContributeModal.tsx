@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2, DollarSign, Goal as GoalIcon } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { safeFetch } from "@/lib/api";
+import { goalService, expenseService } from "@/services";
 import { toast } from "sonner";
 import { Goal } from "@/types/index";
 import { formatLiveNumber, parseLiveNumber } from "@/lib/utils";
@@ -50,23 +50,17 @@ export function ContributeModal({
         current_amount: goal.current_amount + contributeAmount,
       };
 
-      const res = await safeFetch(`/api/goals/${goal.id}`, {
-        method: "PUT",
-        body: JSON.stringify(updatedGoal),
-      });
+      const res = await goalService.updateGoal(goal.id, updatedGoal);
 
       if (res.ok) {
         // Also record this as an expense to decrease balance and show in recent activity
-        await safeFetch("/api/expenses", {
-          method: "POST",
-          body: JSON.stringify({
-            amount: contributeAmount,
-            description: `${translate("goals.contributionToGoal")}: ${goal.name}`,
-            category: "Metas",
-            date: new Date().toISOString(),
-            payment_method: "Efectivo",
-            currency: "USD",
-          }),
+        await expenseService.createExpense({
+          amount: contributeAmount,
+          description: `${translate("goals.contributionToGoal")}: ${goal.name}`,
+          category: "Metas",
+          date: new Date().toISOString(),
+          payment_method: "Efectivo",
+          currency: "USD",
         });
 
         toast.success(translate("goals.contributeSuccess"));

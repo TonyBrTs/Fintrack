@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { safeFetch } from "@/lib/api";
+import { categoryService } from "@/services";
 import { Category } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -51,8 +51,7 @@ export function useCategories(filterType?: "expense" | "income") {
 
     try {
       setLoading(true);
-      const query = filterType ? `?type=${filterType}` : "";
-      const res = await safeFetch<Category[]>(`/api/categories${query}`);
+      const res = await categoryService.getCategories(filterType);
 
       if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
         setCategories(res.data);
@@ -93,10 +92,7 @@ export function useCategories(filterType?: "expense" | "income") {
       return { ok: false, error: "El nombre de la categoría es requerido." };
     }
 
-    const res = await safeFetch<Category>("/api/categories", {
-      method: "POST",
-      body: JSON.stringify({ name: trimmed, type, color, icon }),
-    });
+    const res = await categoryService.createCategory({ name: trimmed, type, color, icon });
 
     if (!res.ok) {
       return { ok: false, error: res.error || "No se pudo crear la categoría." };
@@ -111,15 +107,7 @@ export function useCategories(filterType?: "expense" | "income") {
     id: string,
     reassignTo?: string
   ): Promise<DeleteCategoryResult> => {
-    const query = reassignTo ? `?reassignTo=${encodeURIComponent(reassignTo)}` : "";
-    const res = await safeFetch<{
-      message?: string;
-      in_use?: boolean;
-      count?: number;
-      category_name?: string;
-    }>(`/api/categories/${id}${query}`, {
-      method: "DELETE",
-    });
+    const res = await categoryService.deleteCategory(id, reassignTo);
 
     if (res.status === 409) {
       return {

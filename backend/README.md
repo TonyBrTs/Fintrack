@@ -46,17 +46,16 @@ backend/
 │   ├── database/       # Conexión GORM PostgreSQL y AutoMigrate
 │   ├── handlers/       # Controladores HTTP puros (Single Responsibility)
 │   ├── middleware/     # Auth JWT y CORS Middleware
-│   ├── models/         # Entidades del dominio (Expense, Income, Goal, Category)
+│   ├── models/         # Entidades del dominio (Expense, Income, Goal, Category, Recurrences)
 │   ├── repository/     # Contratos e implementaciones intercambiables (Liskov / DIP)
 │   │   ├── gorm_repo/  # Implementación con PostgreSQL
 │   │   └── memory_repo/# Implementación local / JSON fallback
-│   └── services/       # Lógica y reglas de negocio puras (Testeable con Mocks)
-├── expenses.json       # Archivos de respaldo local
-├── incomes.json
-├── goals.json
-├── categories.json
+│   └── services/       # Lógica de negocio, Scheduler y pruebas unitarias con Mocks
+│       ├── interfaces.go # Contratos de servicios centralizados
+│       ├── scheduler.go  # RecurringScheduler (Background worker aislado)
+│       └── ...
 ├── go.mod
-├── main.go             # Inyección de dependencias
+├── main.go             # Inyección de dependencias y bootstrapping
 └── README.md
 ```
 
@@ -67,6 +66,9 @@ backend/
 Para más información técnica, consulta:
 * [Arquitectura del Sistema](../docs/ARCHITECTURE.md)
 * [Principios SOLID en FinTrack](../docs/SOLID_PRINCIPLES.md)
+* [Registros de Decisiones de Arquitectura (ADRs)](../docs/decisions/)
 * [Referencia de la API REST](../docs/API_REFERENCE.md)
 * [Esquema de Base de Datos](../docs/DATABASE.md)
 * [Autenticación y Seguridad](../docs/AUTH_AND_SECURITY.md)
+* [Despliegue en Producción](../docs/DEPLOYMENT.md)
+

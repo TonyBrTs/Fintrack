@@ -9,17 +9,6 @@ import (
 	"github.com/TonyBrTs/fintrack-backend/internal/repository"
 )
 
-type RecurringIncomeService interface {
-	GetRecurringIncomes(ctx context.Context, userID string) ([]models.RecurringIncome, error)
-	GetRecurringIncomeByID(ctx context.Context, id, userID string) (*models.RecurringIncome, error)
-	CreateRecurringIncome(ctx context.Context, userID string, item *models.RecurringIncome) (*models.RecurringIncome, error)
-	UpdateRecurringIncome(ctx context.Context, id, userID string, item *models.RecurringIncome) (*models.RecurringIncome, error)
-	DeleteRecurringIncome(ctx context.Context, id, userID string) error
-	ProcessDueIncomes(ctx context.Context, userID string, clientDate ...time.Time) ([]models.Income, error)
-	ProcessAllDueIncomes(ctx context.Context) (int, error)
-	ExecuteNow(ctx context.Context, id, userID string) (*models.Income, error)
-}
-
 type recurringIncomeService struct {
 	recurringRepo repository.RecurringIncomeRepository
 	incomeRepo    repository.IncomeRepository

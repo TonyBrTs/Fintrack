@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
-import { safeFetch } from "@/lib/api";
+import { expenseService } from "@/services";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,14 +70,11 @@ export function RegisterExpenseModal({
         return;
       }
 
-      const res = await safeFetch("/api/expenses", {
-        method: "POST",
-        body: JSON.stringify({
-          ...formData,
-          amount: parsedAmount,
-          currency,
-          date: new Date(formData.date + "T12:00:00").toISOString(),
-        }),
+      const res = await expenseService.createExpense({
+        ...formData,
+        amount: parsedAmount,
+        currency,
+        date: new Date(formData.date + "T12:00:00").toISOString(),
       });
 
       if (!res.ok) {
