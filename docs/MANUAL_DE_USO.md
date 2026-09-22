@@ -1,355 +1,365 @@
-# 📘 Manual de Uso de la Aplicación Web — FinTrack
+# 📘 Manual de Usuario Exhaustivo — FinTrack Web
 
-Bienvenido a **FinTrack**, tu plataforma integral de gestión y salud financiera personal. Este manual detalla paso a paso todas las funciones del sistema web, diseñado para ser intuitivo, rápido, seguro y adaptable tanto a computadoras de escritorio como a dispositivos móviles y tabletas.
+Bienvenido al **Manual Oficial de Usuario de FinTrack**, tu plataforma integral de control financiero personal, contabilidad simplificada y seguimiento de metas patrimoniales.
 
----
-
-## 📑 Tabla de Contenidos
-
-1. [Acceso al Sistema y Seguridad](#1-acceso-al-sistema-y-seguridad)
-   - [Inicio de Sesión y Registro](#inicio-de-sesión-y-registro)
-   - [Cuenta de Pruebas / Demostración](#cuenta-de-pruebas--demostración)
-   - [Cierre de Sesión](#cierre-de-sesión)
-2. [Navegación e Interfaz General](#2-navegación-e-interfaz-general)
-   - [Encabezado y Barra de Navegación](#encabezado-y-barra-de-navegación)
-   - [Selector de Moneda e Idioma](#selector-de-moneda-e-idioma)
-   - [Tema Claro y Oscuro](#tema-claro-y-oscuro)
-   - [Instalación como Aplicación (PWA)](#instalación-como-aplicación-pwa)
-3. [Panel Principal (Resumen / Dashboard)](#3-panel-principal-resumen--dashboard)
-   - [Selector de Período](#selector-de-período)
-   - [Tarjetas de Métricas Clave (KPIs)](#tarjetas-de-métricas-clave-kpis)
-   - [Gráficos Financieros Interactivos](#gráficos-financieros-interactivos)
-   - [Carrusel de Transacciones Recientes](#carrusel-de-transacciones-recientes)
-   - [Resumen de Metas de Ahorro](#resumen-de-metas-de-ahorro)
-   - [Consejos Financieros Inteligentes](#consejos-financieros-inteligentes)
-4. [Módulo de Gastos](#4-módulo-de-gastos)
-   - [Historial y Tabla de Gastos](#historial-y-tabla-de-gastos)
-   - [Cómo Registrar un Nuevo Gasto](#cómo-registrar-un-nuevo-gasto)
-   - [Búsqueda y Filtros Avanzados](#búsqueda-y-filtros-avanzados)
-   - [Detalle, Edición y Eliminación de Gastos](#detalle-edición-y-eliminación-de-gastos)
-   - [Gastos Fijos y Recurrentes](#gastos-fijos-y-recurrentes)
-5. [Módulo de Ingresos](#5-módulo-de-ingresos)
-   - [Historial y Tabla de Ingresos](#historial-y-tabla-de-ingresos)
-   - [Cómo Registrar un Nuevo Ingreso](#cómo-registrar-un-nuevo-ingreso)
-   - [Búsqueda y Filtros de Fuentes](#búsqueda-y-filtros-de-fuentes)
-   - [Detalle, Edición y Eliminación](#detalle-edición-y-eliminación)
-   - [Ingresos Fijos y Recurrentes](#ingresos-fijos-y-recurrentes)
-6. [Módulo de Metas de Ahorro](#6-módulo-de-metas-de-ahorro)
-   - [Creación de una Nueva Meta](#creación-de-una-nueva-meta)
-   - [Cómo Realizar Aportes a una Meta](#cómo-realizar-aportes-a-una-meta)
-   - [Retiro de Fondos y Cumplimiento](#retiro-de-fondos-y-cumplimiento)
-7. [Módulo de Reportes y Libro Contable](#7-módulo-de-reportes-y-libro-contable)
-   - [Filtros de Tiempo y Rangos Personalizados](#filtros-de-tiempo-y-rangos-personalizados)
-   - [Exportación a PDF / Imprimir](#exportación-a-pdf--imprimir)
-   - [Exportación a Excel (.xlsx) y CSV](#exportación-a-excel-xlsx-y-csv)
-8. [Administración de Categorías Personalizadas](#8-administración-de-categorías-personalizadas)
-   - [Crear una Categoría con Color Identificador](#crear-una-categoría-con-color-identificador)
-   - [Eliminación Segura y Reasignación](#eliminación-segura-y-reasignación)
-9. [Solución de Problemas Frecuentes](#9-solución-de-problemas-frecuentes)
+Este manual ha sido elaborado para guiarte en el uso de cada una de las herramientas, pantallas, cálculos y configuraciones del sistema, complementado con **capturas de pantalla reales** de la aplicación en producción.
 
 ---
 
-## 1. Acceso al Sistema y Seguridad
+## 📑 Índice de Contenidos
 
-### Inicio de Sesión y Registro
-1. Ingresa a la URL de la aplicación (por ejemplo: `https://fintrack-six-opal.vercel.app/login`).
-2. Si ya tienes una cuenta:
-   - Introduce tu **Correo electrónico**.
-   - Introduce tu **Contraseña**.
-   - Haz clic en **Iniciar Sesión**.
-3. Si eres un usuario nuevo:
-   - Haz clic en la pestaña o enlace **Registrarse**.
-   - Ingresa tu correo electrónico y una contraseña segura (mínimo 6 caracteres).
-   - Completa el registro. Tu cuenta quedará lista para usar inmediatamente.
+1. [Arquitectura General y Seguridad](#1-arquitectura-general-y-seguridad)
+   - [Seguridad de Acceso y Sesión](#seguridad-de-acceso-y-sesión)
+   - [Inicio de Sesión y Creación de Cuenta](#inicio-de-sesión-y-creación-de-cuenta)
+   - [Credenciales de Demostración](#credenciales-de-demostración)
+2. [Entorno de Navegación y Preferencias](#2-entorno-de-navegación-y-preferencias)
+   - [Barra de Navegación Superior e Inferior Móvil](#barra-de-navegación-superior-e-inferior-móvil)
+   - [Selector de Moneda Internacional](#selector-de-moneda-internacional)
+   - [Modo Oscuro / Modo Claro](#modo-oscuro--modo-claro)
+   - [Instalación como PWA (Móvil y Escritorio)](#instalación-como-pwa-móvil-y-escritorio)
+3. [Panel de Control Principal (Dashboard / Resumen)](#3-panel-de-control-principal-dashboard--resumen)
+   - [Filtro Temporal del Dashboard](#filtro-temporal-del-dashboard)
+   - [Tarjetas de Indicadores Clave (KPIs)](#tarjetas-de-indicadores-clave-kpis)
+   - [Gráfico Dinámico de Gastos por Categoría](#gráfico-dinámico-de-gastos-por-categoría)
+   - [Comparador Anual de Ingresos vs. Gastos](#comparador-anual-de-ingresos-vs-gastos)
+   - [Carrusel Interactivo de Actividad Reciente](#carrusel-interactivo-de-actividad-reciente)
+   - [Mini-Monitor de Metas y Consejos Financieros](#mini-monitor-de-metas-y-consejos-financieros)
+4. [Gestión Completa de Gastos (Egresos)](#4-gestión-completa-de-gastos-egresos)
+   - [Visualización y Consulta del Historial](#visualización-y-consulta-del-historial)
+   - [Registro Paso a Paso de un Nuevo Gasto](#registro-paso-a-paso-de-un-nuevo-gasto)
+   - [Filtros, Búsquedas y Métodos de Pago](#filtros-búsquedas-y-métodos-de-pago)
+   - [Edición y Eliminación Segura](#edición-y-eliminación-segura)
+5. [Gastos Fijos y Suscripciones Recurrentes](#5-gastos-fijos-y-suscripciones-recurrentes)
+   - [Diferencia entre Gasto Ocasional y Gasto Fijo](#diferencia-entre-gasto-ocasional-y-gasto-fijo)
+   - [Frecuencias Admitidas y Lógica de Quincenas](#frecuencias-admitidas-y-lógica-de-quincenas)
+   - [Cálculo del Impacto Mensual y Proyección](#cálculo-del-impacto-mensual-y-proyección)
+6. [Gestión Completa de Ingresos](#6-gestión-completa-de-ingresos)
+   - [Registro de Salarios, Honorarios y Ventas](#registro-de-salarios-honorarios-y-ventas)
+   - [Ingresos Fijos vs. Ingresos Variables](#ingresos-fijos-vs-ingresos-variables)
+   - [Filtrado y Trazabilidad de Entradas](#filtrado-y-trazabilidad-de-entradas)
+7. [Metas Financieras y Proyectos de Ahorro](#7-metas-financieras-y-proyectos-de-ahorro)
+   - [Definición de Objetivos y Plazos](#definición-de-objetivos-y-plazos)
+   - [Cómo Aportar Dinero a una Meta](#cómo-aportar-dinero-a-una-meta)
+   - [Impacto del Aporte en el Flujo de Caja](#impacto-del-aporte-en-el-flujo-de-caja)
+   - [Liquidación o Retiro de Fondos](#liquidación-o-retiro-de-fondos)
+8. [Auditoría, Reportes y Exportación Contable](#8-auditoría-reportes-y-exportación-contable)
+   - [Generación del Estado de Cuenta Oficial](#generación-del-estado-de-cuenta-oficial)
+   - [Selección de Módulos a Incluir](#selección-de-módulos-a-incluir)
+   - [Exportación a PDF Profesional con Código de Referencia](#exportación-a-pdf-profesional-con-código-de-referencia)
+   - [Descarga en Excel (.xlsx) y CSV](#descarga-en-excel-xlsx-y-csv)
+9. [Administración del Catálogo de Categorías](#9-administración-del-catálogo-de-categorías)
+   - [Creación de Categorías con Paleta Cromática Personalizada](#creación-de-categorías-con-paleta-cromática-personalizada)
+   - [Persistencia de Colores en Tablas y Gráficos](#persistencia-de-colores-en-tablas-y-gráficos)
+   - [Eliminación de Categorías y Reasignación Automática](#eliminación-de-categorías-y-reasignación-automática)
+10. [Preguntas Frecuentes y Diagnóstico de Problemas](#10-preguntas-frecuentes-y-diagnóstico-de-problemas)
 
-### Cuenta de Pruebas / Demostración
-Para evaluar la plataforma con datos cargados previamente (gastos, ingresos, metas y suscripciones recurrentes):
+---
+
+## 1. Arquitectura General y Seguridad
+
+### Seguridad de Acceso y Sesión
+FinTrack utiliza un esquema de autenticación basado en **JSON Web Tokens (JWT)** con cifrado en capa de transporte (**HTTPS/TLS**) y almacenamiento en base de datos PostgreSQL en Supabase.
+
+![Pantalla de Autenticación](img/01_login.png)
+
+### Inicio de Sesión y Creación de Cuenta
+
+#### Para Iniciar Sesión:
+1. Accede a `https://fintrack-six-opal.vercel.app/login`.
+2. Ingresa tu **Correo electrónico** registrado.
+3. Ingresa tu **Contraseña**.
+4. Pulsa el botón **Iniciar Sesión**. Los mensajes de error o advertencia solo se mostrarán en caso de datos incorrectos, garantizando una experiencia limpia.
+
+#### Para Registrarte por Primera Vez:
+1. En la pantalla de login, haz clic en la pestaña o enlace **Registrarse**.
+2. Proporciona una cuenta de correo electrónico válida.
+3. Define tu clave personal (longitud recomendada: mínimo 6 caracteres).
+4. Confirma el registro. El sistema creará tu entorno privado y tus 7 categorías base predeterminadas.
+
+### Credenciales de Demostración
+Para fines de capacitación, auditoría o evaluación sin ingresar datos bancarios reales:
 * **Correo**: `admin@gmail.com`
 * **Contraseña**: `admin`
 
-### Cierre de Sesión
-Para cerrar tu sesión de forma segura:
-* En computadoras: Haz clic en el botón con tu perfil o ícono de salida en la esquina superior derecha del encabezado.
-* En móviles: En la barra de navegación inferior, dirígete al menú o perfil y pulsa **Cerrar Sesión**.
-
 > [!NOTE]
-> La aplicación cuenta con persistencia inteligente de sesión: puedes cambiar entre pestañas del navegador o minimizar la app sin que se produzcan recargas o desconexiones inesperadas.
+> Esta cuenta demo cuenta con registros de sueldos, servicios, tarjetas, metas activas y gastos fijos precargados para explorar todas las capacidades de la plataforma.
 
 ---
 
-## 2. Navegación e Interfaz General
+## 2. Entorno de Navegación y Preferencias
 
-### Encabezado y Barra de Navegación
-* **Logotipo FinTrack**: Al hacer clic en el isotipo o logotipo en cualquier momento, volverás a la pantalla de **Resumen**.
-* **Menú Superior (Escritorio)**: Acceso directo a las 5 secciones principales:
-  1. **Resumen** (`/`)
-  2. **Gastos** (`/expenses`)
-  3. **Ingresos** (`/incomes`)
-  4. **Metas** (`/goals`)
-  5. **Reportes** (`/reports`)
-* **Barra Inferior (Móvil)**: En pantallas pequeñas, dispones de una barra de navegación rápida fija en la parte inferior para alternar de forma cómoda con una sola mano.
+### Barra de Navegación Superior e Inferior Móvil
+FinTrack implementa un diseño responsivo adaptado según el dispositivo:
+* **En Computadoras y Laptops**: En la parte superior encontrarás el selector central de pestañas: `Resumen`, `Gastos`, `Ingresos`, `Metas` y `Reportes`. A la derecha se ubica el conmutador de tema y el avatar de usuario con acceso rápido a cerrar sesión.
+* **En Dispositivos Móviles (Smartphones)**: La interfaz traslada los accesos a una **barra de navegación inferior fija (Dock)** para facilitar la navegación con el pulgar, manteniendo el encabezado superior despejado.
 
-### Selector de Moneda e Idioma
-En la barra de navegación o menú de configuración puedes personalizar:
-* **Moneda**:
-  * `CRC (₡)` — Colones costarricenses (por defecto).
-  * `USD ($)` — Dólares estadounidenses.
-  * `EUR (€)` — Euros.
-  * Los montos se formatean automáticamente con separador de miles y dos decimales en tiempo real.
-* **Idioma**:
-  * **Español (`es`)**: Vocabulario, fechas y meses en formato latino (`15 set.`, `30 oct.`).
-  * **Inglés (`en`)**: Adaptación completa bilingüe.
+### Selector de Moneda Internacional
+La aplicación soporta tres denominaciones monetarias con recálculo visual en tiempo real:
+* **Colones Costarricenses (`₡ CRC`)**: Configuración nativa por defecto.
+* **Dólares Estadounidenses (`$ USD`)**.
+* **Euros (`€ EUR`)**.
 
-### Tema Claro y Oscuro
-FinTrack incluye un modo oscuro (*Dark Mode*) diseñado para descansar la vista en entornos de poca luz y ahorrar batería en pantallas OLED:
-* Haz clic en el interruptor de sol/luna (☀️ / 🌙) ubicado en el encabezado.
-* El sistema recordará tu preferencia en futuras sesiones.
+> [!TIP]
+> Al cambiar de moneda, los símbolos y formatos numéricos se actualizan inmediatamente en tarjetas, tablas, modales y exportaciones sin recargar la página.
 
-### Instalación como Aplicación (PWA)
-FinTrack está optimizado como *Progressive Web App*:
-* **En Chrome / Edge (PC o Mac)**: Haz clic en el ícono de instalación (ordenador con flecha hacia abajo) en la barra de direcciones del navegador.
-* **En Android**: Pulsa el menú de 3 puntos en Chrome y selecciona **"Agregar a la pantalla principal"** o **"Instalar aplicación"**.
-* **En iPhone / iPad**: Pulsa el botón **Compartir** en Safari y selecciona **"Añadir a la pantalla de inicio"**.
+### Modo Oscuro / Modo Claro
+FinTrack dispone de dos paletas de color integrales:
+1. **Modo Oscuro (Dark Mode)**: Fondo `#0B0F19` con tarjetas `#111827` de alto contraste, ideal para evitar fatiga visual y reducir el consumo energético en pantallas OLED.
+2. **Modo Claro (Light Mode)**: Fondos claros de alta legibilidad para ambientes iluminados o presentaciones.
+* Para alternar, presiona el botón con el ícono de **Luna/Sol** situado en el extremo superior derecho.
+
+### Instalación como PWA (Móvil y Escritorio)
+FinTrack cumple con los estándares de *Progressive Web App*:
+* **Google Chrome / Microsoft Edge (PC/Mac)**: Aparecerá un ícono de instalación a la derecha de la barra de direcciones URL. Haz clic en **Instalar FinTrack** para disponer de un acceso directo en tu escritorio e iniciarlo en ventana independiente sin barras de navegador.
+* **Android**: Pulsa los 3 puntos del navegador Chrome y elige **Añadir a pantalla de inicio**.
+* **iOS (iPhone/iPad)**: Pulsa el botón de **Compartir** en Safari y selecciona **Añadir a la pantalla de inicio**.
 
 ---
 
-## 3. Panel Principal (Resumen / Dashboard)
+## 3. Panel de Control Principal (Dashboard / Resumen)
 
-Al iniciar sesión serás recibido por el Dashboard general, diseñado para que en menos de 5 segundos conozcas el estado exacto de tu economía.
+El **Resumen** es la central de mando donde se consolida tu salud patrimonial en tiempo real.
 
-### Selector de Período
-En la esquina superior derecha encontrarás el selector de fecha:
-* **Mes Actual**: Muestra los movimientos del mes en curso.
-* **Meses Anteriores**: Puedes consultar meses específicos de los últimos 12 meses.
-* **Todo el tiempo**: Totaliza el acumulado histórico de tu cuenta.
+![Panel de Control Principal / Dashboard](img/02_dashboard.png)
 
-### Tarjetas de Métricas Clave (KPIs)
-1. **Balance Total**: Tu patrimonio disponible en el período (`Ingresos Totales - Gastos Totales`).
-   * *Verde / Óptimo*: Tus ingresos superan tus gastos.
-   * *Rojo / Negativo*: Estás gastando más de lo que ingresas.
-2. **Total en Ingresos**: Suma total de sueldos, trabajos extra y demás entradas con el número de transacciones registradas.
-3. **Total en Gastos**: Suma de consumos, pagos y aportes a metas.
-4. **Tasa de Ahorro (%)**: Porcentaje neto de tus ingresos que lograste retener en el período. Si superas el 20%, el sistema te otorgará un indicador de *Excelente*.
+### Filtro Temporal del Dashboard
+En la esquina superior derecha del Resumen se encuentra el **Selector de Período**:
+* **Mes Actual** (ej. *Septiembre de 2026*): Filtra transacciones efectuadas dentro del mes en curso.
+* **Meses Históricos**: Permite auditar el comportamiento de meses anteriores.
+* **Todo el Histórico**: Muestra el acumulado total desde la creación de la cuenta.
 
-### Gráficos Financieros Interactivos
-* **Gastos por Categoría (Gráfico Circular / Dona)**:
-  * Cada rebanada representa una categoría y adopta **su color oficial asignado**.
-  * Al pasar el cursor o pulsar sobre una rebanada, verás el monto exacto acumulado y el porcentaje relativo.
-* **Ingresos vs Gastos Mensuales (Gráfico de Barras)**:
-  * Compara mes a mes las barras verdes (entradas) contra las barras rojas (salidas) a lo largo del año.
+### Tarjetas de Indicadores Clave (KPIs)
+En la hilera principal se despliegan cuatro indicadores financieros esenciales:
 
-### Carrusel de Transacciones Recientes
-* Muestra de forma cronológica tus últimos 8 movimientos.
-* **Punto de color de categoría**: Cada tarjeta identifica visualmente la categoría con su color distintivo.
-* **Diferenciador visual**:
-  * `+` en verde para ingresos.
-  * `-` en rojo para gastos comunes.
-  * Ícono de meta en ámbar para aportes a metas de ahorro.
-* Cuenta con auto-desplazamiento suave y barra indicadora de progreso. Al hacer clic en cualquier tarjeta, te dirigirá directamente al módulo correspondiente.
-
-### Resumen de Metas de Ahorro
-* Tarjeta ubicada a la derecha de transacciones recientes en computadoras.
-* Contiene una lista optimizada con desplazamiento vertical (`scroll`) para visualizar múltiples metas sin descuadrar la cuadrícula del panel.
-* Muestra el porcentaje de cumplimiento (`%`), el monto actual vs meta final y una barra de progreso animada.
-
-### Consejos Financieros Inteligentes
-* Módulo con análisis automatizado que evalúa tu balance y gastos para ofrecerte recomendaciones prácticas de ahorro y control presupuestario.
-
----
-
-## 4. Módulo de Gastos
-
-Accede desde el menú superior pulsando **Gastos**.
-
-### Historial y Tabla de Gastos
-En la pestaña principal **"Historial de Gastos"** verás:
-* Resumen de total gastado en el mes y categoría principal con mayor impacto.
-* Tabla completa con:
-  * **Fecha y Método de Pago**: Día de realización y medio empleado (Efectivo, Tarjeta, SINPE Móvil, etc.).
-  * **Descripción**: Nombre del concepto. Si fue generado por una regla recurrente, incluirá el ícono de repetición (`🔁`). Si es un aporte a meta, indicará claramente `Aporte a meta: [Nombre]`.
-  * **Categoría**: Insignia interactiva (`CategoryBadge`) con el color configurado por ti y un punto indicador.
-  * **Monto**: Cifra destacada en tono rojizo (`-₡X,XXX.XX`).
-
-### Cómo Registrar un Nuevo Gasto
-1. Haz clic en el botón azul **"+ Registrar Gasto"** en la parte superior.
-2. Completa los campos en el modal:
-   * **Monto**: Escribe la cantidad. El campo formatea los números con comas de miles automáticamente a medida que escribes.
-   * **Concepto / Descripción**: Nombre de la compra o servicio (ej. *"Supermercado semanal"*, *"Cena familiar"*).
-   * **Categoría**: Elige una de las categorías existentes o pulsa **"Añadir categoría"** para crear una nueva al instante.
-   * **Fecha**: Por defecto coloca el día de hoy, pero puedes seleccionar cualquier fecha pasada en el calendario.
-   * **Método de Pago**: Efectivo, Tarjeta de Débito, Tarjeta de Crédito, Transferencia Bancaria, u Otros.
-3. Haz clic en **"Guardar Gasto"**.
-4. Recibirás una confirmación emergente (*Toast*) en la esquina superior derecha y la tabla se actualizará de inmediato.
-
-### Búsqueda y Filtros Avanzados
-* **Buscador en Vivo**: Escribe palabras clave en la barra de búsqueda para filtrar al instante por descripción, comercio o método de pago.
-* **Filtro por Categoría**: Despliega el menú para aislar gastos de una categoría particular (ej. solo *"Alimentación"* o solo *"Transporte"*). Cada opción del menú incluye su respectivo punto de color.
-
-### Detalle, Edición y Eliminación de Gastos
-1. Haz clic en cualquier fila de la tabla de gastos para abrir el **Comprobante Digital (Sheet)**.
-2. En este panel podrás:
-   * Copiar el ID único de la transacción al portapapeles con un solo clic en el botón de copiado.
-   * Ver fecha completa, categoría con su badge de color y método de pago.
-   * **Editar**: Haz clic en el botón con ícono de lápiz para modificar monto, categoría o descripción.
-   * **Eliminar**: Haz clic en el botón de papelera roja. Se solicitará confirmación antes de borrar el registro para evitar pérdidas accidentales.
-
----
-
-### Gastos Fijos y Recurrentes
-Accede pulsando la pestaña **"Gastos Fijos"** dentro de la sección de Gastos. Esta herramienta automatiza tus pagos periódicos obligatorios (como suscripciones, alquileres o servicios públicos).
-
-#### 1. Configurar un Gasto Fijo
-1. Haz clic en **"+ Nuevo Gasto Fijo"**.
-2. Ingresa el monto y el concepto (ej. *"Netflix"*, *"Alquiler departamento"*).
-3. Selecciona la **Frecuencia**:
-   * **Quincenal**: Elige entre:
-     * *15 y fin de mes* (ideal para salarios de quincena estándar).
-     * *Cada 15 días continuos*.
-   * **Mensual**: Elige el día del mes exacto en que vence (del 1 al 31, o el último día).
-   * **Semanal**: Se ejecutará cada 7 días.
-   * **Anual**: Se ejecutará una vez al año.
-4. Elige el **Modo de Cobro**:
-   * **Automático**: Cuando llegue la fecha de vencimiento y abras la aplicación, el gasto se registrará por sí solo en tu historial.
-   * **Manual**: Te notificará la fecha de vencimiento pero requerirá que pulses el botón de registro.
-5. Guarda el registro.
-
-#### 2. Pausar o Reactivar Gastos Fijos
-* Tanto en computadoras como en celulares, cada gasto fijo cuenta con un interruptor **Switch**.
-* Para pausar temporalmente un gasto (por ejemplo, si cancelaste un servicio un mes): desactiva el switch. La fila se atenuará y no generará gastos automáticos.
-* Para reactivarlo, vuelve a activar el switch en cualquier momento.
-
-#### 3. Ejecución Anticipada ("Ejecutar Ahora")
-* Si pagaste un servicio antes de su fecha programada, abre las opciones del gasto fijo y haz clic en **"Ejecutar Ahora"** para asentar el gasto en el historial sin esperar al día de corte.
-
-> [!IMPORTANT]
-> **Sincronización con Zona Horaria Local:**
-> FinTrack sincroniza las quincenas y fechas fijas basándose en la hora local de tu dispositivo (`UTC-6`). Por ejemplo, durante la noche del día 14 nunca se aplicará indebidamente un gasto programado para el día 15.
-
----
-
-## 5. Módulo de Ingresos
-
-Accede desde el menú superior pulsando **Ingresos**.
-
-### Historial y Tabla de Ingresos
-* Funciona de forma análoga al módulo de gastos, destacando tus entradas con números verdes (`+₡X,XXX.XX`).
-* Muestra la **Fuente** de dinero (Salario, Freelance, Inversiones, Regalo, etc.) con su etiqueta de color `CategoryBadge`.
-
-### Cómo Registrar un Nuevo Ingreso
-1. Haz clic en **"+ Registrar Ingreso"**.
-2. Ingresa el monto (con formateo en vivo), descripción (ej. *"Pago de nómina primera quincena"*), fuente de ingreso, fecha y medio de recepción.
-3. Guarda el ingreso para impactar positivamente tu balance general.
-
-### Ingresos Fijos y Recurrentes
-* En la pestaña **"Ingresos Fijos"** puedes programar cobros periódicos como tu salario quincenal o rentas mensuales.
-* Ofrece los mismos controles de activación con interruptor *Switch*, frecuencias quincenales/mensuales y modo automático al vencer.
-
----
-
-## 6. Módulo de Metas de Ahorro
-
-Accede desde el menú superior pulsando **Metas**.
-
-Las metas te permiten separar dinero mental y financieramente para objetivos específicos (un viaje, comprar un auto, fondo de emergencias, etc.).
-
-### Creación de una Nueva Meta
-1. Pulsa en **"+ Nueva Meta"**.
-2. Rellena los datos:
-   * **Nombre de la Meta**: Ej. *"Vacaciones en Cancún"*, *"Prima del Carro"*.
-   * **Monto Objetivo**: La cantidad total que necesitas alcanzar.
-   * **Monto Inicial**: Si ya tienes algún dinero reservado para este fin.
-   * **Fecha Límite (*Deadline*)**: La fecha en la que planeas haber completado el ahorro.
-   * **Categoría**: Clasificación general del objetivo.
-3. Haz clic en **"Crear Meta"**.
-
-### Cómo Realizar Aportes a una Meta
-Cuando dispongas de dinero para ahorrar:
-1. En la tarjeta de la meta correspondiente, haz clic en el botón **"+ Aportar"** (o ícono de alcancía/billetera).
-2. Ingresa la cantidad que deseas aportar hoy.
-3. El sistema realizará dos acciones simultáneas con total consistencia:
-   * Sumará el monto al avance de la meta y actualizará su porcentaje de cumplimiento.
-   * Creará automáticamente un registro en tus gastos categorizado como `Metas: Aporte a meta: [Nombre de la meta]` para que tu saldo en el panel principal coincida con la realidad de tu bolsillo.
-
-### Retiro de Fondos y Cumplimiento
-* Si necesitas utilizar parte del dinero guardado en una meta antes de tiempo, puedes abrir el menú de la meta y seleccionar **"Retirar Fondos"**.
-* Cuando alcances el 100% del monto objetivo, la meta se marcará con una insignia de completada y podrás archivarla o eliminarla con confirmación.
-
----
-
-## 7. Módulo de Reportes y Libro Contable
-
-Accede desde el menú superior pulsando **Reportes**.
-
-Diseñado para contabilidad personal, declaraciones tributarias o revisiones periódicas con un formato limpio y profesional.
-
-### Filtros de Tiempo y Rangos Personalizados
-En la barra de herramientas superior dispones de filtros predefinidos:
-* **Este Mes**
-* **Mes Anterior**
-* **Últimos 30 Días**
-* **Este Año**
-* **Todo el Tiempo**
-* **Rango Personalizado**: Abre un calendario interactivo para elegir libremente la fecha inicial y la fecha final del reporte.
-
-### Exportación a PDF / Imprimir
-1. Configura el rango de fechas deseado.
-2. Haz clic en el botón **"Imprimir / PDF"**.
-3. El sistema activará el asistente de impresión del navegador con estilos optimizados:
-   * Se ocultan automáticamente barras de navegación, botones y elementos no imprimibles.
-   * Se incluye el membrete formal de FinTrack, fecha de emisión, totales de ingresos, gastos, balance neto y el desglose contable ordenado.
-4. En el destino de impresión de tu navegador, selecciona **"Guardar como PDF"** para obtener un documento digital listo para archivar o enviar por correo.
-
-### Exportación a Excel (.xlsx) y CSV
-* **Botón Excel (.xlsx)**: Genera una hoja de cálculo con fórmulas nativas, celdas formateadas en moneda y encabezados destacados, lista para abrir en Microsoft Excel, Google Sheets o LibreOffice.
-* **Botón CSV**: Descarga un archivo de texto separado por comas estándar para procesar en herramientas de analítica o bases de datos.
-
----
-
-## 8. Administración de Categorías Personalizadas
-
-FinTrack no te limita a categorías fijas; puedes crear tantas categorías como requiera tu estilo de vida.
-
-### Crear una Categoría con Color Identificador
-1. En el módulo de **Gastos** o de **Ingresos**, haz clic en el botón con ícono de etiqueta **"Categorías"** (o selecciona *"Añadir nueva categoría..."* en los selectores).
-2. Se abrirá la ventana de **Administrar Categorías**.
-3. Pulsa **"Añadir categoría de gasto"** (o de ingreso).
-4. Escribe el nombre (ej. *"Gimnasio"*, *"Veterinaria"*, *"Educación"*).
-5. Selecciona uno de los **8 colores vibrantes** disponibles:
-   * Azul (`blue`)
-   * Esmeralda (`emerald`)
-   * Púrpura (`purple`)
-   * Ámbar (`amber`)
-   * Rosa (`rose`)
-   * Cian (`cyan`)
-   * Índigo (`indigo`)
-   * Gris (`slate`)
-6. Guarda la categoría.
-
-### Persistencia Total del Color
-El color seleccionado se reflejará de forma unificada en:
-* Las etiquetas e insignias de las tablas principales.
-* Los filtros desplegables de búsqueda.
-* Los paneles de detalle de cada transacción.
-* Las rebanadas del gráfico de pastel/dona del panel de resumen.
-* Las tarjetas del carrusel de transacciones recientes.
-
-### Eliminación Segura y Reasignación
-Para proteger la integridad de tus finanzas:
-* Si intentas eliminar una categoría que **ya está asignada a transacciones existentes**, FinTrack detectará el conflicto y te avisará cuántas transacciones están vinculadas.
-* Te ofrecerá la opción de **"Reasignar a 'Otros' y Eliminar"**, garantizando que ninguna transacción quede huérfana ni se alteren tus balances históricos.
-
----
-
-## 9. Solución de Problemas Frecuentes
-
-| Situación | Causa Común | Solución Recomendada |
+| Indicador | Descripción y Cálculo | Estado Visual |
 | :--- | :--- | :--- |
-| **Los montos no cargan al abrir una página** | El servidor en la nube (Render) entra en suspensión tras inactividad en planes gratuitos. | Espera unos 15 a 30 segundos en la pantalla de carga. Si persiste, pulsa el botón *"Reintentar conexión"* en pantalla. |
-| **No veo las alertas o notificaciones** | Están ubicadas en la esquina superior derecha. | Verifica que no tengas extensiones del navegador bloqueando popups. FinTrack muestra alertas *Toast* limpias arriba a la derecha. |
-| **Un gasto fijo no se aplicó automáticamente** | El switch del gasto fijo está en estado *Pausado*. | Ingresa a Gastos > Gastos Fijos y asegúrate de que el switch esté encendido (azul/verde) y que el modo esté en *Automático*. |
-| **La fecha de quincena parecía adelantada** | Diferencia horaria entre el servidor en la nube (UTC) y tu país. | Ya solucionado en la versión actual: el sistema utiliza siempre la fecha local de tu navegador (`client_date`) y zona `UTC-6`. |
-| **Deseo cambiar de Colones a Dólares** | Configuración de moneda por defecto. | En el menú superior o de configuración, pulsa el selector de moneda y selecciona `USD ($)`. Toda la plataforma convertirá la simbología de inmediato. |
+| **Saldo Total** | Balance neto del período: `Total Ingresos - Total Gastos`. | 🟢 *Estado óptimo* (saldo positivo) / 🔴 *Alerta* (saldo negativo). |
+| **Ingresos** | Suma total de sueldos, rentas y cobros registrados en el mes, junto al conteo de operaciones. | 🟢 Conteo en verde con enlace directo al módulo. |
+| **Gastos** | Suma total de compras, pagos de servicios y consumos del mes. | 🔴 Conteo en rojo con enlace directo al módulo. |
+| **Ahorros (%)** | Tasa neta de ahorro: `((Ingresos - Gastos) / Ingresos) * 100`. | Muestra el estado: *Excelente* (≥ 20%), *Ajustado* (0-19%) o *Déficit*. |
+
+### Gráfico Dinámico de Gastos por Categoría
+* **Tipo**: Gráfico de anillo (*Doughnut Chart*).
+* **Función**: Muestra la distribución porcentual del dinero gastado en el mes.
+* **Colorimetría**: Cada segmento respeta el color asignado a la categoría.
+* **Tooltip**: Al situar el cursor o pulsar sobre una rebanada, se revela el nombre, el monto exacto en tu moneda y el porcentaje relativo sobre el gasto total.
+
+### Comparador Anual de Ingresos vs. Gastos
+* **Tipo**: Gráfico de barras comparativas mensuales.
+* **Función**: Permite evaluar mes a mes la relación entre dinero entrante (verde) y dinero saliente (rojo), facilitando la detección de meses con sobrecostos o estacionalidad financiera.
+
+### Carrusel Interactivo de Actividad Reciente
+Ubicado en el área central izquierda:
+* Exhibe las **últimas 8 transacciones** registradas con fecha, descripción, categoría con su punto de color distintivo, método de pago y monto.
+* Cuenta con botones de navegación lateral (`<` y `>`) y una barra de progreso suave.
+* Hacer clic sobre cualquier tarjeta te traslada de inmediato al movimiento específico.
+
+### Mini-Monitor de Metas y Consejos Financieros
+* **Widget de Metas**: En el lateral derecho se listan las metas activas más cercanas con una barra de progreso porcentual (`% logrado`) y el balance actual contra la meta final.
+* **Consejos Financieros**: Un motor de sugerencias contextuales analiza tu tasa de ahorro actual e identifica tu categoría de mayor consumo para advertirte proactivamente sobre posibles fugas de capital.
 
 ---
 
-*Manual elaborado para el equipo y usuarios de FinTrack. Versión Web 1.0.*
+## 4. Gestión Completa de Gastos (Egresos)
+
+El módulo de **Gastos** (`/expenses`) te permite llevar una contabilidad minuciosa de cada desembolso.
+
+![Listado Principal de Gastos](img/03_gastos.png)
+
+### Visualización y Consulta del Historial
+La tabla central presenta:
+1. **Fecha y Método**: Día de registro y medio de pago utilizado (Efectivo, Tarjeta de Crédito, Débito, Transferencia, etc.). Si el gasto proviene de una recurrencia fija, incluye un ícono distintivo de flechas cíclicas (`🔄`).
+2. **Descripción**: Detalle conceptual de la compra o servicio.
+3. **Categoría**: Etiqueta redondeada con el **color identificador** exacto de la categoría y un punto cromático.
+4. **Monto**: Importe en rojo con el signo negativo (`-₡27 000,00`) formateado con separación de miles.
+
+### Registro Paso a Paso de un Nuevo Gasto
+
+Para registrar un gasto nuevo, presiona el botón azul **+ Registrar Gasto** en la esquina superior derecha:
+
+![Modal de Registro de Gasto](img/04_modal_gasto.png)
+
+#### Campos del Formulario:
+1. **Monto**: Ingresa el valor numérico. El símbolo monetario se antepone de forma automática.
+2. **Categoría**: Despliega la lista para elegir la categoría. Si requieres una no existente, puedes pulsar **Añadir categoría** directamente desde aquí.
+3. **Fecha**: Selector con calendario interactivo para asignar compras pasadas o del día de hoy.
+4. **Método de Pago**: Selecciona entre:
+   - *Tarjeta de Crédito*
+   - *Tarjeta de Débito*
+   - *Efectivo*
+   - *Transferencia Bancaria*
+   - *Sinpe Móvil* (o billetera electrónica)
+5. **Descripción**: Nota explicativa del gasto (ej. "Supermercado semanal", "Gasolina", "Farmacia").
+6. Pulsa **Guardar**. El gasto se reflejará al instante en la tabla y los totales del mes.
+
+### Filtros, Búsquedas y Métodos de Pago
+* **Buscador de Texto en Vivo**: Escribe en la barra de búsqueda para filtrar al instante por descripción, comercio o método de pago.
+* **Filtro por Categoría**: El selector desplegable permite aislar gastos de una única categoría (ej. solo *Alimentación* o solo *Servicios*) para analizar desembolsos específicos.
+
+### Edición y Eliminación Segura
+* **Editar**: Al hacer clic sobre cualquier fila del listado de gastos, se abre el modal precargado con sus datos para modificar importes, fechas o categorías.
+* **Eliminar**: En el detalle del gasto encontrarás el botón rojo de papelera. Se solicitará confirmación antes de borrar el registro de la base de datos para prevenir pérdidas accidentales.
+
+---
+
+## 5. Gastos Fijos y Suscripciones Recurrentes
+
+Dentro del módulo de Gastos, la pestaña superior **Gastos Fijos** permite gestionar compromisos recurrentes como alquileres, préstamos, colegiaturas, plataformas de streaming y servicios públicos.
+
+![Módulo de Gastos Fijos](img/05_gastos_fijos.png)
+
+### Diferencia entre Gasto Ocasional y Gasto Fijo
+* **Gasto Ocasional**: Una transacción puntual (ej. una cena o una compra en la ferretería) que impacta una sola vez tu contabilidad.
+* **Gasto Fijo**: Una obligación recurrente que FinTrack proyecta automáticamente para anticipar tus costos de vida fijos.
+
+### Frecuencias Admitidas y Lógica de Quincenas
+FinTrack soporta los siguientes esquemas de repetición:
+* **Mensual**: Se cobra una vez por mes en el día indicado (ej. día 5 de cada mes).
+* **Quincenal**: Diseñado específicamente para pagos vinculados a los ciclos quincenales (días 15 y fin de mes). 
+  > [!IMPORTANT]
+  > La aplicación aplica los gastos de quincena una vez que la fecha del sistema alcanza o supera el día de corte correspondiente, evitando que se carguen prematuramente si aún no se ha cumplido el ciclo.
+* **Semanal / Bisemanal**: Repeticiones cada 7 o 14 días.
+* **Anual**: Para seguros, pólizas o membresías de facturación anual.
+
+### Cálculo del Impacto Mensual y Proyección
+En el encabezado de la pestaña verás el **Total Mensual Estimado en Gastos Fijos**. Este indicador te dice cuánto dinero de tu salario ya está comprometido antes de comenzar a realizar consumos variables.
+
+---
+
+## 6. Gestión Completa de Ingresos
+
+El módulo de **Ingresos** (`/incomes`) centraliza todas las entradas de capital a tus cuentas.
+
+![Módulo de Ingresos](img/06_ingresos.png)
+
+### Registro de Salarios, Honorarios y Ventas
+1. Pulsa el botón **+ Registrar Ingreso**.
+2. Completa los campos solicitados:
+   - **Monto**: Importe neto percibido.
+   - **Fuente o Categoría de Ingreso**: (ej. *Salario Quincenal*, *Trabajo Independiente*, *Rentas*, *Dividendos*, *Devoluciones*).
+   - **Fecha**: Fecha efectiva de depósito.
+   - **Método de Recepción**: Cuenta bancaria, efectivo, transferencia.
+   - **Descripción**: Detalle del pagador o cliente.
+3. Haz clic en **Guardar**.
+
+### Ingresos Fijos vs. Ingresos Variables
+Al igual que en los gastos, puedes conmutar entre **Ingresos** ordinarios e **Ingresos Fijos** para programar depósitos salariales recurrentes que se sumen automáticamente en cada ciclo contable.
+
+### Filtrado y Trazabilidad de Entradas
+La tabla de ingresos cuenta con su propio buscador rápido y totalizador mensual que expone el total de entradas y el número de depósitos verificados.
+
+---
+
+## 7. Metas Financieras y Proyectos de Ahorro
+
+El módulo de **Metas** (`/goals`) te ayuda a planificar compras importantes, crear fondos de emergencia o reservar dinero para vacaciones sin mezclarlo con tu gasto corriente.
+
+![Módulo de Metas de Ahorro](img/07_metas.png)
+
+### Definición de Objetivos y Plazos
+Para crear una nueva meta de ahorro:
+1. Pulsa **+ Nueva Meta**.
+2. Especifica:
+   - **Nombre de la Meta**: (ej. *Fondo de Emergencia*, *Vacaciones a la Playa*, *Prima de Vehículo*).
+   - **Monto Objetivo**: La cantidad total requerida.
+   - **Monto Inicial**: Si ya tienes un dinero apartado para este fin, indícalo aquí (puede ser `0`).
+   - **Fecha Límite (Opcional)**: Plazo estimado para completarla.
+   - **Categoría Asociada**: Para categorizar la meta (ej. *Entretenimiento*, *Transporte*).
+3. Haz clic en **Crear Meta**.
+
+### Cómo Aportar Dinero a una Meta
+Cada tarjeta de meta cuenta con un botón azul **+ Aportar**:
+1. Haz clic en **+ Aportar** sobre la meta deseada.
+2. Ingresa la suma que vas a abonar.
+3. El sistema recalculará inmediatamente la barra de progreso, el porcentaje acumulado y el saldo restante.
+
+### Impacto del Aporte en el Flujo de Caja
+> [!NOTE]
+> Cuando aportas dinero a una meta, FinTrack registra automáticamente el movimiento como una asignación financiera. Así, tu saldo disponible en el Dashboard refleja fielmente que ese dinero ha sido resguardado y no debe gastarse en consumos ordinarios.
+
+### Liquidación o Retiro de Fondos
+Si necesitas utilizar los fondos ahorrados o la meta ha alcanzado el 100%:
+* Puedes liquidar la meta para transferir el dinero a tus fondos disponibles o marcarla como **Cumplida** (`3/3 metas cumplidas`).
+* Si cancelas el objetivo, puedes optar por devolver el monto acumulado al saldo general.
+
+---
+
+## 8. Auditoría, Reportes y Exportación Contable
+
+El módulo de **Reportes** (`/reports`) genera informes contables para control personal, solicitudes de crédito o declaraciones fiscales.
+
+![Generador de Reportes y Estados de Cuenta](img/08_reportes.png)
+
+### Generación del Estado de Cuenta Oficial
+La pantalla compone en tiempo real un documento formal con diseño membretado que incluye:
+* **Identificador de Transacción Único** (ej. `FT-202609-3CA4`).
+* **Datos del Titular**: Nombre y correo electrónico registrado.
+* **Período Consultado**: Rango exacto de fechas analizadas.
+* **Resumen Ejecutivo y Flujo Neto**: Cuadro comparativo de (+) Ingresos vs. (-) Egresos y Saldo Resultante.
+
+### Selección de Módulos a Incluir
+Mediante casillas interactivas puedes activar o desactivar qué secciones deseas incluir en el documento final:
+* ☑️ **Estado de Flujo y Resumen**
+* ☑️ **Detalle de Cada Gasto** (desglose línea por línea)
+* ☑️ **Detalle de Cada Ingreso**
+* ☑️ **Metas de Ahorro**
+* ☑️ **Observaciones Contables**
+
+### Exportación a PDF Profesional con Código de Referencia
+* Al hacer clic en el botón azul **PDF / Imprimir**, se abrirá la vista de impresión optimizada del navegador.
+* Puedes elegir **Guardar como PDF** en tamaño Carta o A4.
+* La hoja de estilos oculta la barra de navegación web y adapta las tablas al formato impreso con membrete oficial.
+
+### Descarga en Excel (.xlsx) y CSV
+* **Botón Excel (.xlsx)**: Genera un libro de Microsoft Excel con fórmulas de sumatoria, encabezados estilizados y formato de celdas monetario.
+* **Botón CSV**: Descarga un archivo en texto delimitado por comas, perfecto para importar en Google Sheets, Notion o programas contables externos.
+
+---
+
+## 9. Administración del Catálogo de Categorías
+
+FinTrack te ofrece un sistema de categorización con soporte cromático para organizar tus egresos e ingresos.
+
+![Administrador de Categorías](img/09_categorias.png)
+
+### Creación de Categorías con Paleta Cromática Personalizada
+1. En la pantalla de Gastos o Ingresos, haz clic en el botón **Categorías**.
+2. Se desplegará el modal de **Administrar Categorías**.
+3. Pulsa el botón **+ Añadir categoría de gasto** (o de ingreso).
+4. Asigna un nombre claro (ej. *Mascotas*, *Gimnasio*, *Educación*).
+5. Selecciona el color de tu preferencia de la paleta predefinida (verde esmeralda, azul zafiro, ámbar, violeta, carmín, cian, etc.).
+6. Guarda la categoría. A partir de ese momento estará disponible en todos los selectores.
+
+### Persistencia de Colores en Tablas y Gráficos
+* Cada categoría conserva su color de manera estricta en:
+  - Las etiquetas de la tabla de gastos e ingresos.
+  - Los puntos indicadores en el carrusel de transacciones recientes.
+  - Las rebanadas del gráfico circular del Dashboard.
+  - Los resúmenes por categoría en la exportación de reportes.
+
+### Eliminación de Categorías y Reasignación Automática
+* **Categorías Predeterminadas**: Protegidas por el sistema con la etiqueta *Sistema* (Alimentación, Transporte, Servicios, Entretenimiento, Salud, Metas, Otros).
+* **Categorías Propias**: Puedes eliminarlas cuando lo desees. Si una categoría eliminada contenía gastos asociados, el sistema reasignará automáticamente esos movimientos a la categoría comodín **Otros**, garantizando que tu historial y balances nunca se descuadren ni pierdan consistencia contable.
+
+---
+
+## 10. Preguntas Frecuentes y Diagnóstico de Problemas
+
+### 1. ¿Por qué el toast o mensaje de notificación aparece arriba a la derecha?
+Los avisos de confirmación (ej. *"Gasto registrado con éxito"*, *"Meta actualizada"*) se proyectan en la esquina superior derecha de la pantalla para garantizar alta visibilidad sin tapar los botones ni interferir con la navegación táctil en móviles.
+
+### 2. ¿Qué ocurre con los gastos quincenales si estamos antes del día 15?
+Los gastos configurados con periodicidad quincenal esperan a que la fecha del sistema alcance el día de corte (día 15 o fin de mes) para aplicarse, de forma que el saldo disponible no sufra deducciones anticipadas erróneas.
+
+### 3. ¿El sistema funciona sin conexión a internet?
+Al ser una aplicación web progresiva (PWA), la interfaz se almacena en la memoria caché de tu navegador. Sin embargo, para sincronizar nuevos gastos, autenticarte y calcular balances en la nube, se requiere conexión activa con el servidor de base de datos.
+
+### 4. ¿Cómo cambio la contraseña de mi cuenta?
+Dirígete a tu perfil haciendo clic en el avatar de la esquina superior derecha y selecciona la opción de seguridad para actualizar tus credenciales.
+
+### 5. ¿Mis datos están respaldados?
+Sí. Toda la información reside en una base de datos PostgreSQL alojada en centros de datos con copias de seguridad automatizadas diarias y conexiones encriptadas de extremo a extremo.
+
+---
+
+*Manual de Usuario de FinTrack — Versión 2.4 — Actualizado en Septiembre de 2026.*

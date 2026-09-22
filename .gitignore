@@ -1,5 +1,8 @@
 # dependencies
 frontend/node_modules
+mobile/node_modules
+mobile/.expo/
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
