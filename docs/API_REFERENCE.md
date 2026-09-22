@@ -1,6 +1,6 @@
-# 📡 Referencia de la API REST - FinTrack
+# 📡 Referencia de la API REST — FinTrack
 
-La API REST de FinTrack proporciona operaciones CRUD completas y seguras para la gestión de finanzas personales, categorización y metas de ahorro.
+La API REST de FinTrack proporciona operaciones CRUD completas y seguras para la gestión de finanzas personales, categorización, metas de ahorro y transacciones recurrentes.
 
 ---
 
@@ -26,7 +26,7 @@ Authorization: Bearer <TU_SUPABASE_JWT_ACCESS_TOKEN>
 
 ---
 
-## 🚦 Formato de Respuestas de Error
+## ⚠️ Formato de Respuestas de Error
 
 En caso de error, la API responde con un objeto JSON uniforme:
 ```json
@@ -37,7 +37,7 @@ En caso de error, la API responde con un objeto JSON uniforme:
 
 ---
 
-## 💸 1. Módulo de Gastos (`/api/expenses`)
+## 📉 1. Módulo de Gastos (`/api/expenses`)
 
 ### `GET /api/expenses`
 Obtiene la lista de gastos del usuario autenticado ordenados cronológicamente descendente.
@@ -101,7 +101,7 @@ Elimina un gasto existente.
 
 ---
 
-## 💵 2. Módulo de Ingresos (`/api/incomes`)
+## 📈 2. Módulo de Ingresos (`/api/incomes`)
 
 ### `GET /api/incomes`
 Obtiene los ingresos del usuario autenticado ordenados por fecha.
@@ -124,13 +124,13 @@ Obtiene los ingresos del usuario autenticado ordenados por fecha.
 ```
 
 ### `POST /api/incomes`
-Registra un nuevo ingreso. (`201 Created`).
+Registra un nuevo ingreso (`201 Created`).
 
 ### `PUT /api/incomes/:id`
-Actualiza un ingreso existente. (`200 OK`).
+Actualiza un ingreso existente (`200 OK`).
 
 ### `DELETE /api/incomes/:id`
-Elimina un ingreso. (`204 No Content`).
+Elimina un ingreso (`204 No Content`).
 
 ---
 
@@ -156,13 +156,13 @@ Lista todas las metas de ahorro del usuario con su progreso actual.
 ```
 
 ### `POST /api/goals`
-Crea una nueva meta de ahorro. (`201 Created`).
+Crea una nueva meta de ahorro (`201 Created`).
 
 ### `PUT /api/goals/:id`
-Actualiza el monto acumulado o datos de la meta. (`200 OK`).
+Actualiza el monto acumulado o datos de la meta (`200 OK`).
 
 ### `DELETE /api/goals/:id`
-Elimina una meta de ahorro. (`204 No Content`).
+Elimina una meta de ahorro (`204 No Content`).
 
 ---
 
@@ -296,7 +296,7 @@ Genera recomendaciones financieras avanzadas utilizando modelos de **Google Gemi
 
 ---
 
-## 🩺 6. Verificación de Salud (`/health`)
+## 🩺 7. Verificación de Salud (`/health`)
 
 ### `GET /health`
 Ruta pública para balanceadores de carga y monitoreo.

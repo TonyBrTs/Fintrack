@@ -1,4 +1,4 @@
-﻿# ADR-001: Adopción de Clean Architecture y Principios SOLID en FinTrack
+# ADR-001: Adopción de Clean Architecture y Principios SOLID en FinTrack
 
 ## Estado
 **Aceptado**

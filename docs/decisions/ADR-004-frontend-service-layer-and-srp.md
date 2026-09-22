@@ -1,4 +1,4 @@
-﻿# ADR-004: Capa de Servicios en el Frontend y Principio de Responsabilidad Única (SRP)
+# ADR-004: Capa de Servicios en el Frontend y Principio de Responsabilidad Única (SRP)
 
 ## Estado
 **Aceptado**

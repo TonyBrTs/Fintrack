@@ -1,4 +1,4 @@
-﻿# ADR-003: Autenticación con Supabase Auth y Seguridad Multi-Inquilino
+# ADR-003: Autenticación con Supabase Auth y Seguridad Multi-Inquilino
 
 ## Estado
 **Aceptado**

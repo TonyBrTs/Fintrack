@@ -14,13 +14,13 @@
 
 ## 🌐 Enlaces en Vivo
 
-* 🚀 **Frontend en Producción**: [https://fintrack-six-opal.vercel.app](https://fintrack-six-opal.vercel.app)
+* 📱 **Frontend en Producción**: [https://fintrack-six-opal.vercel.app](https://fintrack-six-opal.vercel.app)
 * ⚡ **Backend API en Producción**: [https://fintrack-ihwb.onrender.com/health](https://fintrack-ihwb.onrender.com/health)
-* 📦 **Repositorio GitHub**: [https://github.com/TonyBrTs/Fintrack](https://github.com/TonyBrTs/Fintrack)
+* 🐙 **Repositorio GitHub**: [https://github.com/TonyBrTs/Fintrack](https://github.com/TonyBrTs/Fintrack)
 
 ---
 
-## 🏛️ Arquitectura del Sistema
+## 🏗️ Arquitectura del Sistema
 
 ```mermaid
 graph TB
@@ -46,34 +46,34 @@ graph TB
     end
 
     UI --> AuthCtx
-    AuthCtx -->|OAuth 2.0 / Login| SupabaseAuth
-    UI -->|Bearer JWT| Handlers
     UI --> AIClient
+    UI --> ServicesLayer["Capa de Servicios Frontend"]
+    ServicesLayer -->|Bearer Token HTTP| Handlers
     Handlers --> Services
     Services --> Repos
     Repos -->|Producción| GormPostgres
-    Repos -.->|Offline / Local| MemoryJSON
+    Repos -.->|Fallback Local| MemoryJSON
+    AuthCtx --> SupabaseAuth
+    Handlers -->|Verifica JWT| SupabaseAuth
 ```
 
 ---
 
-## 🛡️ Principios SOLID Implementados
+## 💎 Principios SOLID Implementados
 
-El backend de FinTrack fue refactorizado para cumplir rigurosamente con los principios **SOLID**:
-
-| Principio | Aplicación en FinTrack |
+| Principio | Implementación en FinTrack |
 | :--- | :--- |
-| **S - Single Responsibility** | Separación estricta en 4 capas: Handlers (solo HTTP), Services (solo lógica financiera), Repositories (solo persistencia) y Models (solo estructuras de datos). |
-| **O - Open/Closed** | El sistema es extensible a nuevas bases de datos (Redis, MongoDB, DynamoDB) implementando las interfaces de `internal/repository` sin tocar código existente. |
-| **L - Liskov Substitution** | `GormExpenseRepository` y `MemoryExpenseRepository` son 100% intercambiables; los servicios operan idénticamente con cualquiera. |
-| **I - Interface Segregation** | Interfaces granulares y segregadas (`ExpenseRepository`, `IncomeRepository`, `GoalRepository`, `CategoryRepository`) en lugar de interfaces gigantes. |
-| **D - Dependency Inversion** | Los Handlers dependen de interfaces de Services; los Services dependen de interfaces de Repositories. Inyección limpia de dependencias en `main.go`. |
+| **S — Single Responsibility** | Separación estricta en 4 capas: Handlers (solo HTTP), Services (solo lógica financiera), Repositories (solo persistencia) y Models (solo estructuras de datos). |
+| **O — Open/Closed** | El sistema es extensible a nuevas bases de datos (Redis, MongoDB, DynamoDB) implementando las interfaces de `internal/repository` sin tocar código existente. |
+| **L — Liskov Substitution** | `GormExpenseRepository` y `MemoryExpenseRepository` son 100% intercambiables; los servicios operan idénticamente con cualquiera. |
+| **I — Interface Segregation** | Interfaces granulares y segregadas (`ExpenseRepository`, `IncomeRepository`, `GoalRepository`, `CategoryRepository`) en lugar de interfaces gigantes. |
+| **D — Dependency Inversion** | Los Handlers dependen de interfaces de Services; los Services dependen de interfaces de Repositories. Inyección limpia de dependencias en `main.go`. |
 
 > 📖 Consulta el análisis completo con código y pruebas en [docs/SOLID_PRINCIPLES.md](./docs/SOLID_PRINCIPLES.md).
 
 ---
 
-## ✨ Funcionalidades Principales
+## 🌟 Funcionalidades Principales
 
 * 📊 **Dashboard Financiero en Tiempo Real**: Balance consolidado, ingresos, egresos, tasa de ahorro neta y gráficos analíticos interactivos.
 * 🤖 **AI Financial Insights con Google Gemini**: Recomendaciones predictivas sobre hábitos de gasto con sistema de fallback en cascada y caché en memoria.
@@ -87,28 +87,29 @@ El backend de FinTrack fue refactorizado para cumplir rigurosamente con los prin
 * 🎯 **Gestión de Metas de Ahorro**: Seguimiento de objetivos financieros con aportes en tiempo real y barras de progreso.
 * 💱 **Soporte Multimoneda Dinámico**: Dólar estadounidense (**USD**), Euro (**EUR**), Libra esterlina (**GBP**) y Colón costarricense (**CRC**).
 * 🌍 **Internacionalización Bilingüe (i18n)**: Soporte completo e instantáneo en **Español** e **Inglés**.
-* 📱 **PWA (Progressive Web App)**: Instalable en dispositivos móviles y de escritorio con service worker offline.
+* 📱 **PWA (Progressive Web App)**: Instalable en dispositivos móviles y de escritorio con soporte responsivo.
+* 📑 **Auditoría y Exportación Contable**: Generación de estados de cuenta membretados en PDF e informes en Excel (.xlsx) y CSV.
 
 ---
 
 ## 📚 Documentación Técnica Detallada
 
-Toda la arquitectura, base de datos, APIs y seguridad están documentadas a profundidad en la carpeta [`docs/`](./docs/):
+Toda la arquitectura, base de datos, APIs y manual de usuario están documentados a profundidad en la carpeta [`docs/`](./docs/):
 
 | Documento | Descripción |
 | :--- | :--- |
-| 🏛️ [**docs/ARCHITECTURE.md**](./docs/ARCHITECTURE.md) | Clean Architecture, diagramas C4 de contenedores, flujo de datos y multi-tenancy. |
-| 🛡️ [**docs/SOLID_PRINCIPLES.md**](./docs/SOLID_PRINCIPLES.md) | Detalle exhaustivo de los 5 principios SOLID en Go y TypeScript/React con ejemplos. |
+| 📘 [**docs/MANUAL_DE_USO.md**](./docs/MANUAL_DE_USO.md) | **Manual Oficial de Usuario** con capturas reales de pantalla y guías paso a paso. |
+| 🏛️ [**docs/ARCHITECTURE.md**](./docs/ARCHITECTURE.md) | Clean Architecture, C4, flujo de datos, multi-tenancy y motor de IA (Gemini). |
+| 💎 [**docs/SOLID_PRINCIPLES.md**](./docs/SOLID_PRINCIPLES.md) | Detalle exhaustivo de los 5 principios SOLID en Go y TypeScript/React con ejemplos. |
 | 📜 [**docs/decisions/**](./docs/decisions/) | Registros de Decisiones de Arquitectura (ADRs de 001 a 005). |
 | 📡 [**docs/API_REFERENCE.md**](./docs/API_REFERENCE.md) | Catálogo completo de endpoints REST, headers de autorización, payloads y códigos de error. |
 | 🗄️ [**docs/DATABASE.md**](./docs/DATABASE.md) | Diagrama ERD, esquemas SQL de PostgreSQL, tipos de datos, índices y políticas RLS. |
 | 🔐 [**docs/AUTH_AND_SECURITY.md**](./docs/AUTH_AND_SECURITY.md) | Flujos de OAuth 2.0, validación de JWT Bearer en Go, recuperación de contraseñas y CORS. |
-| 🤖 [**docs/AI_INSIGHTS.md**](./docs/AI_INSIGHTS.md) | Integración con Google Gemini (2.0/1.5 Flash), prompt engineering y caché en memoria. |
 | 🚀 [**docs/DEPLOYMENT.md**](./docs/DEPLOYMENT.md) | Guía de despliegue paso a paso en Vercel, Render y Supabase con matriz de variables. |
 
 ---
 
-## 🚀 Inicio Rápido en Local
+## ⚡ Inicio Rápido en Local
 
 ### Requisitos Previos:
 - [Node.js](https://nodejs.org/) v20 o superior
@@ -144,7 +145,7 @@ go test -v ./internal/services/...
 
 ---
 
-## 📂 Estructura del Repositorio
+## 📁 Estructura del Repositorio
 
 ```
 Fintrack/
@@ -181,15 +182,16 @@ Fintrack/
 │       ├── lib/                    # Clientes API, Supabase, Excel e i18n
 │       └── types/                  # Tipado TypeScript compartido
 │
-├── docs/                           # Documentación Técnica Integral
+├── docs/                           # Documentación Técnica Integral y Manual
 │   ├── decisions/                  # Architecture Decision Records (ADR 001 - 005)
-│   ├── ARCHITECTURE.md
-│   ├── SOLID_PRINCIPLES.md
-│   ├── API_REFERENCE.md
-│   ├── DATABASE.md
-│   ├── AUTH_AND_SECURITY.md
-│   ├── AI_INSIGHTS.md
-│   └── DEPLOYMENT.md
+│   ├── img/                        # Capturas de pantalla reales del sistema
+│   ├── MANUAL_DE_USO.md            # Manual de usuario final
+│   ├── ARCHITECTURE.md             # Arquitectura, Clean Architecture y Google Gemini
+│   ├── SOLID_PRINCIPLES.md         # Detalle de principios SOLID
+│   ├── API_REFERENCE.md            # Catálogo de endpoints REST
+│   ├── DATABASE.md                 # Modelo de datos ERD y RLS
+│   ├── AUTH_AND_SECURITY.md        # Autenticación, JWT y seguridad
+│   └── DEPLOYMENT.md               # Guía DevOps de despliegue
 │
 └── README.md                       # Documentación principal del proyecto
 ```

@@ -1,4 +1,4 @@
-# 🗄️ Esquema y Modelo de Datos - FinTrack
+# 🗄️ Esquema y Modelo de Datos — FinTrack
 
 FinTrack utiliza **PostgreSQL** alojado en **Supabase** como su motor de base de datos relacional primario, operado mediante **GORM** en el backend de Go.
 
@@ -33,26 +33,21 @@ erDiagram
         varchar biweekly_type "15_and_last_day, every_15_days"
         int billing_day "Día 1-31"
         timestamptz start_date "Inicio de vigencia"
-        timestamptz next_due_date "Próximo vencimiento indexado"
-        boolean is_active "Activo o pausado"
-        boolean auto_register "Ejecución automática"
+        timestamptz next_due_date "Próximo cobro"
+        boolean is_active "Estado"
     }
 
     RECURRING_INCOMES {
-        string id PK "rec-<UnixNano>"
+        string id PK "rec-inc-<UnixNano>"
         uuid user_id FK "Multi-tenancy"
         numeric amount "12,2 dígitos"
         varchar currency "USD, EUR, GBP, CRC"
         text description
-        varchar source "Fuente de ingreso"
-        varchar payment_method "Forma de cobro"
+        varchar source "Fuente"
+        varchar payment_method "Forma de recepción"
         varchar frequency "biweekly, monthly, etc."
-        varchar biweekly_type "15_and_last_day, every_15_days"
-        int billing_day "Día 1-31"
-        timestamptz start_date "Inicio de vigencia"
-        timestamptz next_due_date "Próximo cobro indexado"
-        boolean is_active "Activo o pausado"
-        boolean auto_register "Ejecución automática"
+        timestamptz next_due_date "Próximo depósito"
+        boolean is_active "Estado"
     }
 
     EXPENSES {
@@ -296,4 +291,3 @@ ON recurring_incomes FOR ALL
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 ```
-

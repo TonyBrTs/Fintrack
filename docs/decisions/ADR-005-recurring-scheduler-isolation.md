@@ -1,4 +1,4 @@
-﻿# ADR-005: Aislamiento del Scheduler Recurrente en el Backend (Go)
+# ADR-005: Aislamiento del Scheduler Recurrente en el Backend (Go)
 
 ## Estado
 **Aceptado**

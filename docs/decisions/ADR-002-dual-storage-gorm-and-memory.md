@@ -1,4 +1,4 @@
-﻿# ADR-002: Persistencia Híbrida Intercambiable (GORM PostgreSQL y Fallback JSON en Memoria)
+# ADR-002: Persistencia Híbrida Intercambiable (GORM PostgreSQL y Fallback JSON en Memoria)
 
 ## Estado
 **Aceptado**

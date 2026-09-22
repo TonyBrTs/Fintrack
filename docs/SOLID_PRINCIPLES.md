@@ -1,14 +1,14 @@
-﻿# 🛡️ Aplicación de Principios SOLID en FinTrack
+# 🏛️ Aplicación de Principios SOLID en FinTrack
 
 Este documento detalla cómo la base de código de **FinTrack** implementa los 5 principios fundamentales de diseño orientado a objetos y arquitectura de software (**SOLID**), tanto en el **Backend (Golang)** como en el **Frontend (Next.js 16 / TypeScript / React 19)**, asegurando un sistema desacoplado, testeable y fácilmente extensible.
 
 ---
 
-# 🔷 PARTE I: Principios SOLID en el Backend (Golang)
+# ⚙️ PARTE I: Principios SOLID en el Backend (Golang)
 
 ---
 
-## 📌 1. S - Single Responsibility Principle (Principio de Responsabilidad Única)
+## 🎯 1. S — Single Responsibility Principle (Principio de Responsabilidad Única)
 
 > *"Una clase o módulo debe tener una sola razón para cambiar."*
 
@@ -36,7 +36,7 @@ Cada componente tiene **una única responsabilidad bien delimitada**:
 
 ---
 
-## 🔓 2. O - Open/Closed Principle (Principio de Abierto/Cerrado)
+## 🔓 2. O — Open/Closed Principle (Principio de Abierto/Cerrado)
 
 > *"Las entidades de software deben estar abiertas para su extensión, pero cerradas para su modificación."*
 
@@ -59,7 +59,7 @@ type ExpenseRepository interface {
 
 ---
 
-## 🔄 3. L - Liskov Substitution Principle (Principio de Sustitución de Liskov)
+## 🔄 3. L — Liskov Substitution Principle (Principio de Sustitución de Liskov)
 
 > *"Los objetos de un programa deben ser reemplazables por instancias de sus subtipos sin alterar la corrección del programa."*
 
@@ -87,7 +87,7 @@ Ninguna regla de negocio en `ExpenseService` necesita saber si los datos vienen 
 
 ---
 
-## ✂️ 4. I - Interface Segregation Principle (Principio de Segregación de Interfaces)
+## 🧩 4. I — Interface Segregation Principle (Principio de Segregación de Interfaces)
 
 > *"Los clientes no deben verse obligados a depender de interfaces que no utilizan."*
 
@@ -112,7 +112,7 @@ type goalService struct {
 
 ---
 
-## 🔌 5. D - Dependency Inversion Principle (Principio de Inversión de Dependencias)
+## 🔄 5. D — Dependency Inversion Principle (Principio de Inversión de Dependencias)
 
 > *"Los módulos de alto nivel no deben depender de los módulos de bajo nivel. Ambos deben depender de abstracciones. Las abstracciones no deben depender de los detalles; los detalles deben depender de las abstracciones."*
 
@@ -170,11 +170,11 @@ func TestExpenseService_CreateAndGet(t *testing.T) {
 
 ---
 
-# 🔶 PARTE II: Principios SOLID en el Frontend (Next.js 16 / TypeScript / React 19)
+# 💻 PARTE II: Principios SOLID en el Frontend (Next.js 16 / TypeScript / React 19)
 
 ---
 
-## 📌 1. S - Single Responsibility Principle en Frontend
+## 🎯 1. S — Single Responsibility Principle en Frontend
 
 ### ❌ Estado Previo
 Los componentes de página (`app/expenses/page.tsx`, `app/goals/page.tsx`) y modales realizaban peticiones directas vía `fetch`, concatenaban URLs a mano (`/api/recurring-expenses/sync?client_date=...`), parseaban JSON y gestionaban toasts. Tenían múltiples razones para cambiar: cambios de diseño UI, cambios de URLs o cambios en la serialización de datos.
@@ -199,15 +199,15 @@ if (res.ok) {
 
 ---
 
-## 🔓 2. O - Open/Closed Principle en Frontend
+## 🔓 2. O — Open/Closed Principle en Frontend
 
 ### ✅ Estrategia de Exportación y Formatters
-- El módulo `excelExport.ts` y los utilitarios de formateo están diseñados para extenderse con nuevas hojas de cálculo, columnas o formatos (como CSV o futuros PDFs) sin modificar los componentes del Dashboard ni de Reportes.
+- El módulo `excelExport.ts` y los utilitarios de formateo están diseñados para extenderse con nuevas hojas de cálculo, columnas o formatos (como CSV o PDFs) sin modificar los componentes del Dashboard ni de Reportes.
 - El sistema de íconos (`AppIcons.tsx`) y paletas de categorías permite registrar nuevos paquetes de iconos o temas sin reescribir las tablas ni las tarjetas.
 
 ---
 
-## 🔄 3. L - Liskov Substitution Principle en Frontend
+## 🔄 3. L — Liskov Substitution Principle en Frontend
 
 ### ✅ Proveedores de Contexto y Componentes Base
 - Los contextos de React (`SettingsContext`, `AuthContext`) definen contratos de estado e interfaces sustituibles. En entornos de pruebas unitarias (Jest / Vitest / Playwright), cualquier proveedor puede ser sustituido por un Mock Provider que implemente exactamente la misma interfaz sin que los componentes hijos fallen.
@@ -215,7 +215,7 @@ if (res.ok) {
 
 ---
 
-## ✂️ 4. I - Interface Segregation Principle en Frontend
+## 🧩 4. I — Interface Segregation Principle en Frontend
 
 ### ✅ Tipos e Interfaces de Entrada Segregados
 En lugar de forzar a los componentes de formularios a enviar un objeto `Expense` completo con campos autogenerados por el servidor (`id`, `created_at`), se definen tipos de entrada precisos y estrechos:
@@ -232,7 +232,7 @@ Esto evita que un formulario tenga que fabricar IDs falsos o fechas de auditorí
 
 ---
 
-## 🔌 5. D - Dependency Inversion Principle en Frontend
+## 🔄 5. D — Dependency Inversion Principle en Frontend
 
 ### ✅ Inversión de Dependencias en Vistas
 - Las páginas y componentes no dependen directamente de la red ni de la implementación subyacente de `window.fetch`.

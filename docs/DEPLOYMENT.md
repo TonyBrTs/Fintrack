@@ -1,6 +1,6 @@
-# 🚀 Guía de Despliegue y DevOps - FinTrack
+# 🚀 Guía de Despliegue y DevOps — FinTrack
 
-FinTrack está preparado para un despliegue continuo y sin coste en infraestructura en la nube moderna utilizando **Vercel** (Frontend), **Render** (Backend en Go) y **Supabase** (PostgreSQL y Auth).
+FinTrack está preparado para un despliegue continuo y eficiente en infraestructura moderna en la nube utilizando **Vercel** (Frontend), **Render** (Backend en Go) y **Supabase** (PostgreSQL y Auth).
 
 ---
 
@@ -38,7 +38,7 @@ FinTrack está preparado para un despliegue continuo y sin coste en infraestruct
 
 ---
 
-## 🗄️ 3. Configuración en Supabase
+## 🔐 3. Configuración en Supabase
 
 1. **Tablas e Índices**:
    Ejecuta el script SQL documentado en [`docs/DATABASE.md`](./DATABASE.md) desde el **SQL Editor** de Supabase para crear las tablas con índices y políticas RLS.

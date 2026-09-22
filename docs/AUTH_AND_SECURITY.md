@@ -1,4 +1,4 @@
-# 🔐 Autenticación y Seguridad - FinTrack
+# 🔐 Autenticación y Seguridad — FinTrack
 
 Este documento describe la arquitectura de autenticación, autorización y seguridad implementada en FinTrack.
 
@@ -19,12 +19,12 @@ FinTrack soporta dos mecanismos de acceso mediante **Supabase Auth**:
 
 ---
 
-## 🔄 2. Flujo de Autenticación OAuth 2.0 con Google
+## 🌐 2. Flujo de Autenticación OAuth 2.0 con Google
 
 ```mermaid
 sequenceDiagram
     participant User as 👤 Usuario
-    participant React as 💻 Frontend (React)
+    participant React as 📱 Frontend (React)
     participant Google as 🌐 Google OAuth
     participant Supabase as ⚡ Supabase Auth
     participant GoAPI as 🛡️ Backend API (Go)
@@ -42,14 +42,14 @@ sequenceDiagram
 
 ---
 
-## ✉️ 3. Flujo de Recuperación de Contraseña ("Olvidé mi contraseña")
+## 🔄 3. Flujo de Recuperación de Contraseña ("Olvidé mi contraseña")
 
 ```mermaid
 sequenceDiagram
     participant User as 👤 Usuario
-    participant React as 💻 Frontend (React)
+    participant React as 📱 Frontend (React)
     participant Supabase as ⚡ Supabase Auth
-    participant Email as 📬 Correo Electrónico
+    participant Email as ✉️ Correo Electrónico
 
     User->>React: Clic en "¿Olvidaste tu contraseña?" e ingresa email
     React->>Supabase: supabase.auth.resetPasswordForEmail(email, { redirectTo: appUrl })
@@ -89,9 +89,9 @@ ctx.Set("userID", userID)
 
 ---
 
-## 🌐 5. Políticas de CORS y Protección Web
+## 🚦 5. Políticas de CORS y Protección Web
 
 El middleware `internal/middleware/cors.go` implementa:
 * **Allowlist Dinámico**: Autoriza dominios de desarrollo (`http://localhost:3000`), ramas de preview en Vercel (`*.vercel.app`) y el dominio de producción especificado en `FRONTEND_URL`.
-* **Protección contra Inyección SQL**: 100% de las consultas a base de datos utilizan sentencias parametrizadas de GORM (`db.Where("user_id = ?", userID)`), neutralizando cualquier vector de SQLi.
+* **Protección contra Inyección SQL**: El 100% de las consultas a base de datos utilizan sentencias parametrizadas de GORM (`db.Where("user_id = ?", userID)`), neutralizando vectores de SQL Injection.
 * **Encabezados Seguros**: Manejo estricto de `OPTIONS` preflight, `Access-Control-Allow-Credentials` y métodos permitidos (`GET, POST, PUT, DELETE`).

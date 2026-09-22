@@ -1,10 +1,10 @@
-﻿# 🏛️ Arquitectura del Sistema - FinTrack
+# 🏛️ Arquitectura del Sistema — FinTrack
 
-FinTrack es una plataforma de finanzas personales diseñada con **Clean Architecture** en el backend en **Go** y **Component-Driven & Service Layer Architecture** en el frontend en **Next.js 16**, garantizando alto rendimiento, desacoplamiento modular, mantenibilidad y escalabilidad.
+FinTrack es una plataforma de finanzas personales diseñada bajo los paradigmas de **Clean Architecture** en el backend en **Go** y **Component-Driven & Service Layer Architecture** en el frontend en **Next.js 16**, garantizando alto rendimiento, desacoplamiento modular, mantenibilidad y escalabilidad.
 
 ---
 
-## 📐 1. Vista de Alto Nivel (C4 - Diagrama de Contenedores)
+## 🧭 1. Vista de Alto Nivel (C4 - Diagrama de Contenedores)
 
 ```mermaid
 graph TB
@@ -16,8 +16,8 @@ graph TB
     end
 
     subgraph EdgeLayer ["Servicios Cloud & Gateway"]
-        VercelCDN["☁️ Vercel Edge Network<br/>(Hosting Frontend & Next.js Serverless)"]
-        GeminiAPI["🤖 Google Gemini 2.0/1.5 Flash<br/>(Motor de IA Financiera)"]
+        VercelCDN["▲ Vercel Edge Network<br/>(Hosting Frontend & Next.js Serverless)"]
+        GeminiAPI["✨ Google Gemini 2.0 / 1.5 Flash<br/>(Motor de IA Financiera)"]
     end
 
     subgraph BackendLayer ["Backend API (Golang / Clean Architecture)"]
@@ -60,7 +60,7 @@ El backend de FinTrack implementa el patrón de **Arquitectura Limpia (Clean Arc
 │  - Deserialización de JSON y enlace de DTOs            │
 │  - Extracción de Claims de contexto (userID)           │
 │  - Retorno de Códigos de Estado HTTP y respuestas JSON │
-└──────────────────────────┬─────────────────────────────┘
+└────────────────────────────────────────────────────────┘
                            │ (Llama a interfaces de Servicio)
                            ▼
 ┌────────────────────────────────────────────────────────┐
@@ -70,7 +70,7 @@ El backend de FinTrack implementa el patrón de **Arquitectura Limpia (Clean Arc
 │  - Orquestación de transacciones y recurrencias        │
 │  - RecurringScheduler (Background Worker)              │
 │  - Aislamiento total de infraestructura HTTP           │
-└──────────────────────────┬─────────────────────────────┘
+└────────────────────────────────────────────────────────┘
                            │ (Llama a interfaces de Repositorio)
                            ▼
 ┌────────────────────────────────────────────────────────┐
@@ -78,7 +78,7 @@ El backend de FinTrack implementa el patrón de **Arquitectura Limpia (Clean Arc
 │  - Interfaces abstractas / Contratos segregados        │
 │  - Implementación GORM (PostgreSQL en Producción)      │
 │  - Implementación Memory/JSON (Desarrollo / Offline)   │
-└──────────────────────────┬─────────────────────────────┘
+└────────────────────────────────────────────────────────┘
                            │
                            ▼
 ┌────────────────────────────────────────────────────────┐
@@ -115,7 +115,7 @@ backend/
 
 ---
 
-## 💻 3. Arquitectura del Frontend (Next.js 16 + React 19)
+## 🎨 3. Arquitectura del Frontend (Next.js 16 + React 19)
 
 El frontend está estructurado mediante una clara separación de capas para maximizar modularidad, rendimiento web y testabilidad:
 
@@ -126,7 +126,7 @@ frontend/src/
 │   ├── expenses/           # Página de gestión de egresos
 │   ├── incomes/            # Página de gestión de ingresos
 │   ├── goals/              # Página de metas de ahorro
-│   ├── reports/            # Generación y exportación de reportes Excel/CSV
+│   ├── reports/            # Generación y exportación de reportes PDF/Excel/CSV
 │   ├── layout.tsx          # Shell principal con Providers
 │   └── page.tsx            # Dashboard principal con métricas en tiempo real
 ├── components/             # Jerarquía de Componentes UI
@@ -136,13 +136,13 @@ frontend/src/
 │   ├── incomes/            # Formulario, detalles y gestores de ingresos
 │   ├── goals/              # Tarjetas de progreso y aportes a metas
 │   ├── layout/             # Header, BottomNavbar, SettingsDrawer
-│   └── ui/                 # Primitivas accesibles basadas en Radix UI
+│   └── ui/                 # Primitivas accesibles
 ├── contexts/               # Estado Global React (Auth, Currency, Language, Audio)
 ├── hooks/                  # Custom Hooks (useCategories, useSoundEffects)
 ├── services/               # Capa de Servicios desacoplada (SRP / DIP)
 │   ├── expenseService.ts   # Operaciones de gastos
 │   ├── incomeService.ts    # Operaciones de ingresos
-│   ├── goalService.ts       # Operaciones de metas
+│   ├── goalService.ts      # Operaciones de metas
 │   ├── categoryService.ts  # Operaciones de categorías
 │   ├── recurringService.ts # Operaciones de recurrencias
 │   └── index.ts            # Barrel file unificado
@@ -173,7 +173,7 @@ sequenceDiagram
     Frontend->>API: POST /api/recurring-expenses/sync?client_date=YYYY-MM-DD
     API->>DB: Procesa transacciones pendientes del ciclo
     API-->>Frontend: { processed_count: N, expenses: [...] }
-    Frontend-->>Usuario: Toast notificando registros generados
+    Frontend-->>Usuario: Notificación de registros generados
 ```
 
 ---
@@ -188,11 +188,75 @@ La seguridad de datos por usuario se garantiza en **todas las capas**:
    ```sql
    WHERE user_id = ?
    ```
-4. **Base de Datos**: PostgreSQL cuenta con políticas **RLS (Row Level Security)** que impiden que cualquier usuario lea o modifique filas de otro usuario, incluso ante errores de código en capas superiores.
+4. **Base de Datos**: PostgreSQL cuenta con políticas **RLS (Row Level Security)** que impiden que cualquier usuario lea o modifique filas de otro usuario, incluso ante eventuales errores de código en capas superiores.
 
 ---
 
-## 📜 6. Registro de Decisiones de Arquitectura (ADRs)
+## 🤖 6. Motor de Inteligencia Artificial (Google Gemini)
+
+FinTrack integra un sistema de análisis predictivo y asesoría financiera personalizada impulsado por los modelos de lenguaje de última generación de **Google Gemini**.
+
+### Arquitectura del Servicio de Insights
+El análisis no sobrecarga el backend en Go; se ejecuta como una **Route Handler Serverless** en Next.js (`frontend/src/app/api/ai/insights/route.ts`), permitiendo ejecución escalable en el edge de Vercel.
+
+```mermaid
+graph TD
+    Client[📱 Frontend FinTrack] -->|POST /api/ai/insights| NextRoute[⚡ Next.js Route Handler]
+    NextRoute --> CacheCheck{¿Modelo en Caché?}
+    CacheCheck -- Sí --> ExecuteModel[Llamada a Google Gemini API]
+    CacheCheck -- No --> DiscoverModels[Descubrir Modelos Disponibles]
+    DiscoverModels --> ExecuteModel
+    ExecuteModel --> ValidateJSON{¿JSON Válido?}
+    ValidateJSON -- Sí --> ReturnInsights[Devolver Insights al Dashboard]
+    ValidateJSON -- No / Error 404 --> FallbackCascade[Probar Siguiente Modelo en Cascada]
+    FallbackCascade --> ExecuteModel
+```
+
+### Cascada Resiliente de Modelos y Descubrimiento Dinámico
+Para evitar caídas por modelos no disponibles o cambios en la API (`v1beta`), se implementan tres niveles de resiliencia:
+1. **Descubrimiento Dinámico (`ModelService.ListModels`)**: Consulta automáticamente a Google qué modelos con soporte `generateContent` están activos para la clave de API suministrada.
+2. **Lista de Respaldo Ordenada por Rendimiento**:
+   ```typescript
+   const fallbackList = [
+     "gemini-2.0-flash",
+     "gemini-1.5-flash-latest",
+     "gemini-1.5-flash",
+     "gemini-2.5-flash",
+     "gemini-1.5-pro",
+     "gemini-pro",
+   ];
+   ```
+3. **Caché en Memoria (`cachedWorkingModel`)**: Una vez que un modelo responde con éxito, se almacena en memoria para que las consultas subsecuentes no pierdan tiempo en sondeos, reduciendo la latencia a menos de 1 segundo.
+
+### Prompt Engineering y Salida Estructurada
+El prompt instruye al modelo a comportarse como un asesor financiero certificado, exigiendo respuestas estrictamente en formato JSON:
+```typescript
+const prompt = `Actúa como un asesor financiero certificado y analiza estos datos financieros:
+- Moneda activa: ${currency}
+- Total Ingresos: ${totalIncome}
+- Total Gastos: ${totalExpenses}
+- Tasa de Ahorro: ${savingsRate}%
+- Desglose por categorías y metas activas.
+
+Genera de 3 a 5 recomendaciones accionables en formato JSON válido:
+[
+  {
+    "id": "string",
+    "type": "tip" | "warning" | "achievement" | "opportunity",
+    "title": "string",
+    "description": "string",
+    "category": "string",
+    "priority": "high" | "medium" | "low"
+  }
+]`;
+```
+
+### Sanitización y Fallback Heurístico Local
+Si la cuota de la API de Google se agota o se pierde la conexión externa, el componente `FinancialInsights.tsx` activa un motor heurístico local que calcula alertas de presupuesto, tasa de ahorro y progreso de metas sin requerir conexión externa.
+
+---
+
+## 📜 7. Registro de Decisiones de Arquitectura (ADRs)
 
 Las decisiones de diseño arquitectónico se documentan formalmente bajo el estándar ADR en [`docs/decisions/`](./decisions/):
 
