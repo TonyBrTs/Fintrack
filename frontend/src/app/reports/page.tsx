@@ -10,6 +10,7 @@ import type { Expense, Income, Goal } from "@/types/index";
 import type { DateRange } from "react-day-picker";
 import { PageLoadingState } from "@/components/ui/PageLoadingState";
 import { exportFinancialReportExcel } from "@/lib/excelExport";
+import { formatDateDDMMYYYY } from "@/lib/utils";
 import { toast } from "sonner";
 import { AlertCircle, RotateCcw } from "lucide-react";
 import {
@@ -223,18 +224,12 @@ export default function ReportsPage() {
         ? "Histórico Completo (Todo el Registro)"
         : "All Historical Records";
     }
-    const fmt = (d: Date) =>
-      d.toLocaleDateString(isEs ? "es-ES" : "en-US", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
 
     if (dateRange.from && dateRange.to) {
-      return `${fmt(dateRange.from)} — ${fmt(dateRange.to)}`;
+      return `${formatDateDDMMYYYY(dateRange.from)} — ${formatDateDDMMYYYY(dateRange.to)}`;
     }
     if (dateRange.from) {
-      return fmt(dateRange.from);
+      return formatDateDDMMYYYY(dateRange.from);
     }
     return isEs ? "Período Personalizado" : "Custom Period";
   }, [dateRange, isEs]);
@@ -253,26 +248,18 @@ export default function ReportsPage() {
 
   // Emission date string
   const generatedAt = useMemo(() => {
-    return new Date().toLocaleDateString(isEs ? "es-ES" : "en-US", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }, [isEs]);
+    const now = new Date();
+    const datePart = formatDateDDMMYYYY(now);
+    const timePart = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return `${datePart} ${timePart}`;
+  }, []);
 
   const handlePrint = () => {
     window.print();
   };
 
   const formatDateDisplay = (d: Date | string) => {
-    const parsed = parseLocalDate(d);
-    return parsed.toLocaleDateString(isEs ? "es-ES" : "en-US", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    return formatDateDDMMYYYY(d);
   };
 
   const translateCategory = (cat?: string) => {

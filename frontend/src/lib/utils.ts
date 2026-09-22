@@ -290,24 +290,29 @@ const MONTHS_SHORT: Record<string, string[]> = {
 };
 
 /**
- * Formats a calendar date safely into "30 set." or "Sep 30" without timezone shifting or browser locale bugs.
+ * Formats any date safely into strict "dd/mm/yyyy" format (e.g. "14/09/2026").
+ * Guaranteed 2 digits for day, 2 digits for month, and 4 digits for year.
+ * Prevents UTC timezone shifting.
+ */
+export function formatDateDDMMYYYY(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) return "";
+  const d = parseCalendarDate(dateInput);
+  if (isNaN(d.getTime())) return "";
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+/**
+ * Formats a calendar date safely into strict "dd/mm/yyyy" format.
  */
 export function formatCalendarDate(
   dateInput: string | Date | null | undefined,
-  language: string = "es",
-  includeYear: boolean = false
+  _language: string = "es",
+  _includeYear: boolean = false
 ): string {
-  if (!dateInput) return "";
-  const d = parseCalendarDate(dateInput);
-  const day = d.getDate();
-  const langKey = language === "en" ? "en" : "es";
-  const months = MONTHS_SHORT[langKey];
-  const month = months[d.getMonth()] || "";
-
-  if (langKey === "en") {
-    return includeYear ? `${month} ${day}, ${d.getFullYear()}` : `${month} ${day}`;
-  }
-  return includeYear ? `${day} ${month} ${d.getFullYear()}` : `${day} ${month}`;
+  return formatDateDDMMYYYY(dateInput);
 }
 
 /**

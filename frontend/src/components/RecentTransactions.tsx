@@ -3,7 +3,7 @@
 import { Expense, Income } from "@/types/index";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useCategories } from "@/hooks/useCategories";
-import { formatCurrency, getCategoryStyle, cn } from "@/lib/utils";
+import { formatCurrency, getCategoryStyle, cn, formatDateDDMMYYYY } from "@/lib/utils";
 import {
   Sparkles,
   ChevronLeft,
@@ -250,10 +250,7 @@ export function RecentTransactions({
                         </p>
                       </div>
                       <p className="text-[10px] text-muted-foreground/70">
-                        {new Date(tx.date).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        })}
+                        {formatDateDDMMYYYY(tx.date)}
                       </p>
                     </div>
                     <p

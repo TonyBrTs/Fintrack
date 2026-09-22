@@ -31,7 +31,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
 import { CategoryBadge } from '@/components/categories/CategoryBadge';
 import { PageLoadingState } from '@/components/ui/PageLoadingState';
-import { cn, formatCurrency, getCategoryStyle } from '@/lib/utils';
+import { cn, formatCurrency, getCategoryStyle, formatDateDDMMYYYY } from '@/lib/utils';
 import type { Expense, RecurringSyncResult } from '@/types/index';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -436,7 +436,7 @@ function ExpensesContent() {
                 >
                   <TableCell className="px-5 py-4 text-sm font-medium whitespace-nowrap text-titles dark:text-foreground">
                     <div className="flex flex-col">
-                      <span className="font-semibold">{new Date(expense.date).toLocaleDateString()}</span>
+                      <span className="font-semibold">{formatDateDDMMYYYY(expense.date)}</span>
                       <span className="text-[11px] text-muted-foreground">{expense.payment_method}</span>
                     </div>
                   </TableCell>

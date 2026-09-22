@@ -1,7 +1,7 @@
 "use client";
 
 import { Goal } from "@/types/index";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDateDDMMYYYY } from "@/lib/utils";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Target, Calendar, Trash2, Plus, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
@@ -131,11 +131,7 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
               <Calendar size={13} className="text-action shrink-0" />
               <span className="truncate">
                 {translate("goals.deadline") || "Fecha límite"}:{" "}
-                {new Date(goal.deadline).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
+                {formatDateDDMMYYYY(goal.deadline)}
               </span>
             </div>
           </div>

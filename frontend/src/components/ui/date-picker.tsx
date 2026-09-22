@@ -74,13 +74,11 @@ export function DatePicker({
   const formattedLabel = React.useMemo(() => {
     if (!selectedDate) return null;
     try {
-      return format(selectedDate, isEs ? "d 'de' MMMM, yyyy" : "PPP", {
-        locale: activeLocale,
-      });
+      return format(selectedDate, "dd/MM/yyyy");
     } catch {
       return value;
     }
-  }, [selectedDate, isEs, activeLocale, value]);
+  }, [selectedDate, value]);
 
   const defaultPlaceholder = isEs ? "Seleccionar fecha" : "Select date";
 

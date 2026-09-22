@@ -6,6 +6,7 @@ import {
   getCategoryColorBg,
   cn,
   formatCalendarDate,
+  formatDateDDMMYYYY,
   parseCalendarDate,
   formatDueDateLabel,
   formatFrequencyLabel,
@@ -625,7 +626,7 @@ export function RecurringExpensesManager({
                           </div>
                           {item.last_executed_at && (
                             <span className="text-[10px] text-muted-foreground mt-0.5">
-                              Último: {new Date(item.last_executed_at).toLocaleDateString()}
+                              Último: {formatDateDDMMYYYY(item.last_executed_at)}
                             </span>
                           )}
                         </div>

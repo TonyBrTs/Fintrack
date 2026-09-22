@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { EditExpenseModal } from "./EditExpenseModal";
 import { useState } from "react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDateDDMMYYYY } from "@/lib/utils";
 import { safeFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
@@ -169,12 +169,7 @@ export function ExpenseDetailsSheet({
                 </span>
               </div>
               <span className="font-semibold text-xs sm:text-sm text-foreground capitalize text-right">
-                {new Date(expense.date).toLocaleDateString(undefined, {
-                  weekday: "short",
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
+                {formatDateDDMMYYYY(expense.date)}
               </span>
             </div>
 

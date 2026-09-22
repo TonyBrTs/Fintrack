@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { EditIncomeModal } from "./EditIncomeModal";
 import { useState } from "react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDateDDMMYYYY } from "@/lib/utils";
 import { safeFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
@@ -166,12 +166,7 @@ export function IncomeDetailsSheet({
                 </span>
               </div>
               <span className="font-semibold text-xs sm:text-sm text-foreground capitalize text-right">
-                {new Date(income.date).toLocaleDateString(undefined, {
-                  weekday: "short",
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
+                {formatDateDDMMYYYY(income.date)}
               </span>
             </div>
 
