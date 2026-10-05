@@ -69,15 +69,11 @@ export function RegisterForm({
         ? "Por favor ingresa tu correo electrónico."
         : "Please enter your email.";
     } else if (!EMAIL_REGEX.test(email)) {
-      newErrors.email = isEs
-        ? "Formato de correo electrónico inválido."
-        : "Invalid email format.";
+      newErrors.email = isEs ? "Formato de correo electrónico inválido." : "Invalid email format.";
     }
 
     if (!password) {
-      newErrors.password = isEs
-        ? "Por favor ingresa una contraseña."
-        : "Please enter a password.";
+      newErrors.password = isEs ? "Por favor ingresa una contraseña." : "Please enter a password.";
     } else if (password.length < 6) {
       newErrors.password = isEs
         ? "La contraseña debe tener al menos 6 caracteres."
@@ -103,11 +99,7 @@ export function RegisterForm({
     setIsLoading(true);
 
     try {
-      const { error, needsEmailConfirmation } = await signUpWithEmail(
-        email,
-        password,
-        fullName
-      );
+      const { error, needsEmailConfirmation } = await signUpWithEmail(email, password, fullName);
       if (error) {
         const friendly = getFriendlyAuthError(error.message, isEs, false);
         toast.error(friendly.message);
@@ -165,8 +157,7 @@ export function RegisterForm({
               value={fullName}
               onChange={(e) => {
                 setFullName(e.target.value);
-                if (errors.fullName)
-                  setErrors((prev) => ({ ...prev, fullName: undefined }));
+                if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
               }}
               className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 shadow-2xs ${
                 errors.fullName
@@ -202,8 +193,7 @@ export function RegisterForm({
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                if (errors.email)
-                  setErrors((prev) => ({ ...prev, email: undefined }));
+                if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
               }}
               className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 shadow-2xs ${
                 errors.email
@@ -236,8 +226,7 @@ export function RegisterForm({
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
-                if (errors.password)
-                  setErrors((prev) => ({ ...prev, password: undefined }));
+                if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
               }}
               className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-3.5 pr-10 outline-none transition duration-200 shadow-2xs ${
                 errors.password
@@ -338,11 +327,7 @@ export function RegisterForm({
       </div>
 
       {/* Google OAuth Button */}
-      <GoogleAuthButton
-        isLoading={isGoogleLoading}
-        onClick={handleGoogleSignIn}
-        isEs={isEs}
-      />
+      <GoogleAuthButton isLoading={isGoogleLoading} onClick={handleGoogleSignIn} isEs={isEs} />
 
       {/* Toggle to Login */}
       <div className="text-center pt-2">

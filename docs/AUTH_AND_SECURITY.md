@@ -92,6 +92,7 @@ ctx.Set("userID", userID)
 ## 🚦 5. Políticas de CORS y Protección Web
 
 El middleware `internal/middleware/cors.go` implementa:
-* **Allowlist Dinámico**: Autoriza dominios de desarrollo (`http://localhost:3000`), ramas de preview en Vercel (`*.vercel.app`) y el dominio de producción especificado en `FRONTEND_URL`.
-* **Protección contra Inyección SQL**: El 100% de las consultas a base de datos utilizan sentencias parametrizadas de GORM (`db.Where("user_id = ?", userID)`), neutralizando vectores de SQL Injection.
-* **Encabezados Seguros**: Manejo estricto de `OPTIONS` preflight, `Access-Control-Allow-Credentials` y métodos permitidos (`GET, POST, PUT, DELETE`).
+
+- **Allowlist Dinámico**: Autoriza dominios de desarrollo (`http://localhost:3000`), ramas de preview en Vercel (`*.vercel.app`) y el dominio de producción especificado en `FRONTEND_URL`.
+- **Protección contra Inyección SQL**: El 100% de las consultas a base de datos utilizan sentencias parametrizadas de GORM (`db.Where("user_id = ?", userID)`), neutralizando vectores de SQL Injection.
+- **Encabezados Seguros**: Manejo estricto de `OPTIONS` preflight, `Access-Control-Allow-Credentials` y métodos permitidos (`GET, POST, PUT, DELETE`).

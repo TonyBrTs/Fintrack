@@ -18,22 +18,25 @@ Conectada directamente al backend de Go en producción (`https://fintrack-ihwb.o
 ## Cómo ejecutar la app en tu teléfono (Desarrollo)
 
 1. Sitúate en la carpeta `mobile`:
+
    ```bash
    cd mobile
    ```
 
 2. Instala dependencias si es la primera vez:
+
    ```bash
    npm install
    ```
 
 3. Inicia el servidor Metro:
+
    ```bash
    npx expo start
    ```
 
 4. **Conecta tu teléfono**:
-   - **Android**: Abre **Expo Go** y selecciona *"Scan QR code"*.
+   - **Android**: Abre **Expo Go** y selecciona _"Scan QR code"_.
    - **iOS**: Abre la cámara nativa de tu iPhone y escanea el código QR de la terminal.
 
 ---
@@ -43,11 +46,13 @@ Conectada directamente al backend de Go en producción (`https://fintrack-ihwb.o
 Para generar un instalable nativo `.apk` descargable mediante **EAS Build**:
 
 1. Instala el CLI de EAS globalmente:
+
    ```bash
    npm install -g eas-cli
    ```
 
 2. Inicia sesión con tu cuenta de Expo:
+
    ```bash
    eas login
    ```

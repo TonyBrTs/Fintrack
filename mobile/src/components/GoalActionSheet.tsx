@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   Animated,
   Pressable,
   ActivityIndicator,
-} from 'react-native';
+} from "react-native";
 import {
   Target,
   CheckCircle2,
@@ -16,9 +16,9 @@ import {
   Edit2,
   Trash2,
   AlertTriangle,
-} from 'lucide-react-native';
-import { Goal } from '../types';
-import { getCategoryTheme } from '../lib/constants';
+} from "lucide-react-native";
+import { Goal } from "../types";
+import { getCategoryTheme } from "../lib/constants";
 
 export interface GoalActionSheetProps {
   visible: boolean;
@@ -102,12 +102,7 @@ export const GoalActionSheet: React.FC<GoalActionSheetProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <View className="flex-1 justify-end">
         <Animated.View
           className="absolute inset-0 bg-black"
@@ -129,7 +124,10 @@ export const GoalActionSheet: React.FC<GoalActionSheetProps> = ({
 
           {/* Resumen de la meta */}
           {goal && (
-            <View className="bg-card p-3 rounded-2xl border mb-4" style={{ borderColor: theme.border }}>
+            <View
+              className="bg-card p-3 rounded-2xl border mb-4"
+              style={{ borderColor: theme.border }}
+            >
               <View className="flex-row items-center gap-2.5">
                 <View
                   className="w-10 h-10 rounded-xl justify-center items-center border"
@@ -146,7 +144,8 @@ export const GoalActionSheet: React.FC<GoalActionSheetProps> = ({
                     {goal.title}
                   </Text>
                   <Text className="text-xs font-semibold mt-0.5" style={{ color: theme.badgeText }}>
-                    {formatCurrency(goal.current_amount)} de {formatCurrency(goal.target_amount)} ({progressPercent.toFixed(0)}%)
+                    {formatCurrency(goal.current_amount)} de {formatCurrency(goal.target_amount)} (
+                    {progressPercent.toFixed(0)}%)
                   </Text>
                 </View>
               </View>
@@ -165,12 +164,17 @@ export const GoalActionSheet: React.FC<GoalActionSheetProps> = ({
                   if (goal) onContribute(goal);
                 }}
               >
-                <View className="w-9 h-9 rounded-xl justify-center items-center" style={{ backgroundColor: theme.lightBg }}>
+                <View
+                  className="w-9 h-9 rounded-xl justify-center items-center"
+                  style={{ backgroundColor: theme.lightBg }}
+                >
                   <Coins size={18} color={theme.primary} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm font-bold text-white">Aportar a la Meta</Text>
-                  <Text className="text-[11px] text-slate-400 mt-0.5">Añadir fondos al acumulado actual</Text>
+                  <Text className="text-[11px] text-slate-400 mt-0.5">
+                    Añadir fondos al acumulado actual
+                  </Text>
                 </View>
                 <ChevronRight size={16} color="#64748b" />
               </TouchableOpacity>
@@ -189,7 +193,9 @@ export const GoalActionSheet: React.FC<GoalActionSheetProps> = ({
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm font-bold text-white">Editar Meta</Text>
-                  <Text className="text-[11px] text-slate-400 mt-0.5">Modificar título, monto objetivo o fecha</Text>
+                  <Text className="text-[11px] text-slate-400 mt-0.5">
+                    Modificar título, monto objetivo o fecha
+                  </Text>
                 </View>
                 <ChevronRight size={16} color="#64748b" />
               </TouchableOpacity>
@@ -205,7 +211,9 @@ export const GoalActionSheet: React.FC<GoalActionSheetProps> = ({
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm font-bold text-rose-400">Eliminar Meta</Text>
-                  <Text className="text-[11px] text-slate-400 mt-0.5">Quitar este objetivo de tu plan</Text>
+                  <Text className="text-[11px] text-slate-400 mt-0.5">
+                    Quitar este objetivo de tu plan
+                  </Text>
                 </View>
                 <ChevronRight size={16} color="#ef4444" />
               </TouchableOpacity>
@@ -215,7 +223,7 @@ export const GoalActionSheet: React.FC<GoalActionSheetProps> = ({
                 activeOpacity={0.8}
                 onPress={onClose}
               >
-                <Text className="text-sm font-bold text-slate-400">{t('common.cancel')}</Text>
+                <Text className="text-sm font-bold text-slate-400">{t("common.cancel")}</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -225,7 +233,8 @@ export const GoalActionSheet: React.FC<GoalActionSheetProps> = ({
               </View>
               <Text className="text-lg font-bold text-white text-center">¿Eliminar esta meta?</Text>
               <Text className="text-xs text-slate-400 text-center leading-4 px-3">
-                Se eliminará permanentemente &quot;{goal?.title}&quot;. Esta acción no se puede deshacer.
+                Se eliminará permanentemente &quot;{goal?.title}&quot;. Esta acción no se puede
+                deshacer.
               </Text>
 
               <View className="flex-row gap-3 w-full mt-2">
@@ -235,7 +244,7 @@ export const GoalActionSheet: React.FC<GoalActionSheetProps> = ({
                   disabled={deleting}
                   activeOpacity={0.8}
                 >
-                  <Text className="text-sm font-bold text-slate-300">{t('common.cancel')}</Text>
+                  <Text className="text-sm font-bold text-slate-300">{t("common.cancel")}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity

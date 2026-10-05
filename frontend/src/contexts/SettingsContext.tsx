@@ -22,9 +22,7 @@ interface SettingsContextType {
   closeSettings: () => void;
 }
 
-const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined,
-);
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 const currencySymbols: Record<Currency, string> = {
   USD: "$",
@@ -33,9 +31,7 @@ const currencySymbols: Record<Currency, string> = {
   CRC: "₡",
 };
 
-export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>("es");
   const [currency, setCurrency] = useState<Currency>("CRC");
   const [iconSource, setIconSource] = useState<IconSource>("phosphor");
@@ -116,11 +112,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     closeSettings,
   };
 
-  return (
-    <SettingsContext.Provider value={value}>
-      {children}
-    </SettingsContext.Provider>
-  );
+  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 
 export const useSettings = () => {

@@ -6,17 +6,15 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
-import {
-  Sun,
-  Moon,
-  LogOut,
-  User as UserIcon,
-  ShieldCheck,
-} from "lucide-react";
+import { Sun, Moon, LogOut, User as UserIcon, ShieldCheck } from "lucide-react";
 
 const emptySubscribe = () => () => {};
 function useHydrated() {
-  return useSyncExternalStore(emptySubscribe, () => true, () => false);
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 }
 
 export function SettingsDrawer() {
@@ -37,9 +35,7 @@ export function SettingsDrawer() {
 
   const isEs = language === "es";
 
-  const userInitials = user?.email
-    ? user.email.slice(0, 2).toUpperCase()
-    : "FT";
+  const userInitials = user?.email ? user.email.slice(0, 2).toUpperCase() : "FT";
 
   const displayName =
     (user?.user_metadata?.full_name as string) ||
@@ -55,7 +51,10 @@ export function SettingsDrawer() {
     <Sheet
       isOpen={isSettingsOpen}
       onClose={closeSettings}
-      title={translate("settingsDrawer.title") || (isEs ? "Ajustes y Configuración" : "Settings & Preferences")}
+      title={
+        translate("settingsDrawer.title") ||
+        (isEs ? "Ajustes y Configuración" : "Settings & Preferences")
+      }
     >
       <div className="flex flex-col gap-5 pb-8">
         {/* User Profile Card */}
@@ -64,11 +63,7 @@ export function SettingsDrawer() {
             <div className="flex items-center gap-3 min-w-0">
               <Avatar size="lg" className="ring-2 ring-blue-500/30 shrink-0">
                 {avatarUrl && (
-                  <AvatarImage
-                    src={avatarUrl}
-                    alt={displayName}
-                    referrerPolicy="no-referrer"
-                  />
+                  <AvatarImage src={avatarUrl} alt={displayName} referrerPolicy="no-referrer" />
                 )}
                 <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm">
                   {userInitials}
@@ -76,14 +71,10 @@ export function SettingsDrawer() {
               </Avatar>
               <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-foreground font-bold text-sm truncate">
-                    {displayName}
-                  </span>
+                  <span className="text-foreground font-bold text-sm truncate">{displayName}</span>
                   <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                 </div>
-                <span className="text-muted-foreground text-xs truncate">
-                  {user.email}
-                </span>
+                <span className="text-muted-foreground text-xs truncate">{user.email}</span>
               </div>
             </div>
             <button
@@ -119,8 +110,6 @@ export function SettingsDrawer() {
             </button>
           </div>
         )}
-
-
 
         {/* Visual Theme Selection */}
         <div className="space-y-2">
@@ -222,11 +211,7 @@ export function SettingsDrawer() {
               return (
                 <button
                   key={style.id}
-                  onClick={() =>
-                    setIconSource(
-                      style.id as "phosphor" | "tabler" | "lucide",
-                    )
-                  }
+                  onClick={() => setIconSource(style.id as "phosphor" | "tabler" | "lucide")}
                   className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
                     isSelected
                       ? "bg-action/10 dark:bg-blue-500/15 border-action/40 dark:border-blue-500/40 text-action dark:text-blue-400 shadow-xs"
@@ -246,7 +231,10 @@ export function SettingsDrawer() {
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
             <span>FinTrack v2.0 • Supabase Auth</span>
           </div>
-          <span>{translate("settingsDrawer.cloudSafe") || (isEs ? "Protegido en la Nube" : "Cloud Protected")}</span>
+          <span>
+            {translate("settingsDrawer.cloudSafe") ||
+              (isEs ? "Protegido en la Nube" : "Cloud Protected")}
+          </span>
         </div>
       </div>
     </Sheet>

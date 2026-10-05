@@ -3,26 +3,12 @@
 import React from "react";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatCurrency } from "@/lib/utils";
-import {
-  Calendar as CalendarIcon,
-  ChevronDown,
-  RotateCcw,
-  Check,
-} from "lucide-react";
+import { Calendar as CalendarIcon, ChevronDown, RotateCcw, Check } from "lucide-react";
 
 export type PeriodPreset =
-  | "this_month"
-  | "last_month"
-  | "last_30_days"
-  | "this_year"
-  | "all"
-  | "custom";
+  "this_month" | "last_month" | "last_30_days" | "this_year" | "all" | "custom";
 
 interface ReportFiltersProps {
   preset: PeriodPreset;
@@ -171,9 +157,7 @@ export function ReportFilters({
                 <CalendarIcon
                   size={14}
                   className={
-                    preset === "custom"
-                      ? "text-white"
-                      : "text-blue-600 dark:text-blue-400"
+                    preset === "custom" ? "text-white" : "text-blue-600 dark:text-blue-400"
                   }
                 />
                 <span className="truncate">{periodLabel}</span>
@@ -242,9 +226,7 @@ export function ReportFilters({
         >
           <span
             className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
-              includeSummary
-                ? "bg-blue-600 text-white"
-                : "border border-muted-foreground/40"
+              includeSummary ? "bg-blue-600 text-white" : "border border-muted-foreground/40"
             }`}
           >
             {includeSummary && <Check size={11} strokeWidth={3} />}
@@ -264,16 +246,13 @@ export function ReportFilters({
         >
           <span
             className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
-              includeExpensesList
-                ? "bg-rose-600 text-white"
-                : "border border-muted-foreground/40"
+              includeExpensesList ? "bg-rose-600 text-white" : "border border-muted-foreground/40"
             }`}
           >
             {includeExpensesList && <Check size={11} strokeWidth={3} />}
           </span>
           <span>
-            {isEs ? "Detalle de Cada Gasto" : "Every Expense"} (
-            {filteredExpensesCount})
+            {isEs ? "Detalle de Cada Gasto" : "Every Expense"} ({filteredExpensesCount})
           </span>
         </button>
 
@@ -289,16 +268,13 @@ export function ReportFilters({
         >
           <span
             className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
-              includeIncomesList
-                ? "bg-emerald-600 text-white"
-                : "border border-muted-foreground/40"
+              includeIncomesList ? "bg-emerald-600 text-white" : "border border-muted-foreground/40"
             }`}
           >
             {includeIncomesList && <Check size={11} strokeWidth={3} />}
           </span>
           <span>
-            {isEs ? "Detalle de Cada Ingreso" : "Every Income"} (
-            {filteredIncomesCount})
+            {isEs ? "Detalle de Cada Ingreso" : "Every Income"} ({filteredIncomesCount})
           </span>
         </button>
 
@@ -314,9 +290,7 @@ export function ReportFilters({
         >
           <span
             className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
-              includeGoals
-                ? "bg-amber-600 text-white"
-                : "border border-muted-foreground/40"
+              includeGoals ? "bg-amber-600 text-white" : "border border-muted-foreground/40"
             }`}
           >
             {includeGoals && <Check size={11} strokeWidth={3} />}

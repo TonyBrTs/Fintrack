@@ -1,14 +1,8 @@
-import React, { useRef } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-  Platform,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Home, ArrowLeftRight, Plus, BarChart3, Target } from 'lucide-react-native';
-import { useSettings } from '../context/SettingsContext';
+import React, { useRef } from "react";
+import { View, Text, TouchableOpacity, Animated, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Home, ArrowLeftRight, Plus, BarChart3, Target } from "lucide-react-native";
+import { useSettings } from "../context/SettingsContext";
 
 interface CustomTabBarProps {
   state: any;
@@ -25,7 +19,7 @@ export const CustomTabBar: React.FC<CustomTabBarProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { t } = useSettings();
-  const bottomPadding = Math.max(insets.bottom, Platform.OS === 'android' ? 24 : 14);
+  const bottomPadding = Math.max(insets.bottom, Platform.OS === "android" ? 24 : 14);
 
   // Escalas animadas para cada una de las 5 pestañas (simétricas con '+' en el centro)
   const scales = [
@@ -56,16 +50,16 @@ export const CustomTabBar: React.FC<CustomTabBarProps> = ({
 
   const getLocalizedLabel = (name: string) => {
     switch (name) {
-      case 'Inicio':
-        return t('nav.summary');
-      case 'Movimientos':
-        return t('nav.transactions');
-      case 'Nuevo':
-        return t('nav.new');
-      case 'Reportes':
-        return t('nav.reports');
-      case 'Metas':
-        return t('nav.goals');
+      case "Inicio":
+        return t("nav.summary");
+      case "Movimientos":
+        return t("nav.transactions");
+      case "Nuevo":
+        return t("nav.new");
+      case "Reportes":
+        return t("nav.reports");
+      case "Metas":
+        return t("nav.goals");
       default:
         return name;
     }
@@ -78,7 +72,7 @@ export const CustomTabBar: React.FC<CustomTabBarProps> = ({
     >
       {state.routes.map((route: any, index: number) => {
         const isFocused = state.index === index;
-        const isCenterButton = route.name === 'Nuevo';
+        const isCenterButton = route.name === "Nuevo";
 
         const onPress = () => {
           animatePress(index);
@@ -89,7 +83,7 @@ export const CustomTabBar: React.FC<CustomTabBarProps> = ({
           }
 
           const event = navigation.emit({
-            type: 'tabPress',
+            type: "tabPress",
             target: route.key,
             canPreventDefault: true,
           });
@@ -119,17 +113,17 @@ export const CustomTabBar: React.FC<CustomTabBarProps> = ({
         }
 
         const getIcon = () => {
-          const color = isFocused ? '#ffffff' : '#71717a';
+          const color = isFocused ? "#ffffff" : "#71717a";
           const strokeWidth = isFocused ? 2.5 : 1.8;
 
           switch (route.name) {
-            case 'Inicio':
+            case "Inicio":
               return <Home size={22} color={color} strokeWidth={strokeWidth} />;
-            case 'Movimientos':
+            case "Movimientos":
               return <ArrowLeftRight size={22} color={color} strokeWidth={strokeWidth} />;
-            case 'Reportes':
+            case "Reportes":
               return <BarChart3 size={22} color={color} strokeWidth={strokeWidth} />;
-            case 'Metas':
+            case "Metas":
               return <Target size={22} color={color} strokeWidth={strokeWidth} />;
             default:
               return <Home size={22} color={color} strokeWidth={strokeWidth} />;
@@ -154,7 +148,7 @@ export const CustomTabBar: React.FC<CustomTabBarProps> = ({
 
             <Text
               className={`text-[9.5px] mt-[3px] tracking-tight ${
-                isFocused ? 'text-white font-bold' : 'text-zinc-500 font-semibold'
+                isFocused ? "text-white font-bold" : "text-zinc-500 font-semibold"
               }`}
               numberOfLines={1}
             >

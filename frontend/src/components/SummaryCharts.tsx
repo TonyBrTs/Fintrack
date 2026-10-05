@@ -30,11 +30,7 @@ interface ChartDataItem {
   value: number;
 }
 
-export function SummaryCharts({
-  expenses,
-  incomes,
-  currentMonthExpenses,
-}: SummaryChartsProps) {
+export function SummaryCharts({ expenses, incomes, currentMonthExpenses }: SummaryChartsProps) {
   const { translate, currencySymbol } = useSettings();
   const { categories } = useCategories("expense");
 
@@ -86,10 +82,7 @@ export function SummaryCharts({
     }
   });
 
-  const totalExpenseAmount = expensesForPie.reduce(
-    (acc, curr) => acc + curr.amount,
-    0,
-  );
+  const totalExpenseAmount = expensesForPie.reduce((acc, curr) => acc + curr.amount, 0);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -129,12 +122,7 @@ export function SummaryCharts({
                 >
                   {categoryData.map((entry: ChartDataItem, index: number) => {
                     const style = getCategoryStyle(entry.name, categories);
-                    return (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={style.hex}
-                      />
-                    );
+                    return <Cell key={`cell-${index}`} fill={style.hex} />;
                   })}
                 </Pie>
                 <Tooltip
@@ -199,10 +187,7 @@ export function SummaryCharts({
 
         <div className="h-[260px] sm:h-[300px] w-full min-w-0 min-h-[260px] grow">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={260}>
-            <BarChart
-              data={monthlyData}
-              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-            >
+            <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}

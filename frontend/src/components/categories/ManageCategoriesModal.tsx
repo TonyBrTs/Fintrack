@@ -121,8 +121,12 @@ export function ManageCategoriesModal({
                       className="flex items-center justify-between p-3 rounded-xl bg-secondary/40 border border-border/60 hover:bg-secondary/70 transition-colors"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span className={`w-3.5 h-3.5 rounded-full ${getCategoryColorBg(cat.color)} shrink-0`} />
-                        <span className="text-sm font-semibold text-foreground truncate">{cat.name}</span>
+                        <span
+                          className={`w-3.5 h-3.5 rounded-full ${getCategoryColorBg(cat.color)} shrink-0`}
+                        />
+                        <span className="text-sm font-semibold text-foreground truncate">
+                          {cat.name}
+                        </span>
                       </div>
 
                       <button
@@ -153,7 +157,12 @@ export function ManageCategoriesModal({
                     className="flex items-center justify-between p-2.5 rounded-xl bg-secondary/20 border border-border/40 text-xs font-medium text-muted-foreground"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", getCategoryColorBg(cat.color || cat.name))} />
+                      <span
+                        className={cn(
+                          "w-2.5 h-2.5 rounded-full shrink-0",
+                          getCategoryColorBg(cat.color || cat.name)
+                        )}
+                      />
                       <span className="truncate">{cat.name}</span>
                     </div>
                     <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground font-semibold shrink-0 ml-1.5">
@@ -190,7 +199,11 @@ export function ManageCategoriesModal({
                   Categoría en uso
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-                  La categoría <strong className="text-foreground">&ldquo;{inUseConflict.category.name}&rdquo;</strong> está asignada a{" "}
+                  La categoría{" "}
+                  <strong className="text-foreground">
+                    &ldquo;{inUseConflict.category.name}&rdquo;
+                  </strong>{" "}
+                  está asignada a{" "}
                   <strong className="text-amber-600 dark:text-amber-400 font-bold">
                     {inUseConflict.count} transacción(es)
                   </strong>
@@ -200,8 +213,9 @@ export function ManageCategoriesModal({
             </div>
 
             <p className="text-xs text-muted-foreground bg-secondary/40 p-3 rounded-xl border border-border/60 mt-2">
-              Para no dejar registros huérfanos, puedes reasignar automáticamente esas transacciones a la categoría{" "}
-              <strong className="text-foreground">&ldquo;Otros&rdquo;</strong> antes de borrarla.
+              Para no dejar registros huérfanos, puedes reasignar automáticamente esas transacciones
+              a la categoría <strong className="text-foreground">&ldquo;Otros&rdquo;</strong> antes
+              de borrarla.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-4 border-t border-border/40">

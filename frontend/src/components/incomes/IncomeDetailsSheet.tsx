@@ -57,9 +57,7 @@ export function IncomeDetailsSheet({
 
       if (!res.ok) {
         toast.error(
-          res.error ||
-            translate("income.details.deleteError") ||
-            "Error al eliminar el ingreso"
+          res.error || translate("income.details.deleteError") || "Error al eliminar el ingreso"
         );
         return;
       }
@@ -68,9 +66,7 @@ export function IncomeDetailsSheet({
       onSuccess?.();
       onClose();
     } catch {
-      toast.error(
-        translate("income.details.deleteError") || "Error al eliminar el ingreso"
-      );
+      toast.error(translate("income.details.deleteError") || "Error al eliminar el ingreso");
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
@@ -92,11 +88,7 @@ export function IncomeDetailsSheet({
 
   return (
     <>
-      <Sheet
-        isOpen={isOpen}
-        onClose={onClose}
-        title={translate("income.details.title")}
-      >
+      <Sheet isOpen={isOpen} onClose={onClose} title={translate("income.details.title")}>
         <div className="space-y-6 pb-6">
           {/* Hero Receipt Section */}
           <div className="relative flex flex-col items-center justify-center p-6 bg-gradient-to-b from-emerald-500/10 via-emerald-500/5 to-transparent dark:from-emerald-500/15 dark:via-emerald-500/5 rounded-3xl border border-emerald-500/20 text-center overflow-hidden">
@@ -122,9 +114,7 @@ export function IncomeDetailsSheet({
                 + {currencySymbol}
                 {formatCurrency(income.amount)}
               </span>
-              <span className="text-xs font-bold text-muted-foreground uppercase">
-                {currency}
-              </span>
+              <span className="text-xs font-bold text-muted-foreground uppercase">{currency}</span>
             </div>
 
             <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">

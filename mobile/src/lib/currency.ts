@@ -1,17 +1,17 @@
-import { Currency } from '../types';
+import { Currency } from "../types";
 
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-  CRC: '₡',
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  CRC: "₡",
 };
 
 export const CURRENCY_NAMES: Record<Currency, string> = {
-  USD: 'Dólar Estadounidense ($)',
-  EUR: 'Euro (€)',
-  GBP: 'Libra Esterlina (£)',
-  CRC: 'Colón Costarricense (₡)',
+  USD: "Dólar Estadounidense ($)",
+  EUR: "Euro (€)",
+  GBP: "Libra Esterlina (£)",
+  CRC: "Colón Costarricense (₡)",
 };
 
 /**

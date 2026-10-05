@@ -1,12 +1,6 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Pressable,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React from "react";
+import { View, Text, TouchableOpacity, Modal, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Play,
   Edit2,
@@ -16,13 +10,13 @@ import {
   ArrowDownRight,
   ChevronRight,
   AlertTriangle,
-} from 'lucide-react-native';
-import { RecurringTransaction } from '../types';
+} from "lucide-react-native";
+import { RecurringTransaction } from "../types";
 
 export interface RecurringActionSheetProps {
   visible: boolean;
   item: RecurringTransaction | null;
-  tab: 'expenses' | 'incomes';
+  tab: "expenses" | "incomes";
   confirmDeleteSheet: boolean;
   deletingSheet: boolean;
   onClose: () => void;
@@ -55,12 +49,7 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
   if (!visible || !item) return null;
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 justify-end">
         <Pressable className="absolute inset-0 bg-black/75" onPress={onClose} />
         <View
@@ -74,20 +63,20 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
             <View className="flex-row items-center justify-between">
               <View
                 className={`flex-row items-center gap-1 px-2 py-0.5 rounded-md ${
-                  tab === 'incomes' ? 'bg-emerald-500/15' : 'bg-rose-500/15'
+                  tab === "incomes" ? "bg-emerald-500/15" : "bg-rose-500/15"
                 }`}
               >
-                {tab === 'incomes' ? (
+                {tab === "incomes" ? (
                   <ArrowUpRight size={14} color="#10b981" />
                 ) : (
                   <ArrowDownRight size={14} color="#f43f5e" />
                 )}
                 <Text
                   className={`text-[11px] font-bold ${
-                    tab === 'incomes' ? 'text-emerald-400' : 'text-rose-400'
+                    tab === "incomes" ? "text-emerald-400" : "text-rose-400"
                   }`}
                 >
-                  {tab === 'incomes' ? 'Ingreso Fijo' : 'Gasto Fijo'}
+                  {tab === "incomes" ? "Ingreso Fijo" : "Gasto Fijo"}
                 </Text>
               </View>
               <View className="flex-row items-center gap-1 bg-indigo-500/15 px-2 py-0.5 rounded-md">
@@ -100,10 +89,11 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
 
             <Text
               className={`text-2xl font-black ${
-                tab === 'incomes' ? 'text-emerald-500' : 'text-rose-500'
+                tab === "incomes" ? "text-emerald-500" : "text-rose-500"
               }`}
             >
-              {tab === 'incomes' ? '+' : '-'}{formatCurrency(item.amount)}
+              {tab === "incomes" ? "+" : "-"}
+              {formatCurrency(item.amount)}
             </Text>
 
             <Text className="text-base font-bold text-white" numberOfLines={2}>
@@ -116,7 +106,9 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
               </View>
               {item.payment_method && (
                 <View className="bg-slate-800 px-2.5 py-1 rounded-lg border border-white/[0.05]">
-                  <Text className="text-xs font-semibold text-slate-300">{item.payment_method}</Text>
+                  <Text className="text-xs font-semibold text-slate-300">
+                    {item.payment_method}
+                  </Text>
                 </View>
               )}
             </View>
@@ -135,10 +127,12 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm font-bold text-white">
-                    {tab === 'incomes' ? t('recurring.collectBtn') : t('recurring.executeBtn')}
+                    {tab === "incomes" ? t("recurring.collectBtn") : t("recurring.executeBtn")}
                   </Text>
                   <Text className="text-xs text-slate-400 mt-0.5">
-                    {tab === 'incomes' ? 'Registrar ingreso en movimientos ahora' : 'Registrar gasto en movimientos ahora'}
+                    {tab === "incomes"
+                      ? "Registrar ingreso en movimientos ahora"
+                      : "Registrar gasto en movimientos ahora"}
                   </Text>
                 </View>
                 <ChevronRight size={18} color="#475569" />
@@ -155,10 +149,10 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm font-bold text-white">
-                    {t('transactions.editAction') || 'Editar Fijo'}
+                    {t("transactions.editAction") || "Editar Fijo"}
                   </Text>
                   <Text className="text-xs text-slate-400 mt-0.5">
-                    {t('transactions.editActionDesc') || 'Modificar monto, concepto o fecha'}
+                    {t("transactions.editActionDesc") || "Modificar monto, concepto o fecha"}
                   </Text>
                 </View>
                 <ChevronRight size={18} color="#475569" />
@@ -175,10 +169,10 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm font-bold text-rose-400">
-                    {t('transactions.deleteAction') || 'Eliminar Fijo'}
+                    {t("transactions.deleteAction") || "Eliminar Fijo"}
                   </Text>
                   <Text className="text-xs text-slate-400 mt-0.5">
-                    {t('transactions.deleteActionDesc') || 'Borrar esta regla permanente'}
+                    {t("transactions.deleteActionDesc") || "Borrar esta regla permanente"}
                   </Text>
                 </View>
                 <ChevronRight size={18} color="#f43f5e" />
@@ -191,7 +185,7 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
                 activeOpacity={0.7}
               >
                 <Text className="text-sm font-bold text-slate-400">
-                  {t('transactions.cancelBtn') || 'Cancelar'}
+                  {t("transactions.cancelBtn") || "Cancelar"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -202,10 +196,10 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
                 <AlertTriangle size={28} color="#f43f5e" />
               </View>
               <Text className="text-[17px] font-extrabold text-white text-center">
-                {t('transactions.confirmDeleteQuestion') || '¿Deseas eliminar esta regla fija?'}
+                {t("transactions.confirmDeleteQuestion") || "¿Deseas eliminar esta regla fija?"}
               </Text>
               <Text className="text-xs text-slate-400 text-center leading-4 px-3">
-                {t('transactions.confirmDeleteDesc') || 'Esta acción no se puede deshacer.'}
+                {t("transactions.confirmDeleteDesc") || "Esta acción no se puede deshacer."}
               </Text>
               <View className="flex-row gap-3 w-full mt-2">
                 <TouchableOpacity
@@ -215,13 +209,13 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
                   disabled={deletingSheet}
                 >
                   <Text className="text-sm font-bold text-slate-300">
-                    {t('transactions.cancelBtn') || 'Volver'}
+                    {t("transactions.cancelBtn") || "Volver"}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   className={`flex-[1.3] flex-row gap-2 py-3.5 rounded-2xl bg-rose-500 items-center justify-center shadow-lg shadow-rose-500/30 ${
-                    deletingSheet ? 'opacity-50' : ''
+                    deletingSheet ? "opacity-50" : ""
                   }`}
                   onPress={onDeleteConfirm}
                   activeOpacity={0.8}
@@ -230,8 +224,8 @@ export const RecurringActionSheet: React.FC<RecurringActionSheetProps> = ({
                   <Trash2 size={16} color="#ffffff" />
                   <Text className="text-sm font-extrabold text-white">
                     {deletingSheet
-                      ? (t('transactions.executing') || 'Eliminando...')
-                      : (t('transactions.deleteConfirmBtn') || 'Sí, Eliminar')}
+                      ? t("transactions.executing") || "Eliminando..."
+                      : t("transactions.deleteConfirmBtn") || "Sí, Eliminar"}
                   </Text>
                 </TouchableOpacity>
               </View>

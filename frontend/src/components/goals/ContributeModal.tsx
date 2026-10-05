@@ -24,12 +24,7 @@ interface ContributeModalProps {
   goal: Goal;
 }
 
-export function ContributeModal({
-  isOpen,
-  onClose,
-  onSuccess,
-  goal,
-}: ContributeModalProps) {
+export function ContributeModal({ isOpen, onClose, onSuccess, goal }: ContributeModalProps) {
   const { translate, currencySymbol } = useSettings();
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState("");
@@ -68,7 +63,9 @@ export function ContributeModal({
         onClose();
         setAmount("");
       } else {
-        toast.error(res.error || translate("goals.contributeError") || "Error al realizar el aporte");
+        toast.error(
+          res.error || translate("goals.contributeError") || "Error al realizar el aporte"
+        );
       }
     } catch {
       toast.error(translate("goals.contributeError") || "Error al realizar el aporte");

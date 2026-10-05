@@ -89,7 +89,9 @@ export function BottomNavbar() {
                 </div>
                 <span
                   className={`text-[10px] leading-tight tracking-tight transition-colors ${
-                    isActive ? "font-bold text-slate-900 dark:text-foreground" : "font-medium text-slate-500 dark:text-muted-foreground"
+                    isActive
+                      ? "font-bold text-slate-900 dark:text-foreground"
+                      : "font-medium text-slate-500 dark:text-muted-foreground"
                   }`}
                 >
                   {item.name}

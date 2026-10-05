@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn, formatLiveNumber, parseLiveNumber, getCategoryColorBg, getTodayLocal, formatCalendarDate } from "@/lib/utils";
+import {
+  cn,
+  formatLiveNumber,
+  parseLiveNumber,
+  getCategoryColorBg,
+  getTodayLocal,
+  formatCalendarDate,
+} from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +18,14 @@ import {
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
 import { recurringService } from "@/services";
-import { Loader2, Calendar as CalendarLucide, Repeat, CalendarClock, CheckCircle2, Power } from "lucide-react";
+import {
+  Loader2,
+  Calendar as CalendarLucide,
+  Repeat,
+  CalendarClock,
+  CheckCircle2,
+  Power,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -67,9 +81,10 @@ export function RecurringExpenseModal({
         frequency: initialData.frequency || "biweekly",
         biweekly_type: initialData.biweekly_type || "15_and_last_day",
         billing_day: initialData.billing_day || 15,
-        start_date: typeof initialData.start_date === "string" 
-          ? initialData.start_date.split("T")[0] 
-          : new Date(initialData.start_date).toISOString().split("T")[0],
+        start_date:
+          typeof initialData.start_date === "string"
+            ? initialData.start_date.split("T")[0]
+            : new Date(initialData.start_date).toISOString().split("T")[0],
         auto_register: initialData.auto_register ?? true,
         is_active: initialData.is_active ?? true,
       });
@@ -89,12 +104,7 @@ export function RecurringExpenseModal({
     }
   }, [initialData, isOpen]);
 
-  const paymentMethods = [
-    "Transferencia",
-    "Tarjeta de Débito",
-    "Tarjeta de Crédito",
-    "Efectivo",
-  ];
+  const paymentMethods = ["Transferencia", "Tarjeta de Débito", "Tarjeta de Crédito", "Efectivo"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,8 +148,8 @@ export function RecurringExpenseModal({
       }
 
       toast.success(
-        initialData 
-          ? "Gasto programado actualizado exitosamente" 
+        initialData
+          ? "Gasto programado actualizado exitosamente"
           : "Gasto fijo programado exitosamente. Se registrará automáticamente en la fecha correspondiente."
       );
       onSuccess();
@@ -228,7 +238,9 @@ export function RecurringExpenseModal({
                 <button
                   type="button"
                   key={freq.id}
-                  onClick={() => setFormData({ ...formData, frequency: freq.id as RecurringFrequency })}
+                  onClick={() =>
+                    setFormData({ ...formData, frequency: freq.id as RecurringFrequency })
+                  }
                   className={cn(
                     "flex flex-col items-center justify-center p-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer text-center",
                     formData.frequency === freq.id
@@ -237,7 +249,12 @@ export function RecurringExpenseModal({
                   )}
                 >
                   <span className="font-bold">{freq.label}</span>
-                  <span className={cn("text-[10px] opacity-80", formData.frequency === freq.id ? "text-white" : "text-muted-foreground")}>
+                  <span
+                    className={cn(
+                      "text-[10px] opacity-80",
+                      formData.frequency === freq.id ? "text-white" : "text-muted-foreground"
+                    )}
+                  >
                     {freq.desc}
                   </span>
                 </button>
@@ -261,7 +278,14 @@ export function RecurringExpenseModal({
                         : "bg-background/60 border-border hover:bg-secondary/50 text-muted-foreground"
                     )}
                   >
-                    <CheckCircle2 className={cn("w-4 h-4 shrink-0 mt-0.5", formData.biweekly_type === "15_and_last_day" ? "text-blue-600" : "opacity-30")} />
+                    <CheckCircle2
+                      className={cn(
+                        "w-4 h-4 shrink-0 mt-0.5",
+                        formData.biweekly_type === "15_and_last_day"
+                          ? "text-blue-600"
+                          : "opacity-30"
+                      )}
+                    />
                     <div>
                       <div className="font-bold text-foreground">Día 15 y Fin de Mes</div>
                       <div className="text-[10px]">Típico pago de planilla o quincena laboral</div>
@@ -278,10 +302,17 @@ export function RecurringExpenseModal({
                         : "bg-background/60 border-border hover:bg-secondary/50 text-muted-foreground"
                     )}
                   >
-                    <CheckCircle2 className={cn("w-4 h-4 shrink-0 mt-0.5", formData.biweekly_type === "every_15_days" ? "text-blue-600" : "opacity-30")} />
+                    <CheckCircle2
+                      className={cn(
+                        "w-4 h-4 shrink-0 mt-0.5",
+                        formData.biweekly_type === "every_15_days" ? "text-blue-600" : "opacity-30"
+                      )}
+                    />
                     <div>
                       <div className="font-bold text-foreground">Cada 15 días exactos</div>
-                      <div className="text-[10px]">Intervalo regular a partir de la fecha de inicio</div>
+                      <div className="text-[10px]">
+                        Intervalo regular a partir de la fecha de inicio
+                      </div>
                     </div>
                   </button>
                 </div>
@@ -323,7 +354,9 @@ export function RecurringExpenseModal({
                     min={1}
                     max={31}
                     value={formData.billing_day}
-                    onChange={(e) => setFormData({ ...formData, billing_day: parseInt(e.target.value) || 1 })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, billing_day: parseInt(e.target.value) || 1 })
+                    }
                     className="w-16 h-8 text-center font-bold text-sm bg-background border border-border rounded-lg"
                   />
                   <span className="text-xs text-muted-foreground">de cada mes</span>
@@ -345,7 +378,10 @@ export function RecurringExpenseModal({
                         dates.push(formatCalendarDate(dt, language, true));
                       }
                       m++;
-                      if (m > 11) { m = 0; y++; }
+                      if (m > 11) {
+                        m = 0;
+                        y++;
+                      }
                     }
                     return dates.join(" · ");
                   })()}
@@ -444,7 +480,12 @@ export function RecurringExpenseModal({
           {/* Switch de Estado (Activo / Pausado) */}
           <div className="flex items-center justify-between p-3.5 rounded-xl bg-secondary/40 border border-border/60 gap-3">
             <div className="flex items-start gap-2.5 min-w-0">
-              <Power className={cn("w-4 h-4 shrink-0 mt-0.5", formData.is_active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")} />
+              <Power
+                className={cn(
+                  "w-4 h-4 shrink-0 mt-0.5",
+                  formData.is_active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"
+                )}
+              />
               <div>
                 <span className="text-xs font-bold text-titles dark:text-foreground block">
                   Estado del Gasto Fijo

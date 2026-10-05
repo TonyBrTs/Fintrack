@@ -19,12 +19,7 @@ export interface Expense {
 }
 
 export type IncomeSource =
-  | "Salario"
-  | "Freelance"
-  | "Inversiones"
-  | "Regalo"
-  | "Otros"
-  | (string & {});
+  "Salario" | "Freelance" | "Inversiones" | "Regalo" | "Otros" | (string & {});
 
 export interface Income {
   id: string;
@@ -110,4 +105,3 @@ export interface RecurringIncomeSyncResult {
   processed_count: number;
   incomes: Income[];
 }
-

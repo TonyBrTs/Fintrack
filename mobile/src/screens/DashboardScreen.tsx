@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -8,19 +8,22 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext';
-import { useSettings } from '../context/SettingsContext';
-import { api } from '../lib/api';
-import { Expense, Income, Goal, AIInsight } from '../types';
-import { AddExpenseModal } from '../components/AddExpenseModal';
-import { AddIncomeModal } from '../components/AddIncomeModal';
-import { TransactionActionSheet, ActionSheetTransaction } from '../components/TransactionActionSheet';
-import { PeriodPicker, isDateInPeriod } from '../components/PeriodPickerModal';
-import { BrandLogo } from '../components/BrandLogo';
-import { DashboardCharts } from '../components/DashboardCharts';
-import { formatDate } from '../lib/format';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "../context/AuthContext";
+import { useSettings } from "../context/SettingsContext";
+import { api } from "../lib/api";
+import { Expense, Income, Goal, AIInsight } from "../types";
+import { AddExpenseModal } from "../components/AddExpenseModal";
+import { AddIncomeModal } from "../components/AddIncomeModal";
+import {
+  TransactionActionSheet,
+  ActionSheetTransaction,
+} from "../components/TransactionActionSheet";
+import { PeriodPicker, isDateInPeriod } from "../components/PeriodPickerModal";
+import { BrandLogo } from "../components/BrandLogo";
+import { DashboardCharts } from "../components/DashboardCharts";
+import { formatDate } from "../lib/format";
 import {
   Settings,
   Wallet,
@@ -29,11 +32,11 @@ import {
   Sparkles,
   Layers,
   MoreVertical,
-} from 'lucide-react-native';
+} from "lucide-react-native";
 
 type DashboardTx = {
   id: string;
-  type: 'expense' | 'income';
+  type: "expense" | "income";
   title: string;
   category: string;
   amount: number;
@@ -57,12 +60,12 @@ export const DashboardScreen: React.FC = () => {
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
 
   // Filtro de movimientos en dashboard
-  const [txFilter, setTxFilter] = useState<'all' | 'expenses' | 'incomes'>('all');
+  const [txFilter, setTxFilter] = useState<"all" | "expenses" | "incomes">("all");
 
   // Filtro de mes (por defecto el mes actual: "YYYY-MM")
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
 
   // Modales
@@ -108,11 +111,12 @@ export const DashboardScreen: React.FC = () => {
       setAllGoals(Array.isArray(goalsData) ? goalsData : []);
 
       // Cargar insights de Gemini en segundo plano
-      api.getAIInsights(expData, incData, goalsData)
+      api
+        .getAIInsights(expData, incData, goalsData)
         .then((insights) => setAiInsights(insights))
         .catch(() => {});
     } catch {
-      Alert.alert(t('common.error'), 'No se pudieron sincronizar los datos con la API.');
+      Alert.alert(t("common.error"), "No se pudieron sincronizar los datos con la API.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -130,23 +134,27 @@ export const DashboardScreen: React.FC = () => {
   };
 
   const handleActionSheetEdit = (tx: ActionSheetTransaction) => {
-    if (tx.type === 'expense') {
+    if (tx.type === "expense") {
       setEditingExpense(tx.raw as Expense);
     } else {
       setEditingIncome(tx.raw as Income);
     }
   };
 
-  const handleActionSheetDelete = async (id: string, _title: string, type: 'expense' | 'income') => {
+  const handleActionSheetDelete = async (
+    id: string,
+    _title: string,
+    type: "expense" | "income"
+  ) => {
     try {
-      if (type === 'expense') {
+      if (type === "expense") {
         await api.deleteExpense(id);
       } else {
         await api.deleteIncome(id);
       }
       loadDashboardData();
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || 'No se pudo eliminar el movimiento.');
+      Alert.alert(t("common.error"), e?.message || "No se pudo eliminar el movimiento.");
     }
   };
 
@@ -160,24 +168,17 @@ export const DashboardScreen: React.FC = () => {
   }, [allIncomes, selectedMonth]);
 
   // CÁLCULO PRECISO Y REAL DE TOTALES (DIRECTO 1:1 COMO EN LA WEB)
-  const totalExpenses = filteredExpenses.reduce(
-    (acc, curr) => acc + (Number(curr.amount) || 0),
-    0
-  );
-  const totalIncomes = filteredIncomes.reduce(
-    (acc, curr) => acc + (Number(curr.amount) || 0),
-    0
-  );
+  const totalExpenses = filteredExpenses.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+  const totalIncomes = filteredIncomes.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
   const netSavings = totalIncomes - totalExpenses;
   const savingsRate = totalIncomes > 0 ? ((totalIncomes - totalExpenses) / totalIncomes) * 100 : 0;
   const isNegative = netSavings < 0;
-
 
   // Movimientos combinados para el dashboard (Ingresos y Gastos ordenados cronológicamente)
   const combinedTransactions: DashboardTx[] = React.useMemo(() => {
     const expList: DashboardTx[] = filteredExpenses.map((e) => ({
       id: e.id,
-      type: 'expense' as const,
+      type: "expense" as const,
       title: e.description || e.category,
       category: e.category,
       amount: e.amount,
@@ -188,9 +189,9 @@ export const DashboardScreen: React.FC = () => {
 
     const incList: DashboardTx[] = filteredIncomes.map((i) => ({
       id: i.id,
-      type: 'income' as const,
-      title: i.source || i.description || i.category || 'Ingreso',
-      category: i.category || i.source || 'Ingreso',
+      type: "income" as const,
+      title: i.source || i.description || i.category || "Ingreso",
+      category: i.category || i.source || "Ingreso",
       amount: i.amount,
       currency: i.currency,
       date: i.date,
@@ -198,17 +199,15 @@ export const DashboardScreen: React.FC = () => {
     }));
 
     let list: DashboardTx[] = [];
-    if (txFilter === 'all') {
+    if (txFilter === "all") {
       list = [...expList, ...incList];
-    } else if (txFilter === 'expenses') {
+    } else if (txFilter === "expenses") {
       list = expList;
     } else {
       list = incList;
     }
 
-    return list.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [filteredExpenses, filteredIncomes, txFilter]);
 
   if (loading) {
@@ -236,7 +235,7 @@ export const DashboardScreen: React.FC = () => {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor="#3b82f6"
-            colors={['#3b82f6']}
+            colors={["#3b82f6"]}
           />
         }
       >
@@ -245,9 +244,9 @@ export const DashboardScreen: React.FC = () => {
           <View className="flex-1 mr-2.5 justify-center">
             <BrandLogo size={26} variant="full" className="mb-1" />
             <Text className="text-xs text-slate-400 font-medium">
-              {t('common.welcome')}{' '}
+              {t("common.welcome")}{" "}
               <Text className="text-sm font-extrabold text-white">
-                {user?.email ? user.email.split('@')[0] : t('common.user')}
+                {user?.email ? user.email.split("@")[0] : t("common.user")}
               </Text>
             </Text>
           </View>
@@ -269,21 +268,21 @@ export const DashboardScreen: React.FC = () => {
           {/* Hero Card de Balance Principal */}
           <View
             className={`bg-card rounded-3xl p-[22px] border gap-3.5 shadow-xl shadow-black ${
-              isNegative ? 'border-rose-500/35' : 'border-emerald-500/35'
+              isNegative ? "border-rose-500/35" : "border-emerald-500/35"
             }`}
           >
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center gap-2">
                 <Wallet size={16} color="#94a3b8" />
                 <Text className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">
-                  {t('summary.netSaving')}
+                  {t("summary.netSaving")}
                 </Text>
               </View>
             </View>
 
             <Text
               className={`text-[34px] font-black tracking-tight ${
-                isNegative ? 'text-rose-500' : 'text-white'
+                isNegative ? "text-rose-500" : "text-white"
               }`}
             >
               {formatCurrency(netSavings)}
@@ -296,7 +295,9 @@ export const DashboardScreen: React.FC = () => {
                   <ArrowUpRight size={14} color="#10b981" />
                 </View>
                 <View className="gap-0.5">
-                  <Text className="text-[11px] text-slate-500 font-medium">{t('summary.income')}</Text>
+                  <Text className="text-[11px] text-slate-500 font-medium">
+                    {t("summary.income")}
+                  </Text>
                   <Text className="text-[13px] font-bold text-emerald-500">
                     +{formatCurrency(totalIncomes)}
                   </Text>
@@ -310,7 +311,9 @@ export const DashboardScreen: React.FC = () => {
                   <ArrowDownRight size={14} color="#f43f5e" />
                 </View>
                 <View className="gap-0.5">
-                  <Text className="text-[11px] text-slate-500 font-medium">{t('summary.expenses')}</Text>
+                  <Text className="text-[11px] text-slate-500 font-medium">
+                    {t("summary.expenses")}
+                  </Text>
                   <Text className="text-[13px] font-bold text-rose-500">
                     -{formatCurrency(totalExpenses)}
                   </Text>
@@ -321,7 +324,7 @@ export const DashboardScreen: React.FC = () => {
             <View className="flex-row items-center gap-1.5 pt-1">
               <Sparkles size={13} color="#f59e0b" />
               <Text className="text-xs text-slate-400">
-                {t('summary.savingsRate')}:{' '}
+                {t("summary.savingsRate")}:{" "}
                 <Text className="font-bold text-blue-400">{savingsRate.toFixed(1)}%</Text>
               </Text>
             </View>
@@ -329,7 +332,7 @@ export const DashboardScreen: React.FC = () => {
 
           {/* Acciones Rápidas */}
           <Text className="text-base font-extrabold text-white mt-2 mb-1">
-            {t('summary.quickActions')}
+            {t("summary.quickActions")}
           </Text>
           <View className="flex-row gap-3">
             <TouchableOpacity
@@ -341,8 +344,12 @@ export const DashboardScreen: React.FC = () => {
                 <ArrowUpRight size={20} color="#10b981" />
               </View>
               <View className="flex-1">
-                <Text className="text-[13px] font-bold text-white mb-0.5">{t('summary.newIncome')}</Text>
-                <Text className="text-[11px] text-slate-400">{t('summary.registerIncomeDesc')}</Text>
+                <Text className="text-[13px] font-bold text-white mb-0.5">
+                  {t("summary.newIncome")}
+                </Text>
+                <Text className="text-[11px] text-slate-400">
+                  {t("summary.registerIncomeDesc")}
+                </Text>
               </View>
             </TouchableOpacity>
 
@@ -355,8 +362,12 @@ export const DashboardScreen: React.FC = () => {
                 <ArrowDownRight size={20} color="#f43f5e" />
               </View>
               <View className="flex-1">
-                <Text className="text-[13px] font-bold text-white mb-0.5">{t('summary.newExpense')}</Text>
-                <Text className="text-[11px] text-slate-400">{t('summary.registerExpenseDesc')}</Text>
+                <Text className="text-[13px] font-bold text-white mb-0.5">
+                  {t("summary.newExpense")}
+                </Text>
+                <Text className="text-[11px] text-slate-400">
+                  {t("summary.registerExpenseDesc")}
+                </Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -366,7 +377,9 @@ export const DashboardScreen: React.FC = () => {
             <View className="gap-2 mt-1.5">
               <View className="flex-row items-center gap-1.5">
                 <Sparkles size={16} color="#60a5fa" />
-                <Text className="text-[13px] font-bold text-blue-300">{t('summary.aiInsights')}</Text>
+                <Text className="text-[13px] font-bold text-blue-300">
+                  {t("summary.aiInsights")}
+                </Text>
               </View>
               <View className="bg-[#0f172a] rounded-2xl p-3.5 border border-blue-500/25 gap-1">
                 <Text className="text-[13px] font-bold text-white">{aiInsights[0].title}</Text>
@@ -387,7 +400,7 @@ export const DashboardScreen: React.FC = () => {
           {/* Movimientos Recientes (Ingresos y Gastos combinados) */}
           <View className="flex-row justify-between items-center mt-1 mb-0.5">
             <Text className="text-base font-extrabold text-white">
-              {t('summary.recentTransactions')}
+              {t("summary.recentTransactions")}
             </Text>
           </View>
 
@@ -395,26 +408,26 @@ export const DashboardScreen: React.FC = () => {
           <View className="flex-row bg-card rounded-[14px] p-[3px] border border-white/[0.07] gap-1 mb-1">
             <TouchableOpacity
               className={`flex-1 flex-row items-center justify-center py-[9px] rounded-[11px] gap-1.5 ${
-                txFilter === 'all' ? 'bg-slate-800 border border-white/[0.12]' : ''
+                txFilter === "all" ? "bg-slate-800 border border-white/[0.12]" : ""
               }`}
-              onPress={() => setTxFilter('all')}
+              onPress={() => setTxFilter("all")}
               activeOpacity={0.7}
             >
               <Text
                 className={`text-xs font-semibold ${
-                  txFilter === 'all' ? 'text-white font-bold' : 'text-slate-400'
+                  txFilter === "all" ? "text-white font-bold" : "text-slate-400"
                 }`}
               >
-                {t('transactions.all')}
+                {t("transactions.all")}
               </Text>
               <View
                 className={`px-1.5 py-0.5 rounded-lg ${
-                  txFilter === 'all' ? 'bg-white/15' : 'bg-white/[0.05]'
+                  txFilter === "all" ? "bg-white/15" : "bg-white/[0.05]"
                 }`}
               >
                 <Text
                   className={`text-[10px] font-bold ${
-                    txFilter === 'all' ? 'text-white' : 'text-slate-500'
+                    txFilter === "all" ? "text-white" : "text-slate-500"
                   }`}
                 >
                   {filteredExpenses.length + filteredIncomes.length}
@@ -424,32 +437,27 @@ export const DashboardScreen: React.FC = () => {
 
             <TouchableOpacity
               className={`flex-1 flex-row items-center justify-center py-[9px] rounded-[11px] gap-1.5 ${
-                txFilter === 'incomes'
-                  ? 'bg-emerald-500/15 border border-emerald-500/35'
-                  : ''
+                txFilter === "incomes" ? "bg-emerald-500/15 border border-emerald-500/35" : ""
               }`}
-              onPress={() => setTxFilter('incomes')}
+              onPress={() => setTxFilter("incomes")}
               activeOpacity={0.7}
             >
-              <ArrowUpRight
-                size={14}
-                color={txFilter === 'incomes' ? '#10b981' : '#64748b'}
-              />
+              <ArrowUpRight size={14} color={txFilter === "incomes" ? "#10b981" : "#64748b"} />
               <Text
                 className={`text-xs font-semibold ${
-                  txFilter === 'incomes' ? 'text-emerald-500 font-bold' : 'text-slate-400'
+                  txFilter === "incomes" ? "text-emerald-500 font-bold" : "text-slate-400"
                 }`}
               >
-                {t('transactions.incomes')}
+                {t("transactions.incomes")}
               </Text>
               <View
                 className={`px-1.5 py-0.5 rounded-lg ${
-                  txFilter === 'incomes' ? 'bg-emerald-500/25' : 'bg-white/[0.05]'
+                  txFilter === "incomes" ? "bg-emerald-500/25" : "bg-white/[0.05]"
                 }`}
               >
                 <Text
                   className={`text-[10px] font-bold ${
-                    txFilter === 'incomes' ? 'text-emerald-500' : 'text-slate-500'
+                    txFilter === "incomes" ? "text-emerald-500" : "text-slate-500"
                   }`}
                 >
                   {filteredIncomes.length}
@@ -459,32 +467,27 @@ export const DashboardScreen: React.FC = () => {
 
             <TouchableOpacity
               className={`flex-1 flex-row items-center justify-center py-[9px] rounded-[11px] gap-1.5 ${
-                txFilter === 'expenses'
-                  ? 'bg-rose-500/15 border border-rose-500/35'
-                  : ''
+                txFilter === "expenses" ? "bg-rose-500/15 border border-rose-500/35" : ""
               }`}
-              onPress={() => setTxFilter('expenses')}
+              onPress={() => setTxFilter("expenses")}
               activeOpacity={0.7}
             >
-              <ArrowDownRight
-                size={14}
-                color={txFilter === 'expenses' ? '#f43f5e' : '#64748b'}
-              />
+              <ArrowDownRight size={14} color={txFilter === "expenses" ? "#f43f5e" : "#64748b"} />
               <Text
                 className={`text-xs font-semibold ${
-                  txFilter === 'expenses' ? 'text-rose-500 font-bold' : 'text-slate-400'
+                  txFilter === "expenses" ? "text-rose-500 font-bold" : "text-slate-400"
                 }`}
               >
-                {t('transactions.expenses')}
+                {t("transactions.expenses")}
               </Text>
               <View
                 className={`px-1.5 py-0.5 rounded-lg ${
-                  txFilter === 'expenses' ? 'bg-rose-500/25' : 'bg-white/[0.05]'
+                  txFilter === "expenses" ? "bg-rose-500/25" : "bg-white/[0.05]"
                 }`}
               >
                 <Text
                   className={`text-[10px] font-bold ${
-                    txFilter === 'expenses' ? 'text-rose-500' : 'text-slate-500'
+                    txFilter === "expenses" ? "text-rose-500" : "text-slate-500"
                   }`}
                 >
                   {filteredExpenses.length}
@@ -496,12 +499,14 @@ export const DashboardScreen: React.FC = () => {
           {combinedTransactions.length === 0 ? (
             <View className="items-center justify-center py-9 gap-2.5 bg-card rounded-[18px] border border-white/[0.04]">
               <Layers size={38} color="#475569" />
-              <Text className="text-xs text-slate-500 text-center">{t('summary.noTransactions')}</Text>
+              <Text className="text-xs text-slate-500 text-center">
+                {t("summary.noTransactions")}
+              </Text>
             </View>
           ) : (
             <View className="gap-2.5">
               {combinedTransactions.slice(0, 8).map((item) => {
-                const isExp = item.type === 'expense';
+                const isExp = item.type === "expense";
 
                 return (
                   <TouchableOpacity
@@ -513,7 +518,7 @@ export const DashboardScreen: React.FC = () => {
                     <View className="flex-row items-center gap-3 flex-1">
                       <View
                         className={`w-[38px] h-[38px] rounded-xl justify-center items-center ${
-                          isExp ? 'bg-rose-500/15' : 'bg-emerald-500/15'
+                          isExp ? "bg-rose-500/15" : "bg-emerald-500/15"
                         }`}
                       >
                         {isExp ? (
@@ -529,7 +534,9 @@ export const DashboardScreen: React.FC = () => {
                         <View className="flex-row items-center gap-1.5">
                           <Text className="text-[11px] text-slate-400">{item.category}</Text>
                           <Text className="text-[10px] text-slate-600">•</Text>
-                          <Text className="text-[11px] text-slate-500">{formatDate(item.date)}</Text>
+                          <Text className="text-[11px] text-slate-500">
+                            {formatDate(item.date)}
+                          </Text>
                         </View>
                       </View>
                     </View>
@@ -537,10 +544,10 @@ export const DashboardScreen: React.FC = () => {
                     <View className="flex-row items-center gap-2">
                       <Text
                         className={`text-sm font-extrabold ${
-                          isExp ? 'text-rose-500' : 'text-emerald-500'
+                          isExp ? "text-rose-500" : "text-emerald-500"
                         }`}
                       >
-                        {isExp ? '-' : '+'}
+                        {isExp ? "-" : "+"}
                         {formatCurrency(item.amount)}
                       </Text>
                       <View className="w-[26px] h-[26px] rounded-lg bg-white/[0.04] justify-center items-center">

@@ -113,7 +113,7 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
   const autoFitColumns = (ws: ExcelJS.Worksheet, minWidths: Record<number, number> = {}) => {
     ws.columns.forEach((col, idx) => {
       let maxLen = 10;
-      const colNumber = (idx + 1);
+      const colNumber = idx + 1;
       col.eachCell?.({ includeEmpty: false }, (cell) => {
         const val = cell.value ? cell.value.toString() : "";
         if (val.length > maxLen) {
@@ -153,7 +153,10 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
   const metaStartRow = 5;
   const metaRows: [string, string][] = [
     [isEs ? "Referencia Contable:" : "Audit Reference:", reportReference],
-    [isEs ? "Titular:" : "Account Holder:", user.name || user.email || (isEs ? "Titular FinTrack" : "Account Holder")],
+    [
+      isEs ? "Titular:" : "Account Holder:",
+      user.name || user.email || (isEs ? "Titular FinTrack" : "Account Holder"),
+    ],
     [isEs ? "Correo Electrónico:" : "Email:", user.email || "N/A"],
     [isEs ? "Período Consultado:" : "Consulted Period:", periodLabel],
     [isEs ? "Fecha de Emisión:" : "Issued Date:", generatedAt],
@@ -222,7 +225,8 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
       label: isEs ? "(-) Total Egresos Realizados" : "(-) Total Outflows Executed",
       amount: totalExpense,
       currency: currencyCode,
-      note: totalIncome > 0 ? `${((totalExpense / totalIncome) * 100).toFixed(1)}% de ingresos` : "---",
+      note:
+        totalIncome > 0 ? `${((totalExpense / totalIncome) * 100).toFixed(1)}% de ingresos` : "---",
       fontColor: "B91C1C",
       bold: true,
     },
@@ -230,7 +234,14 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
       label: isEs ? "(=) Balance Financiero Neto" : "(=) Net Financial Balance",
       amount: netSavings,
       currency: currencyCode,
-      note: netSavings >= 0 ? (isEs ? "Superávit neto" : "Net surplus") : (isEs ? "Déficit neto" : "Net deficit"),
+      note:
+        netSavings >= 0
+          ? isEs
+            ? "Superávit neto"
+            : "Net surplus"
+          : isEs
+            ? "Déficit neto"
+            : "Net deficit",
       fontColor: netSavings >= 0 ? "065F46" : "991B1B",
       bold: true,
       highlight: true,
@@ -240,7 +251,14 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
       amount: savingsRate / 100,
       currency: "%",
       isPercent: true,
-      note: savingsRate >= 20 ? (isEs ? "Objetivo saludable (>=20%)" : "Healthy target (>=20%)") : (isEs ? "Margen bajo (<20%)" : "Low margin (<20%)"),
+      note:
+        savingsRate >= 20
+          ? isEs
+            ? "Objetivo saludable (>=20%)"
+            : "Healthy target (>=20%)"
+          : isEs
+            ? "Margen bajo (<20%)"
+            : "Low margin (<20%)",
       fontColor: savingsRate >= 0 ? "1E40AF" : "B91C1C",
       bold: false,
     },
@@ -262,13 +280,23 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
 
     const cellLabel = wsSummary.getCell(`B${currentKpiRow}`);
     cellLabel.value = item.label;
-    cellLabel.font = { name: FONT_FAMILY, size: 10, bold: item.bold, color: { argb: item.fontColor } };
+    cellLabel.font = {
+      name: FONT_FAMILY,
+      size: 10,
+      bold: item.bold,
+      color: { argb: item.fontColor },
+    };
     cellLabel.border = BORDER_LIGHT;
     cellLabel.alignment = { vertical: "middle", horizontal: "left" };
 
     const cellAmt = wsSummary.getCell(`C${currentKpiRow}`);
     cellAmt.value = item.amount;
-    cellAmt.font = { name: FONT_FAMILY, size: 10, bold: item.bold, color: { argb: item.fontColor } };
+    cellAmt.font = {
+      name: FONT_FAMILY,
+      size: 10,
+      bold: item.bold,
+      color: { argb: item.fontColor },
+    };
     cellAmt.border = BORDER_LIGHT;
     cellAmt.alignment = { vertical: "middle", horizontal: "right" };
 
@@ -351,7 +379,12 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
     expTitle.value = isEs
       ? `DESGLOSE DETALLADO DE EGRESOS (${filteredExpenses.length} REGISTROS) • ${periodLabel}`
       : `DETAILED OUTFLOWS LEDGER (${filteredExpenses.length} RECORDS) • ${periodLabel}`;
-    expTitle.font = { name: FONT_FAMILY, size: 11, bold: true, color: { argb: COLOR_EXPENSE_FILL } };
+    expTitle.font = {
+      name: FONT_FAMILY,
+      size: 11,
+      bold: true,
+      color: { argb: COLOR_EXPENSE_FILL },
+    };
     expTitle.alignment = { vertical: "middle", horizontal: "left" };
     wsExpenses.getRow(1).height = 24;
 
@@ -615,7 +648,12 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
       cPct.value = pct;
       cPct.numFmt = "0.0%";
       cPct.alignment = { vertical: "middle", horizontal: "center" };
-      cPct.font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: isDone ? "047857" : "3730A3" } };
+      cPct.font = {
+        name: FONT_FAMILY,
+        size: 10,
+        bold: true,
+        color: { argb: isDone ? "047857" : "3730A3" },
+      };
 
       const cRem = r.getCell(5);
       cRem.value = rem;
@@ -624,8 +662,12 @@ export async function exportFinancialReportExcel(data: ExcelExportData): Promise
 
       const cStatus = r.getCell(6);
       cStatus.value = isDone
-        ? (isEs ? "✓ CUMPLIDA" : "✓ COMPLETED")
-        : (isEs ? "EN PROGRESO" : "IN PROGRESS");
+        ? isEs
+          ? "✓ CUMPLIDA"
+          : "✓ COMPLETED"
+        : isEs
+          ? "EN PROGRESO"
+          : "IN PROGRESS";
       cStatus.alignment = { vertical: "middle", horizontal: "center" };
       cStatus.font = {
         name: FONT_FAMILY,

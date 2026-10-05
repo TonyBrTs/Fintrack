@@ -63,9 +63,7 @@ export function UpdatePasswordForm({
         toast.error(friendly.message);
       } else {
         toast.success(
-          isEs
-            ? "Contraseña actualizada exitosamente."
-            : "Password updated successfully."
+          isEs ? "Contraseña actualizada exitosamente." : "Password updated successfully."
         );
         onSuccess();
       }
@@ -98,8 +96,7 @@ export function UpdatePasswordForm({
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              if (errors.password)
-                setErrors((prev) => ({ ...prev, password: undefined }));
+              if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
             }}
             className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-3.5 pr-10 outline-none transition duration-200 shadow-2xs ${
               errors.password

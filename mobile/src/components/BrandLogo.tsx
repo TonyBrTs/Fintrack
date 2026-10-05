@@ -1,23 +1,23 @@
-import React from 'react';
-import { Image, ImageStyle, StyleProp } from 'react-native';
+import React from "react";
+import { Image, ImageStyle, StyleProp } from "react-native";
 
 interface BrandLogoProps {
   size?: number;
-  variant?: 'full' | 'icon';
+  variant?: "full" | "icon";
   style?: StyleProp<ImageStyle>;
   className?: string;
 }
 
 export const BrandLogo: React.FC<BrandLogoProps> = ({
   size = 32,
-  variant = 'full',
+  variant = "full",
   style,
   className,
 }) => {
-  if (variant === 'icon') {
+  if (variant === "icon") {
     return (
       <Image
-        source={require('../../assets/icon-dark.png')}
+        source={require("../../assets/icon-dark.png")}
         className={className}
         style={[
           {
@@ -36,7 +36,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   const width = Math.round(size * 4.79);
   return (
     <Image
-      source={require('../../assets/logo-dark.png')}
+      source={require("../../assets/logo-dark.png")}
       className={className}
       style={[
         {

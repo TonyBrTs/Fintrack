@@ -44,7 +44,10 @@ export const categoryService = {
   /**
    * Deletes a category by ID, with optional reassignment of associated transactions.
    */
-  async deleteCategory(id: string, reassignTo?: string): Promise<SafeFetchResult<DeleteCategoryResponse>> {
+  async deleteCategory(
+    id: string,
+    reassignTo?: string
+  ): Promise<SafeFetchResult<DeleteCategoryResponse>> {
     const query = reassignTo ? `?reassignTo=${encodeURIComponent(reassignTo)}` : "";
     return safeFetch<DeleteCategoryResponse>(`/api/categories/${id}${query}`, {
       method: "DELETE",

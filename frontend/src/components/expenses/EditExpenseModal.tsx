@@ -37,25 +37,16 @@ interface EditExpenseModalProps {
   expense: Expense | null;
 }
 
-export function EditExpenseModal({
-  isOpen,
-  onClose,
-  onSuccess,
-  expense,
-}: EditExpenseModalProps) {
+export function EditExpenseModal({ isOpen, onClose, onSuccess, expense }: EditExpenseModalProps) {
   const { translate, currency, currencySymbol } = useSettings();
   const { categories: categoryList } = useCategories("expense");
   const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     amount: expense?.amount.toString() || "",
-    category:
-      (expense?.category as ExpenseCategory) ||
-      ("Alimentación" as ExpenseCategory),
+    category: (expense?.category as ExpenseCategory) || ("Alimentación" as ExpenseCategory),
     description: expense?.description || "",
-    date: expense
-      ? format(new Date(expense.date), "yyyy-MM-dd")
-      : format(new Date(), "yyyy-MM-dd"),
+    date: expense ? format(new Date(expense.date), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
     payment_method: expense?.payment_method || "Tarjeta de Crédito",
   });
 
@@ -71,12 +62,7 @@ export function EditExpenseModal({
     }
   }, [expense, isOpen]);
 
-  const paymentMethods = [
-    "Tarjeta de Crédito",
-    "Tarjeta de Débito",
-    "Efectivo",
-    "Transferencia",
-  ];
+  const paymentMethods = ["Tarjeta de Crédito", "Tarjeta de Débito", "Efectivo", "Transferencia"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,172 +105,169 @@ export function EditExpenseModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-106.25">
-        <DialogHeader>
-          <DialogTitle className="text-action">
-            {translate("expenses.form.title")}
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-titles dark:text-foreground">
-              {translate("expenses.form.amount")}
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-400 z-10">
-                {currencySymbol}
-              </span>
-              <Input
-                required
-                type="text"
-                inputMode="decimal"
-                value={formData.amount}
-                onChange={(e) =>
-                  setFormData({ ...formData, amount: formatLiveNumber(e.target.value) })
-                }
-                placeholder="0.00"
-                className="pl-8 text-lg font-bold h-12 focus-visible:ring-action"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <DialogContent className="sm:max-w-106.25">
+          <DialogHeader>
+            <DialogTitle className="text-action">{translate("expenses.form.title")}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-6 pt-4">
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-bold text-titles dark:text-foreground">
-                  {translate("expenses.form.category")}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setIsCreateCategoryOpen(true)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer py-0.5 px-2 rounded-lg hover:bg-blue-500/10 transition-colors"
-                  title="Crear nueva categoría"
-                >
-                  <Plus size={13} strokeWidth={2.5} />
-                  <span>Añadir categoría</span>
-                </button>
-              </div>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => {
-                  if (value === "__new_category__") {
-                    setIsCreateCategoryOpen(true);
-                    return;
+              <label className="text-sm font-bold text-titles dark:text-foreground">
+                {translate("expenses.form.amount")}
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-400 z-10">
+                  {currencySymbol}
+                </span>
+                <Input
+                  required
+                  type="text"
+                  inputMode="decimal"
+                  value={formData.amount}
+                  onChange={(e) =>
+                    setFormData({ ...formData, amount: formatLiveNumber(e.target.value) })
                   }
-                  setFormData({
-                    ...formData,
-                    category: value as ExpenseCategory,
-                  });
-                }}
+                  placeholder="0.00"
+                  className="pl-8 text-lg font-bold h-12 focus-visible:ring-action"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-bold text-titles dark:text-foreground">
+                    {translate("expenses.form.category")}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateCategoryOpen(true)}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer py-0.5 px-2 rounded-lg hover:bg-blue-500/10 transition-colors"
+                    title="Crear nueva categoría"
+                  >
+                    <Plus size={13} strokeWidth={2.5} />
+                    <span>Añadir categoría</span>
+                  </button>
+                </div>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => {
+                    if (value === "__new_category__") {
+                      setIsCreateCategoryOpen(true);
+                      return;
+                    }
+                    setFormData({
+                      ...formData,
+                      category: value as ExpenseCategory,
+                    });
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryList.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.name}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={cn(
+                              "w-2.5 h-2.5 rounded-full shrink-0",
+                              getCategoryColorBg(cat.color)
+                            )}
+                          />
+                          <span className="truncate">{cat.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                    <div className="p-1 border-t border-border/40 mt-1">
+                      <SelectItem
+                        value="__new_category__"
+                        className="text-blue-600 dark:text-blue-400 font-bold focus:bg-blue-500/10 focus:text-blue-600 dark:focus:text-blue-400 cursor-pointer"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <Plus size={14} strokeWidth={2.5} />
+                          <span>Añadir nueva categoría...</span>
+                        </div>
+                      </SelectItem>
+                    </div>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2 min-w-0">
+                <label className="text-sm font-bold text-titles dark:text-foreground">
+                  {translate("expenses.form.date")}
+                </label>
+                <DatePicker
+                  value={formData.date}
+                  onChange={(date) => setFormData({ ...formData, date })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-titles dark:text-foreground">
+                {translate("expenses.form.paymentMethod")}
+              </label>
+              <Select
+                value={formData.payment_method}
+                onValueChange={(value) => setFormData({ ...formData, payment_method: value })}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar categoría" />
+                  <SelectValue placeholder="Seleccionar método" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoryList.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.name}>
-                      <div className="flex items-center gap-2">
-                        <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", getCategoryColorBg(cat.color))} />
-                        <span className="truncate">{cat.name}</span>
-                      </div>
+                  {paymentMethods.map((pm) => (
+                    <SelectItem key={pm} value={pm}>
+                      {pm}
                     </SelectItem>
                   ))}
-                  <div className="p-1 border-t border-border/40 mt-1">
-                    <SelectItem
-                      value="__new_category__"
-                      className="text-blue-600 dark:text-blue-400 font-bold focus:bg-blue-500/10 focus:text-blue-600 dark:focus:text-blue-400 cursor-pointer"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <Plus size={14} strokeWidth={2.5} />
-                        <span>Añadir nueva categoría...</span>
-                      </div>
-                    </SelectItem>
-                  </div>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2 min-w-0">
+            <div className="space-y-2">
               <label className="text-sm font-bold text-titles dark:text-foreground">
-                {translate("expenses.form.date")}
+                {translate("expenses.form.description")}
               </label>
-              <DatePicker
-                value={formData.date}
-                onChange={(date) => setFormData({ ...formData, date })}
+              <Textarea
+                required
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="..."
+                className="min-h-24 resize-none"
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-titles dark:text-foreground">
-              {translate("expenses.form.paymentMethod")}
-            </label>
-            <Select
-              value={formData.payment_method}
-              onValueChange={(value) =>
-                setFormData({ ...formData, payment_method: value })
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccionar método" />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethods.map((pm) => (
-                  <SelectItem key={pm} value={pm}>
-                    {pm}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-3">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onClose}
+                className="w-full sm:w-auto font-medium bg-expense hover:bg-expense/90 text-white dark:bg-expense/10 dark:hover:bg-expense/20 dark:text-expense border border-transparent dark:border-expense/20 cursor-pointer"
+              >
+                {translate("expenses.form.cancel")}
+              </Button>
+              <Button
+                disabled={loading}
+                type="submit"
+                className="w-full sm:w-auto bg-action hover:bg-action/90 dark:bg-action/10 dark:hover:bg-action/20 text-white dark:text-action font-bold shadow-md active:scale-95 transition-all border border-transparent dark:border-action/20 cursor-pointer"
+              >
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading ? translate("expenses.form.loading") : translate("expenses.form.save")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-titles dark:text-foreground">
-              {translate("expenses.form.description")}
-            </label>
-            <Textarea
-              required
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="..."
-              className="min-h-24 resize-none"
-            />
-          </div>
-
-          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-3">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onClose}
-              className="w-full sm:w-auto font-medium bg-expense hover:bg-expense/90 text-white dark:bg-expense/10 dark:hover:bg-expense/20 dark:text-expense border border-transparent dark:border-expense/20 cursor-pointer"
-            >
-              {translate("expenses.form.cancel")}
-            </Button>
-            <Button
-              disabled={loading}
-              type="submit"
-              className="w-full sm:w-auto bg-action hover:bg-action/90 dark:bg-action/10 dark:hover:bg-action/20 text-white dark:text-action font-bold shadow-md active:scale-95 transition-all border border-transparent dark:border-action/20 cursor-pointer"
-            >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {loading
-                ? translate("expenses.form.loading")
-                : translate("expenses.form.save")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-
-    <CategoryModal
-      isOpen={isCreateCategoryOpen}
-      onClose={() => setIsCreateCategoryOpen(false)}
-      defaultType="expense"
-      onSuccess={(newCat) => {
-        setFormData((prev) => ({ ...prev, category: newCat.name as ExpenseCategory }));
-      }}
-    />
-  </>
+      <CategoryModal
+        isOpen={isCreateCategoryOpen}
+        onClose={() => setIsCreateCategoryOpen(false)}
+        defaultType="expense"
+        onSuccess={(newCat) => {
+          setFormData((prev) => ({ ...prev, category: newCat.name as ExpenseCategory }));
+        }}
+      />
+    </>
   );
 }

@@ -19,7 +19,11 @@ import Link from "next/link";
 
 const emptySubscribe = () => () => {};
 function useHydrated() {
-  return useSyncExternalStore(emptySubscribe, () => true, () => false);
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 }
 
 export function Header() {
@@ -33,14 +37,10 @@ export function Header() {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const userInitials = user?.email
-    ? user.email.slice(0, 2).toUpperCase()
-    : "FT";
+  const userInitials = user?.email ? user.email.slice(0, 2).toUpperCase() : "FT";
 
   const displayName =
-    (user?.user_metadata?.full_name as string) ||
-    user?.email?.split("@")[0] ||
-    "Usuario";
+    (user?.user_metadata?.full_name as string) || user?.email?.split("@")[0] || "Usuario";
 
   const avatarUrl =
     (user?.user_metadata?.avatar_url as string) ||
@@ -51,10 +51,7 @@ export function Header() {
     <>
       <header className="h-16 px-4 md:px-10 lg:px-20 flex items-center justify-between transition-colors duration-300">
         {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer"
-        >
+        <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer">
           <BrandLogo
             variant="full"
             size={32}
@@ -69,7 +66,15 @@ export function Header() {
           <button
             onClick={toggleTheme}
             aria-label={isEs ? "Alternar tema" : "Toggle theme"}
-            title={mounted && theme === "dark" ? (isEs ? "Cambiar a modo claro" : "Switch to light mode") : (isEs ? "Cambiar a modo oscuro" : "Switch to dark mode")}
+            title={
+              mounted && theme === "dark"
+                ? isEs
+                  ? "Cambiar a modo claro"
+                  : "Switch to light mode"
+                : isEs
+                  ? "Cambiar a modo oscuro"
+                  : "Switch to dark mode"
+            }
             className="hidden md:flex p-2 sm:p-2.5 rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100/90 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-blue-400 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition-all cursor-pointer shadow-xs"
           >
             {mounted && theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
@@ -112,18 +117,11 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64" align="end">
                   <div className="px-3 py-2">
-                    <p className="text-xs font-bold text-foreground truncate">
-                      {displayName}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {user.email}
-                    </p>
+                    <p className="text-xs font-bold text-foreground truncate">{displayName}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={openSettings}
-                    className="cursor-pointer"
-                  >
+                  <DropdownMenuItem onClick={openSettings} className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4 text-action dark:text-blue-400" />
                     <span>
                       {translate("settingsDrawer.preferences") ||
@@ -137,8 +135,7 @@ export function Header() {
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>
-                      {translate("settingsDrawer.signOut") ||
-                        (isEs ? "Cerrar Sesión" : "Sign Out")}
+                      {translate("settingsDrawer.signOut") || (isEs ? "Cerrar Sesión" : "Sign Out")}
                     </span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

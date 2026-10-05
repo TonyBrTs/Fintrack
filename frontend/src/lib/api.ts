@@ -24,7 +24,9 @@ export const getApiBaseUrl = (): string => {
 /**
  * Common headers for all API requests. Automatically injects Supabase JWT bearer token.
  */
-export const getApiHeaders = (extraHeaders: Record<string, string> = {}): Record<string, string> => {
+export const getApiHeaders = (
+  extraHeaders: Record<string, string> = {}
+): Record<string, string> => {
   let token = currentToken;
 
   // Fallback to localStorage synchronous lookup if token not yet loaded in memory
@@ -131,7 +133,8 @@ export async function safeFetch<T = unknown>(
       } else if (res.status === 404) {
         errorMsg = "El registro o recurso solicitado no fue encontrado.";
       } else if (res.status >= 500) {
-        errorMsg = "El servicio experimentó un inconveniente temporal. Por favor, intenta de nuevo en unos momentos.";
+        errorMsg =
+          "El servicio experimentó un inconveniente temporal. Por favor, intenta de nuevo en unos momentos.";
       } else if (
         rawError &&
         !rawError.toLowerCase().includes("database") &&

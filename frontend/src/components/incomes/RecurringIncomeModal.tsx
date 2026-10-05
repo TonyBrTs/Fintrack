@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn, formatLiveNumber, parseLiveNumber, getTodayLocal, formatCalendarDate } from "@/lib/utils";
+import {
+  cn,
+  formatLiveNumber,
+  parseLiveNumber,
+  getTodayLocal,
+  formatCalendarDate,
+} from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +17,14 @@ import {
 } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/SettingsContext";
 import { recurringService } from "@/services";
-import { Loader2, Calendar as CalendarLucide, Repeat, CalendarClock, CheckCircle2, Power } from "lucide-react";
+import {
+  Loader2,
+  Calendar as CalendarLucide,
+  Repeat,
+  CalendarClock,
+  CheckCircle2,
+  Power,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -67,9 +80,10 @@ export function RecurringIncomeModal({
         frequency: initialData.frequency || "biweekly",
         biweekly_type: initialData.biweekly_type || "15_and_last_day",
         billing_day: initialData.billing_day || 15,
-        start_date: typeof initialData.start_date === "string" 
-          ? initialData.start_date.split("T")[0] 
-          : new Date(initialData.start_date).toISOString().split("T")[0],
+        start_date:
+          typeof initialData.start_date === "string"
+            ? initialData.start_date.split("T")[0]
+            : new Date(initialData.start_date).toISOString().split("T")[0],
         auto_register: initialData.auto_register ?? true,
         is_active: initialData.is_active ?? true,
       });
@@ -89,13 +103,7 @@ export function RecurringIncomeModal({
     }
   }, [initialData, isOpen]);
 
-  const paymentMethods = [
-    "Transferencia",
-    "Depósito Bancario",
-    "Efectivo",
-    "Cheque",
-    "Otro",
-  ];
+  const paymentMethods = ["Transferencia", "Depósito Bancario", "Efectivo", "Cheque", "Otro"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,8 +147,8 @@ export function RecurringIncomeModal({
       }
 
       toast.success(
-        initialData 
-          ? "Ingreso programado actualizado exitosamente" 
+        initialData
+          ? "Ingreso programado actualizado exitosamente"
           : "Ingreso fijo programado exitosamente. Se registrará automáticamente en la fecha correspondiente."
       );
       onSuccess();
@@ -207,9 +215,7 @@ export function RecurringIncomeModal({
               type="text"
               required
               value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Ej: Salario Empresa, Pensión, Freelance Mensual"
               className="h-10 bg-secondary/30 border-border/80 focus:bg-background rounded-xl"
             />
@@ -235,7 +241,9 @@ export function RecurringIncomeModal({
                 )}
               >
                 <div className="flex items-center justify-between w-full">
-                  <span className="font-bold text-sm text-titles dark:text-foreground">Quincenal</span>
+                  <span className="font-bold text-sm text-titles dark:text-foreground">
+                    Quincenal
+                  </span>
                   {formData.frequency === "biweekly" && (
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   )}
@@ -254,7 +262,9 @@ export function RecurringIncomeModal({
                 )}
               >
                 <div className="flex items-center justify-between w-full">
-                  <span className="font-bold text-sm text-titles dark:text-foreground">Mensual</span>
+                  <span className="font-bold text-sm text-titles dark:text-foreground">
+                    Mensual
+                  </span>
                   {formData.frequency === "monthly" && (
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   )}
@@ -374,7 +384,9 @@ export function RecurringIncomeModal({
               </div>
               {/* Live preview of next 3 due dates */}
               <div className="text-[11px] text-muted-foreground bg-emerald-500/5 border border-emerald-500/15 rounded-lg px-3 py-2">
-                <span className="font-semibold text-emerald-700 dark:text-emerald-400">Próximos cobros: </span>
+                <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                  Próximos cobros:{" "}
+                </span>
                 {(() => {
                   const day = Math.min(formData.billing_day || 15, 31);
                   const now = new Date();
@@ -389,7 +401,10 @@ export function RecurringIncomeModal({
                       dates.push(formatCalendarDate(dt, language, true));
                     }
                     m++;
-                    if (m > 11) { m = 0; y++; }
+                    if (m > 11) {
+                      m = 0;
+                      y++;
+                    }
                   }
                   return dates.join(" · ");
                 })()}
@@ -426,9 +441,7 @@ export function RecurringIncomeModal({
               </label>
               <Select
                 value={formData.payment_method}
-                onValueChange={(val) =>
-                  setFormData({ ...formData, payment_method: val })
-                }
+                onValueChange={(val) => setFormData({ ...formData, payment_method: val })}
               >
                 <SelectTrigger className="h-10 bg-secondary/30 border-border/80 rounded-xl">
                   <SelectValue placeholder="Selecciona método" />
@@ -475,9 +488,7 @@ export function RecurringIncomeModal({
 
             <Switch
               checked={formData.auto_register}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, auto_register: checked })
-              }
+              onCheckedChange={(checked) => setFormData({ ...formData, auto_register: checked })}
               colorScheme="emerald"
             />
           </div>
@@ -485,7 +496,12 @@ export function RecurringIncomeModal({
           {/* Switch de Estado (Activo / Pausado) */}
           <div className="flex items-center justify-between p-3.5 rounded-xl bg-secondary/40 border border-border/60 gap-3">
             <div className="flex items-start gap-2.5 min-w-0">
-              <Power className={cn("w-4 h-4 shrink-0 mt-0.5", formData.is_active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")} />
+              <Power
+                className={cn(
+                  "w-4 h-4 shrink-0 mt-0.5",
+                  formData.is_active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"
+                )}
+              />
               <div>
                 <span className="text-xs font-bold text-titles dark:text-foreground block">
                   Estado del Ingreso
@@ -500,9 +516,7 @@ export function RecurringIncomeModal({
 
             <Switch
               checked={formData.is_active}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, is_active: checked })
-              }
+              onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
               colorScheme="emerald"
             />
           </div>

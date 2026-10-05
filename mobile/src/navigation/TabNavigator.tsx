@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { View, Modal } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { DashboardScreen } from '../screens/DashboardScreen';
-import { TransactionsScreen } from '../screens/TransactionsScreen';
-import { ReportsScreen } from '../screens/ReportsScreen';
-import { GoalsScreen } from '../screens/GoalsScreen';
-import { RecurringScreen } from '../screens/RecurringScreen';
-import { CustomTabBar } from './CustomTabBar';
-import { QuickActionModal } from '../components/QuickActionModal';
-import { AddExpenseModal } from '../components/AddExpenseModal';
-import { AddIncomeModal } from '../components/AddIncomeModal';
-import { SettingsModal } from '../components/SettingsModal';
-import { useSettings } from '../context/SettingsContext';
+import React, { useState } from "react";
+import { View, Modal } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { DashboardScreen } from "../screens/DashboardScreen";
+import { TransactionsScreen } from "../screens/TransactionsScreen";
+import { ReportsScreen } from "../screens/ReportsScreen";
+import { GoalsScreen } from "../screens/GoalsScreen";
+import { RecurringScreen } from "../screens/RecurringScreen";
+import { CustomTabBar } from "./CustomTabBar";
+import { QuickActionModal } from "../components/QuickActionModal";
+import { AddExpenseModal } from "../components/AddExpenseModal";
+import { AddIncomeModal } from "../components/AddIncomeModal";
+import { SettingsModal } from "../components/SettingsModal";
+import { useSettings } from "../context/SettingsContext";
 
 const Tab = createBottomTabNavigator();
 
@@ -28,9 +28,7 @@ export const TabNavigator: React.FC = () => {
   return (
     <>
       <Tab.Navigator
-        tabBar={(props) => (
-          <CustomTabBar {...props} onOpenCreate={() => setShowQuickModal(true)} />
-        )}
+        tabBar={(props) => <CustomTabBar {...props} onOpenCreate={() => setShowQuickModal(true)} />}
         screenOptions={{
           headerShown: false,
         }}
@@ -73,10 +71,7 @@ export const TabNavigator: React.FC = () => {
       </Modal>
 
       {/* Modal Global de Configuración & Perfil disponible para todas las pantallas */}
-      <SettingsModal
-        visible={isSettingsOpen}
-        onClose={closeSettings}
-      />
+      <SettingsModal visible={isSettingsOpen} onClose={closeSettings} />
     </>
   );
 };

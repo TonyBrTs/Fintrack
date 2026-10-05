@@ -9,11 +9,7 @@ interface GoogleAuthButtonProps {
   isEs?: boolean;
 }
 
-export function GoogleAuthButton({
-  isLoading,
-  onClick,
-  isEs = true,
-}: GoogleAuthButtonProps) {
+export function GoogleAuthButton({ isLoading, onClick, isEs = true }: GoogleAuthButtonProps) {
   return (
     <button
       type="button"

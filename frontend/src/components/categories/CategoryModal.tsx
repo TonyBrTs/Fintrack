@@ -167,7 +167,9 @@ export function CategoryModal({
                   }`}
                   title={opt.label}
                 >
-                  {color === opt.name && <Check size={16} className="text-white drop-shadow font-bold" strokeWidth={3} />}
+                  {color === opt.name && (
+                    <Check size={16} className="text-white drop-shadow font-bold" strokeWidth={3} />
+                  )}
                 </button>
               ))}
             </div>

@@ -30,11 +30,7 @@ interface RegisterGoalModalProps {
   onSuccess: () => void;
 }
 
-export function RegisterGoalModal({
-  isOpen,
-  onClose,
-  onSuccess,
-}: RegisterGoalModalProps) {
+export function RegisterGoalModal({ isOpen, onClose, onSuccess }: RegisterGoalModalProps) {
   const { translate, currencySymbol } = useSettings();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -95,9 +91,7 @@ export function RegisterGoalModal({
             <div className="p-2 bg-action/10 text-action rounded-xl">
               <Goal size={20} />
             </div>
-            <DialogTitle className="text-xl font-bold">
-              {translate("goals.register")}
-            </DialogTitle>
+            <DialogTitle className="text-xl font-bold">{translate("goals.register")}</DialogTitle>
           </div>
         </DialogHeader>
 
@@ -110,9 +104,7 @@ export function RegisterGoalModal({
               required
               type="text"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Ej. Viaje a Japón"
               className="h-12 focus-visible:ring-action"
             />
@@ -159,9 +151,7 @@ export function RegisterGoalModal({
             </label>
             <Select
               value={formData.category}
-              onValueChange={(value) =>
-                setFormData({ ...formData, category: value })
-              }
+              onValueChange={(value) => setFormData({ ...formData, category: value })}
             >
               <SelectTrigger className="h-12">
                 <SelectValue placeholder="Seleccionar categoría" />

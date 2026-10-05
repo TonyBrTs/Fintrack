@@ -58,7 +58,9 @@ export default function GoalsPage() {
         fetchGoals();
         toast.success(translate("goals.details.deleteSuccess") || "Meta eliminada");
       } else {
-        toast.error(res.error || translate("goals.details.deleteError") || "Error al eliminar la meta");
+        toast.error(
+          res.error || translate("goals.details.deleteError") || "Error al eliminar la meta"
+        );
       }
     } catch {
       toast.error(translate("goals.details.deleteError") || "Error al eliminar la meta");
@@ -77,7 +79,7 @@ export default function GoalsPage() {
     fetchGoals();
   }, [user?.id]);
 
-  const safeGoals = useMemo(() => Array.isArray(goals) ? goals : [], [goals]);
+  const safeGoals = useMemo(() => (Array.isArray(goals) ? goals : []), [goals]);
 
   const totalSaved = useMemo(() => {
     return safeGoals.reduce((acc, curr) => acc + curr.current_amount, 0);
@@ -97,129 +99,130 @@ export default function GoalsPage() {
   }, [goals]);
 
   if (loading && goals.length === 0) {
-    return (
-      <PageLoadingState message={translate("common.loading") || "Cargando metas..."} />
-    );
+    return <PageLoadingState message={translate("common.loading") || "Cargando metas..."} />;
   }
 
   return (
     <ProtectedRoute>
       <div className="space-y-8 max-w-7xl mx-auto">
-      <DeleteConfirmDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => {
-          setIsDeleteDialogOpen(false);
-          setGoalToDelete(null);
-        }}
-        onConfirm={confirmDelete}
-        loading={isDeleting}
-        title={translate("goals.delete") || "Eliminar meta"}
-        description={translate("goals.details.deleteConfirm") || "¿Estás seguro de que deseas eliminar esta meta?"}
-        confirmLabel={translate("goals.delete") || "Eliminar"}
-        cancelLabel={translate("income.form.cancel") || "Cancelar"}
-      />
+        <DeleteConfirmDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setGoalToDelete(null);
+          }}
+          onConfirm={confirmDelete}
+          loading={isDeleting}
+          title={translate("goals.delete") || "Eliminar meta"}
+          description={
+            translate("goals.details.deleteConfirm") ||
+            "¿Estás seguro de que deseas eliminar esta meta?"
+          }
+          confirmLabel={translate("goals.delete") || "Eliminar"}
+          cancelLabel={translate("income.form.cancel") || "Cancelar"}
+        />
 
-      {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-            <Trophy size={12} className="text-amber-500" />
-            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Objetivos Financieros</span>
+        {/* Header */}
+        <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
+              <Trophy size={12} className="text-amber-500" />
+              <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">
+                Objetivos Financieros
+              </span>
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
+                {translate("goals.title") || "Metas Financieras"}
+              </h1>
+              <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
+                {translate("goals.description") ||
+                  "Define tus objetivos de ahorro, visualiza tu avance y celebra cada logro."}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
-              {translate("goals.title") || "Metas Financieras"}
-            </h1>
-            <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
-              {translate("goals.description") || "Define tus objetivos de ahorro, visualiza tu avance y celebra cada logro."}
-            </p>
-          </div>
-        </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer"
-        >
-          <Plus size={18} strokeWidth={2.5} />
-          {translate("goals.register") || "Nueva Meta"}
-        </motion.button>
-      </header>
-
-      <RegisterGoalModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={fetchGoals}
-      />
-
-      {/* Metrics Row */}
-      {goals.length > 0 && (
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-          <KPICard
-            title="Total Acumulado en Metas"
-            amount={`${currencySymbol}${formatCurrency(totalSaved)}`}
-            trend={`de ${currencySymbol}${formatCurrency(totalTarget)}`}
-            trendType="up"
-            icon={<NavGoalsIcon size={22} className="text-action dark:text-blue-400" />}
-          />
-          <KPICard
-            title="Progreso Global"
-            amount={`${overallProgress.toFixed(1)}%`}
-            trend={overallProgress >= 50 ? "Buen avance" : "En progreso"}
-            trendType={overallProgress >= 50 ? "up" : "neutral"}
-            icon={<Sparkles size={22} className="text-amber-500" />}
-          />
-          <KPICard
-            title="Metas Cumplidas"
-            amount={`${completedGoalsCount} / ${goals.length}`}
-            trend={completedGoalsCount > 0 ? "¡Objetivos logrados!" : "Aún sin completar"}
-            trendType={completedGoalsCount > 0 ? "up" : "neutral"}
-            icon={<Trophy size={22} className="text-emerald-500" />}
-          />
-        </section>
-      )}
-
-      {/* Goals Grid */}
-      {goals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-card/60 dark:bg-card/40 rounded-3xl border border-dashed border-border/80">
-          <div className="p-5 bg-action/10 rounded-2xl text-action">
-            <NavGoalsIcon size={48} />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold text-titles dark:text-foreground">
-              Comienza tu primera meta de ahorro
-            </h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
-              {translate("goals.emptyState") || "No tienes metas registradas. Crea una para visualizar tu progreso."}
-            </p>
-          </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setIsModalOpen(true)}
-            className="text-action dark:text-blue-400 font-bold hover:underline cursor-pointer text-sm"
+            className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer"
           >
-            + {translate("goals.register") || "Crear primera meta"}
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AnimatePresence>
-            {goals.map((goal, index) => (
-              <motion.div
-                key={goal.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.3 }}
-              >
-                <GoalCard
-                  goal={goal}
-                  onDelete={handleDelete}
-                  onRefresh={fetchGoals}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      )}
+            <Plus size={18} strokeWidth={2.5} />
+            {translate("goals.register") || "Nueva Meta"}
+          </motion.button>
+        </header>
+
+        <RegisterGoalModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={fetchGoals}
+        />
+
+        {/* Metrics Row */}
+        {goals.length > 0 && (
+          <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+            <KPICard
+              title="Total Acumulado en Metas"
+              amount={`${currencySymbol}${formatCurrency(totalSaved)}`}
+              trend={`de ${currencySymbol}${formatCurrency(totalTarget)}`}
+              trendType="up"
+              icon={<NavGoalsIcon size={22} className="text-action dark:text-blue-400" />}
+            />
+            <KPICard
+              title="Progreso Global"
+              amount={`${overallProgress.toFixed(1)}%`}
+              trend={overallProgress >= 50 ? "Buen avance" : "En progreso"}
+              trendType={overallProgress >= 50 ? "up" : "neutral"}
+              icon={<Sparkles size={22} className="text-amber-500" />}
+            />
+            <KPICard
+              title="Metas Cumplidas"
+              amount={`${completedGoalsCount} / ${goals.length}`}
+              trend={completedGoalsCount > 0 ? "¡Objetivos logrados!" : "Aún sin completar"}
+              trendType={completedGoalsCount > 0 ? "up" : "neutral"}
+              icon={<Trophy size={22} className="text-emerald-500" />}
+            />
+          </section>
+        )}
+
+        {/* Goals Grid */}
+        {goals.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-card/60 dark:bg-card/40 rounded-3xl border border-dashed border-border/80">
+            <div className="p-5 bg-action/10 rounded-2xl text-action">
+              <NavGoalsIcon size={48} />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-titles dark:text-foreground">
+                Comienza tu primera meta de ahorro
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                {translate("goals.emptyState") ||
+                  "No tienes metas registradas. Crea una para visualizar tu progreso."}
+              </p>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="text-action dark:text-blue-400 font-bold hover:underline cursor-pointer text-sm"
+            >
+              + {translate("goals.register") || "Crear primera meta"}
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence>
+              {goals.map((goal, index) => (
+                <motion.div
+                  key={goal.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.3 }}
+                >
+                  <GoalCard goal={goal} onDelete={handleDelete} onRefresh={fetchGoals} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );

@@ -4,11 +4,7 @@ import React from "react";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { formatCurrency } from "@/lib/utils";
 import type { Expense, Income, Goal } from "@/types/index";
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ShieldCheck } from "lucide-react";
 
 interface AccountStatementDocumentProps {
   reportReference: string;
@@ -128,9 +124,7 @@ export function AccountStatementDocument({
               <span className="block text-[10px] uppercase font-bold text-slate-400 mb-0.5">
                 {isEs ? "Período Consultado" : "Consulted Period"}
               </span>
-              <span className="font-semibold text-slate-800 break-words block">
-                {periodLabel}
-              </span>
+              <span className="font-semibold text-slate-800 break-words block">{periodLabel}</span>
             </div>
           </div>
         </div>
@@ -144,9 +138,7 @@ export function AccountStatementDocument({
                   ? "I. RESUMEN EJECUTIVO Y FLUJO NETO DEL PERÍODO"
                   : "I. EXECUTIVE SUMMARY & NET CASH FLOW"}
               </h3>
-              <span className="text-[10px] text-slate-500 font-mono">
-                {periodLabel}
-              </span>
+              <span className="text-[10px] text-slate-500 font-mono">{periodLabel}</span>
             </div>
 
             <div className="overflow-x-auto print:overflow-visible -mx-2 px-2 sm:mx-0 sm:px-0">
@@ -167,10 +159,7 @@ export function AccountStatementDocument({
                 <tbody className="divide-y divide-slate-200">
                   <tr>
                     <td className="py-2.5 px-3 font-semibold text-slate-800 flex items-center gap-1.5">
-                      <ArrowDownRight
-                        size={14}
-                        className="text-emerald-600 shrink-0"
-                      />
+                      <ArrowDownRight size={14} className="text-emerald-600 shrink-0" />
                       <span>
                         {isEs
                           ? "(+) Total Ingresos y Abonos Percibidos"
@@ -187,10 +176,7 @@ export function AccountStatementDocument({
                   </tr>
                   <tr>
                     <td className="py-2.5 px-3 font-semibold text-slate-800 flex items-center gap-1.5">
-                      <ArrowUpRight
-                        size={14}
-                        className="text-rose-600 shrink-0"
-                      />
+                      <ArrowUpRight size={14} className="text-rose-600 shrink-0" />
                       <span>
                         {isEs
                           ? "(-) Total Egresos y Gastos Realizados"
@@ -214,8 +200,7 @@ export function AccountStatementDocument({
                         : "(=) Net Financial Balance"}
                     </td>
                     <td className="py-2.5 px-3 text-center font-mono text-[11px] text-slate-600">
-                      {savingsRate.toFixed(1)}%{" "}
-                      {isEs ? "margen ahorro" : "saving rate"}
+                      {savingsRate.toFixed(1)}% {isEs ? "margen ahorro" : "saving rate"}
                     </td>
                     <td
                       className={`py-2.5 px-3 text-right font-mono text-sm ${
@@ -243,8 +228,7 @@ export function AccountStatementDocument({
                   : "II. ITEMIZED EXPENSES LEDGER (EVERY TRANSACTION)"}
               </h3>
               <span className="text-[10px] text-slate-500 font-mono">
-                {filteredExpenses.length}{" "}
-                {isEs ? "transacciones" : "transactions"}
+                {filteredExpenses.length} {isEs ? "transacciones" : "transactions"}
               </span>
             </div>
 
@@ -259,9 +243,7 @@ export function AccountStatementDocument({
                 <table className="w-full text-xs border-collapse min-w-[480px] sm:min-w-0">
                   <thead>
                     <tr className="bg-slate-100 text-slate-700 text-[10px] uppercase font-bold border-y border-slate-300">
-                      <th className="py-2 px-3 text-left w-24">
-                        {isEs ? "Fecha" : "Date"}
-                      </th>
+                      <th className="py-2 px-3 text-left w-24">{isEs ? "Fecha" : "Date"}</th>
                       <th className="py-2 px-3 text-left">
                         {isEs ? "Concepto / Descripción" : "Description / Concept"}
                       </th>
@@ -271,9 +253,7 @@ export function AccountStatementDocument({
                       <th className="py-2 px-3 text-left w-32 hidden sm:table-cell">
                         {isEs ? "Medio Pago" : "Method"}
                       </th>
-                      <th className="py-2 px-3 text-right w-28">
-                        {isEs ? "Importe" : "Amount"}
-                      </th>
+                      <th className="py-2 px-3 text-right w-28">{isEs ? "Importe" : "Amount"}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -286,8 +266,7 @@ export function AccountStatementDocument({
                           {formatDateDisplay(exp.date)}
                         </td>
                         <td className="py-2 px-3 font-medium text-slate-800">
-                          {exp.description ||
-                            (isEs ? "Sin descripción" : "No concept")}
+                          {exp.description || (isEs ? "Sin descripción" : "No concept")}
                         </td>
                         <td className="py-2 px-3 text-slate-600">
                           <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
@@ -306,10 +285,7 @@ export function AccountStatementDocument({
                   </tbody>
                   <tfoot>
                     <tr className="border-t-2 border-b-2 border-slate-400 font-bold bg-slate-50">
-                      <td
-                        colSpan={3}
-                        className="py-2.5 px-3 text-slate-900 uppercase font-black"
-                      >
+                      <td colSpan={3} className="py-2.5 px-3 text-slate-900 uppercase font-black">
                         {isEs
                           ? `Total Egresos (${filteredExpenses.length} transacciones)`
                           : `Total Expenses (${filteredExpenses.length} transactions)`}
@@ -337,8 +313,7 @@ export function AccountStatementDocument({
                   : "III. ITEMIZED INCOMES LEDGER (EVERY TRANSACTION)"}
               </h3>
               <span className="text-[10px] text-slate-500 font-mono">
-                {filteredIncomes.length}{" "}
-                {isEs ? "transacciones" : "transactions"}
+                {filteredIncomes.length} {isEs ? "transacciones" : "transactions"}
               </span>
             </div>
 
@@ -353,9 +328,7 @@ export function AccountStatementDocument({
                 <table className="w-full text-xs border-collapse min-w-[480px] sm:min-w-0">
                   <thead>
                     <tr className="bg-slate-100 text-slate-700 text-[10px] uppercase font-bold border-y border-slate-300">
-                      <th className="py-2 px-3 text-left w-24">
-                        {isEs ? "Fecha" : "Date"}
-                      </th>
+                      <th className="py-2 px-3 text-left w-24">{isEs ? "Fecha" : "Date"}</th>
                       <th className="py-2 px-3 text-left">
                         {isEs ? "Concepto / Descripción" : "Description / Concept"}
                       </th>
@@ -365,9 +338,7 @@ export function AccountStatementDocument({
                       <th className="py-2 px-3 text-left w-32 hidden sm:table-cell">
                         {isEs ? "Medio Acreditación" : "Method"}
                       </th>
-                      <th className="py-2 px-3 text-right w-28">
-                        {isEs ? "Importe" : "Amount"}
-                      </th>
+                      <th className="py-2 px-3 text-right w-28">{isEs ? "Importe" : "Amount"}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -380,8 +351,7 @@ export function AccountStatementDocument({
                           {formatDateDisplay(inc.date)}
                         </td>
                         <td className="py-2 px-3 font-medium text-slate-800">
-                          {inc.description ||
-                            (isEs ? "Abono a cuenta" : "Deposit")}
+                          {inc.description || (isEs ? "Abono a cuenta" : "Deposit")}
                         </td>
                         <td className="py-2 px-3 text-slate-600">
                           <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800">
@@ -400,10 +370,7 @@ export function AccountStatementDocument({
                   </tbody>
                   <tfoot>
                     <tr className="border-t-2 border-b-2 border-slate-400 font-bold bg-slate-50">
-                      <td
-                        colSpan={3}
-                        className="py-2.5 px-3 text-slate-900 uppercase font-black"
-                      >
+                      <td colSpan={3} className="py-2.5 px-3 text-slate-900 uppercase font-black">
                         {isEs
                           ? `Total Ingresos (${filteredIncomes.length} transacciones)`
                           : `Total Inflows (${filteredIncomes.length} transactions)`}
@@ -448,20 +415,14 @@ export function AccountStatementDocument({
                     <th className="py-2 px-3 text-right">
                       {isEs ? "Meta Proyectada" : "Target Cap"}
                     </th>
-                    <th className="py-2 px-3 text-center">
-                      {isEs ? "Progreso" : "Status"}
-                    </th>
-                    <th className="py-2 px-3 text-right">
-                      {isEs ? "Remanente" : "Remaining"}
-                    </th>
+                    <th className="py-2 px-3 text-center">{isEs ? "Progreso" : "Status"}</th>
+                    <th className="py-2 px-3 text-right">{isEs ? "Remanente" : "Remaining"}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   {goals.map((g, idx) => {
                     const pct =
-                      g.target_amount > 0
-                        ? (g.current_amount / g.target_amount) * 100
-                        : 0;
+                      g.target_amount > 0 ? (g.current_amount / g.target_amount) * 100 : 0;
                     const rem = Math.max(0, g.target_amount - g.current_amount);
                     const isDone = g.current_amount >= g.target_amount;
                     return (
@@ -469,9 +430,7 @@ export function AccountStatementDocument({
                         key={g.id || idx}
                         className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}
                       >
-                        <td className="py-2 px-3 font-semibold text-slate-800">
-                          {g.name}
-                        </td>
+                        <td className="py-2 px-3 font-semibold text-slate-800">{g.name}</td>
                         <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
                           {currencySymbol}
                           {formatCurrency(g.current_amount)}
@@ -492,9 +451,7 @@ export function AccountStatementDocument({
                           )}
                         </td>
                         <td className="py-2 px-3 text-right font-mono text-slate-500">
-                          {rem > 0
-                            ? `${currencySymbol}${formatCurrency(rem)}`
-                            : "---"}
+                          {rem > 0 ? `${currencySymbol}${formatCurrency(rem)}` : "---"}
                         </td>
                       </tr>
                     );
@@ -509,13 +466,9 @@ export function AccountStatementDocument({
         {notes.trim() && (
           <div className="report-section mb-7 p-3.5 bg-slate-50 border-l-4 border-blue-600 text-xs">
             <div className="font-bold text-slate-900 uppercase tracking-wider text-[11px] mb-1">
-              {isEs
-                ? "V. OBSERVACIONES Y NOTAS ACLARATORIAS"
-                : "V. AUDITOR REMARKS & DISCLOSURES"}
+              {isEs ? "V. OBSERVACIONES Y NOTAS ACLARATORIAS" : "V. AUDITOR REMARKS & DISCLOSURES"}
             </div>
-            <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
-              {notes}
-            </p>
+            <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{notes}</p>
           </div>
         )}
 
@@ -538,17 +491,12 @@ export function AccountStatementDocument({
             <div className="text-right font-mono shrink-0">
               <div className="flex items-center justify-end gap-1 text-slate-700 font-bold mb-1">
                 <ShieldCheck size={14} className="text-blue-600" />
-                <span>
-                  {isEs ? "DOCUMENTO CERTIFICADO" : "CERTIFIED REPORT"}
-                </span>
+                <span>{isEs ? "DOCUMENTO CERTIFICADO" : "CERTIFIED REPORT"}</span>
               </div>
               <p className="text-[9px] text-slate-400">
-                REF: {reportReference} •{" "}
-                {isEs ? "EMISIÓN:" : "ISSUED:"} {generatedAt}
+                REF: {reportReference} • {isEs ? "EMISIÓN:" : "ISSUED:"} {generatedAt}
               </p>
-              <p className="text-[9px] text-slate-400">
-                FinTrack Systems © 2026
-              </p>
+              <p className="text-[9px] text-slate-400">FinTrack Systems © 2026</p>
             </div>
           </div>
         </div>

@@ -1,13 +1,13 @@
-import 'react-native-url-polyfill/auto';
-import * as SecureStore from 'expo-secure-store';
-import { createClient } from '@supabase/supabase-js';
+import "react-native-url-polyfill/auto";
+import * as SecureStore from "expo-secure-store";
+import { createClient } from "@supabase/supabase-js";
 
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 
 const ExpoSecureStoreAdapter = {
   getItem: (key: string) => {
-    if (Platform.OS === 'web') {
-      if (typeof localStorage !== 'undefined') {
+    if (Platform.OS === "web") {
+      if (typeof localStorage !== "undefined") {
         return Promise.resolve(localStorage.getItem(key));
       }
       return Promise.resolve(null);
@@ -15,8 +15,8 @@ const ExpoSecureStoreAdapter = {
     return SecureStore.getItemAsync(key);
   },
   setItem: (key: string, value: string) => {
-    if (Platform.OS === 'web') {
-      if (typeof localStorage !== 'undefined') {
+    if (Platform.OS === "web") {
+      if (typeof localStorage !== "undefined") {
         localStorage.setItem(key, value);
       }
       return Promise.resolve();
@@ -24,8 +24,8 @@ const ExpoSecureStoreAdapter = {
     return SecureStore.setItemAsync(key, value);
   },
   removeItem: (key: string) => {
-    if (Platform.OS === 'web') {
-      if (typeof localStorage !== 'undefined') {
+    if (Platform.OS === "web") {
+      if (typeof localStorage !== "undefined") {
         localStorage.removeItem(key);
       }
       return Promise.resolve();
@@ -35,8 +35,7 @@ const ExpoSecureStoreAdapter = {
 };
 
 const supabaseUrl =
-  process.env.EXPO_PUBLIC_SUPABASE_URL ||
-  "https://tjloylnetfaefuoyfwxy.supabase.co";
+  process.env.EXPO_PUBLIC_SUPABASE_URL || "https://tjloylnetfaefuoyfwxy.supabase.co";
 
 const supabaseAnonKey =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||

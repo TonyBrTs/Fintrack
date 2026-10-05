@@ -1,67 +1,67 @@
-import { AppShell } from '@/components/layout/AppShell';
-import { ThemeProvider } from '@/components/theme-provider';
-import { SettingsProvider } from '@/contexts/SettingsContext';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { AuthModal } from '@/components/auth/AuthModal';
-import { ServiceWorkerRegister } from '@/components/layout/ServiceWorkerRegister';
-import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import './globals.css';
+import { AppShell } from "@/components/layout/AppShell";
+import { ThemeProvider } from "@/components/theme-provider";
+import { SettingsProvider } from "@/contexts/SettingsContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
 
 const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#e8edf5' },
-    { media: '(prefers-color-scheme: dark)', color: '#090d16' },
+    { media: "(prefers-color-scheme: light)", color: "#e8edf5" },
+    { media: "(prefers-color-scheme: dark)", color: "#090d16" },
   ],
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover',
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
-  title: 'FinTrack - Gestor Financiero',
-  description: 'Tu gestor inteligente de finanzas personales, gastos, ingresos y metas',
-  manifest: '/manifest.webmanifest',
+  title: "FinTrack - Gestor Financiero",
+  description: "Tu gestor inteligente de finanzas personales, gastos, ingresos y metas",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'FinTrack',
+    statusBarStyle: "black-translucent",
+    title: "FinTrack",
   },
   formatDetection: {
     telephone: false,
   },
   icons: {
     icon: [
-      { url: '/favicon.ico?v=3', sizes: 'any' },
-      { url: '/favicon-32x32.png?v=3', type: 'image/png', sizes: '32x32' },
-      { url: '/favicon-16x16.png?v=3', type: 'image/png', sizes: '16x16' },
-      { url: '/icon-192.png?v=3', type: 'image/png', sizes: '192x192' },
-      { url: '/icon-512.png?v=3', type: 'image/png', sizes: '512x512' },
-      { url: '/icon.png?v=3', type: 'image/png', sizes: '512x512' },
-      { url: '/logo.png?v=3', type: 'image/png' },
+      { url: "/favicon.ico?v=3", sizes: "any" },
+      { url: "/favicon-32x32.png?v=3", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png?v=3", type: "image/png", sizes: "16x16" },
+      { url: "/icon-192.png?v=3", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png?v=3", type: "image/png", sizes: "512x512" },
+      { url: "/icon.png?v=3", type: "image/png", sizes: "512x512" },
+      { url: "/logo.png?v=3", type: "image/png" },
     ],
     apple: [
-      { url: '/apple-touch-icon.png?v=3', sizes: '180x180' },
-      { url: '/icon-512.png?v=3', sizes: '512x512' },
-      { url: '/icon.png?v=3', sizes: '512x512' },
+      { url: "/apple-touch-icon.png?v=3", sizes: "180x180" },
+      { url: "/icon-512.png?v=3", sizes: "512x512" },
+      { url: "/icon.png?v=3", sizes: "512x512" },
     ],
-    shortcut: ['/favicon.ico?v=3'],
+    shortcut: ["/favicon.ico?v=3"],
   },
 };
 
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,

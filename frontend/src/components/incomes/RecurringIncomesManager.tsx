@@ -117,7 +117,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
     const last = new Date(item.last_executed_at);
     const now = new Date();
     if (item.frequency === "biweekly") {
-      const sameMonth = last.getFullYear() === now.getFullYear() && last.getMonth() === now.getMonth();
+      const sameMonth =
+        last.getFullYear() === now.getFullYear() && last.getMonth() === now.getMonth();
       if (!sameMonth) return false;
       const lastIsFirst = last.getDate() <= 15;
       const nowIsFirst = now.getDate() <= 15;
@@ -127,7 +128,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
       return last.getFullYear() === now.getFullYear() && last.getMonth() === now.getMonth();
     }
     if (item.frequency === "weekly") {
-      return (now.getTime() - last.getTime()) < 6 * 24 * 60 * 60 * 1000;
+      return now.getTime() - last.getTime() < 6 * 24 * 60 * 60 * 1000;
     }
     if (item.frequency === "yearly") {
       return last.getFullYear() === now.getFullYear();
@@ -224,7 +225,10 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
             </h3>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {translate("recurring.incomesSubtitle", "Se registran automáticamente en tu balance al llegar su fecha de cobro")}
+            {translate(
+              "recurring.incomesSubtitle",
+              "Se registran automáticamente en tu balance al llegar su fecha de cobro"
+            )}
           </p>
         </div>
 
@@ -234,11 +238,21 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
             size="sm"
             onClick={handleSync}
             disabled={syncing}
-            title={language === "en" ? "Sync due recurring incomes" : "Sincronizar ingresos vencidos"}
+            title={
+              language === "en" ? "Sync due recurring incomes" : "Sincronizar ingresos vencidos"
+            }
             className="flex-1 sm:flex-initial rounded-xl font-bold text-xs h-9 px-3 border-border hover:bg-secondary cursor-pointer"
           >
-            <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", syncing && "animate-spin text-emerald-600")} />
-            <span>{syncing ? (language === "en" ? "Checking..." : "Comprobando...") : translate("recurring.sync", "Sincronizar")}</span>
+            <RefreshCw
+              className={cn("w-3.5 h-3.5 mr-1.5", syncing && "animate-spin text-emerald-600")}
+            />
+            <span>
+              {syncing
+                ? language === "en"
+                  ? "Checking..."
+                  : "Comprobando..."
+                : translate("recurring.sync", "Sincronizar")}
+            </span>
           </Button>
 
           <Button
@@ -266,7 +280,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
           </div>
           <div className="mt-2 flex items-baseline gap-1">
             <span className="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
-              +{currencySymbol}{formatCurrency(monthlyTotal)}
+              +{currencySymbol}
+              {formatCurrency(monthlyTotal)}
             </span>
             <span className="text-[10px] text-muted-foreground font-bold uppercase">
               / {language === "en" ? "mo" : "mes"}
@@ -293,7 +308,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                   {activeItems[0].description}
                 </span>
                 <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
-                  {formatCalendarDate(activeItems[0].next_due_date, language)} • {formatDueDateLabelLocal(activeItems[0].next_due_date).label}
+                  {formatCalendarDate(activeItems[0].next_due_date, language)} •{" "}
+                  {formatDueDateLabelLocal(activeItems[0].next_due_date).label}
                 </p>
               </>
             ) : (
@@ -323,7 +339,10 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
               {translate("recurring.noIncomesTitle", "No tienes ingresos fijos configurados")}
             </h4>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              {translate("recurring.noIncomesDesc", "Programa tu salario quincenal, pensión o cobros recurrentes de clientes para que se registren automáticamente sin que tengas que hacerlo a mano.")}
+              {translate(
+                "recurring.noIncomesDesc",
+                "Programa tu salario quincenal, pensión o cobros recurrentes de clientes para que se registren automáticamente sin que tengas que hacerlo a mano."
+              )}
             </p>
           </div>
           <Button
@@ -379,7 +398,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                     </div>
                     <div className="text-right shrink-0">
                       <span className="text-base font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                        +{currencySymbol}{formatCurrency(item.amount)}
+                        +{currencySymbol}
+                        {formatCurrency(item.amount)}
                       </span>
                     </div>
                   </div>
@@ -412,7 +432,15 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                         checked={item.is_active}
                         disabled={isLoadingThis}
                         onCheckedChange={() => handleToggleActive(item)}
-                        title={item.is_active ? (language === "en" ? "Active • Click to pause" : "Ingreso activo • Clic para pausar") : (language === "en" ? "Paused • Click to activate" : "Ingreso pausado • Clic para activar")}
+                        title={
+                          item.is_active
+                            ? language === "en"
+                              ? "Active • Click to pause"
+                              : "Ingreso activo • Clic para pausar"
+                            : language === "en"
+                              ? "Paused • Click to activate"
+                              : "Ingreso pausado • Clic para activar"
+                        }
                       />
                     </div>
                   </div>
@@ -426,8 +454,12 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                       onClick={() => handleExecuteNow(item)}
                       title={
                         alreadyExecuted
-                          ? (language === "en" ? "Already recorded in this cycle" : "Ya registrado en este ciclo")
-                          : (language === "en" ? "Record income now" : "Registrar cobro ahora (adelantar en el historial)")
+                          ? language === "en"
+                            ? "Already recorded in this cycle"
+                            : "Ya registrado en este ciclo"
+                          : language === "en"
+                            ? "Record income now"
+                            : "Registrar cobro ahora (adelantar en el historial)"
                       }
                       className={cn(
                         "flex-1 rounded-xl text-xs font-bold h-8.5 border cursor-pointer",
@@ -437,7 +469,9 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                       )}
                     >
                       <Zap className="w-3.5 h-3.5 mr-1 fill-current" />
-                      {alreadyExecuted ? translate("recurring.alreadyRegistered", "Ya Registrado") : translate("recurring.collectNow", "Cobrar Ahora")}
+                      {alreadyExecuted
+                        ? translate("recurring.alreadyRegistered", "Ya Registrado")
+                        : translate("recurring.collectNow", "Cobrar Ahora")}
                     </Button>
 
                     <Button
@@ -446,7 +480,11 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                       onClick={() => toggleExpand(item.id)}
                       className="h-8.5 px-2.5 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/60 cursor-pointer flex items-center gap-1 font-medium shrink-0"
                     >
-                      <span>{isExpanded ? translate("recurring.hide", "Ocultar") : translate("recurring.details", "Detalles")}</span>
+                      <span>
+                        {isExpanded
+                          ? translate("recurring.hide", "Ocultar")
+                          : translate("recurring.details", "Detalles")}
+                      </span>
                       <ChevronDown
                         className={cn(
                           "w-3.5 h-3.5 transition-transform duration-200",
@@ -485,7 +523,12 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                             {translate("recurring.frequency", "Frecuencia")}
                           </span>
                           <span className="font-medium text-foreground block mt-0.5 truncate">
-                            {formatFrequencyLabel(item.frequency, item.biweekly_type, item.billing_day, language)}
+                            {formatFrequencyLabel(
+                              item.frequency,
+                              item.biweekly_type,
+                              item.billing_day,
+                              language
+                            )}
                           </span>
                         </div>
 
@@ -494,7 +537,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                             {translate("recurring.paymentMethod", "Medio de Pago")}
                           </span>
                           <span className="font-medium text-foreground block mt-0.5 truncate">
-                            {item.payment_method || (language === "en" ? "Not specified" : "No especificado")}
+                            {item.payment_method ||
+                              (language === "en" ? "Not specified" : "No especificado")}
                           </span>
                         </div>
 
@@ -503,7 +547,9 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                             {translate("recurring.mode", "Modo de Cobro")}
                           </span>
                           <span className="font-medium text-foreground block mt-0.5 truncate">
-                            {item.auto_register ? translate("recurring.autoOnDue", "Automático al vencer") : translate("recurring.manual", "Manual")}
+                            {item.auto_register
+                              ? translate("recurring.autoOnDue", "Automático al vencer")
+                              : translate("recurring.manual", "Manual")}
                           </span>
                         </div>
                       </div>
@@ -590,7 +636,15 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                             checked={item.is_active}
                             disabled={isLoadingThis}
                             onCheckedChange={() => handleToggleActive(item)}
-                            title={item.is_active ? (language === "en" ? "Active • Click to pause" : "Ingreso activo • Clic para pausar") : (language === "en" ? "Paused • Click to activate" : "Ingreso pausado • Clic para activar")}
+                            title={
+                              item.is_active
+                                ? language === "en"
+                                  ? "Active • Click to pause"
+                                  : "Ingreso activo • Clic para pausar"
+                                : language === "en"
+                                  ? "Paused • Click to activate"
+                                  : "Ingreso pausado • Clic para activar"
+                            }
                           />
                         </div>
                       </TableCell>
@@ -599,7 +653,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                         <div className="flex flex-col">
                           <span>{item.description}</span>
                           <span className="text-[11px] font-normal text-muted-foreground">
-                            {item.payment_method || (language === "en" ? "Not specified" : "No especificado")}
+                            {item.payment_method ||
+                              (language === "en" ? "Not specified" : "No especificado")}
                           </span>
                         </div>
                       </TableCell>
@@ -615,7 +670,12 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
 
                       <TableCell className="px-5 py-4 text-xs font-semibold text-muted-foreground text-center whitespace-nowrap">
                         <span className="bg-secondary/60 px-2.5 py-1 rounded-lg border border-border/50 text-foreground inline-block">
-                          {formatFrequencyLabel(item.frequency, item.biweekly_type, item.billing_day, language)}
+                          {formatFrequencyLabel(
+                            item.frequency,
+                            item.biweekly_type,
+                            item.billing_day,
+                            language
+                          )}
                         </span>
                       </TableCell>
 
@@ -640,7 +700,8 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                       <TableCell className="px-5 py-4 text-center whitespace-nowrap">
                         <div className="flex flex-col items-center justify-center">
                           <span className="text-base font-black text-emerald-600 dark:text-emerald-400">
-                            +{currencySymbol}{formatCurrency(item.amount)}
+                            +{currencySymbol}
+                            {formatCurrency(item.amount)}
                           </span>
                           <span className="text-[10px] text-muted-foreground font-bold uppercase">
                             {currency}
@@ -655,10 +716,16 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                             size="icon-sm"
                             title={
                               isAlreadyExecutedThisPeriod(item)
-                                ? (language === "en" ? "Already recorded in this cycle" : "Ya registrado en este ciclo")
-                                : (language === "en" ? "Collect now (record into balance)" : "Cobrar ahora (adelantar registro de ingreso en el balance)")
+                                ? language === "en"
+                                  ? "Already recorded in this cycle"
+                                  : "Ya registrado en este ciclo"
+                                : language === "en"
+                                  ? "Collect now (record into balance)"
+                                  : "Cobrar ahora (adelantar registro de ingreso en el balance)"
                             }
-                            disabled={isLoadingThis || !item.is_active || isAlreadyExecutedThisPeriod(item)}
+                            disabled={
+                              isLoadingThis || !item.is_active || isAlreadyExecutedThisPeriod(item)
+                            }
                             onClick={() => handleExecuteNow(item)}
                             className={cn(
                               "h-8 w-8 rounded-lg cursor-pointer",
@@ -673,7 +740,11 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title={language === "en" ? "Edit fixed income" : "Editar datos de este ingreso fijo"}
+                            title={
+                              language === "en"
+                                ? "Edit fixed income"
+                                : "Editar datos de este ingreso fijo"
+                            }
                             disabled={isLoadingThis}
                             onClick={() => {
                               setSelectedItem(item);
@@ -687,7 +758,11 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title={language === "en" ? "Delete fixed income" : "Eliminar este ingreso fijo"}
+                            title={
+                              language === "en"
+                                ? "Delete fixed income"
+                                : "Eliminar este ingreso fijo"
+                            }
                             disabled={isLoadingThis}
                             onClick={() => handleDelete(item)}
                             className="h-8 w-8 text-rose-500 hover:bg-rose-500/15 rounded-lg cursor-pointer"

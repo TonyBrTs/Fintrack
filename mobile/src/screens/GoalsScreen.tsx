@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,24 +8,17 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSettings } from '../context/SettingsContext';
-import { api } from '../lib/api';
-import { Goal } from '../types';
-import { BrandLogo } from '../components/BrandLogo';
-import { GoalCardItem } from '../components/GoalCardItem';
-import { GoalActionSheet } from '../components/GoalActionSheet';
-import { GoalModal } from '../components/GoalModal';
-import { ContributeGoalModal } from '../components/ContributeGoalModal';
-import {
-  Target,
-  Plus,
-  Sparkles,
-  Settings,
-  Trophy,
-  TrendingUp,
-} from 'lucide-react-native';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
+import { api } from "../lib/api";
+import { Goal } from "../types";
+import { BrandLogo } from "../components/BrandLogo";
+import { GoalCardItem } from "../components/GoalCardItem";
+import { GoalActionSheet } from "../components/GoalActionSheet";
+import { GoalModal } from "../components/GoalModal";
+import { ContributeGoalModal } from "../components/ContributeGoalModal";
+import { Target, Plus, Sparkles, Settings, Trophy, TrendingUp } from "lucide-react-native";
 
 export const GoalsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
@@ -49,7 +42,7 @@ export const GoalsScreen: React.FC = () => {
       const data = await api.getGoals();
       setGoals(Array.isArray(data) ? data : []);
     } catch {
-      Alert.alert(t('common.error'), 'No se pudieron cargar las metas de ahorro.');
+      Alert.alert(t("common.error"), "No se pudieron cargar las metas de ahorro.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -106,7 +99,7 @@ export const GoalsScreen: React.FC = () => {
       await api.deleteGoal(goalId);
       loadGoals();
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || 'No se pudo eliminar la meta.');
+      Alert.alert(t("common.error"), e?.message || "No se pudo eliminar la meta.");
     }
   };
 
@@ -129,10 +122,12 @@ export const GoalsScreen: React.FC = () => {
         <View className="flex-1 pr-2.5">
           <View className="flex-row items-center gap-1.5 mb-1">
             <BrandLogo size={20} variant="icon" />
-            <Text className="text-slate-400 text-[11px] font-extrabold tracking-widest">FINTRACK</Text>
+            <Text className="text-slate-400 text-[11px] font-extrabold tracking-widest">
+              FINTRACK
+            </Text>
           </View>
-          <Text className="text-[22px] font-extrabold text-white">{t('goals.title')}</Text>
-          <Text className="text-xs text-slate-400 mt-0.5">{t('goals.subtitle')}</Text>
+          <Text className="text-[22px] font-extrabold text-white">{t("goals.title")}</Text>
+          <Text className="text-xs text-slate-400 mt-0.5">{t("goals.subtitle")}</Text>
         </View>
 
         <View className="flex-row items-center gap-2">
@@ -142,7 +137,7 @@ export const GoalsScreen: React.FC = () => {
             activeOpacity={0.85}
           >
             <Plus size={15} color="#ffffff" strokeWidth={2.5} />
-            <Text className="text-white text-[13px] font-bold">{t('goals.newGoal')}</Text>
+            <Text className="text-white text-[13px] font-bold">{t("goals.newGoal")}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             className="w-[38px] h-[38px] rounded-xl bg-card border border-white/[0.08] justify-center items-center"
@@ -169,7 +164,7 @@ export const GoalsScreen: React.FC = () => {
               loadGoals();
             }}
             tintColor="#10b981"
-            colors={['#10b981', '#f59e0b', '#a855f7']}
+            colors={["#10b981", "#f59e0b", "#a855f7"]}
           />
         }
         ListHeaderComponent={
@@ -243,7 +238,7 @@ export const GoalsScreen: React.FC = () => {
                     {completedCount} / {goals.length}
                   </Text>
                   <Text className="text-[11px] text-purple-400 font-semibold">
-                    {completedCount > 0 ? 'Objetivos logrados' : 'En camino'}
+                    {completedCount > 0 ? "Objetivos logrados" : "En camino"}
                   </Text>
                 </View>
               </View>
@@ -255,15 +250,19 @@ export const GoalsScreen: React.FC = () => {
             <View className="w-20 h-20 rounded-full bg-emerald-500/10 justify-center items-center mb-1.5">
               <Target size={44} color="#10b981" />
             </View>
-            <Text className="text-base font-bold text-slate-200">{t('goals.emptyTitle')}</Text>
-            <Text className="text-xs text-slate-500 text-center px-5 leading-4">{t('goals.emptyDesc')}</Text>
+            <Text className="text-base font-bold text-slate-200">{t("goals.emptyTitle")}</Text>
+            <Text className="text-xs text-slate-500 text-center px-5 leading-4">
+              {t("goals.emptyDesc")}
+            </Text>
             <TouchableOpacity
               className="flex-row items-center gap-1.5 px-3.5 py-2.5 rounded-xl mt-1 bg-emerald-500 shadow-md shadow-emerald-500/30"
               onPress={handleOpenCreate}
               activeOpacity={0.85}
             >
               <Plus size={16} color="#ffffff" strokeWidth={2.5} />
-              <Text className="text-white text-[13px] font-extrabold">{t('goals.createFirst')}</Text>
+              <Text className="text-white text-[13px] font-extrabold">
+                {t("goals.createFirst")}
+              </Text>
             </TouchableOpacity>
           </View>
         }

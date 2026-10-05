@@ -10,10 +10,7 @@ interface PageLoadingStateProps {
   className?: string;
 }
 
-export function PageLoadingState({
-  message = "Cargando...",
-  className,
-}: PageLoadingStateProps) {
+export function PageLoadingState({ message = "Cargando...", className }: PageLoadingStateProps) {
   return (
     <div
       className={cn(
@@ -31,9 +28,7 @@ export function PageLoadingState({
         {/* Centered spinner and message */}
         <div className="flex items-center gap-2.5 mt-1 text-muted-foreground">
           <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-          <span className="text-sm font-medium tracking-tight animate-pulse">
-            {message}
-          </span>
+          <span className="text-sm font-medium tracking-tight animate-pulse">{message}</span>
         </div>
       </div>
     </div>

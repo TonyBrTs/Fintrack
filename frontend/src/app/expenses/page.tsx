@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { ExpenseDetailsSheet } from '@/components/expenses/ExpenseDetailsSheet';
-import { RegisterExpenseModal } from '@/components/expenses/RegisterExpenseModal';
-import { RecurringExpensesManager } from '@/components/expenses/RecurringExpensesManager';
-import { RecurringExpenseModal } from '@/components/expenses/RecurringExpenseModal';
-import { Badge } from '@/components/ui/Badge';
-import { KPICard } from '@/components/ui/KPICard';
-import { NavExpensesIcon } from '@/components/ui/AppIcons';
+import { ExpenseDetailsSheet } from "@/components/expenses/ExpenseDetailsSheet";
+import { RegisterExpenseModal } from "@/components/expenses/RegisterExpenseModal";
+import { RecurringExpensesManager } from "@/components/expenses/RecurringExpensesManager";
+import { RecurringExpenseModal } from "@/components/expenses/RecurringExpenseModal";
+import { Badge } from "@/components/ui/Badge";
+import { KPICard } from "@/components/ui/KPICard";
+import { NavExpensesIcon } from "@/components/ui/AppIcons";
 import {
   Table,
   TableBody,
@@ -14,27 +14,27 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { useSettings } from '@/contexts/SettingsContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { expenseService } from '@/services';
-import { useCategories } from '@/hooks/useCategories';
-import { ManageCategoriesModal } from '@/components/categories/ManageCategoriesModal';
-import { CategoryBadge } from '@/components/categories/CategoryBadge';
-import { PageLoadingState } from '@/components/ui/PageLoadingState';
-import { cn, formatCurrency, getCategoryStyle, formatDateDDMMYYYY } from '@/lib/utils';
-import type { Expense, RecurringSyncResult } from '@/types/index';
-import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { useSettings } from "@/contexts/SettingsContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { expenseService } from "@/services";
+import { useCategories } from "@/hooks/useCategories";
+import { ManageCategoriesModal } from "@/components/categories/ManageCategoriesModal";
+import { CategoryBadge } from "@/components/categories/CategoryBadge";
+import { PageLoadingState } from "@/components/ui/PageLoadingState";
+import { cn, formatCurrency, getCategoryStyle, formatDateDDMMYYYY } from "@/lib/utils";
+import type { Expense, RecurringSyncResult } from "@/types/index";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
 import {
   AlertCircle,
   ChevronRight,
@@ -46,16 +46,16 @@ import {
   Search,
   Tag,
   TrendingDown,
-} from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+} from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 function ExpensesContent() {
   const { currency, currencySymbol, translate, language } = useSettings();
   const { user, openAuthModal } = useAuth();
   const { categories: userCatList } = useCategories("expense");
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'history' | 'recurring'>('history');
+  const [activeTab, setActiveTab] = useState<"history" | "recurring">("history");
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,12 +64,12 @@ function ExpensesContent() {
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   // Auto-open details if ID is in URL
   useEffect(() => {
-    const id = searchParams.get('id');
+    const id = searchParams.get("id");
     if (id && expenses.length > 0) {
       const expense = expenses.find((e) => e.id.toString() === id);
 
@@ -87,9 +87,9 @@ function ExpensesContent() {
 
       if (!res.ok) {
         if (res.isUnauthorized) {
-          setError('Tu sesión ha expirado o necesitas iniciar sesión.');
+          setError("Tu sesión ha expirado o necesitas iniciar sesión.");
         } else {
-          setError(res.error || 'No fue posible cargar tus gastos en este momento.');
+          setError(res.error || "No fue posible cargar tus gastos en este momento.");
         }
         setExpenses([]);
         return;
@@ -97,7 +97,7 @@ function ExpensesContent() {
       setExpenses(Array.isArray(res.data) ? res.data : []);
       setError(null);
     } catch {
-      setError('No se pudo establecer conexión. Por favor, intenta nuevamente.');
+      setError("No se pudo establecer conexión. Por favor, intenta nuevamente.");
     } finally {
       setLoading(false);
     }
@@ -112,8 +112,9 @@ function ExpensesContent() {
     fetchExpenses();
 
     // Sincronización automática de gastos fijos pendientes de la quincena/mes
-    const localDate = new Date().toLocaleDateString('en-CA');
-    expenseService.syncRecurringExpenses(localDate)
+    const localDate = new Date().toLocaleDateString("en-CA");
+    expenseService
+      .syncRecurringExpenses(localDate)
       .then((res) => {
         if (res.ok && res.data && res.data.processed_count > 0) {
           toast.success(
@@ -126,7 +127,7 @@ function ExpensesContent() {
       .catch(() => {});
   }, [user?.id]);
 
-  const safeExpenses = useMemo(() => Array.isArray(expenses) ? expenses : [], [expenses]);
+  const safeExpenses = useMemo(() => (Array.isArray(expenses) ? expenses : []), [expenses]);
 
   const totalMonth = useMemo(() => {
     return safeExpenses.reduce((acc, curr) => acc + curr.amount, 0);
@@ -138,12 +139,12 @@ function ExpensesContent() {
         acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
   }, [safeExpenses]);
 
   const highestCategory = useMemo(() => {
-    return Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || '---';
+    return Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || "---";
   }, [categoryTotals]);
 
   // Unique categories list combining user categories and transactions
@@ -164,20 +165,19 @@ function ExpensesContent() {
         e.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
         e.payment_method.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesCat = selectedCategory === 'all' || e.category === selectedCategory;
+      const matchesCat = selectedCategory === "all" || e.category === selectedCategory;
 
       return matchesSearch && matchesCat;
     });
   }, [expenses, searchTerm, selectedCategory]);
 
   if (loading && expenses.length === 0) {
-    return (
-      <PageLoadingState message={translate('common.loading') || 'Cargando gastos...'} />
-    );
+    return <PageLoadingState message={translate("common.loading") || "Cargando gastos..."} />;
   }
 
   if (error && expenses.length === 0) {
-    const isAuthError = error.toLowerCase().includes('sesión') || error.toLowerCase().includes('iniciar');
+    const isAuthError =
+      error.toLowerCase().includes("sesión") || error.toLowerCase().includes("iniciar");
     return (
       <main className="max-w-7xl mx-auto px-4 lg:px-20 py-24 flex flex-col items-center justify-center space-y-6 text-center">
         <div className="bg-rose-500/10 p-4 rounded-full">
@@ -185,16 +185,20 @@ function ExpensesContent() {
         </div>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-titles dark:text-foreground">
-            {isAuthError ? 'Sesión requerida' : (translate('common.errorTitle') || 'Algo no salió como esperábamos')}
+            {isAuthError
+              ? "Sesión requerida"
+              : translate("common.errorTitle") || "Algo no salió como esperábamos"}
           </h2>
           <p className="text-muted-foreground max-w-md mx-auto text-sm">
-            {error || translate('common.errorMessage') || 'No fue posible cargar la información en este momento.'}
+            {error ||
+              translate("common.errorMessage") ||
+              "No fue posible cargar la información en este momento."}
           </p>
         </div>
         <div className="flex items-center gap-3">
           {isAuthError ? (
             <button
-              onClick={() => openAuthModal('login')}
+              onClick={() => openAuthModal("login")}
               className="bg-action text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
             >
               Iniciar Sesión
@@ -204,7 +208,7 @@ function ExpensesContent() {
               onClick={() => fetchExpenses()}
               className="bg-action text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
             >
-              {translate('common.retry') || 'Reintentar'}
+              {translate("common.retry") || "Reintentar"}
             </button>
           )}
         </div>
@@ -219,14 +223,17 @@ function ExpensesContent() {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20">
             <TrendingDown size={12} className="text-rose-500" />
-            <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest">Control de Egresos</span>
+            <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest">
+              Control de Egresos
+            </span>
           </div>
           <div>
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
-              {translate('expenses.title') || 'Gastos'}
+              {translate("expenses.title") || "Gastos"}
             </h1>
             <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
-              {translate('expenses.description') || 'Monitorea, categoriza y controla todos tus egresos en un solo lugar.'}
+              {translate("expenses.description") ||
+                "Monitorea, categoriza y controla todos tus egresos en un solo lugar."}
             </p>
           </div>
         </div>
@@ -240,7 +247,7 @@ function ExpensesContent() {
             <span>Categorías</span>
           </Button>
 
-          {activeTab === 'recurring' ? (
+          {activeTab === "recurring" ? (
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -258,7 +265,9 @@ function ExpensesContent() {
               className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
             >
               <Plus size={18} strokeWidth={2.5} />
-              <span className="truncate">{translate('expenses.register') || 'Registrar Gasto'}</span>
+              <span className="truncate">
+                {translate("expenses.register") || "Registrar Gasto"}
+              </span>
             </motion.button>
           )}
         </div>
@@ -268,10 +277,10 @@ function ExpensesContent() {
       <div className="grid grid-cols-2 sm:inline-flex items-center gap-1 p-1 bg-slate-200/70 dark:bg-slate-900/80 rounded-2xl border border-slate-300/80 dark:border-slate-800 w-full sm:w-auto shadow-xs">
         <button
           type="button"
-          onClick={() => setActiveTab('history')}
+          onClick={() => setActiveTab("history")}
           className={cn(
             "flex items-center justify-center gap-2 py-2 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none",
-            activeTab === 'history'
+            activeTab === "history"
               ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-foreground shadow-sm border border-slate-200/90 dark:border-slate-700"
               : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
           )}
@@ -285,10 +294,10 @@ function ExpensesContent() {
 
         <button
           type="button"
-          onClick={() => setActiveTab('recurring')}
+          onClick={() => setActiveTab("recurring")}
           className={cn(
             "flex items-center justify-center gap-2 py-2 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none",
-            activeTab === 'recurring'
+            activeTab === "recurring"
               ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-foreground shadow-sm border border-slate-200/90 dark:border-slate-700"
               : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
           )}
@@ -323,172 +332,190 @@ function ExpensesContent() {
         onSuccess={fetchExpenses}
       />
 
-      {activeTab === 'recurring' ? (
+      {activeTab === "recurring" ? (
         <RecurringExpensesManager onExpenseGenerated={fetchExpenses} />
       ) : (
         <>
+          {/* KPI Cards */}
+          <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+            <KPICard
+              title={translate("expenses.totalMonth") || "Total en Gastos"}
+              amount={`${currencySymbol}${formatCurrency(totalMonth)}`}
+              trend={`${expenses.length} registros en total`}
+              trendType="down"
+              icon={<NavExpensesIcon size={22} className="text-rose-500" />}
+            />
+            <KPICard
+              title={translate("expenses.highestCategory") || "Categoría Principal"}
+              amount={
+                highestCategory === "---"
+                  ? "---"
+                  : translate(`categories.${highestCategory}`) || highestCategory
+              }
+              trend={
+                highestCategory !== "---"
+                  ? `${currencySymbol}${formatCurrency(categoryTotals[highestCategory] || 0)} acumulado`
+                  : undefined
+              }
+              trendType="neutral"
+              icon={<Tag size={22} className="text-amber-500" />}
+            />
+          </section>
 
+          {/* Filters and Search Bar */}
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar por descripción, categoría o método..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border border-border/80 text-sm placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-action/40 transition-all"
+              />
+            </div>
 
-      {/* KPI Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-        <KPICard
-          title={translate('expenses.totalMonth') || 'Total en Gastos'}
-          amount={`${currencySymbol}${formatCurrency(totalMonth)}`}
-          trend={`${expenses.length} registros en total`}
-          trendType="down"
-          icon={<NavExpensesIcon size={22} className="text-rose-500" />}
-        />
-        <KPICard
-          title={translate('expenses.highestCategory') || 'Categoría Principal'}
-          amount={highestCategory === '---' ? '---' : translate(`categories.${highestCategory}`) || highestCategory}
-          trend={highestCategory !== '---' ? `${currencySymbol}${formatCurrency(categoryTotals[highestCategory] || 0)} acumulado` : undefined}
-          trendType="neutral"
-          icon={<Tag size={22} className="text-amber-500" />}
-        />
-      </section>
-
-      {/* Filters and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por descripción, categoría o método..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border border-border/80 text-sm placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-action/40 transition-all"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-auto min-w-[200px] sm:w-[220px] h-10 rounded-xl bg-card/90 dark:bg-card/75 border-border/80 font-medium text-sm">
-              <div className="flex items-center gap-2 truncate">
-                <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Todas las categorías" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas las categorías</SelectItem>
-              {categoriesList.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "w-2 h-2 rounded-full shrink-0",
-                        getCategoryStyle(cat, userCatList).dot
-                      )}
-                    />
-                    <span>{translate(`categories.${cat}`) || cat}</span>
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-auto min-w-[200px] sm:w-[220px] h-10 rounded-xl bg-card/90 dark:bg-card/75 border-border/80 font-medium text-sm">
+                  <div className="flex items-center gap-2 truncate">
+                    <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <SelectValue placeholder="Todas las categorías" />
                   </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <span className="text-xs text-muted-foreground font-semibold px-2.5 py-2 bg-secondary/80 rounded-xl whitespace-nowrap border border-border/50">
-            {filteredExpenses.length} {filteredExpenses.length === 1 ? 'gasto' : 'gastos'}
-          </span>
-        </div>
-      </div>
-
-      {/* Expenses Table */}
-      <motion.section
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="bg-card dark:bg-card/75 backdrop-blur-sm border border-slate-200/90 dark:border-border/60 rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all"
-      >
-        <Table>
-          <TableHeader className="bg-secondary/40 dark:bg-secondary/20">
-            <TableRow className="hover:bg-transparent border-b border-border/60">
-              <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                {translate('expenses.table.date') || 'Fecha'}
-              </TableHead>
-              <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                {translate('expenses.table.description') || 'Descripción'}
-              </TableHead>
-              <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                {translate('expenses.table.category') || 'Categoría'}
-              </TableHead>
-              <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">
-                {translate('expenses.table.amount') || 'Monto'}
-              </TableHead>
-              <TableHead className="w-10 px-2 py-4"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredExpenses.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-12 text-center text-muted-foreground text-sm">
-                  No se encontraron gastos que coincidan con los filtros aplicados.
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredExpenses.map((expense) => (
-                <TableRow
-                  key={expense.id}
-                  onClick={() => {
-                    setSelectedExpense(expense);
-                    setIsDetailsOpen(true);
-                  }}
-                  className="hover:bg-secondary/30 dark:hover:bg-secondary/15 border-b border-border/40 cursor-pointer transition-colors group"
-                >
-                  <TableCell className="px-5 py-4 text-sm font-medium whitespace-nowrap text-titles dark:text-foreground">
-                    <div className="flex flex-col">
-                      <span className="font-semibold">{formatDateDDMMYYYY(expense.date)}</span>
-                      <span className="text-[11px] text-muted-foreground">{expense.payment_method}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-sm font-semibold text-titles dark:text-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <span>
-                        {expense.category === 'Metas'
-                          ? `${translate('goals.contributionToGoal') || 'Aporte a meta'}: ${
-                              expense.description.split(': ')[1] || expense.description
-                            }`
-                          : expense.description.replace(/^\[Recurrente\]\s*/i, '')}
-                      </span>
-                      {(expense.id.startsWith('rec_') || expense.id.startsWith('rec-')) && (
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las categorías</SelectItem>
+                  {categoriesList.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      <div className="flex items-center gap-2">
                         <span
-                          title={language === 'en' ? 'Automatic recurring expense' : 'Gasto recurrente automático'}
-                          className="inline-flex items-center cursor-help"
-                        >
-                          <Repeat className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-5 py-4">
-                    <CategoryBadge
-                      category={expense.category}
-                      categories={userCatList}
-                      label={translate(`categories.${expense.category}`) || expense.category}
-                    />
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-right">
-                    <div className="flex flex-col items-end">
-                      <span className="text-base font-black text-rose-500 dark:text-rose-400">
-                        -{currencySymbol}{formatCurrency(expense.amount)}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">
-                        {currency}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className="px-2 py-4 text-right pr-4"
-                    title={language === "en" ? "View expense details" : "Ver detalles del gasto"}
-                  >
-                    <ChevronRight className="w-4 h-4 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all inline" />
-                  </TableCell>
+                          className={cn(
+                            "w-2 h-2 rounded-full shrink-0",
+                            getCategoryStyle(cat, userCatList).dot
+                          )}
+                        />
+                        <span>{translate(`categories.${cat}`) || cat}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <span className="text-xs text-muted-foreground font-semibold px-2.5 py-2 bg-secondary/80 rounded-xl whitespace-nowrap border border-border/50">
+                {filteredExpenses.length} {filteredExpenses.length === 1 ? "gasto" : "gastos"}
+              </span>
+            </div>
+          </div>
+
+          {/* Expenses Table */}
+          <motion.section
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="bg-card dark:bg-card/75 backdrop-blur-sm border border-slate-200/90 dark:border-border/60 rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all"
+          >
+            <Table>
+              <TableHeader className="bg-secondary/40 dark:bg-secondary/20">
+                <TableRow className="hover:bg-transparent border-b border-border/60">
+                  <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    {translate("expenses.table.date") || "Fecha"}
+                  </TableHead>
+                  <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    {translate("expenses.table.description") || "Descripción"}
+                  </TableHead>
+                  <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    {translate("expenses.table.category") || "Categoría"}
+                  </TableHead>
+                  <TableHead className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">
+                    {translate("expenses.table.amount") || "Monto"}
+                  </TableHead>
+                  <TableHead className="w-10 px-2 py-4"></TableHead>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </motion.section>
-      </>
+              </TableHeader>
+              <TableBody>
+                {filteredExpenses.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="py-12 text-center text-muted-foreground text-sm"
+                    >
+                      No se encontraron gastos que coincidan con los filtros aplicados.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredExpenses.map((expense) => (
+                    <TableRow
+                      key={expense.id}
+                      onClick={() => {
+                        setSelectedExpense(expense);
+                        setIsDetailsOpen(true);
+                      }}
+                      className="hover:bg-secondary/30 dark:hover:bg-secondary/15 border-b border-border/40 cursor-pointer transition-colors group"
+                    >
+                      <TableCell className="px-5 py-4 text-sm font-medium whitespace-nowrap text-titles dark:text-foreground">
+                        <div className="flex flex-col">
+                          <span className="font-semibold">{formatDateDDMMYYYY(expense.date)}</span>
+                          <span className="text-[11px] text-muted-foreground">
+                            {expense.payment_method}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-5 py-4 text-sm font-semibold text-titles dark:text-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <span>
+                            {expense.category === "Metas"
+                              ? `${translate("goals.contributionToGoal") || "Aporte a meta"}: ${
+                                  expense.description.split(": ")[1] || expense.description
+                                }`
+                              : expense.description.replace(/^\[Recurrente\]\s*/i, "")}
+                          </span>
+                          {(expense.id.startsWith("rec_") || expense.id.startsWith("rec-")) && (
+                            <span
+                              title={
+                                language === "en"
+                                  ? "Automatic recurring expense"
+                                  : "Gasto recurrente automático"
+                              }
+                              className="inline-flex items-center cursor-help"
+                            >
+                              <Repeat className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-5 py-4">
+                        <CategoryBadge
+                          category={expense.category}
+                          categories={userCatList}
+                          label={translate(`categories.${expense.category}`) || expense.category}
+                        />
+                      </TableCell>
+                      <TableCell className="px-5 py-4 text-right">
+                        <div className="flex flex-col items-end">
+                          <span className="text-base font-black text-rose-500 dark:text-rose-400">
+                            -{currencySymbol}
+                            {formatCurrency(expense.amount)}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">
+                            {currency}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell
+                        className="px-2 py-4 text-right pr-4"
+                        title={
+                          language === "en" ? "View expense details" : "Ver detalles del gasto"
+                        }
+                      >
+                        <ChevronRight className="w-4 h-4 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all inline" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </motion.section>
+        </>
       )}
     </div>
   );

@@ -1,13 +1,7 @@
 "use client";
 
 import { KPICard } from "@/components/ui/KPICard";
-import {
-  Loader2,
-  Calendar,
-  CloudOff,
-  RefreshCw,
-  BarChart3,
-} from "lucide-react";
+import { Loader2, Calendar, CloudOff, RefreshCw, BarChart3 } from "lucide-react";
 import {
   KPIBalanceIcon,
   NavIncomeIcon,
@@ -53,14 +47,10 @@ export default function SummaryPage() {
   });
 
   const generateMonthOptions = () => {
-    const options = [
-      { value: "all", label: translate("common.allTime") || "Todo el tiempo" },
-    ];
+    const options = [{ value: "all", label: translate("common.allTime") || "Todo el tiempo" }];
     const date = new Date();
     for (let i = 0; i < 12; i++) {
-      const value = `${date.getFullYear()}-${String(
-        date.getMonth() + 1,
-      ).padStart(2, "0")}`;
+      const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       const label = date.toLocaleDateString(undefined, {
         month: "long",
         year: "numeric",
@@ -76,73 +66,68 @@ export default function SummaryPage() {
 
   const maxRetries = 4;
 
-  const fetchData = useCallback(
-    async (isManual = false) => {
-      if (isManual) {
-        setRetryAttempt(0);
+  const fetchData = useCallback(async (isManual = false) => {
+    if (isManual) {
+      setRetryAttempt(0);
+      setFetchError(null);
+    }
+    setLoading(true);
+
+    try {
+      const [expensesRes, incomesRes, goalsRes] = await Promise.all([
+        safeFetch<Expense[]>("/api/expenses", { timeoutMs: 15000 }),
+        safeFetch<Income[]>("/api/incomes", { timeoutMs: 15000 }),
+        safeFetch<Goal[]>("/api/goals", { timeoutMs: 15000 }),
+      ]);
+
+      if (expensesRes.ok && incomesRes.ok) {
+        setExpenses(Array.isArray(expensesRes.data) ? expensesRes.data : []);
+        setIncomes(Array.isArray(incomesRes.data) ? incomesRes.data : []);
+        setGoals(Array.isArray(goalsRes.data) ? goalsRes.data : []);
         setFetchError(null);
+        setLoading(false);
+        setRetryAttempt(0);
+        return;
       }
-      setLoading(true);
 
-      try {
-        const [expensesRes, incomesRes, goalsRes] = await Promise.all([
-          safeFetch<Expense[]>("/api/expenses", { timeoutMs: 15000 }),
-          safeFetch<Income[]>("/api/incomes", { timeoutMs: 15000 }),
-          safeFetch<Goal[]>("/api/goals", { timeoutMs: 15000 }),
-        ]);
-
-        if (expensesRes.ok && incomesRes.ok) {
-          setExpenses(Array.isArray(expensesRes.data) ? expensesRes.data : []);
-          setIncomes(Array.isArray(incomesRes.data) ? incomesRes.data : []);
-          setGoals(Array.isArray(goalsRes.data) ? goalsRes.data : []);
-          setFetchError(null);
-          setLoading(false);
-          setRetryAttempt(0);
-          return;
-        }
-
-        if (expensesRes.isUnauthorized || incomesRes.isUnauthorized) {
-          setFetchError("Tu sesión ha expirado o necesitas iniciar sesión.");
-          setLoading(false);
-          return;
-        }
-
-        // Auto-retry if server is warming up or connection is delayed
-        setRetryAttempt((prev) => {
-          const next = prev + 1;
-          if (next <= maxRetries) {
-            setTimeout(() => {
-              fetchData(false);
-            }, 2500);
-          } else {
-            setLoading(false);
-            setFetchError(
-              expensesRes.error ||
-                incomesRes.error ||
-                "El servidor tardó en responder. Por favor, reintenta la conexión.",
-            );
-          }
-          return next;
-        });
-      } catch {
-        setRetryAttempt((prev) => {
-          const next = prev + 1;
-          if (next <= maxRetries) {
-            setTimeout(() => {
-              fetchData(false);
-            }, 2500);
-          } else {
-            setLoading(false);
-            setFetchError(
-              "No se pudo comunicar con el servidor en este momento.",
-            );
-          }
-          return next;
-        });
+      if (expensesRes.isUnauthorized || incomesRes.isUnauthorized) {
+        setFetchError("Tu sesión ha expirado o necesitas iniciar sesión.");
+        setLoading(false);
+        return;
       }
-    },
-    [],
-  );
+
+      // Auto-retry if server is warming up or connection is delayed
+      setRetryAttempt((prev) => {
+        const next = prev + 1;
+        if (next <= maxRetries) {
+          setTimeout(() => {
+            fetchData(false);
+          }, 2500);
+        } else {
+          setLoading(false);
+          setFetchError(
+            expensesRes.error ||
+              incomesRes.error ||
+              "El servidor tardó en responder. Por favor, reintenta la conexión."
+          );
+        }
+        return next;
+      });
+    } catch {
+      setRetryAttempt((prev) => {
+        const next = prev + 1;
+        if (next <= maxRetries) {
+          setTimeout(() => {
+            fetchData(false);
+          }, 2500);
+        } else {
+          setLoading(false);
+          setFetchError("No se pudo comunicar con el servidor en este momento.");
+        }
+        return next;
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -160,14 +145,8 @@ export default function SummaryPage() {
   const currentIncomes = Array.isArray(incomes) ? incomes : [];
   const currentGoals = Array.isArray(goals) ? goals : [];
 
-  const totalExpensesAllTime = currentExpenses.reduce(
-    (acc, curr) => acc + curr.amount,
-    0,
-  );
-  const totalIncomesAllTime = currentIncomes.reduce(
-    (acc, curr) => acc + curr.amount,
-    0,
-  );
+  const totalExpensesAllTime = currentExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalIncomesAllTime = currentIncomes.reduce((acc, curr) => acc + curr.amount, 0);
   const balance = totalIncomesAllTime - totalExpensesAllTime;
 
   // Filtering Logic
@@ -176,9 +155,7 @@ export default function SummaryPage() {
       ? currentExpenses
       : currentExpenses.filter((e) => {
           const d = new Date(e.date);
-          const monthKey = `${d.getFullYear()}-${String(
-            d.getMonth() + 1,
-          ).padStart(2, "0")}`;
+          const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
           return monthKey === selectedMonth;
         });
 
@@ -187,32 +164,24 @@ export default function SummaryPage() {
       ? currentIncomes
       : currentIncomes.filter((i) => {
           const d = new Date(i.date);
-          const monthKey = `${d.getFullYear()}-${String(
-            d.getMonth() + 1,
-          ).padStart(2, "0")}`;
+          const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
           return monthKey === selectedMonth;
         });
 
-  const totalExpensesFiltered = filteredExpenses.reduce(
-    (acc, curr) => acc + curr.amount,
-    0,
-  );
-  const totalIncomesFiltered = filteredIncomes.reduce(
-    (acc, curr) => acc + curr.amount,
-    0,
-  );
+  const totalExpensesFiltered = filteredExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalIncomesFiltered = filteredIncomes.reduce((acc, curr) => acc + curr.amount, 0);
 
   const netSavingPercentFiltered =
     totalIncomesFiltered > 0
-      ? ((totalIncomesFiltered - totalExpensesFiltered) /
-          totalIncomesFiltered) *
-        100
+      ? ((totalIncomesFiltered - totalExpensesFiltered) / totalIncomesFiltered) * 100
       : 0;
 
   if ((loading && expenses === null) || (expenses === null && !fetchError)) {
     return (
       <ProtectedRoute>
-        <PageLoadingState message={isEs ? "Cargando tus finanzas..." : "Loading your finances..."} />
+        <PageLoadingState
+          message={isEs ? "Cargando tus finanzas..." : "Loading your finances..."}
+        />
       </ProtectedRoute>
     );
   }
@@ -220,10 +189,7 @@ export default function SummaryPage() {
   if (fetchError && expenses === null) {
     return (
       <ProtectedRoute>
-        <DashboardErrorState
-          error={fetchError}
-          onRetry={() => fetchData(true)}
-        />
+        <DashboardErrorState error={fetchError} onRetry={() => fetchData(true)} />
       </ProtectedRoute>
     );
   }
@@ -245,7 +211,8 @@ export default function SummaryPage() {
                 {translate("nav.summary") || "Resumen"}
               </h1>
               <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
-                {translate("common.summaryDescription") || "Visualiza tu salud financiera de un vistazo — saldo, movimientos y metas del período."}
+                {translate("common.summaryDescription") ||
+                  "Visualiza tu salud financiera de un vistazo — saldo, movimientos y metas del período."}
               </p>
             </div>
           </div>
@@ -268,154 +235,150 @@ export default function SummaryPage() {
           </div>
         </div>
 
-      {/* KPI Cards Row */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-        <KPICard
-          title={translate("summary.balance")}
-          amount={`${currencySymbol}${formatCurrency(balance)}`}
-          trend={balance >= 0 ? "Estado óptimo" : "Balance negativo"}
-          trendType={balance >= 0 ? "up" : "down"}
-          icon={<KPIBalanceIcon size={24} className="text-action dark:text-blue-400" />}
-        />
-        <KPICard
-          title={translate("summary.income")}
-          amount={`${currencySymbol}${formatCurrency(totalIncomesFiltered)}`}
-          trend={`${filteredIncomes.length} ingresos`}
-          trendType="up"
-          icon={<NavIncomeIcon size={24} className="text-emerald-500" />}
-        />
-        <KPICard
-          title={translate("summary.expenses")}
-          amount={`${currencySymbol}${formatCurrency(totalExpensesFiltered)}`}
-          trend={`${filteredExpenses.length} gastos`}
-          trendType="down"
-          icon={<NavExpensesIcon size={24} className="text-rose-500" />}
-        />
-        <KPICard
-          title={translate("summary.savings")}
-          amount={`${netSavingPercentFiltered.toFixed(1)}%`}
-          trend={netSavingPercentFiltered >= 20 ? "Excelente" : "Ajustado"}
-          trendType={netSavingPercentFiltered >= 20 ? "up" : "neutral"}
-          icon={<KPISavingsIcon size={24} className="text-amber-500" />}
-        />
-      </section>
-
-      {/* Recent Activity & Goals Row */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <RecentTransactions
-            expenses={filteredExpenses}
-            incomes={filteredIncomes}
+        {/* KPI Cards Row */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          <KPICard
+            title={translate("summary.balance")}
+            amount={`${currencySymbol}${formatCurrency(balance)}`}
+            trend={balance >= 0 ? "Estado óptimo" : "Balance negativo"}
+            trendType={balance >= 0 ? "up" : "down"}
+            icon={<KPIBalanceIcon size={24} className="text-action dark:text-blue-400" />}
           />
-        </div>
+          <KPICard
+            title={translate("summary.income")}
+            amount={`${currencySymbol}${formatCurrency(totalIncomesFiltered)}`}
+            trend={`${filteredIncomes.length} ingresos`}
+            trendType="up"
+            icon={<NavIncomeIcon size={24} className="text-emerald-500" />}
+          />
+          <KPICard
+            title={translate("summary.expenses")}
+            amount={`${currencySymbol}${formatCurrency(totalExpensesFiltered)}`}
+            trend={`${filteredExpenses.length} gastos`}
+            trendType="down"
+            icon={<NavExpensesIcon size={24} className="text-rose-500" />}
+          />
+          <KPICard
+            title={translate("summary.savings")}
+            amount={`${netSavingPercentFiltered.toFixed(1)}%`}
+            trend={netSavingPercentFiltered >= 20 ? "Excelente" : "Ajustado"}
+            trendType={netSavingPercentFiltered >= 20 ? "up" : "neutral"}
+            icon={<KPISavingsIcon size={24} className="text-amber-500" />}
+          />
+        </section>
 
-        {/* Goals Progress in Summary */}
-        <div className="bg-card/90 dark:bg-card/75 backdrop-blur-sm p-6 lg:p-5 rounded-3xl border border-border/80 dark:border-border/60 shadow-sm hover:shadow-md transition-all flex flex-col justify-between lg:max-h-[235px]">
-          <div>
-            <div className="flex items-center justify-between mb-5 lg:mb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
-                  <NavGoalsIcon size={18} />
-                </div>
-                <h2 className="text-base font-bold text-titles dark:text-foreground">
-                  {translate("nav.goals")}
-                </h2>
-              </div>
-              <Link
-                href="/goals"
-                className="text-xs font-bold text-action dark:text-blue-400 hover:underline flex items-center gap-1"
-              >
-                Ver todas →
-              </Link>
-            </div>
-
-            {currentGoals.length === 0 ? (
-              <div className="py-8 lg:py-6 flex flex-col items-center justify-center text-center">
-                <NavGoalsIcon
-                  size={36}
-                  className="text-muted-foreground opacity-25 mb-2"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {translate("goals.emptyState") || "No tienes metas registradas"}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4 lg:space-y-2 lg:max-h-[140px] lg:overflow-y-auto lg:pr-1 scrollbar-thin">
-                {currentGoals.slice(0, 6).map((goal) => {
-                  const progress = Math.min(
-                    (goal.current_amount / goal.target_amount) * 100,
-                    100,
-                  );
-                  return (
-                    <div key={goal.id} className="space-y-1.5 lg:space-y-1 p-3 lg:p-2.5 rounded-2xl lg:rounded-xl bg-secondary/40 border border-border/40">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="font-bold truncate pr-2 min-w-0 text-titles dark:text-foreground">
-                          {goal.name}
-                        </span>
-                        <span className="font-extrabold shrink-0 text-action dark:text-blue-400">
-                          {progress.toFixed(0)}%
-                        </span>
-                      </div>
-                      <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${progress}%` }}
-                          className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 rounded-full"
-                          transition={{ duration: 0.8, ease: "easeOut" }}
-                        />
-                      </div>
-                      <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
-                        <span>{currencySymbol}{formatCurrency(goal.current_amount)}</span>
-                        <span>de {currencySymbol}{formatCurrency(goal.target_amount)}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+        {/* Recent Activity & Goals Row */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <RecentTransactions expenses={filteredExpenses} incomes={filteredIncomes} />
           </div>
 
-          {currentGoals.length > 6 && (
-            <p className="text-[11px] text-center text-muted-foreground pt-4 lg:pt-2 border-t border-border/40 mt-4 lg:mt-2">
-              + {currentGoals.length - 6} metas activas en tu lista
-            </p>
-          )}
-        </div>
-      </section>
+          {/* Goals Progress in Summary */}
+          <div className="bg-card/90 dark:bg-card/75 backdrop-blur-sm p-6 lg:p-5 rounded-3xl border border-border/80 dark:border-border/60 shadow-sm hover:shadow-md transition-all flex flex-col justify-between lg:max-h-[235px]">
+            <div>
+              <div className="flex items-center justify-between mb-5 lg:mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
+                    <NavGoalsIcon size={18} />
+                  </div>
+                  <h2 className="text-base font-bold text-titles dark:text-foreground">
+                    {translate("nav.goals")}
+                  </h2>
+                </div>
+                <Link
+                  href="/goals"
+                  className="text-xs font-bold text-action dark:text-blue-400 hover:underline flex items-center gap-1"
+                >
+                  Ver todas →
+                </Link>
+              </div>
 
-      {/* Main Content Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Charts Column */}
-        <div className="lg:col-span-2 space-y-8">
-          <SummaryCharts
-            expenses={currentExpenses}
-            incomes={currentIncomes}
-            currentMonthExpenses={filteredExpenses}
-          />
-        </div>
+              {currentGoals.length === 0 ? (
+                <div className="py-8 lg:py-6 flex flex-col items-center justify-center text-center">
+                  <NavGoalsIcon size={36} className="text-muted-foreground opacity-25 mb-2" />
+                  <p className="text-xs text-muted-foreground">
+                    {translate("goals.emptyState") || "No tienes metas registradas"}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4 lg:space-y-2 lg:max-h-[140px] lg:overflow-y-auto lg:pr-1 scrollbar-thin">
+                  {currentGoals.slice(0, 6).map((goal) => {
+                    const progress = Math.min(
+                      (goal.current_amount / goal.target_amount) * 100,
+                      100
+                    );
+                    return (
+                      <div
+                        key={goal.id}
+                        className="space-y-1.5 lg:space-y-1 p-3 lg:p-2.5 rounded-2xl lg:rounded-xl bg-secondary/40 border border-border/40"
+                      >
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-bold truncate pr-2 min-w-0 text-titles dark:text-foreground">
+                            {goal.name}
+                          </span>
+                          <span className="font-extrabold shrink-0 text-action dark:text-blue-400">
+                            {progress.toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 rounded-full"
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
+                          <span>
+                            {currencySymbol}
+                            {formatCurrency(goal.current_amount)}
+                          </span>
+                          <span>
+                            de {currencySymbol}
+                            {formatCurrency(goal.target_amount)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
-        {/* Sidebar Column (Insights only now) */}
-        <div className="space-y-8">
-          <FinancialInsights
-            expenses={filteredExpenses}
-            incomes={filteredIncomes}
-            goals={currentGoals}
-          />
+            {currentGoals.length > 6 && (
+              <p className="text-[11px] text-center text-muted-foreground pt-4 lg:pt-2 border-t border-border/40 mt-4 lg:mt-2">
+                + {currentGoals.length - 6} metas activas en tu lista
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* Main Content Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Charts Column */}
+          <div className="lg:col-span-2 space-y-8">
+            <SummaryCharts
+              expenses={currentExpenses}
+              incomes={currentIncomes}
+              currentMonthExpenses={filteredExpenses}
+            />
+          </div>
+
+          {/* Sidebar Column (Insights only now) */}
+          <div className="space-y-8">
+            <FinancialInsights
+              expenses={filteredExpenses}
+              incomes={filteredIncomes}
+              goals={currentGoals}
+            />
+          </div>
         </div>
-      </div>
       </div>
     </ProtectedRoute>
   );
 }
 
-
-function DashboardErrorState({
-  error,
-  onRetry,
-}: {
-  error: string;
-  onRetry: () => void;
-}) {
+function DashboardErrorState({ error, onRetry }: { error: string; onRetry: () => void }) {
   return (
     <div className="max-w-xl mx-auto py-16 px-4 text-center">
       <div className="relative overflow-hidden rounded-3xl p-8 sm:p-10 bg-white/95 dark:bg-[#0d1322]/90 border border-slate-200/90 dark:border-white/10 shadow-2xl backdrop-blur-xl space-y-6">
@@ -426,9 +389,7 @@ function DashboardErrorState({
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             Servidor en proceso de inicio
           </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            {error}
-          </p>
+          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{error}</p>
         </div>
         <div className="pt-2">
           <button
@@ -443,4 +404,3 @@ function DashboardErrorState({
     </div>
   );
 }
-

@@ -1,19 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Pressable,
-} from 'react-native';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar as CalendarIcon,
-  Clock,
-  X,
-} from 'lucide-react-native';
-import { useSettings } from '../context/SettingsContext';
+import React, { useState, useMemo } from "react";
+import { View, Text, TouchableOpacity, Modal, Pressable } from "react-native";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, X } from "lucide-react-native";
+import { useSettings } from "../context/SettingsContext";
 
 interface DatePickerModalProps {
   visible: boolean;
@@ -50,35 +38,35 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
 
   const selectedDateKey = useMemo(() => {
     const y = initialDate.getFullYear();
-    const m = String(initialDate.getMonth() + 1).padStart(2, '0');
-    const d = String(initialDate.getDate()).padStart(2, '0');
+    const m = String(initialDate.getMonth() + 1).padStart(2, "0");
+    const d = String(initialDate.getDate()).padStart(2, "0");
     return `${y}-${m}-${d}`;
   }, [initialDate]);
 
   const todayKey = useMemo(() => {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   }, []);
 
   const yesterdayKey = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - 1);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }, []);
 
   const viewMonthName = useMemo(() => {
     const d = new Date(viewYear, viewMonth, 15);
-    const name = d.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', {
-      month: 'long',
-      year: 'numeric',
+    const name = d.toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
+      month: "long",
+      year: "numeric",
     });
     return name.charAt(0).toUpperCase() + name.slice(1);
   }, [viewYear, viewMonth, language]);
 
   const weekDays = useMemo(() => {
-    return language === 'en'
-      ? ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
-      : ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'];
+    return language === "en"
+      ? ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+      : ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"];
   }, [language]);
 
   const handlePrevMonth = () => {
@@ -120,13 +108,13 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
         key: `prev-${dayNum}`,
         dayNumber: dayNum,
         isCurrentMonth: false,
-        dateKey: `${prevY}-${String(prevM).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`,
+        dateKey: `${prevY}-${String(prevM).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`,
       });
     }
 
     // Mes actual
     for (let d = 1; d <= daysInMonth; d++) {
-      const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
       cells.push({
         key: `cur-${d}`,
         dayNumber: d,
@@ -144,7 +132,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
         key: `next-${i}`,
         dayNumber: i,
         isCurrentMonth: false,
-        dateKey: `${nextY}-${String(nextM).padStart(2, '0')}-${String(i).padStart(2, '0')}`,
+        dateKey: `${nextY}-${String(nextM).padStart(2, "0")}-${String(i).padStart(2, "0")}`,
       });
     }
 
@@ -157,23 +145,24 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable className="flex-1 bg-black/75 justify-center p-[18px]" onPress={onClose}>
-        <Pressable className="bg-[#0f172a] rounded-3xl border border-white/10 p-[18px] shadow-2xl shadow-black" onPress={(e) => e.stopPropagation()}>
+        <Pressable
+          className="bg-[#0f172a] rounded-3xl border border-white/10 p-[18px] shadow-2xl shadow-black"
+          onPress={(e) => e.stopPropagation()}
+        >
           {/* Header */}
           <View className="flex-row justify-between items-center pb-3.5 border-b border-white/[0.06] mb-3">
             <View className="flex-row items-center gap-2.5">
               <CalendarIcon size={18} color="#3b82f6" />
               <Text className="text-[17px] font-extrabold text-white">
-                {language === 'en' ? 'Select Date' : 'Seleccionar Fecha'}
+                {language === "en" ? "Select Date" : "Seleccionar Fecha"}
               </Text>
             </View>
-            <TouchableOpacity onPress={onClose} className="w-8 h-8 rounded-full bg-white/[0.06] justify-center items-center">
+            <TouchableOpacity
+              onPress={onClose}
+              className="w-8 h-8 rounded-full bg-white/[0.06] justify-center items-center"
+            >
               <X size={18} color="#94a3b8" />
             </TouchableOpacity>
           </View>
@@ -182,27 +171,38 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
           <View className="flex-row gap-2 mb-3.5">
             <TouchableOpacity
               className={`flex-1 flex-row items-center justify-center gap-1.5 py-2 rounded-[10px] border ${
-                selectedDateKey === todayKey ? 'bg-primary border-blue-500' : 'bg-slate-800 border-white/[0.05]'
+                selectedDateKey === todayKey
+                  ? "bg-primary border-blue-500"
+                  : "bg-slate-800 border-white/[0.05]"
               }`}
               onPress={() => handleSelect(todayKey)}
               activeOpacity={0.7}
             >
-              <CalendarIcon size={14} color={selectedDateKey === todayKey ? '#ffffff' : '#94a3b8'} />
-              <Text className={`text-xs font-semibold ${selectedDateKey === todayKey ? 'text-white font-bold' : 'text-slate-400'}`}>
-                {language === 'en' ? 'Today' : 'Hoy'}
+              <CalendarIcon
+                size={14}
+                color={selectedDateKey === todayKey ? "#ffffff" : "#94a3b8"}
+              />
+              <Text
+                className={`text-xs font-semibold ${selectedDateKey === todayKey ? "text-white font-bold" : "text-slate-400"}`}
+              >
+                {language === "en" ? "Today" : "Hoy"}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               className={`flex-1 flex-row items-center justify-center gap-1.5 py-2 rounded-[10px] border ${
-                selectedDateKey === yesterdayKey ? 'bg-primary border-blue-500' : 'bg-slate-800 border-white/[0.05]'
+                selectedDateKey === yesterdayKey
+                  ? "bg-primary border-blue-500"
+                  : "bg-slate-800 border-white/[0.05]"
               }`}
               onPress={() => handleSelect(yesterdayKey)}
               activeOpacity={0.7}
             >
-              <Clock size={14} color={selectedDateKey === yesterdayKey ? '#ffffff' : '#94a3b8'} />
-              <Text className={`text-xs font-semibold ${selectedDateKey === yesterdayKey ? 'text-white font-bold' : 'text-slate-400'}`}>
-                {language === 'en' ? 'Yesterday' : 'Ayer'}
+              <Clock size={14} color={selectedDateKey === yesterdayKey ? "#ffffff" : "#94a3b8"} />
+              <Text
+                className={`text-xs font-semibold ${selectedDateKey === yesterdayKey ? "text-white font-bold" : "text-slate-400"}`}
+              >
+                {language === "en" ? "Yesterday" : "Ayer"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -246,9 +246,9 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
               return (
                 <TouchableOpacity
                   key={cell.key}
-                  style={{ width: '14.28%', aspectRatio: 1 }}
+                  style={{ width: "14.28%", aspectRatio: 1 }}
                   className={`justify-center items-center rounded-[10px] my-0.5 ${
-                    isSelected ? 'bg-primary' : isToday ? 'border border-blue-500' : ''
+                    isSelected ? "bg-primary" : isToday ? "border border-blue-500" : ""
                   }`}
                   onPress={() => handleSelect(cell.dateKey)}
                   activeOpacity={0.7}
@@ -256,12 +256,12 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
                   <Text
                     className={`text-[13px] font-semibold ${
                       isSelected
-                        ? 'text-white font-extrabold'
+                        ? "text-white font-extrabold"
                         : isToday
-                        ? 'text-blue-400 font-bold'
-                        : !cell.isCurrentMonth
-                        ? 'text-slate-600'
-                        : 'text-slate-300'
+                          ? "text-blue-400 font-bold"
+                          : !cell.isCurrentMonth
+                            ? "text-slate-600"
+                            : "text-slate-300"
                     }`}
                   >
                     {cell.dayNumber}

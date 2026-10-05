@@ -7,11 +7,7 @@ import { CalendarIcon, ChevronDown, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useSettings } from "@/contexts/SettingsContext";
 
 export interface DatePickerProps {
@@ -93,7 +89,7 @@ export function DatePicker({
             "w-full h-10 px-3.5 justify-between text-left font-normal bg-card/90 dark:bg-card/75 border-border/80 rounded-xl hover:border-action/60 hover:bg-card dark:hover:bg-card/90 transition-all shadow-xs group cursor-pointer",
             !value && "text-muted-foreground",
             open && "border-action ring-2 ring-action/20",
-            className,
+            className
           )}
         >
           <div className="flex items-center gap-2.5 truncate min-w-0">
@@ -105,7 +101,7 @@ export function DatePicker({
           <ChevronDown
             className={cn(
               "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
-              open && "rotate-180 text-action dark:text-blue-400",
+              open && "rotate-180 text-action dark:text-blue-400"
             )}
           />
         </Button>

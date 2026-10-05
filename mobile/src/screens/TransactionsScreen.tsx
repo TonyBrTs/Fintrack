@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,20 +10,23 @@ import {
   TextInput,
   ScrollView,
   Modal,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSettings } from '../context/SettingsContext';
-import { api } from '../lib/api';
-import { Expense, Income, Category } from '../types';
-import { AddExpenseModal } from '../components/AddExpenseModal';
-import { AddIncomeModal } from '../components/AddIncomeModal';
-import { QuickActionModal } from '../components/QuickActionModal';
-import { ManageCategoriesModal } from '../components/ManageCategoriesModal';
-import { TransactionActionSheet, ActionSheetTransaction } from '../components/TransactionActionSheet';
-import { RecurringScreen } from './RecurringScreen';
-import { PeriodPicker, isDateInPeriod } from '../components/PeriodPickerModal';
-import { BrandLogo } from '../components/BrandLogo';
-import { formatDate } from '../lib/format';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
+import { api } from "../lib/api";
+import { Expense, Income, Category } from "../types";
+import { AddExpenseModal } from "../components/AddExpenseModal";
+import { AddIncomeModal } from "../components/AddIncomeModal";
+import { QuickActionModal } from "../components/QuickActionModal";
+import { ManageCategoriesModal } from "../components/ManageCategoriesModal";
+import {
+  TransactionActionSheet,
+  ActionSheetTransaction,
+} from "../components/TransactionActionSheet";
+import { RecurringScreen } from "./RecurringScreen";
+import { PeriodPicker, isDateInPeriod } from "../components/PeriodPickerModal";
+import { BrandLogo } from "../components/BrandLogo";
+import { formatDate } from "../lib/format";
 import {
   Search,
   Repeat,
@@ -34,11 +37,11 @@ import {
   Plus,
   MoreVertical,
   Tag,
-} from 'lucide-react-native';
+} from "lucide-react-native";
 
 type CombinedTx = {
   id: string;
-  type: 'expense' | 'income';
+  type: "expense" | "income";
   title: string;
   category: string;
   amount: number;
@@ -52,10 +55,10 @@ export const TransactionsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { formatCurrency, t, openSettings, language } = useSettings();
 
-  const [filter, setFilter] = useState<'all' | 'expenses' | 'incomes' | 'recurring'>('all');
-  const [selectedMonth, setSelectedMonth] = useState<string>('all');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<"all" | "expenses" | "incomes" | "recurring">("all");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
@@ -74,23 +77,27 @@ export const TransactionsScreen: React.FC = () => {
   const [actionSheetTx, setActionSheetTx] = useState<CombinedTx | null>(null);
 
   const handleActionSheetEdit = (tx: ActionSheetTransaction) => {
-    if (tx.type === 'expense') {
+    if (tx.type === "expense") {
       setEditingExpense(tx.raw as Expense);
     } else {
       setEditingIncome(tx.raw as Income);
     }
   };
 
-  const handleActionSheetDelete = async (id: string, _title: string, type: 'expense' | 'income') => {
+  const handleActionSheetDelete = async (
+    id: string,
+    _title: string,
+    type: "expense" | "income"
+  ) => {
     try {
-      if (type === 'expense') {
+      if (type === "expense") {
         await api.deleteExpense(id);
       } else {
         await api.deleteIncome(id);
       }
       loadData();
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || 'No se pudo eliminar el movimiento.');
+      Alert.alert(t("common.error"), e?.message || "No se pudo eliminar el movimiento.");
     }
   };
 
@@ -105,7 +112,7 @@ export const TransactionsScreen: React.FC = () => {
       setIncomes(Array.isArray(incData) ? incData : []);
       setCategories(Array.isArray(catData) ? catData : []);
     } catch {
-      Alert.alert(t('common.error'), 'No se pudieron cargar los movimientos.');
+      Alert.alert(t("common.error"), "No se pudieron cargar los movimientos.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -122,7 +129,7 @@ export const TransactionsScreen: React.FC = () => {
 
     const expList: CombinedTx[] = expenses.map((e) => ({
       id: e.id,
-      type: 'expense' as const,
+      type: "expense" as const,
       title: e.description || e.category,
       category: e.category,
       amount: e.amount,
@@ -134,9 +141,9 @@ export const TransactionsScreen: React.FC = () => {
 
     const incList: CombinedTx[] = incomes.map((i) => ({
       id: i.id,
-      type: 'income' as const,
+      type: "income" as const,
       title: i.source,
-      category: i.category || 'Ingreso',
+      category: i.category || "Ingreso",
       amount: i.amount,
       currency: i.currency,
       date: i.date,
@@ -145,21 +152,21 @@ export const TransactionsScreen: React.FC = () => {
     }));
 
     let merged: CombinedTx[] = [];
-    if (filter === 'all') {
+    if (filter === "all") {
       merged = [...expList, ...incList];
-    } else if (filter === 'expenses') {
+    } else if (filter === "expenses") {
       merged = expList;
-    } else if (filter === 'incomes') {
+    } else if (filter === "incomes") {
       merged = incList;
     }
 
     // Filtrar por período (mes, día o rango inicio..fin)
-    if (selectedMonth !== 'all') {
+    if (selectedMonth !== "all") {
       merged = merged.filter((item) => isDateInPeriod(item.date, selectedMonth));
     }
 
     // Filtrar por categoría seleccionada
-    if (selectedCategory !== 'all') {
+    if (selectedCategory !== "all") {
       merged = merged.filter(
         (item) => item.category.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
       );
@@ -169,14 +176,11 @@ export const TransactionsScreen: React.FC = () => {
     if (query) {
       merged = merged.filter(
         (item) =>
-          item.title.toLowerCase().includes(query) ||
-          item.category.toLowerCase().includes(query)
+          item.title.toLowerCase().includes(query) || item.category.toLowerCase().includes(query)
       );
     }
 
-    return merged.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    return merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [expenses, incomes, filter, selectedMonth, selectedCategory, searchQuery]);
 
   return (
@@ -189,13 +193,15 @@ export const TransactionsScreen: React.FC = () => {
         <View className="flex-1 mr-2">
           <View className="flex-row items-center gap-1.5 mb-1">
             <BrandLogo size={20} variant="icon" />
-            <Text className="text-slate-400 text-[11px] font-extrabold tracking-widest">FINTRACK</Text>
+            <Text className="text-slate-400 text-[11px] font-extrabold tracking-widest">
+              FINTRACK
+            </Text>
           </View>
           <Text className="text-[22px] font-extrabold text-white" numberOfLines={1}>
-            {t('transactions.title')}
+            {t("transactions.title")}
           </Text>
           <Text className="text-xs text-slate-400 mt-0.5" numberOfLines={1}>
-            {t('transactions.subtitle')}
+            {t("transactions.subtitle")}
           </Text>
         </View>
 
@@ -204,7 +210,7 @@ export const TransactionsScreen: React.FC = () => {
             className="w-[38px] h-[38px] rounded-xl bg-card border border-blue-500/30 justify-center items-center"
             onPress={() => setShowCategoriesModal(true)}
             activeOpacity={0.8}
-            accessibilityLabel={language === 'en' ? 'Categories' : 'Categorías'}
+            accessibilityLabel={language === "en" ? "Categories" : "Categorías"}
           >
             <Tag size={17} color="#60a5fa" />
           </TouchableOpacity>
@@ -216,7 +222,7 @@ export const TransactionsScreen: React.FC = () => {
           >
             <Plus size={15} color="#ffffff" strokeWidth={2.5} />
             <Text className="text-white text-[13px] font-bold">
-              {language === 'en' ? 'New' : 'Nuevo'}
+              {language === "en" ? "New" : "Nuevo"}
             </Text>
           </TouchableOpacity>
 
@@ -235,70 +241,70 @@ export const TransactionsScreen: React.FC = () => {
       <View className="flex-row mx-5 mb-3 bg-card rounded-xl p-[3px] border border-white/[0.05]">
         <TouchableOpacity
           className={`flex-1 py-2 items-center justify-center rounded-[9px] ${
-            filter === 'all' ? 'bg-slate-800' : ''
+            filter === "all" ? "bg-slate-800" : ""
           }`}
-          onPress={() => setFilter('all')}
+          onPress={() => setFilter("all")}
         >
           <Text
             className={`text-xs ${
-              filter === 'all' ? 'text-white font-bold' : 'text-slate-400 font-semibold'
+              filter === "all" ? "text-white font-bold" : "text-slate-400 font-semibold"
             }`}
           >
-            {t('transactions.all')}
+            {t("transactions.all")}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           className={`flex-1 py-2 items-center justify-center rounded-[9px] ${
-            filter === 'expenses' ? 'bg-slate-800' : ''
+            filter === "expenses" ? "bg-slate-800" : ""
           }`}
-          onPress={() => setFilter('expenses')}
+          onPress={() => setFilter("expenses")}
         >
           <Text
             className={`text-xs ${
-              filter === 'expenses' ? 'text-white font-bold' : 'text-slate-400 font-semibold'
+              filter === "expenses" ? "text-white font-bold" : "text-slate-400 font-semibold"
             }`}
           >
-            {t('transactions.expenses')}
+            {t("transactions.expenses")}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           className={`flex-1 py-2 items-center justify-center rounded-[9px] ${
-            filter === 'incomes' ? 'bg-slate-800' : ''
+            filter === "incomes" ? "bg-slate-800" : ""
           }`}
-          onPress={() => setFilter('incomes')}
+          onPress={() => setFilter("incomes")}
         >
           <Text
             className={`text-xs ${
-              filter === 'incomes' ? 'text-white font-bold' : 'text-slate-400 font-semibold'
+              filter === "incomes" ? "text-white font-bold" : "text-slate-400 font-semibold"
             }`}
           >
-            {t('transactions.incomes')}
+            {t("transactions.incomes")}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           className={`flex-1 py-2 items-center justify-center rounded-[9px] ${
-            filter === 'recurring' ? 'bg-slate-800' : ''
+            filter === "recurring" ? "bg-slate-800" : ""
           }`}
-          onPress={() => setFilter('recurring')}
+          onPress={() => setFilter("recurring")}
         >
           <View className="flex-row items-center gap-1">
-            <Repeat size={12} color={filter === 'recurring' ? '#60a5fa' : '#94a3b8'} />
+            <Repeat size={12} color={filter === "recurring" ? "#60a5fa" : "#94a3b8"} />
             <Text
               className={`text-xs ${
-                filter === 'recurring' ? 'text-white font-bold' : 'text-slate-400 font-semibold'
+                filter === "recurring" ? "text-white font-bold" : "text-slate-400 font-semibold"
               }`}
             >
-              {t('transactions.recurring')}
+              {t("transactions.recurring")}
             </Text>
           </View>
         </TouchableOpacity>
       </View>
 
       {/* Vista de Fijos & Recurrentes con Paridad Web 100% */}
-      {filter === 'recurring' ? (
+      {filter === "recurring" ? (
         <RecurringScreen />
       ) : (
         <>
@@ -307,7 +313,7 @@ export const TransactionsScreen: React.FC = () => {
             <Search size={16} color="#64748b" className="mr-2" />
             <TextInput
               className="flex-1 py-2.5 text-white text-[13px]"
-              placeholder={t('transactions.searchPlaceholder')}
+              placeholder={t("transactions.searchPlaceholder")}
               placeholderTextColor="#64748b"
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -317,10 +323,7 @@ export const TransactionsScreen: React.FC = () => {
 
           {/* Selector de Período con Calendario */}
           <View className="mx-5 mb-2.5">
-            <PeriodPicker
-              selectedMonth={selectedMonth}
-              onSelectMonth={setSelectedMonth}
-            />
+            <PeriodPicker selectedMonth={selectedMonth} onSelectMonth={setSelectedMonth} />
           </View>
 
           {/* Selector Horizontal de Categorías */}
@@ -332,53 +335,52 @@ export const TransactionsScreen: React.FC = () => {
             >
               <TouchableOpacity
                 className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-full border ${
-                  selectedCategory === 'all'
-                    ? 'bg-blue-500/20 border-blue-500'
-                    : 'bg-card border-white/[0.08]'
+                  selectedCategory === "all"
+                    ? "bg-blue-500/20 border-blue-500"
+                    : "bg-card border-white/[0.08]"
                 }`}
-                onPress={() => setSelectedCategory('all')}
+                onPress={() => setSelectedCategory("all")}
                 activeOpacity={0.7}
               >
                 <Text
                   className={`text-xs ${
-                    selectedCategory === 'all' ? 'text-blue-400 font-bold' : 'text-slate-400 font-semibold'
+                    selectedCategory === "all"
+                      ? "text-blue-400 font-bold"
+                      : "text-slate-400 font-semibold"
                   }`}
                 >
-                  {language === 'en' ? 'All' : 'Todas'}
+                  {language === "en" ? "All" : "Todas"}
                 </Text>
               </TouchableOpacity>
 
               {categories
                 .filter((c) =>
-                  filter === 'all'
+                  filter === "all"
                     ? true
-                    : filter === 'expenses'
-                    ? (c.type || 'expense') === 'expense'
-                    : (c.type || 'expense') === 'income'
+                    : filter === "expenses"
+                      ? (c.type || "expense") === "expense"
+                      : (c.type || "expense") === "income"
                 )
                 .map((cat) => {
-                  const isSelected =
-                    selectedCategory.toLowerCase() === cat.name.toLowerCase();
+                  const isSelected = selectedCategory.toLowerCase() === cat.name.toLowerCase();
                   return (
                     <TouchableOpacity
                       key={cat.id}
                       className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-full border ${
                         isSelected
-                          ? 'bg-blue-500/20 border-blue-500'
-                          : 'bg-card border-white/[0.08]'
+                          ? "bg-blue-500/20 border-blue-500"
+                          : "bg-card border-white/[0.08]"
                       }`}
-                      onPress={() =>
-                        setSelectedCategory(isSelected ? 'all' : cat.name)
-                      }
+                      onPress={() => setSelectedCategory(isSelected ? "all" : cat.name)}
                       activeOpacity={0.7}
                     >
                       <View
                         className="w-[7px] h-[7px] rounded-full"
-                        style={{ backgroundColor: cat.color || '#3b82f6' }}
+                        style={{ backgroundColor: cat.color || "#3b82f6" }}
                       />
                       <Text
                         className={`text-xs ${
-                          isSelected ? 'text-blue-400 font-bold' : 'text-slate-400 font-semibold'
+                          isSelected ? "text-blue-400 font-bold" : "text-slate-400 font-semibold"
                         }`}
                       >
                         {cat.name}
@@ -407,17 +409,19 @@ export const TransactionsScreen: React.FC = () => {
                     loadData();
                   }}
                   tintColor="#3b82f6"
-                  colors={['#3b82f6']}
+                  colors={["#3b82f6"]}
                 />
               }
               ListEmptyComponent={
                 <View className="items-center justify-center py-15 gap-3">
                   <Layers size={40} color="#475569" />
-                  <Text className="text-[15px] font-bold text-slate-300">{t('transactions.empty')}</Text>
+                  <Text className="text-[15px] font-bold text-slate-300">
+                    {t("transactions.empty")}
+                  </Text>
                 </View>
               }
               renderItem={({ item }) => {
-                const isExp = item.type === 'expense';
+                const isExp = item.type === "expense";
 
                 return (
                   <TouchableOpacity
@@ -427,7 +431,7 @@ export const TransactionsScreen: React.FC = () => {
                   >
                     <View
                       className={`w-10 h-10 rounded-[13px] justify-center items-center ${
-                        isExp ? 'bg-rose-500/15' : 'bg-emerald-500/15'
+                        isExp ? "bg-rose-500/15" : "bg-emerald-500/15"
                       }`}
                     >
                       {isExp ? (
@@ -451,10 +455,10 @@ export const TransactionsScreen: React.FC = () => {
                     <View className="flex-row items-center gap-2">
                       <Text
                         className={`text-[15px] font-extrabold ${
-                          isExp ? 'text-rose-500' : 'text-emerald-500'
+                          isExp ? "text-rose-500" : "text-emerald-500"
                         }`}
                       >
-                        {isExp ? '-' : '+'}
+                        {isExp ? "-" : "+"}
                         {formatCurrency(item.amount)}
                       </Text>
                       <View className="w-7 h-7 rounded-lg bg-white/[0.04] justify-center items-center">
@@ -540,7 +544,7 @@ export const TransactionsScreen: React.FC = () => {
       <ManageCategoriesModal
         visible={showCategoriesModal}
         onClose={() => setShowCategoriesModal(false)}
-        defaultType={filter === 'incomes' ? 'income' : 'expense'}
+        defaultType={filter === "incomes" ? "income" : "expense"}
         onCategoriesChanged={loadData}
       />
     </View>

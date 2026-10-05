@@ -50,7 +50,10 @@ export function SubNavbar() {
   ];
 
   return (
-    <nav aria-label="Navegación principal de escritorio" className="hidden md:block w-full border-t border-slate-200/80 dark:border-slate-800/60 bg-slate-50/60 dark:bg-slate-950/40">
+    <nav
+      aria-label="Navegación principal de escritorio"
+      className="hidden md:block w-full border-t border-slate-200/80 dark:border-slate-800/60 bg-slate-50/60 dark:bg-slate-950/40"
+    >
       <div className="max-w-7xl mx-auto px-4 md:px-10 lg:px-20 py-2 flex items-center justify-start sm:justify-center overflow-x-auto scrollbar-hide">
         <div className="inline-flex items-center gap-1 p-1 bg-slate-200/70 dark:bg-slate-900/80 rounded-2xl border border-slate-300/80 dark:border-slate-800 shadow-xs">
           {navItems.map((item) => {

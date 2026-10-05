@@ -57,9 +57,7 @@ export function ExpenseDetailsSheet({
 
       if (!res.ok) {
         toast.error(
-          res.error ||
-            translate("expenses.details.deleteError") ||
-            "Error al eliminar el gasto"
+          res.error || translate("expenses.details.deleteError") || "Error al eliminar el gasto"
         );
         return;
       }
@@ -68,9 +66,7 @@ export function ExpenseDetailsSheet({
       onSuccess?.();
       onClose();
     } catch {
-      toast.error(
-        translate("expenses.details.deleteError") || "Error al eliminar el gasto"
-      );
+      toast.error(translate("expenses.details.deleteError") || "Error al eliminar el gasto");
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
@@ -88,18 +84,11 @@ export function ExpenseDetailsSheet({
     }
   };
 
-  const categoryName = translate(
-    `categories.${expense.category}`,
-    expense.category
-  );
+  const categoryName = translate(`categories.${expense.category}`, expense.category);
 
   return (
     <>
-      <Sheet
-        isOpen={isOpen}
-        onClose={onClose}
-        title={translate("expenses.details.title")}
-      >
+      <Sheet isOpen={isOpen} onClose={onClose} title={translate("expenses.details.title")}>
         <div className="space-y-6 pb-6">
           {/* Hero Receipt Section */}
           <div className="relative flex flex-col items-center justify-center p-6 bg-gradient-to-b from-rose-500/10 via-rose-500/5 to-transparent dark:from-rose-500/15 dark:via-rose-500/5 rounded-3xl border border-rose-500/20 text-center overflow-hidden">
@@ -125,9 +114,7 @@ export function ExpenseDetailsSheet({
                 - {currencySymbol}
                 {formatCurrency(expense.amount)}
               </span>
-              <span className="text-xs font-bold text-muted-foreground uppercase">
-                {currency}
-              </span>
+              <span className="text-xs font-bold text-muted-foreground uppercase">{currency}</span>
             </div>
 
             <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -226,9 +213,7 @@ export function ExpenseDetailsSheet({
             <div className="flex items-center justify-between gap-3 pt-0.5">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Hash className="w-3.5 h-3.5" />
-                <span className="text-xs">
-                  {translate("expenses.details.id")}
-                </span>
+                <span className="text-xs">{translate("expenses.details.id")}</span>
               </div>
               <button
                 onClick={handleCopyId}

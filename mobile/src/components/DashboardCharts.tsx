@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text } from 'react-native';
-import Svg, { G, Circle } from 'react-native-svg';
-import { PieChart as PieIcon, BarChart3 } from 'lucide-react-native';
-import { Expense, Income } from '../types';
-import { useSettings } from '../context/SettingsContext';
+import React from "react";
+import { View, Text } from "react-native";
+import Svg, { G, Circle } from "react-native-svg";
+import { PieChart as PieIcon, BarChart3 } from "lucide-react-native";
+import { Expense, Income } from "../types";
+import { useSettings } from "../context/SettingsContext";
 
 interface DashboardChartsProps {
   expenses: Expense[];
@@ -12,18 +12,44 @@ interface DashboardChartsProps {
 }
 
 const CATEGORY_COLORS = [
-  '#f59e0b', // amber
-  '#3b82f6', // blue
-  '#8b5cf6', // purple
-  '#ec4899', // pink
-  '#10b981', // emerald
-  '#06b6d4', // cyan
-  '#f97316', // orange
-  '#64748b', // slate
+  "#f59e0b", // amber
+  "#3b82f6", // blue
+  "#8b5cf6", // purple
+  "#ec4899", // pink
+  "#10b981", // emerald
+  "#06b6d4", // cyan
+  "#f97316", // orange
+  "#64748b", // slate
 ];
 
-const MONTH_NAMES_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-const MONTH_NAMES_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_NAMES_ES = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+];
+const MONTH_NAMES_EN = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 export const DashboardCharts: React.FC<DashboardChartsProps> = ({
   expenses,
@@ -53,7 +79,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
 
   // Procesar 12 meses Ingresos vs Gastos
   const currentYear = new Date().getFullYear();
-  const monthNames = language === 'en' ? MONTH_NAMES_EN : MONTH_NAMES_ES;
+  const monthNames = language === "en" ? MONTH_NAMES_EN : MONTH_NAMES_ES;
   const monthlyData = monthNames.map((name) => ({ name, income: 0, expenses: 0 }));
 
   expenses.forEach((e) => {
@@ -78,10 +104,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
     }
   });
 
-  const maxMonthValue = Math.max(
-    ...monthlyData.map((m) => Math.max(m.income, m.expenses)),
-    1
-  );
+  const maxMonthValue = Math.max(...monthlyData.map((m) => Math.max(m.income, m.expenses)), 1);
 
   // Donut SVG Math
   const radius = 64;
@@ -98,18 +121,20 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
             <View className="w-8 h-8 rounded-[10px] bg-blue-500/15 justify-center items-center">
               <PieIcon size={16} color="#3b82f6" />
             </View>
-            <Text className="text-[15px] font-bold text-white">{t('summary.expensesByCategory')}</Text>
+            <Text className="text-[15px] font-bold text-white">
+              {t("summary.expensesByCategory")}
+            </Text>
           </View>
           <View className="bg-slate-800 px-2 py-0.5 rounded-lg">
             <Text className="text-[11px] text-slate-400 font-semibold">
-              {expensesForPie.length} {language === 'en' ? 'txs' : 'movs'}
+              {expensesForPie.length} {language === "en" ? "txs" : "movs"}
             </Text>
           </View>
         </View>
 
         {categoryList.length === 0 ? (
           <View className="py-8 items-center justify-center">
-            <Text className="text-slate-500 text-xs">{t('common.noData')}</Text>
+            <Text className="text-slate-500 text-xs">{t("common.noData")}</Text>
           </View>
         ) : (
           <>
@@ -155,7 +180,10 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
 
               <View className="absolute items-center justify-center max-w-[100px]">
                 <Text className="text-[10px] font-bold text-slate-400 tracking-wider">TOTAL</Text>
-                <Text className="text-[13px] font-extrabold text-white mt-0.5 text-center" numberOfLines={1}>
+                <Text
+                  className="text-[13px] font-extrabold text-white mt-0.5 text-center"
+                  numberOfLines={1}
+                >
                   {formatCurrency(totalExpenseAmount)}
                 </Text>
               </View>
@@ -169,13 +197,21 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
                   <View key={cat.name} className="gap-1.5">
                     <View className="flex-row justify-between items-center">
                       <View className="flex-row items-center gap-2 flex-1 mr-2">
-                        <View className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
-                        <Text className="text-xs font-semibold text-slate-100 flex-1" numberOfLines={1}>
+                        <View
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: cat.color }}
+                        />
+                        <Text
+                          className="text-xs font-semibold text-slate-100 flex-1"
+                          numberOfLines={1}
+                        >
                           {cat.name}
                         </Text>
                       </View>
                       <View className="flex-row items-center gap-2">
-                        <Text className="text-xs font-bold text-white">{formatCurrency(cat.value)}</Text>
+                        <Text className="text-xs font-bold text-white">
+                          {formatCurrency(cat.value)}
+                        </Text>
                         <Text className="text-[11px] font-semibold text-slate-400 min-w-[28px] text-right">
                           {percent.toFixed(0)}%
                         </Text>
@@ -205,7 +241,9 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
             <View className="w-8 h-8 rounded-[10px] bg-emerald-500/15 justify-center items-center">
               <BarChart3 size={16} color="#10b981" />
             </View>
-            <Text className="text-[15px] font-bold text-white">{t('summary.incomeVsExpenses')}</Text>
+            <Text className="text-[15px] font-bold text-white">
+              {t("summary.incomeVsExpenses")}
+            </Text>
           </View>
           <View className="bg-slate-800 px-2 py-0.5 rounded-lg">
             <Text className="text-[11px] text-slate-400 font-semibold">{currentYear}</Text>
@@ -216,11 +254,13 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
         <View className="flex-row justify-end gap-4 mb-3">
           <View className="flex-row items-center gap-1.5">
             <View className="w-2 h-2 rounded-full bg-emerald-500" />
-            <Text className="text-[11px] text-slate-400 font-semibold">{t('summary.income')}</Text>
+            <Text className="text-[11px] text-slate-400 font-semibold">{t("summary.income")}</Text>
           </View>
           <View className="flex-row items-center gap-1.5">
             <View className="w-2 h-2 rounded-full bg-rose-500" />
-            <Text className="text-[11px] text-slate-400 font-semibold">{t('summary.expenses')}</Text>
+            <Text className="text-[11px] text-slate-400 font-semibold">
+              {t("summary.expenses")}
+            </Text>
           </View>
         </View>
 
@@ -232,16 +272,19 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
               const expHeight = maxMonthValue > 0 ? (m.expenses / maxMonthValue) * 110 : 0;
 
               return (
-                <View key={`month-${idx}`} className="items-center flex-1 h-full justify-end relative">
+                <View
+                  key={`month-${idx}`}
+                  className="items-center flex-1 h-full justify-end relative"
+                >
                   <View className="flex-row items-end gap-0.5 mb-1.5">
                     {/* Barra Ingreso */}
                     <View
-                      className={`w-[5px] rounded-t-[3px] ${m.income > 0 ? 'bg-emerald-500' : 'bg-slate-800'}`}
+                      className={`w-[5px] rounded-t-[3px] ${m.income > 0 ? "bg-emerald-500" : "bg-slate-800"}`}
                       style={{ height: Math.max(incHeight, 4) }}
                     />
                     {/* Barra Gasto */}
                     <View
-                      className={`w-[5px] rounded-t-[3px] ${m.expenses > 0 ? 'bg-rose-500' : 'bg-slate-800'}`}
+                      className={`w-[5px] rounded-t-[3px] ${m.expenses > 0 ? "bg-rose-500" : "bg-slate-800"}`}
                       style={{ height: Math.max(expHeight, 4) }}
                     />
                   </View>

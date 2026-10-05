@@ -1,12 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Pressable,
-  ScrollView,
-} from 'react-native';
+import React, { useState, useMemo } from "react";
+import { View, Text, TouchableOpacity, Modal, Pressable, ScrollView } from "react-native";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,32 +9,32 @@ import {
   Check,
   X,
   Clock,
-} from 'lucide-react-native';
-import { useSettings } from '../context/SettingsContext';
+} from "lucide-react-native";
+import { useSettings } from "../context/SettingsContext";
 
 /**
  * Extrae la clave de fecha en formato YYYY-MM-DD sin sufrir desajustes por zona horaria.
  */
 export const extractDateKey = (dateVal: string | Date | undefined): string => {
-  if (!dateVal) return '';
-  if (typeof dateVal === 'string') {
+  if (!dateVal) return "";
+  if (typeof dateVal === "string") {
     if (dateVal.length >= 10 && /^\d{4}-\d{2}-\d{2}/.test(dateVal)) {
       return dateVal.slice(0, 10);
     }
     const d = new Date(dateVal);
     if (!isNaN(d.getTime())) {
       const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
       return `${y}-${m}-${day}`;
     }
   } else if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
     const y = dateVal.getFullYear();
-    const m = String(dateVal.getMonth() + 1).padStart(2, '0');
-    const day = String(dateVal.getDate()).padStart(2, '0');
+    const m = String(dateVal.getMonth() + 1).padStart(2, "0");
+    const day = String(dateVal.getDate()).padStart(2, "0");
     return `${y}-${m}-${day}`;
   }
-  return '';
+  return "";
 };
 
 /**
@@ -49,15 +42,15 @@ export const extractDateKey = (dateVal: string | Date | undefined): string => {
  * cae dentro del período seleccionado (mes, día, rango inicio..fin, o 'all').
  */
 export const isDateInPeriod = (dateStr: string | Date | undefined, period: string): boolean => {
-  if (!dateStr || !period || period === 'all') return true;
+  if (!dateStr || !period || period === "all") return true;
   const dateKey = extractDateKey(dateStr);
   if (!dateKey) return true; // Incluir para no ocultar registros sin fecha
 
   const monthKey = dateKey.slice(0, 7);
 
   // Si es un rango "YYYY-MM-DD..YYYY-MM-DD"
-  if (period.includes('..')) {
-    const [startStr, endStr] = period.split('..');
+  if (period.includes("..")) {
+    const [startStr, endStr] = period.split("..");
     return dateKey >= startStr && dateKey <= endStr;
   }
 
@@ -75,32 +68,29 @@ interface PeriodPickerProps {
   onSelectMonth: (month: string) => void;
 }
 
-export const PeriodPicker: React.FC<PeriodPickerProps> = ({
-  selectedMonth,
-  onSelectMonth,
-}) => {
+export const PeriodPicker: React.FC<PeriodPickerProps> = ({ selectedMonth, onSelectMonth }) => {
   const { language } = useSettings();
   const [showModal, setShowModal] = useState(false);
 
   // Estados de Rango (Inicio y Fin) para el modal
   const [rangeStart, setRangeStart] = useState<string | null>(null);
   const [rangeEnd, setRangeEnd] = useState<string | null>(null);
-  const [activeRangeSelector, setActiveRangeSelector] = useState<'start' | 'end'>('start');
+  const [activeRangeSelector, setActiveRangeSelector] = useState<"start" | "end">("start");
 
   // Fecha del mes visible en el calendario interno
   const [viewYear, setViewYear] = useState<number>(() => {
-    if (selectedMonth && selectedMonth !== 'all') {
-      const firstPart = selectedMonth.split('..')[0];
-      const parts = firstPart.split('-').map(Number);
+    if (selectedMonth && selectedMonth !== "all") {
+      const firstPart = selectedMonth.split("..")[0];
+      const parts = firstPart.split("-").map(Number);
       if (parts[0]) return parts[0];
     }
     return new Date().getFullYear();
   });
 
   const [viewMonth, setViewMonth] = useState<number>(() => {
-    if (selectedMonth && selectedMonth !== 'all') {
-      const firstPart = selectedMonth.split('..')[0];
-      const parts = firstPart.split('-').map(Number);
+    if (selectedMonth && selectedMonth !== "all") {
+      const firstPart = selectedMonth.split("..")[0];
+      const parts = firstPart.split("-").map(Number);
       if (parts[1]) return parts[1] - 1;
     }
     return new Date().getMonth();
@@ -109,171 +99,177 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
   // Clave de hoy "YYYY-MM-DD"
   const todayKey = useMemo(() => {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   }, []);
 
   // Al abrir el modal, inicializar el rango con el período actual
   const handleOpenModal = () => {
-    if (selectedMonth === 'all') {
+    if (selectedMonth === "all") {
       const now = new Date();
       setViewYear(now.getFullYear());
       setViewMonth(now.getMonth());
       setRangeStart(null);
       setRangeEnd(null);
-      setActiveRangeSelector('start');
-    } else if (selectedMonth.includes('..')) {
-      const [start, end] = selectedMonth.split('..');
+      setActiveRangeSelector("start");
+    } else if (selectedMonth.includes("..")) {
+      const [start, end] = selectedMonth.split("..");
       setRangeStart(start);
       setRangeEnd(end);
-      const parts = start.split('-').map(Number);
+      const parts = start.split("-").map(Number);
       if (parts[0] && parts[1]) {
         setViewYear(parts[0]);
         setViewMonth(parts[1] - 1);
       }
-      setActiveRangeSelector('start');
+      setActiveRangeSelector("start");
     } else if (selectedMonth.length === 10) {
       // Día individual YYYY-MM-DD
       setRangeStart(selectedMonth);
       setRangeEnd(selectedMonth);
-      const parts = selectedMonth.split('-').map(Number);
+      const parts = selectedMonth.split("-").map(Number);
       if (parts[0] && parts[1]) {
         setViewYear(parts[0]);
         setViewMonth(parts[1] - 1);
       }
-      setActiveRangeSelector('start');
+      setActiveRangeSelector("start");
     } else {
       // Mes YYYY-MM
-      const parts = selectedMonth.split('-').map(Number);
+      const parts = selectedMonth.split("-").map(Number);
       if (parts[0] && parts[1]) {
         setViewYear(parts[0]);
         setViewMonth(parts[1] - 1);
         const lastDay = new Date(parts[0], parts[1], 0).getDate();
         setRangeStart(`${selectedMonth}-01`);
-        setRangeEnd(`${selectedMonth}-${String(lastDay).padStart(2, '0')}`);
+        setRangeEnd(`${selectedMonth}-${String(lastDay).padStart(2, "0")}`);
       }
-      setActiveRangeSelector('start');
+      setActiveRangeSelector("start");
     }
     setShowModal(true);
   };
 
   // Etiqueta para la barra superior
   const getPeriodLabel = (): string => {
-    if (selectedMonth === 'all') {
-      return language === 'en' ? 'All History' : 'Todo el Historial';
+    if (selectedMonth === "all") {
+      return language === "en" ? "All History" : "Todo el Historial";
     }
 
     // Rango Inicio .. Fin
-    if (selectedMonth.includes('..')) {
-      const [startStr, endStr] = selectedMonth.split('..');
-      const [sy, sm, sd] = startStr.split('-').map(Number);
-      const [ey, em, ed] = endStr.split('-').map(Number);
+    if (selectedMonth.includes("..")) {
+      const [startStr, endStr] = selectedMonth.split("..");
+      const [sy, sm, sd] = startStr.split("-").map(Number);
+      const [ey, em, ed] = endStr.split("-").map(Number);
       const startDate = new Date(sy, sm - 1, sd);
       const endDate = new Date(ey, em - 1, ed);
 
       const isSameYear = sy === ey;
-      const startFmt = startDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', {
-        day: 'numeric',
-        month: 'short',
-        year: isSameYear ? undefined : '2-digit',
+      const startFmt = startDate.toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
+        day: "numeric",
+        month: "short",
+        year: isSameYear ? undefined : "2-digit",
       });
-      const endFmt = endDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
+      const endFmt = endDate.toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       });
 
       return `${startFmt} - ${endFmt}`;
     }
 
-    const parts = selectedMonth.split('-').map(Number);
+    const parts = selectedMonth.split("-").map(Number);
     if (!parts[0] || !parts[1]) return selectedMonth;
 
     // Día específico (YYYY-MM-DD)
     if (parts[2]) {
       const date = new Date(parts[0], parts[1] - 1, parts[2]);
-      return date.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
+      return date.toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       });
     }
 
     // Mes completo (YYYY-MM)
     const date = new Date(parts[0], parts[1] - 1, 15);
-    const monthName = date.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', {
-      month: 'long',
-      year: 'numeric',
+    const monthName = date.toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
+      month: "long",
+      year: "numeric",
     });
     return monthName.charAt(0).toUpperCase() + monthName.slice(1);
   };
 
   // Flecha anterior de la barra principal
   const handlePrev = () => {
-    if (selectedMonth === 'all') {
+    if (selectedMonth === "all") {
       const now = new Date();
-      onSelectMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+      onSelectMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
       return;
     }
 
-    if (selectedMonth.includes('..')) {
-      const [startStr, endStr] = selectedMonth.split('..');
-      const start = new Date(startStr + 'T12:00:00');
-      const end = new Date(endStr + 'T12:00:00');
-      const diffDays = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    if (selectedMonth.includes("..")) {
+      const [startStr, endStr] = selectedMonth.split("..");
+      const start = new Date(startStr + "T12:00:00");
+      const end = new Date(endStr + "T12:00:00");
+      const diffDays = Math.max(
+        1,
+        Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+      );
 
       start.setDate(start.getDate() - diffDays);
       end.setDate(end.getDate() - diffDays);
 
       const fmt = (d: Date) =>
-        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       onSelectMonth(`${fmt(start)}..${fmt(end)}`);
       return;
     }
 
-    const parts = selectedMonth.split('-').map(Number);
+    const parts = selectedMonth.split("-").map(Number);
     if (parts[2]) {
       const d = new Date(parts[0], parts[1] - 1, parts[2]);
       d.setDate(d.getDate() - 1);
       onSelectMonth(
-        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
       );
     } else {
       const d = new Date(parts[0], parts[1] - 1, 1);
       d.setMonth(d.getMonth() - 1);
-      onSelectMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+      onSelectMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
     }
   };
 
   // Flecha siguiente de la barra principal
   const handleNext = () => {
-    if (selectedMonth === 'all') return;
+    if (selectedMonth === "all") return;
 
-    if (selectedMonth.includes('..')) {
-      const [startStr, endStr] = selectedMonth.split('..');
-      const start = new Date(startStr + 'T12:00:00');
-      const end = new Date(endStr + 'T12:00:00');
-      const diffDays = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    if (selectedMonth.includes("..")) {
+      const [startStr, endStr] = selectedMonth.split("..");
+      const start = new Date(startStr + "T12:00:00");
+      const end = new Date(endStr + "T12:00:00");
+      const diffDays = Math.max(
+        1,
+        Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+      );
 
       start.setDate(start.getDate() + diffDays);
       end.setDate(end.getDate() + diffDays);
 
       const fmt = (d: Date) =>
-        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       onSelectMonth(`${fmt(start)}..${fmt(end)}`);
       return;
     }
 
-    const parts = selectedMonth.split('-').map(Number);
+    const parts = selectedMonth.split("-").map(Number);
     if (parts[2]) {
       const d = new Date(parts[0], parts[1] - 1, parts[2]);
       d.setDate(d.getDate() + 1);
       onSelectMonth(
-        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
       );
     } else {
       const d = new Date(parts[0], parts[1] - 1, 1);
       d.setMonth(d.getMonth() + 1);
-      onSelectMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+      onSelectMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
     }
   };
 
@@ -298,21 +294,21 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
 
   const viewMonthName = useMemo(() => {
     const d = new Date(viewYear, viewMonth, 15);
-    const name = d.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', {
-      month: 'long',
-      year: 'numeric',
+    const name = d.toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
+      month: "long",
+      year: "numeric",
     });
     return name.charAt(0).toUpperCase() + name.slice(1);
   }, [viewYear, viewMonth, language]);
 
   const weekDays = useMemo(() => {
-    return language === 'en'
-      ? ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
-      : ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'];
+    return language === "en"
+      ? ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+      : ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"];
   }, [language]);
 
   const viewMonthKey = useMemo(() => {
-    return `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
+    return `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}`;
   }, [viewYear, viewMonth]);
 
   // Cuadrícula de días
@@ -337,13 +333,13 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
         key: `prev-${dayNum}`,
         dayNumber: dayNum,
         isCurrentMonth: false,
-        dateKey: `${prevY}-${String(prevM).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`,
+        dateKey: `${prevY}-${String(prevM).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`,
       });
     }
 
     // Mes actual
     for (let d = 1; d <= daysInMonth; d++) {
-      const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
       cells.push({
         key: `cur-${d}`,
         dayNumber: d,
@@ -361,7 +357,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
         key: `next-${i}`,
         dayNumber: i,
         isCurrentMonth: false,
-        dateKey: `${nextY}-${String(nextM).padStart(2, '0')}-${String(i).padStart(2, '0')}`,
+        dateKey: `${nextY}-${String(nextM).padStart(2, "0")}-${String(i).padStart(2, "0")}`,
       });
     }
 
@@ -370,19 +366,19 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
 
   // Manejo de pulsación en un día del calendario
   const handleDayPress = (dateKey: string) => {
-    if (activeRangeSelector === 'start') {
+    if (activeRangeSelector === "start") {
       setRangeStart(dateKey);
       if (rangeEnd && dateKey > rangeEnd) {
         setRangeEnd(dateKey);
       }
       // Cambiar automáticamente a seleccionar fin
-      setActiveRangeSelector('end');
+      setActiveRangeSelector("end");
     } else {
       // Seleccionando fin
       if (rangeStart && dateKey < rangeStart) {
         // Si toca una fecha anterior al inicio, se convierte en el nuevo inicio
         setRangeStart(dateKey);
-        setActiveRangeSelector('end');
+        setActiveRangeSelector("end");
       } else {
         setRangeEnd(dateKey);
       }
@@ -392,7 +388,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
   // Aplicar el rango seleccionado
   const handleApplyRange = () => {
     if (!rangeStart && !rangeEnd) {
-      onSelectMonth('all');
+      onSelectMonth("all");
     } else if (rangeStart && rangeEnd) {
       if (rangeStart === rangeEnd) {
         onSelectMonth(rangeStart);
@@ -409,9 +405,9 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
   const handlePresetThisMonth = () => {
     const now = new Date();
     const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const m = String(now.getMonth() + 1).padStart(2, "0");
     const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
-    onSelectMonth(`${y}-${m}-01..${y}-${m}-${String(lastDay).padStart(2, '0')}`);
+    onSelectMonth(`${y}-${m}-01..${y}-${m}-${String(lastDay).padStart(2, "0")}`);
     setShowModal(false);
   };
 
@@ -419,35 +415,35 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
     const now = new Date();
     now.setMonth(now.getMonth() - 1);
     const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const m = String(now.getMonth() + 1).padStart(2, "0");
     const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
-    onSelectMonth(`${y}-${m}-01..${y}-${m}-${String(lastDay).padStart(2, '0')}`);
+    onSelectMonth(`${y}-${m}-01..${y}-${m}-${String(lastDay).padStart(2, "0")}`);
     setShowModal(false);
   };
 
   const handlePresetLast30Days = () => {
     const now = new Date();
-    const endStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const endStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     now.setDate(now.getDate() - 30);
-    const startStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const startStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     onSelectMonth(`${startStr}..${endStr}`);
     setShowModal(false);
   };
 
   const handlePresetAllHistory = () => {
-    onSelectMonth('all');
+    onSelectMonth("all");
     setShowModal(false);
   };
 
   // Formato corto para las píldoras de Inicio y Fin
   const formatShortDate = (dateStr: string | null) => {
-    if (!dateStr) return language === 'en' ? 'Select' : 'Seleccionar';
-    const [y, m, d] = dateStr.split('-').map(Number);
+    if (!dateStr) return language === "en" ? "Select" : "Seleccionar";
+    const [y, m, d] = dateStr.split("-").map(Number);
     if (!y || !m || !d) return dateStr;
     const date = new Date(y, m - 1, d);
-    return date.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', {
-      day: 'numeric',
-      month: 'short',
+    return date.toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
+      day: "numeric",
+      month: "short",
     });
   };
 
@@ -492,39 +488,51 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
         animationType="fade"
         onRequestClose={() => setShowModal(false)}
       >
-        <Pressable className="flex-1 bg-black/75 justify-center p-4" onPress={() => setShowModal(false)}>
-          <Pressable className="bg-[#0f172a] rounded-3xl border border-white/10 p-[18px] max-h-[90%] shadow-2xl shadow-black" onPress={(e) => e.stopPropagation()}>
+        <Pressable
+          className="flex-1 bg-black/75 justify-center p-4"
+          onPress={() => setShowModal(false)}
+        >
+          <Pressable
+            className="bg-[#0f172a] rounded-3xl border border-white/10 p-[18px] max-h-[90%] shadow-2xl shadow-black"
+            onPress={(e) => e.stopPropagation()}
+          >
             {/* Header del Calendario */}
             <View className="flex-row justify-between items-center pb-3 border-b border-white/[0.06] mb-3">
               <View className="flex-row items-center gap-2.5">
                 <CalendarIcon size={18} color="#3b82f6" />
                 <Text className="text-[17px] font-extrabold text-white">
-                  {language === 'en' ? 'Date Range & Filter' : 'Rango de Fechas'}
+                  {language === "en" ? "Date Range & Filter" : "Rango de Fechas"}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => setShowModal(false)} className="w-8 h-8 rounded-full bg-white/[0.06] justify-center items-center">
+              <TouchableOpacity
+                onPress={() => setShowModal(false)}
+                className="w-8 h-8 rounded-full bg-white/[0.06] justify-center items-center"
+              >
                 <X size={18} color="#94a3b8" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-2.5 pb-1">
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerClassName="gap-2.5 pb-1"
+            >
               {/* Selector de Rango: Inicio y Fin */}
               <View className="flex-row items-center justify-between bg-[#111827] rounded-[14px] p-1.5 border border-white/[0.06]">
                 <TouchableOpacity
                   className={`flex-1 py-2 px-2.5 rounded-[10px] items-center border ${
-                    activeRangeSelector === 'start'
-                      ? 'border-primary bg-primary/15'
-                      : 'border-transparent bg-slate-800'
+                    activeRangeSelector === "start"
+                      ? "border-primary bg-primary/15"
+                      : "border-transparent bg-slate-800"
                   }`}
-                  onPress={() => setActiveRangeSelector('start')}
+                  onPress={() => setActiveRangeSelector("start")}
                   activeOpacity={0.7}
                 >
                   <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    {language === 'en' ? 'Start Date' : 'Fecha Inicio'}
+                    {language === "en" ? "Start Date" : "Fecha Inicio"}
                   </Text>
                   <Text
                     className={`text-[13px] font-bold mt-0.5 ${
-                      activeRangeSelector === 'start' ? 'text-blue-400' : 'text-slate-300'
+                      activeRangeSelector === "start" ? "text-blue-400" : "text-slate-300"
                     }`}
                   >
                     {formatShortDate(rangeStart)}
@@ -537,19 +545,19 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
 
                 <TouchableOpacity
                   className={`flex-1 py-2 px-2.5 rounded-[10px] items-center border ${
-                    activeRangeSelector === 'end'
-                      ? 'border-primary bg-primary/15'
-                      : 'border-transparent bg-slate-800'
+                    activeRangeSelector === "end"
+                      ? "border-primary bg-primary/15"
+                      : "border-transparent bg-slate-800"
                   }`}
-                  onPress={() => setActiveRangeSelector('end')}
+                  onPress={() => setActiveRangeSelector("end")}
                   activeOpacity={0.7}
                 >
                   <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    {language === 'en' ? 'End Date' : 'Fecha Fin'}
+                    {language === "en" ? "End Date" : "Fecha Fin"}
                   </Text>
                   <Text
                     className={`text-[13px] font-bold mt-0.5 ${
-                      activeRangeSelector === 'end' ? 'text-blue-400' : 'text-slate-300'
+                      activeRangeSelector === "end" ? "text-blue-400" : "text-slate-300"
                     }`}
                   >
                     {formatShortDate(rangeEnd)}
@@ -565,7 +573,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
                   activeOpacity={0.7}
                 >
                   <Text className="text-[11px] font-semibold text-slate-400">
-                    {language === 'en' ? 'This Month' : 'Este Mes'}
+                    {language === "en" ? "This Month" : "Este Mes"}
                   </Text>
                 </TouchableOpacity>
 
@@ -576,7 +584,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
                 >
                   <Clock size={12} color="#94a3b8" />
                   <Text className="text-[11px] font-semibold text-slate-400">
-                    {language === 'en' ? '30 Days' : '30 Días'}
+                    {language === "en" ? "30 Days" : "30 Días"}
                   </Text>
                 </TouchableOpacity>
 
@@ -586,7 +594,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
                   activeOpacity={0.7}
                 >
                   <Text className="text-[11px] font-semibold text-slate-400">
-                    {language === 'en' ? 'Last Month' : 'Mes Anterior'}
+                    {language === "en" ? "Last Month" : "Mes Anterior"}
                   </Text>
                 </TouchableOpacity>
 
@@ -597,7 +605,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
                 >
                   <Layers size={12} color="#94a3b8" />
                   <Text className="text-[11px] font-semibold text-slate-400">
-                    {language === 'en' ? 'All' : 'Todo'}
+                    {language === "en" ? "All" : "Todo"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -638,26 +646,23 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
                   const isStart = rangeStart === cell.dateKey;
                   const isEnd = rangeEnd === cell.dateKey;
                   const isInRange =
-                    rangeStart &&
-                    rangeEnd &&
-                    cell.dateKey > rangeStart &&
-                    cell.dateKey < rangeEnd;
+                    rangeStart && rangeEnd && cell.dateKey > rangeStart && cell.dateKey < rangeEnd;
                   const isToday = cell.dateKey === todayKey;
 
                   return (
                     <TouchableOpacity
                       key={cell.key}
-                      style={{ width: '14.28%', aspectRatio: 1.1 }}
+                      style={{ width: "14.28%", aspectRatio: 1.1 }}
                       className={`justify-center items-center rounded-lg my-[1px] ${
                         isStart
-                          ? 'bg-primary rounded-l-[10px]'
+                          ? "bg-primary rounded-l-[10px]"
                           : isEnd
-                          ? 'bg-primary rounded-r-[10px]'
-                          : isInRange
-                          ? 'bg-primary/20 rounded-none'
-                          : isToday && !isStart && !isEnd
-                          ? 'border border-blue-500'
-                          : ''
+                            ? "bg-primary rounded-r-[10px]"
+                            : isInRange
+                              ? "bg-primary/20 rounded-none"
+                              : isToday && !isStart && !isEnd
+                                ? "border border-blue-500"
+                                : ""
                       }`}
                       onPress={() => handleDayPress(cell.dateKey)}
                       activeOpacity={0.7}
@@ -665,14 +670,14 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
                       <Text
                         className={`text-xs font-semibold ${
                           isStart || isEnd
-                            ? 'text-white font-extrabold'
+                            ? "text-white font-extrabold"
                             : isInRange
-                            ? 'text-blue-300 font-bold'
-                            : isToday && !isStart && !isEnd
-                            ? 'text-blue-400 font-bold'
-                            : !cell.isCurrentMonth
-                            ? 'text-slate-600'
-                            : 'text-slate-300'
+                              ? "text-blue-300 font-bold"
+                              : isToday && !isStart && !isEnd
+                                ? "text-blue-400 font-bold"
+                                : !cell.isCurrentMonth
+                                  ? "text-slate-600"
+                                  : "text-slate-300"
                         }`}
                       >
                         {cell.dayNumber}
@@ -690,7 +695,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
               >
                 <Check size={16} color="#ffffff" />
                 <Text className="text-sm font-bold text-white">
-                  {language === 'en' ? 'Apply Filter' : 'Aplicar Filtro'}
+                  {language === "en" ? "Apply Filter" : "Aplicar Filtro"}
                 </Text>
               </TouchableOpacity>
             </ScrollView>
@@ -700,6 +705,3 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({
     </View>
   );
 };
-
-
-

@@ -29,9 +29,7 @@ export function ForgotPasswordForm({
         ? "Por favor ingresa tu correo electrónico."
         : "Please enter your email.";
     } else if (!EMAIL_REGEX.test(email)) {
-      newErrors.email = isEs
-        ? "Formato de correo electrónico inválido."
-        : "Invalid email format.";
+      newErrors.email = isEs ? "Formato de correo electrónico inválido." : "Invalid email format.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -87,8 +85,7 @@ export function ForgotPasswordForm({
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
-              if (errors.email)
-                setErrors((prev) => ({ ...prev, email: undefined }));
+              if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
             }}
             className={`w-full bg-slate-50/90 dark:bg-[#060911] border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm rounded-xl py-2.5 pl-10 pr-3.5 outline-none transition duration-200 shadow-2xs ${
               errors.email

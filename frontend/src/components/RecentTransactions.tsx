@@ -4,12 +4,7 @@ import { Expense, Income } from "@/types/index";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { formatCurrency, getCategoryStyle, cn, formatDateDDMMYYYY } from "@/lib/utils";
-import {
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
-  Repeat,
-} from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight, Repeat } from "lucide-react";
 import { TxTypeIcon } from "@/components/ui/AppIcons";
 import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
@@ -29,10 +24,7 @@ interface RecentTransactionsProps {
   incomes: Income[];
 }
 
-export function RecentTransactions({
-  expenses,
-  incomes,
-}: RecentTransactionsProps) {
+export function RecentTransactions({ expenses, incomes }: RecentTransactionsProps) {
   const { translate, currencySymbol, language } = useSettings();
   const { categories } = useCategories();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -75,7 +67,7 @@ export function RecentTransactions({
 
       const { scrollLeft, scrollWidth, clientWidth } = el;
       const cardWidth = 300;
-      
+
       // If reached the end, smoothly loop back to the beginning
       if (scrollLeft + clientWidth >= scrollWidth - 20) {
         el.scrollTo({ left: 0, behavior: "smooth" });
@@ -174,11 +166,7 @@ export function RecentTransactions({
             return (
               <Link
                 key={`${tx.type}-${tx.id}`}
-                href={
-                  isIncome
-                    ? `/incomes?id=${tx.id}`
-                    : `/expenses?id=${tx.id}`
-                }
+                href={isIncome ? `/incomes?id=${tx.id}` : `/expenses?id=${tx.id}`}
                 className="shrink-0 w-68 sm:w-72 p-4 rounded-2xl bg-card dark:bg-card/75 backdrop-blur-sm border border-slate-200/90 dark:border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-action/40 transition-all group cursor-pointer block snap-start"
               >
                 <div className="flex justify-between items-start mb-3">
@@ -187,15 +175,21 @@ export function RecentTransactions({
                       isIncome
                         ? "bg-emerald-500/10 text-emerald-500"
                         : isGoal
-                        ? "bg-amber-500/10 text-amber-500"
-                        : "bg-rose-500/10 text-rose-500"
+                          ? "bg-amber-500/10 text-amber-500"
+                          : "bg-rose-500/10 text-rose-500"
                     }`}
                     title={
                       isIncome
-                        ? (language === "en" ? "Income" : "Ingreso")
+                        ? language === "en"
+                          ? "Income"
+                          : "Ingreso"
                         : isGoal
-                        ? (language === "en" ? "Goal contribution" : "Aporte a meta")
-                        : (language === "en" ? "Expense" : "Gasto")
+                          ? language === "en"
+                            ? "Goal contribution"
+                            : "Aporte a meta"
+                          : language === "en"
+                            ? "Expense"
+                            : "Gasto"
                     }
                   >
                     <TxTypeIcon
@@ -224,7 +218,11 @@ export function RecentTransactions({
                     </p>
                     {(tx.id.startsWith("rec_") || tx.id.startsWith("rec-")) && (
                       <span
-                        title={language === "en" ? "Automatic recurring transaction" : "Transacción recurrente automática"}
+                        title={
+                          language === "en"
+                            ? "Automatic recurring transaction"
+                            : "Transacción recurrente automática"
+                        }
                         className="inline-flex items-center shrink-0 cursor-help"
                       >
                         <Repeat className="w-3.5 h-3.5 text-indigo-500" />
@@ -246,7 +244,8 @@ export function RecentTransactions({
                         <p className="text-[11px] text-muted-foreground font-semibold truncate max-w-[130px]">
                           {isIncome
                             ? translate(`sources.${(tx as Income).source}`) || (tx as Income).source
-                            : translate(`categories.${(tx as Expense).category}`) || (tx as Expense).category}
+                            : translate(`categories.${(tx as Expense).category}`) ||
+                              (tx as Expense).category}
                         </p>
                       </div>
                       <p className="text-[10px] text-muted-foreground/70">

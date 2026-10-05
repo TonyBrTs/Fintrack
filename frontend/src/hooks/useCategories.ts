@@ -7,21 +7,105 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const DEFAULT_EXPENSE_CATEGORIES: Category[] = [
-  { id: "default-exp-1", name: "Alimentación", type: "expense", color: "emerald", icon: "utensils", is_default: true },
-  { id: "default-exp-2", name: "Transporte", type: "expense", color: "blue", icon: "car", is_default: true },
-  { id: "default-exp-3", name: "Servicios", type: "expense", color: "amber", icon: "zap", is_default: true },
-  { id: "default-exp-4", name: "Entretenimiento", type: "expense", color: "purple", icon: "film", is_default: true },
-  { id: "default-exp-5", name: "Salud", type: "expense", color: "rose", icon: "heart-pulse", is_default: true },
-  { id: "default-exp-6", name: "Metas", type: "expense", color: "cyan", icon: "target", is_default: true },
-  { id: "default-exp-7", name: "Otros", type: "expense", color: "slate", icon: "more-horizontal", is_default: true },
+  {
+    id: "default-exp-1",
+    name: "Alimentación",
+    type: "expense",
+    color: "emerald",
+    icon: "utensils",
+    is_default: true,
+  },
+  {
+    id: "default-exp-2",
+    name: "Transporte",
+    type: "expense",
+    color: "blue",
+    icon: "car",
+    is_default: true,
+  },
+  {
+    id: "default-exp-3",
+    name: "Servicios",
+    type: "expense",
+    color: "amber",
+    icon: "zap",
+    is_default: true,
+  },
+  {
+    id: "default-exp-4",
+    name: "Entretenimiento",
+    type: "expense",
+    color: "purple",
+    icon: "film",
+    is_default: true,
+  },
+  {
+    id: "default-exp-5",
+    name: "Salud",
+    type: "expense",
+    color: "rose",
+    icon: "heart-pulse",
+    is_default: true,
+  },
+  {
+    id: "default-exp-6",
+    name: "Metas",
+    type: "expense",
+    color: "cyan",
+    icon: "target",
+    is_default: true,
+  },
+  {
+    id: "default-exp-7",
+    name: "Otros",
+    type: "expense",
+    color: "slate",
+    icon: "more-horizontal",
+    is_default: true,
+  },
 ];
 
 const DEFAULT_INCOME_SOURCES: Category[] = [
-  { id: "default-inc-1", name: "Salario", type: "income", color: "emerald", icon: "briefcase", is_default: true },
-  { id: "default-inc-2", name: "Freelance", type: "income", color: "blue", icon: "laptop", is_default: true },
-  { id: "default-inc-3", name: "Inversiones", type: "income", color: "purple", icon: "trending-up", is_default: true },
-  { id: "default-inc-4", name: "Regalo", type: "income", color: "pink", icon: "gift", is_default: true },
-  { id: "default-inc-5", name: "Otros", type: "income", color: "slate", icon: "more-horizontal", is_default: true },
+  {
+    id: "default-inc-1",
+    name: "Salario",
+    type: "income",
+    color: "emerald",
+    icon: "briefcase",
+    is_default: true,
+  },
+  {
+    id: "default-inc-2",
+    name: "Freelance",
+    type: "income",
+    color: "blue",
+    icon: "laptop",
+    is_default: true,
+  },
+  {
+    id: "default-inc-3",
+    name: "Inversiones",
+    type: "income",
+    color: "purple",
+    icon: "trending-up",
+    is_default: true,
+  },
+  {
+    id: "default-inc-4",
+    name: "Regalo",
+    type: "income",
+    color: "pink",
+    icon: "gift",
+    is_default: true,
+  },
+  {
+    id: "default-inc-5",
+    name: "Otros",
+    type: "income",
+    color: "slate",
+    icon: "more-horizontal",
+    is_default: true,
+  },
 ];
 
 export interface DeleteCategoryResult {
@@ -103,10 +187,7 @@ export function useCategories(filterType?: "expense" | "income") {
     return { ok: true, category: res.data || undefined };
   };
 
-  const deleteCategory = async (
-    id: string,
-    reassignTo?: string
-  ): Promise<DeleteCategoryResult> => {
+  const deleteCategory = async (id: string, reassignTo?: string): Promise<DeleteCategoryResult> => {
     const res = await categoryService.deleteCategory(id, reassignTo);
 
     if (res.status === 409) {

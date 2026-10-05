@@ -101,6 +101,7 @@ erDiagram
 ## 🛠️ 2. Estructura de Tablas SQL
 
 ### Tabla `expenses`
+
 ```sql
 CREATE TABLE IF NOT EXISTS expenses (
     id VARCHAR(64) PRIMARY KEY,
@@ -119,6 +120,7 @@ CREATE INDEX IF NOT EXISTS idx_expenses_user_cat ON expenses(user_id, category);
 ```
 
 ### Tabla `incomes`
+
 ```sql
 CREATE TABLE IF NOT EXISTS incomes (
     id VARCHAR(64) PRIMARY KEY,
@@ -136,6 +138,7 @@ CREATE INDEX IF NOT EXISTS idx_incomes_user_date ON incomes(user_id, date DESC);
 ```
 
 ### Tabla `goals`
+
 ```sql
 CREATE TABLE IF NOT EXISTS goals (
     id VARCHAR(64) PRIMARY KEY,
@@ -152,6 +155,7 @@ CREATE INDEX IF NOT EXISTS idx_goals_user ON goals(user_id, deadline ASC);
 ```
 
 ### Tabla `categories`
+
 ```sql
 CREATE TABLE IF NOT EXISTS categories (
     id VARCHAR(64) PRIMARY KEY,
@@ -163,11 +167,12 @@ CREATE TABLE IF NOT EXISTS categories (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_categories_user_name_type 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_categories_user_name_type
 ON categories(user_id, LOWER(name), type);
 ```
 
 ### Tabla `recurring_expenses` (Gastos Fijos y Recurrentes)
+
 ```sql
 CREATE TABLE IF NOT EXISTS recurring_expenses (
     id VARCHAR(64) PRIMARY KEY,
@@ -190,17 +195,18 @@ CREATE TABLE IF NOT EXISTS recurring_expenses (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_recurring_user_due 
+CREATE INDEX IF NOT EXISTS idx_recurring_user_due
 ON recurring_expenses(user_id, next_due_date ASC);
 
-CREATE INDEX IF NOT EXISTS idx_recurring_active_due 
+CREATE INDEX IF NOT EXISTS idx_recurring_active_due
 ON recurring_expenses(is_active, auto_register, next_due_date ASC);
 
-CREATE INDEX IF NOT EXISTS idx_recurring_user_category 
+CREATE INDEX IF NOT EXISTS idx_recurring_user_category
 ON recurring_expenses(user_id, category);
 ```
 
 ### Tabla `recurring_incomes` (Ingresos Fijos y Recurrentes)
+
 ```sql
 CREATE TABLE IF NOT EXISTS recurring_incomes (
     id VARCHAR(64) PRIMARY KEY,
@@ -210,11 +216,11 @@ CREATE TABLE IF NOT EXISTS recurring_incomes (
     currency VARCHAR(10) NOT NULL DEFAULT 'USD',
     source VARCHAR(100) NOT NULL,
     payment_method VARCHAR(100) NOT NULL,
-    frequency VARCHAR(20) NOT NULL DEFAULT 'biweekly' 
+    frequency VARCHAR(20) NOT NULL DEFAULT 'biweekly'
         CHECK (frequency IN ('weekly', 'biweekly', 'monthly', 'yearly')),
-    biweekly_type VARCHAR(30) DEFAULT '15_and_last_day' 
+    biweekly_type VARCHAR(30) DEFAULT '15_and_last_day'
         CHECK (biweekly_type IS NULL OR biweekly_type IN ('15_and_last_day', 'every_15_days')),
-    billing_day INT DEFAULT 15 
+    billing_day INT DEFAULT 15
         CHECK (billing_day IS NULL OR (billing_day >= 1 AND billing_day <= 31)),
     start_date TIMESTAMPTZ NOT NULL,
     end_date TIMESTAMPTZ,
@@ -227,16 +233,16 @@ CREATE TABLE IF NOT EXISTS recurring_incomes (
     CONSTRAINT chk_recurring_incomes_dates CHECK (end_date IS NULL OR end_date >= start_date)
 );
 
-CREATE INDEX IF NOT EXISTS idx_recurring_incomes_user_due 
+CREATE INDEX IF NOT EXISTS idx_recurring_incomes_user_due
 ON recurring_incomes(user_id, next_due_date ASC);
 
-CREATE INDEX IF NOT EXISTS idx_recurring_incomes_active_due 
+CREATE INDEX IF NOT EXISTS idx_recurring_incomes_active_due
 ON recurring_incomes(is_active, auto_register, next_due_date ASC);
 
-CREATE INDEX IF NOT EXISTS idx_recurring_incomes_user_source 
+CREATE INDEX IF NOT EXISTS idx_recurring_incomes_user_source
 ON recurring_incomes(user_id, source);
 
-CREATE INDEX IF NOT EXISTS idx_recurring_incomes_user_id 
+CREATE INDEX IF NOT EXISTS idx_recurring_incomes_user_id
 ON recurring_incomes(user_id);
 ```
 
@@ -256,38 +262,38 @@ ALTER TABLE recurring_expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recurring_incomes ENABLE ROW LEVEL SECURITY;
 
 -- Política de aislamiento para gastos
-CREATE POLICY "Users can only access their own expenses" 
-ON expenses FOR ALL 
+CREATE POLICY "Users can only access their own expenses"
+ON expenses FOR ALL
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
 -- Política de aislamiento para ingresos
-CREATE POLICY "Users can only access their own incomes" 
-ON incomes FOR ALL 
+CREATE POLICY "Users can only access their own incomes"
+ON incomes FOR ALL
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
 -- Política de aislamiento para metas
-CREATE POLICY "Users can only access their own goals" 
-ON goals FOR ALL 
+CREATE POLICY "Users can only access their own goals"
+ON goals FOR ALL
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
 -- Política de aislamiento para categorías
-CREATE POLICY "Users can only access their own categories" 
-ON categories FOR ALL 
+CREATE POLICY "Users can only access their own categories"
+ON categories FOR ALL
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
 -- Política de aislamiento para gastos fijos y recurrentes
-CREATE POLICY "Users can only access their own recurring expenses" 
-ON recurring_expenses FOR ALL 
+CREATE POLICY "Users can only access their own recurring expenses"
+ON recurring_expenses FOR ALL
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
 -- Política de aislamiento para ingresos fijos y recurrentes
-CREATE POLICY "Users can only access their own recurring incomes" 
-ON recurring_incomes FOR ALL 
+CREATE POLICY "Users can only access their own recurring incomes"
+ON recurring_incomes FOR ALL
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 ```

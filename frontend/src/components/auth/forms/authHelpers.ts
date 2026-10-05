@@ -26,9 +26,7 @@ export function getFriendlyAuthError(
     lower.includes("invalid username or password")
   ) {
     return {
-      message: isEs
-        ? "Correo electrónico o contraseña incorrectos."
-        : "Invalid email or password.",
+      message: isEs ? "Correo electrónico o contraseña incorrectos." : "Invalid email or password.",
       field: "password",
     };
   }
@@ -53,10 +51,7 @@ export function getFriendlyAuthError(
       field: "email",
     };
   }
-  if (
-    lower.includes("password should be at least") ||
-    lower.includes("password is too short")
-  ) {
+  if (lower.includes("password should be at least") || lower.includes("password is too short")) {
     if (isLogin) {
       return {
         message: isEs

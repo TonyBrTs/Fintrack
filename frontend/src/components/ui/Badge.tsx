@@ -12,11 +12,7 @@ interface BadgeProps {
   variant?: "default" | "success" | "warning" | "error" | "info";
 }
 
-export function Badge({
-  children,
-  className,
-  variant = "default",
-}: BadgeProps) {
+export function Badge({ children, className, variant = "default" }: BadgeProps) {
   const variants = {
     default: "bg-secondary text-secondary-titles",
     success: "bg-income/10 text-income",
@@ -30,7 +26,7 @@ export function Badge({
       className={cn(
         "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
         variants[variant],
-        className,
+        className
       )}
     >
       {children}

@@ -112,9 +112,7 @@ export async function POST(req: Request) {
     const totalExpenses = expenses.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
     const totalIncomes = incomes.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
     const savingsRate =
-      totalIncomes > 0
-        ? ((totalIncomes - totalExpenses) / totalIncomes) * 100
-        : 0;
+      totalIncomes > 0 ? ((totalIncomes - totalExpenses) / totalIncomes) * 100 : 0;
 
     // Category breakdown
     const categoryTotals: Record<string, number> = {};
@@ -266,8 +264,7 @@ Debes responder ÚNICAMENTE un array JSON con esta estructura exacta, sin texto 
 
         if (geminiRes.ok) {
           const geminiData = await geminiRes.json();
-          rawContent =
-            geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          rawContent = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
           if (rawContent) {
             cachedWorkingModel = model;
             console.log(`[Gemini] Successfully generated insights using model: ${model}`);
@@ -285,7 +282,11 @@ Debes responder ÚNICAMENTE un array JSON con esta estructura exacta, sin texto 
     }
 
     if (!rawContent) {
-      console.error("[Gemini] All model attempts failed. Last status:", lastErrorStatus, lastErrorText);
+      console.error(
+        "[Gemini] All model attempts failed. Last status:",
+        lastErrorStatus,
+        lastErrorText
+      );
       return NextResponse.json(
         {
           ok: false,
@@ -308,10 +309,7 @@ Debes responder ÚNICAMENTE un array JSON con esta estructura exacta, sin texto 
       const parsed = JSON.parse(cleaned);
       if (Array.isArray(parsed)) {
         parsedInsights = parsed.filter(
-          (item) =>
-            item &&
-            typeof item.title === "string" &&
-            typeof item.desc === "string"
+          (item) => item && typeof item.title === "string" && typeof item.desc === "string"
         );
       }
     } catch {

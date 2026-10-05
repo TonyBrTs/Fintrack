@@ -1,0 +1,20 @@
+{
+  "name": "fintrack-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FinTrack - Plataforma integral de gestión financiera personal (Web, Mobile & Backend)",
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:mobile": "npm --prefix mobile start",
+    "dev:backend": "go run backend/main.go",
+    "build:frontend": "npm --prefix frontend run build",
+    "install:all": "npm --prefix frontend install && npm --prefix mobile install",
+    "lint:frontend": "npm --prefix frontend run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,html,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css,html,yml,yaml}\"",
+    "test:backend": "go test -v ./backend/internal/services/..."
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}

@@ -1,5 +1,5 @@
-export type Currency = 'USD' | 'EUR' | 'GBP' | 'CRC';
-export type Language = 'es' | 'en';
+export type Currency = "USD" | "EUR" | "GBP" | "CRC";
+export type Language = "es" | "en";
 
 export interface Expense {
   id: string;
@@ -47,12 +47,12 @@ export interface Category {
   name: string;
   icon?: string;
   color?: string;
-  type?: 'expense' | 'income';
+  type?: "expense" | "income";
   is_default?: boolean;
 }
 
-export type RecurringFrequency = 'biweekly' | 'monthly' | 'weekly' | 'yearly';
-export type BiweeklyType = '15_and_last_day' | 'every_15_days';
+export type RecurringFrequency = "biweekly" | "monthly" | "weekly" | "yearly";
+export type BiweeklyType = "15_and_last_day" | "every_15_days";
 
 export interface RecurringTransaction {
   id: string;
@@ -85,8 +85,8 @@ export interface FinancialSummary {
 }
 
 export interface AIInsight {
-  type: 'savings' | 'optimization' | 'warning' | 'goal';
+  type: "savings" | "optimization" | "warning" | "goal";
   title: string;
   desc: string;
-  priority?: 'high' | 'medium' | 'low';
+  priority?: "high" | "medium" | "low";
 }

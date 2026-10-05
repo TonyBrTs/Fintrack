@@ -94,11 +94,7 @@ export default function ReportsPage() {
         );
       }
     } catch {
-      setError(
-        isEs
-          ? "Error de conexión con el servidor contable."
-          : "Server connection error."
-      );
+      setError(isEs ? "Error de conexión con el servidor contable." : "Server connection error.");
     } finally {
       setLoading(false);
     }
@@ -162,10 +158,7 @@ export default function ReportsPage() {
 
         return true;
       })
-      .sort(
-        (a, b) =>
-          parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime()
-      );
+      .sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime());
   }, [expenses, dateRange]);
 
   const filteredIncomes = useMemo(() => {
@@ -192,37 +185,25 @@ export default function ReportsPage() {
 
         return true;
       })
-      .sort(
-        (a, b) =>
-          parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime()
-      );
+      .sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime());
   }, [incomes, dateRange]);
 
   // Aggregates
   const totalExpense = useMemo(() => {
-    return filteredExpenses.reduce(
-      (acc, e) => acc + (Number(e.amount) || 0),
-      0
-    );
+    return filteredExpenses.reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
   }, [filteredExpenses]);
 
   const totalIncome = useMemo(() => {
-    return filteredIncomes.reduce(
-      (acc, i) => acc + (Number(i.amount) || 0),
-      0
-    );
+    return filteredIncomes.reduce((acc, i) => acc + (Number(i.amount) || 0), 0);
   }, [filteredIncomes]);
 
   const netSavings = totalIncome - totalExpense;
-  const savingsRate =
-    totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome) * 100 : 0;
+  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome) * 100 : 0;
 
   // Period label for statement
   const periodLabel = useMemo(() => {
     if (!dateRange || (!dateRange.from && !dateRange.to)) {
-      return isEs
-        ? "Histórico Completo (Todo el Registro)"
-        : "All Historical Records";
+      return isEs ? "Histórico Completo (Todo el Registro)" : "All Historical Records";
     }
 
     if (dateRange.from && dateRange.to) {
@@ -279,8 +260,8 @@ export default function ReportsPage() {
   const paymentMethodTranslations: Record<string, string> = {
     "Tarjeta de Crédito": "Credit Card",
     "Tarjeta de Débito": "Debit Card",
-    "Efectivo": "Cash",
-    "Transferencia": "Bank Transfer",
+    Efectivo: "Cash",
+    Transferencia: "Bank Transfer",
   };
 
   const translatePaymentMethod = (pm?: string) => {
@@ -318,17 +299,11 @@ export default function ReportsPage() {
 
       const filename = `FinTrack-Reporte-${reportReference}.xlsx`;
       toast.success(
-        isEs
-          ? `Reporte Excel descargado: ${filename}`
-          : `Excel report downloaded: ${filename}`
+        isEs ? `Reporte Excel descargado: ${filename}` : `Excel report downloaded: ${filename}`
       );
     } catch (err) {
       console.error(err);
-      toast.error(
-        isEs
-          ? "No se pudo generar el archivo Excel."
-          : "Could not generate Excel file."
-      );
+      toast.error(isEs ? "No se pudo generar el archivo Excel." : "Could not generate Excel file.");
     }
   };
 
@@ -376,19 +351,12 @@ export default function ReportsPage() {
       ];
 
       combined.sort(
-        (a, b) =>
-          parseLocalDate(b.rawDate).getTime() -
-          parseLocalDate(a.rawDate).getTime()
+        (a, b) => parseLocalDate(b.rawDate).getTime() - parseLocalDate(a.rawDate).getTime()
       );
 
       const escapeCSV = (val: string | number) => {
         const str = String(val ?? "");
-        if (
-          str.includes(",") ||
-          str.includes('"') ||
-          str.includes("\n") ||
-          str.includes("\r")
-        ) {
+        if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
           return `"${str.replace(/"/g, '""')}"`;
         }
         return str;
@@ -424,17 +392,11 @@ export default function ReportsPage() {
       URL.revokeObjectURL(url);
 
       toast.success(
-        isEs
-          ? "Libro contable CSV descargado con éxito."
-          : "CSV transaction ledger downloaded."
+        isEs ? "Libro contable CSV descargado con éxito." : "CSV transaction ledger downloaded."
       );
     } catch (err) {
       console.error(err);
-      toast.error(
-        isEs
-          ? "No se pudo generar el archivo CSV."
-          : "Could not generate CSV file."
-      );
+      toast.error(isEs ? "No se pudo generar el archivo CSV." : "Could not generate CSV file.");
     }
   };
 
@@ -453,11 +415,7 @@ export default function ReportsPage() {
         {/* Global Loading Spinner */}
         {loading && (
           <PageLoadingState
-            message={
-              isEs
-                ? "Cargando libro contable..."
-                : "Loading financial records..."
-            }
+            message={isEs ? "Cargando libro contable..." : "Loading financial records..."}
           />
         )}
 

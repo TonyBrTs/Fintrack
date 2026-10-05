@@ -48,7 +48,9 @@ export const incomeService = {
   /**
    * Synchronizes and registers pending recurring incomes for the current cycle.
    */
-  async syncRecurringIncomes(clientDate?: string): Promise<SafeFetchResult<RecurringIncomeSyncResult>> {
+  async syncRecurringIncomes(
+    clientDate?: string
+  ): Promise<SafeFetchResult<RecurringIncomeSyncResult>> {
     const dateQuery = clientDate ? `?client_date=${encodeURIComponent(clientDate)}` : "";
     return safeFetch<RecurringIncomeSyncResult>(`/api/recurring-incomes/sync${dateQuery}`, {
       method: "POST",

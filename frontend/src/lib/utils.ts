@@ -29,7 +29,8 @@ export function formatLiveNumber(val: string): string {
   // Prevent multiple dots
   const parts = cleaned.split(".");
   let integerPart = parts[0].replace(/\D/g, "");
-  const decimalPart = parts.length > 1 ? parts.slice(1).join("").replace(/\D/g, "").slice(0, 2) : null;
+  const decimalPart =
+    parts.length > 1 ? parts.slice(1).join("").replace(/\D/g, "").slice(0, 2) : null;
 
   if (integerPart) {
     integerPart = new Intl.NumberFormat("en-US").format(BigInt(integerPart));
@@ -206,9 +207,7 @@ export function getCategoryStyle(
 
   // 2. Lookup in provided categoryList (user's custom categories or state)
   if (categoryList && Array.isArray(categoryList)) {
-    const found = categoryList.find(
-      (c) => c.name.trim().toLowerCase() === normalized
-    );
+    const found = categoryList.find((c) => c.name.trim().toLowerCase() === normalized);
     if (found?.color) {
       const colorKey = found.color.toLowerCase();
       if (CATEGORY_COLOR_PALETTE[colorKey]) {
@@ -285,7 +284,20 @@ export function parseCalendarDate(dateInput: string | Date | null | undefined): 
 }
 
 const MONTHS_SHORT: Record<string, string[]> = {
-  es: ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "set.", "oct.", "nov.", "dic."],
+  es: [
+    "ene.",
+    "feb.",
+    "mar.",
+    "abr.",
+    "may.",
+    "jun.",
+    "jul.",
+    "ago.",
+    "set.",
+    "oct.",
+    "nov.",
+    "dic.",
+  ],
   en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 };
 
@@ -335,9 +347,7 @@ export function formatDueDateLabel(dueDateStr: string | Date, language: string =
   if (diffDays > 31) {
     const months = Math.round(diffDays / 30);
     return {
-      label: isEn
-        ? `In ${months} ${months === 1 ? "month" : "months"}`
-        : `En ${months} meses`,
+      label: isEn ? `In ${months} ${months === 1 ? "month" : "months"}` : `En ${months} meses`,
       urgent: false,
     };
   }
@@ -381,4 +391,3 @@ export function formatFrequencyLabel(
       return frequency;
   }
 }
-

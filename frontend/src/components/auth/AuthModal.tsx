@@ -11,12 +11,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { BrandLogo } from "@/components/layout/BrandLogo";
-import {
-  LoginForm,
-  RegisterForm,
-  ForgotPasswordForm,
-  UpdatePasswordForm,
-} from "./forms";
+import { LoginForm, RegisterForm, ForgotPasswordForm, UpdatePasswordForm } from "./forms";
 
 export function AuthModal() {
   const {
@@ -45,44 +40,30 @@ export function AuthModal() {
     if (typeof window !== "undefined") {
       const hash = window.location.hash;
       const search = window.location.search;
-      if (
-        hash.includes("type=recovery") ||
-        search.includes("reset_password=true")
-      ) {
+      if (hash.includes("type=recovery") || search.includes("reset_password=true")) {
         openAuthModal("update_password");
       }
     }
   }, [openAuthModal]);
 
   return (
-    <Dialog
-      open={isAuthModalOpen}
-      onOpenChange={(open) => !open && closeAuthModal()}
-    >
+    <Dialog open={isAuthModalOpen} onOpenChange={(open) => !open && closeAuthModal()}>
       <DialogContent className="sm:max-w-[440px] p-6 sm:p-8 bg-white dark:bg-[#0b101d] border-slate-200/90 dark:border-slate-800/90 text-slate-900 dark:text-slate-100 rounded-3xl shadow-2xl overflow-hidden max-h-[95vh] overflow-y-auto">
         {/* Brand Logo Emblem */}
         <div className="flex justify-center mb-4">
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 rounded-2xl blur-md opacity-40 dark:opacity-60 group-hover:opacity-75 transition duration-300" />
-            <BrandLogo
-              size={48}
-              className="relative shadow-xl rounded-xl"
-              priority
-            />
+            <BrandLogo size={48} className="relative shadow-xl rounded-xl" priority />
           </div>
         </div>
 
         {/* Dialog Header */}
         <DialogHeader className="text-center space-y-1.5 pb-2">
           <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-            {isLogin &&
-              (isEs ? "Inicia Sesión en FinTrack" : "Sign In to FinTrack")}
-            {isRegister &&
-              (isEs ? "Crea tu Cuenta" : "Create Your Account")}
-            {isForgotPassword &&
-              (isEs ? "Recuperar Contraseña" : "Reset Password")}
-            {isUpdatePassword &&
-              (isEs ? "Nueva Contraseña" : "Create New Password")}
+            {isLogin && (isEs ? "Inicia Sesión en FinTrack" : "Sign In to FinTrack")}
+            {isRegister && (isEs ? "Crea tu Cuenta" : "Create Your Account")}
+            {isForgotPassword && (isEs ? "Recuperar Contraseña" : "Reset Password")}
+            {isUpdatePassword && (isEs ? "Nueva Contraseña" : "Create New Password")}
           </DialogTitle>
           <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
             {isLogin &&

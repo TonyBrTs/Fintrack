@@ -71,13 +71,11 @@ export function Sheet({ isOpen, onClose, title, children }: SheetProps) {
             </div>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto pr-1 -mr-1 space-y-6 pt-2">
-              {children}
-            </div>
+            <div className="flex-1 overflow-y-auto pr-1 -mr-1 space-y-6 pt-2">{children}</div>
           </motion.div>
         </div>
       )}
     </AnimatePresence>,
-    document.body,
+    document.body
   );
 }

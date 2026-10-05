@@ -1,8 +1,15 @@
-import React, { useEffect, useRef, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
-import { Target, CheckCircle2, Plus, MoreVertical, Calendar, ChevronRight } from 'lucide-react-native';
-import { Goal } from '../types';
-import { getCategoryTheme } from '../lib/constants';
+import React, { useEffect, useRef, useMemo } from "react";
+import { View, Text, TouchableOpacity, Animated } from "react-native";
+import {
+  Target,
+  CheckCircle2,
+  Plus,
+  MoreVertical,
+  Calendar,
+  ChevronRight,
+} from "lucide-react-native";
+import { Goal } from "../types";
+import { getCategoryTheme } from "../lib/constants";
 
 export interface GoalCardItemProps {
   goal: Goal;
@@ -72,7 +79,7 @@ export const GoalCardItem: React.FC<GoalCardItemProps> = ({
 
   const widthInterpolation = progressAnim.interpolate({
     inputRange: [0, 100],
-    outputRange: ['0%', '100%'],
+    outputRange: ["0%", "100%"],
   });
 
   const formattedDeadline = useMemo(() => {
@@ -80,10 +87,10 @@ export const GoalCardItem: React.FC<GoalCardItemProps> = ({
     try {
       const d = new Date(goal.deadline);
       if (isNaN(d.getTime())) return goal.deadline;
-      return d.toLocaleDateString('es-ES', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
+      return d.toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       });
     } catch {
       return goal.deadline;
@@ -107,7 +114,7 @@ export const GoalCardItem: React.FC<GoalCardItemProps> = ({
     >
       <TouchableOpacity
         className={`bg-card rounded-[20px] p-4 border gap-3 ${
-          isCompleted ? 'border-emerald-500/50' : ''
+          isCompleted ? "border-emerald-500/50" : ""
         }`}
         style={{ borderColor: theme.border }}
         activeOpacity={0.92}
@@ -140,7 +147,7 @@ export const GoalCardItem: React.FC<GoalCardItemProps> = ({
                   className="text-[10px] font-bold uppercase tracking-wider"
                   style={{ color: theme.badgeText }}
                 >
-                  {goal.category || 'Ahorro'}
+                  {goal.category || "Ahorro"}
                 </Text>
               </View>
             </View>
@@ -157,7 +164,7 @@ export const GoalCardItem: React.FC<GoalCardItemProps> = ({
             >
               <Plus size={13} color={theme.primary} strokeWidth={3} />
               <Text className="text-xs font-bold" style={{ color: theme.primary }}>
-                {isCompleted ? t('goals.completed') : t('goals.contribute')}
+                {isCompleted ? t("goals.completed") : t("goals.contribute")}
               </Text>
             </TouchableOpacity>
 
@@ -176,7 +183,7 @@ export const GoalCardItem: React.FC<GoalCardItemProps> = ({
         <View className="gap-1.5">
           <View className="flex-row justify-between items-center">
             <Text className="text-xs font-bold" style={{ color: theme.primary }}>
-              {progressPercent.toFixed(0)}% {isCompleted ? '¡Completada!' : 'alcanzado'}
+              {progressPercent.toFixed(0)}% {isCompleted ? "¡Completada!" : "alcanzado"}
             </Text>
             <Text className="text-xs font-semibold text-slate-400">
               Meta: {formatCurrency(goal.target_amount)}
@@ -212,12 +219,17 @@ export const GoalCardItem: React.FC<GoalCardItemProps> = ({
           <View className="flex-row items-center gap-1.5">
             <Calendar size={13} color="#64748b" />
             <Text className="text-[11px] text-slate-500">
-              Fecha límite: <Text className="text-slate-300 font-semibold">{formattedDeadline || 'Sin fecha'}</Text>
+              Fecha límite:{" "}
+              <Text className="text-slate-300 font-semibold">
+                {formattedDeadline || "Sin fecha"}
+              </Text>
             </Text>
           </View>
 
           <View className="flex-row items-center gap-0.5">
-            <Text className="text-[11px] font-semibold" style={{ color: theme.badgeText }}>Opciones</Text>
+            <Text className="text-[11px] font-semibold" style={{ color: theme.badgeText }}>
+              Opciones
+            </Text>
             <ChevronRight size={13} color={theme.primary} />
           </View>
         </View>

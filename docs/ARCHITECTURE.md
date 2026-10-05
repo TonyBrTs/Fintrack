@@ -90,6 +90,7 @@ El backend de FinTrack implementa el patrón de **Arquitectura Limpia (Clean Arc
 ```
 
 ### Estructura de Paquetes en `backend/`:
+
 ```
 backend/
 ├── internal/
@@ -197,6 +198,7 @@ La seguridad de datos por usuario se garantiza en **todas las capas**:
 FinTrack integra un sistema de análisis predictivo y asesoría financiera personalizada impulsado por los modelos de lenguaje de última generación de **Google Gemini**.
 
 ### Arquitectura del Servicio de Insights
+
 El análisis no sobrecarga el backend en Go; se ejecuta como una **Route Handler Serverless** en Next.js (`frontend/src/app/api/ai/insights/route.ts`), permitiendo ejecución escalable en el edge de Vercel.
 
 ```mermaid
@@ -213,7 +215,9 @@ graph TD
 ```
 
 ### Cascada Resiliente de Modelos y Descubrimiento Dinámico
+
 Para evitar caídas por modelos no disponibles o cambios en la API (`v1beta`), se implementan tres niveles de resiliencia:
+
 1. **Descubrimiento Dinámico (`ModelService.ListModels`)**: Consulta automáticamente a Google qué modelos con soporte `generateContent` están activos para la clave de API suministrada.
 2. **Lista de Respaldo Ordenada por Rendimiento**:
    ```typescript
@@ -229,7 +233,9 @@ Para evitar caídas por modelos no disponibles o cambios en la API (`v1beta`), s
 3. **Caché en Memoria (`cachedWorkingModel`)**: Una vez que un modelo responde con éxito, se almacena en memoria para que las consultas subsecuentes no pierdan tiempo en sondeos, reduciendo la latencia a menos de 1 segundo.
 
 ### Prompt Engineering y Salida Estructurada
+
 El prompt instruye al modelo a comportarse como un asesor financiero certificado, exigiendo respuestas estrictamente en formato JSON:
+
 ```typescript
 const prompt = `Actúa como un asesor financiero certificado y analiza estos datos financieros:
 - Moneda activa: ${currency}
@@ -252,6 +258,7 @@ Genera de 3 a 5 recomendaciones accionables en formato JSON válido:
 ```
 
 ### Sanitización y Fallback Heurístico Local
+
 Si la cuota de la API de Google se agota o se pierde la conexión externa, el componente `FinancialInsights.tsx` activa un motor heurístico local que calcula alertas de presupuesto, tasa de ahorro y progreso de metas sin requerir conexión externa.
 
 ---
@@ -260,10 +267,10 @@ Si la cuota de la API de Google se agota o se pierde la conexión externa, el co
 
 Las decisiones de diseño arquitectónico se documentan formalmente bajo el estándar ADR en [`docs/decisions/`](./decisions/):
 
-| ADR | Título | Estado |
-| :--- | :--- | :--- |
-| [**ADR-001**](./decisions/ADR-001-clean-architecture-and-solid.md) | Adopción de Clean Architecture y Principios SOLID | Aceptado |
-| [**ADR-002**](./decisions/ADR-002-dual-storage-gorm-and-memory.md) | Persistencia Híbrida Intercambiable (GORM PostgreSQL y JSON) | Aceptado |
-| [**ADR-003**](./decisions/ADR-003-supabase-auth-and-multi-tenancy.md) | Autenticación con Supabase Auth y Seguridad Multi-Inquilino | Aceptado |
-| [**ADR-004**](./decisions/ADR-004-frontend-service-layer-and-srp.md) | Capa de Servicios en el Frontend y Principio de Responsabilidad Única | Aceptado |
-| [**ADR-005**](./decisions/ADR-005-recurring-scheduler-isolation.md) | Aislamiento del Scheduler Recurrente en el Backend (Go) | Aceptado |
+| ADR                                                                   | Título                                                                | Estado   |
+| :-------------------------------------------------------------------- | :-------------------------------------------------------------------- | :------- |
+| [**ADR-001**](./decisions/ADR-001-clean-architecture-and-solid.md)    | Adopción de Clean Architecture y Principios SOLID                     | Aceptado |
+| [**ADR-002**](./decisions/ADR-002-dual-storage-gorm-and-memory.md)    | Persistencia Híbrida Intercambiable (GORM PostgreSQL y JSON)          | Aceptado |
+| [**ADR-003**](./decisions/ADR-003-supabase-auth-and-multi-tenancy.md) | Autenticación con Supabase Auth y Seguridad Multi-Inquilino           | Aceptado |
+| [**ADR-004**](./decisions/ADR-004-frontend-service-layer-and-srp.md)  | Capa de Servicios en el Frontend y Principio de Responsabilidad Única | Aceptado |
+| [**ADR-005**](./decisions/ADR-005-recurring-scheduler-isolation.md)   | Aislamiento del Scheduler Recurrente en el Backend (Go)               | Aceptado |

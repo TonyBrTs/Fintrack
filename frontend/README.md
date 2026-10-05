@@ -6,26 +6,29 @@ Interfaz web moderna y accesible de **FinTrack**, construida con **Next.js 16 (R
 
 ## 🛠️ Stack Tecnológico
 
-* **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack, React 19)
-* **Estilos & Diseño**: [Tailwind CSS v4](https://tailwindcss.com/)
-* **Componentes UI**: [Radix UI](https://www.radix-ui.com/) (Diálogos, selectores accesibles, dropdowns)
-* **Animaciones**: [Framer Motion](https://www.framer.com/motion/)
-* **Gráficos**: [Recharts](https://recharts.org/)
-* **Autenticación**: [@supabase/supabase-js](https://supabase.com/docs) (Email, Google OAuth 2.0 y recuperación de contraseña)
-* **Motor de IA**: Google Gemini (Modelos 2.0 Flash / 1.5 Flash en route handler serverless)
-* **PWA**: Service Worker nativo (`public/sw.js`) y Web App Manifest
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack, React 19)
+- **Estilos & Diseño**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Componentes UI**: [Radix UI](https://www.radix-ui.com/) (Diálogos, selectores accesibles, dropdowns)
+- **Animaciones**: [Framer Motion](https://www.framer.com/motion/)
+- **Gráficos**: [Recharts](https://recharts.org/)
+- **Autenticación**: [@supabase/supabase-js](https://supabase.com/docs) (Email, Google OAuth 2.0 y recuperación de contraseña)
+- **Motor de IA**: Google Gemini (Modelos 2.0 Flash / 1.5 Flash en route handler serverless)
+- **PWA**: Service Worker nativo (`public/sw.js`) y Web App Manifest
 
 ---
 
 ## 🚀 Inicio Rápido
 
 ### Prerrequisitos
+
 Tener Node.js v20+ instalado:
+
 ```bash
 node -v
 ```
 
 ### Comandos de Desarrollo
+
 ```bash
 # Instalar dependencias
 npm install
@@ -76,8 +79,9 @@ frontend/
 ## 📖 Documentación Detallada
 
 Para consultar la documentación técnica completa del proyecto:
-* [Arquitectura del Sistema](../docs/ARCHITECTURE.md)
-* [Principios SOLID](../docs/SOLID_PRINCIPLES.md)
-* [Integración de IA con Gemini](../docs/AI_INSIGHTS.md)
-* [Flujos de Autenticación y Seguridad](../docs/AUTH_AND_SECURITY.md)
-* [Guía de Despliegue](../docs/DEPLOYMENT.md)
+
+- [Arquitectura del Sistema](../docs/ARCHITECTURE.md)
+- [Principios SOLID](../docs/SOLID_PRINCIPLES.md)
+- [Integración de IA con Gemini](../docs/AI_INSIGHTS.md)
+- [Flujos de Autenticación y Seguridad](../docs/AUTH_AND_SECURITY.md)
+- [Guía de Despliegue](../docs/DEPLOYMENT.md)

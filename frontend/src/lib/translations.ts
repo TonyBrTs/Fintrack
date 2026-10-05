@@ -216,9 +216,11 @@ export const translations = {
       nextDue: "Next Due",
       dueOn: "Due:",
       noExpensesTitle: "No recurring expenses scheduled",
-      noExpensesDesc: "Set up regular payments (rent, utilities, subscriptions) so they register automatically on time.",
+      noExpensesDesc:
+        "Set up regular payments (rent, utilities, subscriptions) so they register automatically on time.",
       noIncomesTitle: "No recurring income scheduled",
-      noIncomesDesc: "Set up your biweekly salary, pension, or client retainers so they register automatically.",
+      noIncomesDesc:
+        "Set up your biweekly salary, pension, or client retainers so they register automatically.",
       createFirstExpense: "Create First Fixed Expense",
       createFirstIncome: "Set Up First Fixed Income",
       registerNow: "Register Now",
@@ -460,9 +462,11 @@ export const translations = {
       nextDue: "Próximo Cobro",
       dueOn: "Cobro:",
       noExpensesTitle: "No tienes gastos fijos programados",
-      noExpensesDesc: "Configura tus pagos habituales (renta, servicios, suscripciones) para que se registren solos al llegar la fecha.",
+      noExpensesDesc:
+        "Configura tus pagos habituales (renta, servicios, suscripciones) para que se registren solos al llegar la fecha.",
       noIncomesTitle: "No tienes ingresos fijos configurados",
-      noIncomesDesc: "Programa tu salario quincenal, pensión o cobros recurrentes de clientes para que se registren automáticamente.",
+      noIncomesDesc:
+        "Programa tu salario quincenal, pensión o cobros recurrentes de clientes para que se registren automáticamente.",
       createFirstExpense: "Crear Primer Gasto Fijo",
       createFirstIncome: "Configurar mi primer ingreso fijo",
       registerNow: "Registrar Ahora",

@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
-import { api } from '../lib/api';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Session, User } from "@supabase/supabase-js";
+import { supabase } from "../lib/supabase";
+import { api } from "../lib/api";
 
 interface AuthContextType {
   session: Session | null;
@@ -15,14 +15,14 @@ interface AuthContextType {
 }
 
 const DEMO_USER: User = {
-  id: 'demo-user-fintrack',
-  app_metadata: { provider: 'demo' },
-  user_metadata: { full_name: 'Usuario Demo', name: 'Usuario Demo' },
-  aud: 'authenticated',
+  id: "demo-user-fintrack",
+  app_metadata: { provider: "demo" },
+  user_metadata: { full_name: "Usuario Demo", name: "Usuario Demo" },
+  aud: "authenticated",
   created_at: new Date().toISOString(),
-  email: 'demo@fintrack.app',
-  phone: '',
-  role: 'authenticated',
+  email: "demo@fintrack.app",
+  phone: "",
+  role: "authenticated",
   updated_at: new Date().toISOString(),
 };
 
@@ -50,7 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // Suscribirse a cambios de estado de autenticación
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
         setIsDemoMode(false);
@@ -71,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       return { error: error ? new Error(error.message) : null };
     } catch (err: any) {
-      return { error: new Error(err?.message || 'Error al iniciar sesión') };
+      return { error: new Error(err?.message || "Error al iniciar sesión") };
     }
   };
 
@@ -82,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signUp({ email, password });
       return { error: error ? new Error(error.message) : null };
     } catch (err: any) {
-      return { error: new Error(err?.message || 'Error al registrarse') };
+      return { error: new Error(err?.message || "Error al registrarse") };
     }
   };
 

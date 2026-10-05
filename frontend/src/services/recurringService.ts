@@ -35,7 +35,9 @@ export const recurringService = {
   /**
    * Creates a new scheduled recurring expense.
    */
-  async createRecurringExpense(data: CreateRecurringExpenseInput): Promise<SafeFetchResult<RecurringExpense>> {
+  async createRecurringExpense(
+    data: CreateRecurringExpenseInput
+  ): Promise<SafeFetchResult<RecurringExpense>> {
     return safeFetch<RecurringExpense>("/api/recurring-expenses", {
       method: "POST",
       body: JSON.stringify(data),
@@ -67,10 +69,15 @@ export const recurringService = {
   /**
    * Immediately generates a transaction for the current cycle ahead of schedule.
    */
-  async executeRecurringExpenseNow(id: string): Promise<SafeFetchResult<{ message: string; expense: Expense }>> {
-    return safeFetch<{ message: string; expense: Expense }>(`/api/recurring-expenses/${id}/execute-now`, {
-      method: "POST",
-    });
+  async executeRecurringExpenseNow(
+    id: string
+  ): Promise<SafeFetchResult<{ message: string; expense: Expense }>> {
+    return safeFetch<{ message: string; expense: Expense }>(
+      `/api/recurring-expenses/${id}/execute-now`,
+      {
+        method: "POST",
+      }
+    );
   },
 
   /**
@@ -95,7 +102,9 @@ export const recurringService = {
   /**
    * Creates a new scheduled recurring income.
    */
-  async createRecurringIncome(data: CreateRecurringIncomeInput): Promise<SafeFetchResult<RecurringIncome>> {
+  async createRecurringIncome(
+    data: CreateRecurringIncomeInput
+  ): Promise<SafeFetchResult<RecurringIncome>> {
     return safeFetch<RecurringIncome>("/api/recurring-incomes", {
       method: "POST",
       body: JSON.stringify(data),
@@ -127,16 +136,23 @@ export const recurringService = {
   /**
    * Immediately generates a transaction for the current cycle ahead of schedule.
    */
-  async executeRecurringIncomeNow(id: string): Promise<SafeFetchResult<{ message: string; income: Income }>> {
-    return safeFetch<{ message: string; income: Income }>(`/api/recurring-incomes/${id}/execute-now`, {
-      method: "POST",
-    });
+  async executeRecurringIncomeNow(
+    id: string
+  ): Promise<SafeFetchResult<{ message: string; income: Income }>> {
+    return safeFetch<{ message: string; income: Income }>(
+      `/api/recurring-incomes/${id}/execute-now`,
+      {
+        method: "POST",
+      }
+    );
   },
 
   /**
    * Triggers processing and synchronization of all due recurring incomes.
    */
-  async syncRecurringIncomes(clientDate?: string): Promise<SafeFetchResult<RecurringIncomeSyncResult>> {
+  async syncRecurringIncomes(
+    clientDate?: string
+  ): Promise<SafeFetchResult<RecurringIncomeSyncResult>> {
     const query = clientDate ? `?client_date=${encodeURIComponent(clientDate)}` : "";
     return safeFetch<RecurringIncomeSyncResult>(`/api/recurring-incomes/sync${query}`, {
       method: "POST",

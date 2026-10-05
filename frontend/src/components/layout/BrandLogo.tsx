@@ -1,20 +1,20 @@
-import React from 'react';
-import Image from 'next/image';
+import React from "react";
+import Image from "next/image";
 
 interface BrandLogoProps {
   className?: string;
   size?: number;
   priority?: boolean;
-  variant?: 'icon' | 'full';
+  variant?: "icon" | "full";
 }
 
 export function BrandLogo({
-  className = '',
+  className = "",
   size = 36,
   priority = false,
-  variant = 'icon',
+  variant = "icon",
 }: BrandLogoProps) {
-  if (variant === 'full') {
+  if (variant === "full") {
     // 800 x 167 (aspect ratio ~4.79)
     const height = size;
     const width = Math.round(size * 4.79);
@@ -73,4 +73,3 @@ export function BrandLogo({
     </div>
   );
 }
-

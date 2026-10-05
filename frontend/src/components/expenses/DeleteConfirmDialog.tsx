@@ -48,9 +48,7 @@ export function DeleteConfirmDialog({
             <div className={cn("p-2 rounded-full", variantBgMuted)}>
               <AlertTriangle size={24} />
             </div>
-            <DialogTitle className="text-xl">
-              {title || translate("expenses.delete")}
-            </DialogTitle>
+            <DialogTitle className="text-xl">{title || translate("expenses.delete")}</DialogTitle>
           </div>
           <DialogDescription className="text-base text-secondary-titles">
             {description || translate("expenses.details.deleteConfirm")}

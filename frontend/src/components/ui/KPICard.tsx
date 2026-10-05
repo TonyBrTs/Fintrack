@@ -29,8 +29,8 @@ export function KPICard({ title, amount, icon, trend, trendType }: KPICardProps)
                   trendType === "up"
                     ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                     : trendType === "down"
-                    ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                    : "bg-muted text-muted-foreground"
+                      ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                      : "bg-muted text-muted-foreground"
                 }`}
               >
                 {trend}

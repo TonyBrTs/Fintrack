@@ -17,10 +17,7 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
   const { currencySymbol, translate } = useSettings();
   const [isContributeOpen, setIsContributeOpen] = useState(false);
 
-  const progress = Math.min(
-    (goal.current_amount / goal.target_amount) * 100,
-    100,
-  );
+  const progress = Math.min((goal.current_amount / goal.target_amount) * 100, 100);
   const isCompleted = progress >= 100;
   const remaining = Math.max(goal.target_amount - goal.current_amount, 0);
 
@@ -87,11 +84,15 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
             {/* Progress Bar & percentage */}
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs font-bold">
-                <span className={isCompleted ? "text-emerald-500" : "text-action dark:text-blue-400"}>
-                  {progress.toFixed(0)}% {isCompleted ? "¡Completada!" : translate("goals.achieved") || "alcanzado"}
+                <span
+                  className={isCompleted ? "text-emerald-500" : "text-action dark:text-blue-400"}
+                >
+                  {progress.toFixed(0)}%{" "}
+                  {isCompleted ? "¡Completada!" : translate("goals.achieved") || "alcanzado"}
                 </span>
                 <span className="text-muted-foreground font-semibold">
-                  Meta: {currencySymbol}{formatCurrency(goal.target_amount)}
+                  Meta: {currencySymbol}
+                  {formatCurrency(goal.target_amount)}
                 </span>
               </div>
               <div className="h-2.5 w-full bg-secondary rounded-full overflow-hidden p-0.5">
@@ -113,7 +114,8 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
                   {translate("goals.current") || "Ahorrado"}
                 </p>
                 <p className="font-black text-titles dark:text-foreground text-sm">
-                  {currencySymbol}{formatCurrency(goal.current_amount)}
+                  {currencySymbol}
+                  {formatCurrency(goal.current_amount)}
                 </p>
               </div>
               <div className="bg-secondary/60 dark:bg-slate-800/50 p-3 rounded-2xl border border-border/40">
@@ -121,7 +123,8 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
                   {translate("goals.remaining") || "Faltante"}
                 </p>
                 <p className="font-black text-sm text-titles dark:text-foreground">
-                  {currencySymbol}{formatCurrency(remaining)}
+                  {currencySymbol}
+                  {formatCurrency(remaining)}
                 </p>
               </div>
             </div>
@@ -130,8 +133,7 @@ export function GoalCard({ goal, onDelete, onRefresh }: GoalCardProps) {
             <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1 border-t border-border/30 min-w-0 overflow-hidden">
               <Calendar size={13} className="text-action shrink-0" />
               <span className="truncate">
-                {translate("goals.deadline") || "Fecha límite"}:{" "}
-                {formatDateDDMMYYYY(goal.deadline)}
+                {translate("goals.deadline") || "Fecha límite"}: {formatDateDDMMYYYY(goal.deadline)}
               </span>
             </div>
           </div>

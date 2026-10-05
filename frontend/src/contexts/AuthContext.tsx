@@ -5,11 +5,7 @@ import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 
-export type AuthModalMode =
-  | "login"
-  | "register"
-  | "forgot_password"
-  | "update_password";
+export type AuthModalMode = "login" | "register" | "forgot_password" | "update_password";
 
 interface AuthContextType {
   user: User | null;
@@ -163,7 +159,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Supabase masks duplicate user registrations when email confirmation is enabled by returning empty identities:
     if (!error && data.user && (!data.user.identities || data.user.identities.length === 0)) {
       return {
-        error: { message: "User already registered", name: "AuthApiError", status: 400 } as unknown as AuthError,
+        error: {
+          message: "User already registered",
+          name: "AuthApiError",
+          status: 400,
+        } as unknown as AuthError,
         needsEmailConfirmation: false,
       };
     }
@@ -179,10 +179,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     setIsLoading(true);
     try {
-      const redirectUrl =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/`
-          : undefined;
+      const redirectUrl = typeof window !== "undefined" ? `${window.location.origin}/` : undefined;
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -201,10 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resetPasswordForEmail = async (email: string) => {
-    const redirectUrl =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/`
-        : undefined;
+    const redirectUrl = typeof window !== "undefined" ? `${window.location.origin}/` : undefined;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: redirectUrl,

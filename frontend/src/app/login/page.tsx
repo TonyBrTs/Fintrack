@@ -27,9 +27,9 @@ export default function LoginPage() {
   const { language, setLanguage } = useSettings();
   const { theme, setTheme } = useTheme();
 
-  const [mode, setMode] = useState<
-    "login" | "register" | "forgot_password" | "update_password"
-  >("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot_password" | "update_password">(
+    "login"
+  );
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -41,10 +41,7 @@ export default function LoginPage() {
     if (typeof window !== "undefined") {
       const hash = window.location.hash;
       const search = window.location.search;
-      if (
-        hash.includes("type=recovery") ||
-        search.includes("reset_password=true")
-      ) {
+      if (hash.includes("type=recovery") || search.includes("reset_password=true")) {
         setMode("update_password");
       }
     }
@@ -128,14 +125,10 @@ export default function LoginPage() {
           {/* Card Titles */}
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {isLogin &&
-                (isEs ? "Inicia Sesión en FinTrack" : "Sign In to FinTrack")}
-              {isRegister &&
-                (isEs ? "Crea tu Cuenta" : "Create Your Account")}
-              {isForgotPassword &&
-                (isEs ? "Recuperar Contraseña" : "Reset Password")}
-              {isUpdatePassword &&
-                (isEs ? "Nueva Contraseña" : "Create New Password")}
+              {isLogin && (isEs ? "Inicia Sesión en FinTrack" : "Sign In to FinTrack")}
+              {isRegister && (isEs ? "Crea tu Cuenta" : "Create Your Account")}
+              {isForgotPassword && (isEs ? "Recuperar Contraseña" : "Reset Password")}
+              {isUpdatePassword && (isEs ? "Nueva Contraseña" : "Create New Password")}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {isLogin &&

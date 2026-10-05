@@ -1,8 +1,7 @@
-# dependencies
-frontend/node_modules
-mobile/node_modules
-mobile/.expo/
+# Dependencies
 node_modules/
+frontend/node_modules/
+mobile/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -10,48 +9,63 @@ node_modules/
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-*.bat
 
-# testing
-frontend/coverage
-backend/coverage
+# Environment & Secrets
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
 
-# next.js
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+.agents/
+
+# Next.js / Frontend
 frontend/.next/
 frontend/out/
+frontend/build/
+frontend/.vercel/
+frontend/coverage/
+frontend/next-env.d.ts
 
-# production
-frontend/build
-backend/bin
+# Mobile / Expo / React Native
+mobile/.expo/
+mobile/web-build/
+mobile/dist/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Go / Backend
+backend/bin/
+backend/vendor/
+backend/coverage/
+backend/*.exe
+backend/*.test
+backend/fintrack-backend
+
+# Local Database & Mock Data
 */expenses.json
 */incomes.json
 */goals.json
+backend/expenses.json
+backend/incomes.json
 
-# misc
-.DS_Store
-*.pem
-frontend/.vercel
-.agents/
+# TypeScript & Build Info
+*.tsbuildinfo
 
-
-# debug
+# Debug & Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-
-# env files
-**/.env
-**/.env.*
-!**/.env.example
-
-# typescript
-*.tsbuildinfo
-frontend/next-env.d.ts
-
-# Go
-backend/vendor/
-backend/*.exe
-backend/*.test
-backend/expenses.json
-backend/fintrack-backend

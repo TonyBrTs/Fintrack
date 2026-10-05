@@ -1,16 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-  Pressable,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSettings } from '../context/SettingsContext';
-import { Expense, Income } from '../types';
+import React, { useState, useEffect, useRef } from "react";
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Animated, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSettings } from "../context/SettingsContext";
+import { Expense, Income } from "../types";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -25,11 +17,11 @@ import {
   Check,
   Hash,
   Repeat,
-} from 'lucide-react-native';
+} from "lucide-react-native";
 
 export type ActionSheetTransaction = {
   id: string;
-  type: 'expense' | 'income';
+  type: "expense" | "income";
   title: string;
   category: string;
   amount: number;
@@ -44,7 +36,7 @@ interface TransactionActionSheetProps {
   transaction: ActionSheetTransaction | null;
   onClose: () => void;
   onEdit: (tx: ActionSheetTransaction) => void;
-  onDelete: (id: string, title: string, type: 'expense' | 'income') => Promise<void> | void;
+  onDelete: (id: string, title: string, type: "expense" | "income") => Promise<void> | void;
 }
 
 export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
@@ -101,30 +93,30 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
 
   if (!transaction && !visible) return null;
 
-  const isExp = transaction?.type === 'expense';
+  const isExp = transaction?.type === "expense";
   const isRecurring =
-    transaction?.id?.startsWith('rec_') ||
-    transaction?.id?.startsWith('rec-') ||
+    transaction?.id?.startsWith("rec_") ||
+    transaction?.id?.startsWith("rec-") ||
     Boolean((transaction?.raw as any)?.frequency);
 
   const formatDate = (isoStr?: string) => {
-    if (!isoStr) return '';
+    if (!isoStr) return "";
     try {
       const d = new Date(isoStr);
-      return d.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
+      return d.toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       });
     } catch {
-      return '';
+      return "";
     }
   };
 
   const handleCopyId = () => {
     if (transaction?.id) {
-      if (typeof navigator !== 'undefined' && (navigator as any)?.clipboard?.writeText) {
+      if (typeof navigator !== "undefined" && (navigator as any)?.clipboard?.writeText) {
         (navigator as any).clipboard.writeText(transaction.id);
       }
       setCopied(true);
@@ -152,18 +144,10 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <View className="flex-1 justify-end">
         {/* Fondo semi-transparente que cierra al tocar */}
-        <Animated.View
-          className="absolute inset-0 bg-black/75"
-          style={{ opacity: backdropAnim }}
-        >
+        <Animated.View className="absolute inset-0 bg-black/75" style={{ opacity: backdropAnim }}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         </Animated.View>
 
@@ -187,7 +171,7 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
                 <View className="flex-row items-center gap-1.5">
                   <View
                     className={`flex-row items-center gap-1.5 px-2.5 py-1 rounded-xl ${
-                      isExp ? 'bg-rose-500/15' : 'bg-emerald-500/15'
+                      isExp ? "bg-rose-500/15" : "bg-emerald-500/15"
                     }`}
                   >
                     {isExp ? (
@@ -197,16 +181,16 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
                     )}
                     <Text
                       className={`text-xs font-bold uppercase tracking-wider ${
-                        isExp ? 'text-rose-500' : 'text-emerald-500'
+                        isExp ? "text-rose-500" : "text-emerald-500"
                       }`}
                     >
                       {isExp
-                        ? language === 'en'
-                          ? 'Expense'
-                          : 'Gasto'
-                        : language === 'en'
-                        ? 'Income'
-                        : 'Ingreso'}
+                        ? language === "en"
+                          ? "Expense"
+                          : "Gasto"
+                        : language === "en"
+                          ? "Income"
+                          : "Ingreso"}
                     </Text>
                   </View>
 
@@ -214,7 +198,7 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
                     <View className="flex-row items-center gap-1 bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 rounded-lg">
                       <Repeat size={11} color="#818cf8" />
                       <Text className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
-                        {language === 'en' ? 'Recurring' : 'Recurrente'}
+                        {language === "en" ? "Recurring" : "Recurrente"}
                       </Text>
                     </View>
                   )}
@@ -231,10 +215,10 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
               {/* Monto Grande Destacado */}
               <Text
                 className={`text-[32px] font-black tracking-tight ${
-                  isExp ? 'text-rose-500' : 'text-emerald-500'
+                  isExp ? "text-rose-500" : "text-emerald-500"
                 }`}
               >
-                {isExp ? '-' : '+'}
+                {isExp ? "-" : "+"}
                 {formatCurrency(transaction.amount)}
               </Text>
 
@@ -247,13 +231,17 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
               <View className="flex-row flex-wrap gap-2 pt-1">
                 <View className="flex-row items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-white/5">
                   <Tag size={12} color="#60a5fa" />
-                  <Text className="text-xs text-slate-300 font-semibold">{transaction.category}</Text>
+                  <Text className="text-xs text-slate-300 font-semibold">
+                    {transaction.category}
+                  </Text>
                 </View>
 
                 {transaction.paymentMethod && (
                   <View className="flex-row items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-white/5">
                     <CreditCard size={12} color="#34d399" />
-                    <Text className="text-xs text-slate-300 font-semibold">{transaction.paymentMethod}</Text>
+                    <Text className="text-xs text-slate-300 font-semibold">
+                      {transaction.paymentMethod}
+                    </Text>
                   </View>
                 )}
               </View>
@@ -272,21 +260,21 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
                 </View>
                 <View
                   className={`flex-row items-center gap-1 px-2 py-0.5 rounded ${
-                    copied ? 'bg-emerald-500/15' : 'bg-white/5'
+                    copied ? "bg-emerald-500/15" : "bg-white/5"
                   }`}
                 >
                   {copied ? (
                     <>
                       <Check size={11} color="#10b981" />
                       <Text className="text-[10px] text-emerald-500 font-bold">
-                        {language === 'en' ? 'Copied' : 'Copiado'}
+                        {language === "en" ? "Copied" : "Copiado"}
                       </Text>
                     </>
                   ) : (
                     <>
                       <Copy size={11} color="#94a3b8" />
                       <Text className="text-[10px] text-slate-400 font-semibold">
-                        {language === 'en' ? 'Copy' : 'Copiar'}
+                        {language === "en" ? "Copy" : "Copiar"}
                       </Text>
                     </>
                   )}
@@ -309,10 +297,10 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
                 </View>
                 <View className="flex-1 gap-0.5">
                   <Text className="text-[15px] font-bold text-white">
-                    {t('transactions.editAction') || 'Editar Movimiento'}
+                    {t("transactions.editAction") || "Editar Movimiento"}
                   </Text>
                   <Text className="text-xs text-slate-400">
-                    {t('transactions.editActionDesc') || 'Modificar monto, concepto o fecha'}
+                    {t("transactions.editActionDesc") || "Modificar monto, concepto o fecha"}
                   </Text>
                 </View>
                 <ChevronRight size={18} color="#475569" />
@@ -329,10 +317,10 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
                 </View>
                 <View className="flex-1 gap-0.5">
                   <Text className="text-[15px] font-bold text-rose-500">
-                    {t('transactions.deleteAction') || 'Eliminar Movimiento'}
+                    {t("transactions.deleteAction") || "Eliminar Movimiento"}
                   </Text>
                   <Text className="text-xs text-slate-400">
-                    {t('transactions.deleteActionDesc') || 'Borrar este registro permanentemente'}
+                    {t("transactions.deleteActionDesc") || "Borrar este registro permanentemente"}
                   </Text>
                 </View>
                 <ChevronRight size={18} color="#f43f5e" />
@@ -345,7 +333,7 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
                 activeOpacity={0.7}
               >
                 <Text className="text-sm font-bold text-slate-400">
-                  {t('transactions.cancelBtn') || 'Cancelar'}
+                  {t("transactions.cancelBtn") || "Cancelar"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -357,11 +345,11 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
               </View>
 
               <Text className="text-[17px] font-extrabold text-white text-center">
-                {t('transactions.confirmDeleteQuestion') || '¿Deseas eliminar este registro?'}
+                {t("transactions.confirmDeleteQuestion") || "¿Deseas eliminar este registro?"}
               </Text>
               <Text className="text-[13px] text-slate-400 text-center leading-[18px] px-3">
-                {t('transactions.confirmDeleteDesc') ||
-                  'Esta acción no se puede deshacer y afectará tu balance.'}
+                {t("transactions.confirmDeleteDesc") ||
+                  "Esta acción no se puede deshacer y afectará tu balance."}
               </Text>
 
               <View className="flex-row gap-3 w-full mt-2">
@@ -372,13 +360,13 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
                   disabled={deleting}
                 >
                   <Text className="text-sm font-bold text-slate-300">
-                    {t('transactions.cancelBtn') || 'Volver'}
+                    {t("transactions.cancelBtn") || "Volver"}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   className={`flex-[1.3] flex-row gap-2 py-3.5 rounded-2xl bg-rose-500 items-center justify-center ${
-                    deleting ? 'opacity-50' : ''
+                    deleting ? "opacity-50" : ""
                   }`}
                   onPress={handleConfirmDelete}
                   activeOpacity={0.8}
@@ -387,8 +375,8 @@ export const TransactionActionSheet: React.FC<TransactionActionSheetProps> = ({
                   <Trash2 size={16} color="#ffffff" />
                   <Text className="text-sm font-extrabold text-white">
                     {deleting
-                      ? t('transactions.executing') || 'Eliminando...'
-                      : t('transactions.deleteConfirmBtn') || 'Sí, Eliminar'}
+                      ? t("transactions.executing") || "Eliminando..."
+                      : t("transactions.deleteConfirmBtn") || "Sí, Eliminar"}
                   </Text>
                 </TouchableOpacity>
               </View>

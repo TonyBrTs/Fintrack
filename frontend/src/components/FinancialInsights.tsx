@@ -38,11 +38,7 @@ interface RawAIInsight {
   priority?: "high" | "medium" | "low";
 }
 
-export function FinancialInsights({
-  expenses,
-  incomes,
-  goals = [],
-}: FinancialInsightsProps) {
+export function FinancialInsights({ expenses, incomes, goals = [] }: FinancialInsightsProps) {
   const { translate, currency, currencySymbol } = useSettings();
   const { user } = useAuth();
 
@@ -56,21 +52,14 @@ export function FinancialInsights({
     const totalExpenses = expenses.reduce((acc, curr) => acc + curr.amount, 0);
     const totalIncomes = incomes.reduce((acc, curr) => acc + curr.amount, 0);
     const savingsRate =
-      totalIncomes > 0
-        ? ((totalIncomes - totalExpenses) / totalIncomes) * 100
-        : 0;
+      totalIncomes > 0 ? ((totalIncomes - totalExpenses) / totalIncomes) * 100 : 0;
 
-    const categoryTotals = expenses.reduce(
-      (acc: Record<string, number>, curr) => {
-        acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
-        return acc;
-      },
-      {}
-    );
+    const categoryTotals = expenses.reduce((acc: Record<string, number>, curr) => {
+      acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
+      return acc;
+    }, {});
 
-    const highestCategory = Object.entries(categoryTotals).sort(
-      (a, b) => b[1] - a[1]
-    )[0];
+    const highestCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
 
     const fallbackList: InsightItem[] = [];
 
@@ -99,8 +88,7 @@ export function FinancialInsights({
 
     if (highestCategory) {
       const catName =
-        translate(`categories.${highestCategory[0]}`, highestCategory[0]) ||
-        highestCategory[0];
+        translate(`categories.${highestCategory[0]}`, highestCategory[0]) || highestCategory[0];
       fallbackList.push({
         icon: <TrendingDown className="text-rose-500" size={18} />,
         title: "Categoría de mayor impacto",
@@ -187,10 +175,7 @@ export function FinancialInsights({
             name: g.name,
             target_amount: g.target_amount,
             current_amount: g.current_amount,
-            deadline:
-              typeof g.deadline === "string"
-                ? g.deadline
-                : g.deadline.toISOString(),
+            deadline: typeof g.deadline === "string" ? g.deadline : g.deadline.toISOString(),
           })),
           currency,
           currencySymbol,
@@ -224,7 +209,9 @@ export function FinancialInsights({
 
           setAiInsights(formatted);
           setIsAIActive(true);
-          setLastAnalyzedTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+          setLastAnalyzedTime(
+            new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          );
 
           // Save in cache
           if (typeof window !== "undefined") {
@@ -248,9 +235,7 @@ export function FinancialInsights({
         } else {
           // If Gemini key is not configured, inform discreetly on manual request
           if (showToast && res.data?.configured === false) {
-            toast.info(
-              "Configura GEMINI_API_KEY en .env.local para activar el análisis con IA."
-            );
+            toast.info("Configura GEMINI_API_KEY en .env.local para activar el análisis con IA.");
           }
           setIsAIActive(false);
         }
@@ -280,17 +265,15 @@ export function FinancialInsights({
         const sameData = cached.txHash === txHash;
 
         if (Array.isArray(cached.insights) && cached.insights.length > 0) {
-          const formatted: InsightItem[] = cached.insights.map(
-            (item: RawAIInsight) => {
-              const visual = mapVisuals(item.type);
-              return {
-                icon: visual.icon,
-                title: item.title,
-                desc: item.desc,
-                badgeClass: visual.badgeClass,
-              };
-            }
-          );
+          const formatted: InsightItem[] = cached.insights.map((item: RawAIInsight) => {
+            const visual = mapVisuals(item.type);
+            return {
+              icon: visual.icon,
+              title: item.title,
+              desc: item.desc,
+              badgeClass: visual.badgeClass,
+            };
+          });
           setAiInsights(formatted);
           setIsAIActive(true);
           setLastAnalyzedTime(
@@ -317,8 +300,7 @@ export function FinancialInsights({
     }
   }, [cacheKey, txHash, expenses.length, incomes.length, requestAIInsights]);
 
-  const activeInsights =
-    aiInsights && aiInsights.length > 0 ? aiInsights : localRuleInsights;
+  const activeInsights = aiInsights && aiInsights.length > 0 ? aiInsights : localRuleInsights;
 
   return (
     <div className="bg-card dark:bg-card/75 backdrop-blur-sm p-6 rounded-3xl shadow-card hover:shadow-card-hover border border-slate-200/90 dark:border-border/60 h-full flex flex-col justify-between transition-all">
@@ -357,7 +339,10 @@ export function FinancialInsights({
               {isLoading ? (
                 <Loader2 size={15} className="animate-spin text-action" />
               ) : (
-                <RefreshCw size={14} className="hover:rotate-180 transition-transform duration-500" />
+                <RefreshCw
+                  size={14}
+                  className="hover:rotate-180 transition-transform duration-500"
+                />
               )}
             </button>
           </div>
@@ -383,9 +368,7 @@ export function FinancialInsights({
                     key={index}
                     className="p-4 rounded-2xl bg-secondary/50 dark:bg-slate-800/40 border border-border/60 hover:border-border transition-colors flex gap-3.5 items-start"
                   >
-                    <div
-                      className={`p-2 rounded-xl border ${insight.badgeClass} shrink-0 mt-0.5`}
-                    >
+                    <div className={`p-2 rounded-xl border ${insight.badgeClass} shrink-0 mt-0.5`}>
                       {insight.icon}
                     </div>
                     <div className="space-y-1">
@@ -406,9 +389,7 @@ export function FinancialInsights({
 
       <div className="mt-6 pt-4 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
         <span>
-          {isAIActive
-            ? "Análisis contextualizado por IA"
-            : "Consejos basados en tus hábitos"}
+          {isAIActive ? "Análisis contextualizado por IA" : "Consejos basados en tus hábitos"}
         </span>
         <span className="font-bold text-action flex items-center gap-1">
           <Sparkles size={12} className="text-amber-500" />
@@ -418,4 +399,3 @@ export function FinancialInsights({
     </div>
   );
 }
-

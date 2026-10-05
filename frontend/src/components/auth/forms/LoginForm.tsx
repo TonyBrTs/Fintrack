@@ -57,9 +57,7 @@ export function LoginForm({
         ? "Por favor ingresa tu correo electrónico."
         : "Please enter your email.";
     } else if (!EMAIL_REGEX.test(email)) {
-      newErrors.email = isEs
-        ? "Formato de correo electrónico inválido."
-        : "Invalid email format.";
+      newErrors.email = isEs ? "Formato de correo electrónico inválido." : "Invalid email format.";
     }
 
     if (!password) {
@@ -85,9 +83,7 @@ export function LoginForm({
           setErrors({ [friendly.field]: friendly.message });
         }
       } else {
-        toast.success(
-          isEs ? "¡Bienvenido de nuevo!" : "Welcome back!"
-        );
+        toast.success(isEs ? "¡Bienvenido de nuevo!" : "Welcome back!");
         onSuccess();
       }
     } catch {
@@ -216,11 +212,7 @@ export function LoginForm({
       </div>
 
       {/* Google OAuth Button */}
-      <GoogleAuthButton
-        isLoading={isGoogleLoading}
-        onClick={handleGoogleSignIn}
-        isEs={isEs}
-      />
+      <GoogleAuthButton isLoading={isGoogleLoading} onClick={handleGoogleSignIn} isEs={isEs} />
 
       {/* Toggle to Register */}
       <div className="text-center pt-2">

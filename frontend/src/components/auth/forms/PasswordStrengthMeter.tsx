@@ -8,10 +8,7 @@ interface PasswordStrengthMeterProps {
   isEs?: boolean;
 }
 
-export function PasswordStrengthMeter({
-  password = "",
-  isEs = true,
-}: PasswordStrengthMeterProps) {
+export function PasswordStrengthMeter({ password = "", isEs = true }: PasswordStrengthMeterProps) {
   if (!password) return null;
 
   const strength = calculatePasswordStrength(password, isEs);
@@ -22,9 +19,7 @@ export function PasswordStrengthMeter({
         <span className="text-slate-500 dark:text-slate-400">
           {isEs ? "Seguridad de contraseña" : "Password strength"}
         </span>
-        <span className={`font-semibold ${strength.textColor}`}>
-          {strength.label}
-        </span>
+        <span className={`font-semibold ${strength.textColor}`}>{strength.label}</span>
       </div>
       <div className="flex gap-1 h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
         <div

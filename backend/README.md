@@ -6,23 +6,26 @@ Servidor API RESTful de alto rendimiento para **FinTrack**, desarrollado en **Go
 
 ## 🛠️ Stack Tecnológico
 
-* **Lenguaje**: [Go 1.23+](https://go.dev/)
-* **Framework Web**: [Gin Framework](https://gin-gonic.com/)
-* **ORM & Persistencia**: [GORM](https://gorm.io/) con PostgreSQL (Supabase) y modo contingencia en memoria/JSON
-* **Autenticación**: Supabase Auth (Validación criptográfica de JWTs HMAC/RSA)
-* **Arquitectura**: Clean Architecture (Handlers ➔ Services ➔ Repositories ➔ Models)
+- **Lenguaje**: [Go 1.23+](https://go.dev/)
+- **Framework Web**: [Gin Framework](https://gin-gonic.com/)
+- **ORM & Persistencia**: [GORM](https://gorm.io/) con PostgreSQL (Supabase) y modo contingencia en memoria/JSON
+- **Autenticación**: Supabase Auth (Validación criptográfica de JWTs HMAC/RSA)
+- **Arquitectura**: Clean Architecture (Handlers ➔ Services ➔ Repositories ➔ Models)
 
 ---
 
 ## 🚀 Inicio Rápido
 
 ### Prerrequisitos
+
 Tener Go 1.22+ instalado (o entorno WSL en Windows):
+
 ```bash
 go version
 ```
 
 ### Ejecutar en Desarrollo
+
 ```bash
 # Descargar dependencias
 go mod download
@@ -32,6 +35,7 @@ go run main.go
 ```
 
 ### Ejecutar Pruebas Unitarias
+
 ```bash
 go test -v ./internal/services/...
 ```
@@ -64,11 +68,11 @@ backend/
 ## 📖 Documentación Detallada
 
 Para más información técnica, consulta:
-* [Arquitectura del Sistema](../docs/ARCHITECTURE.md)
-* [Principios SOLID en FinTrack](../docs/SOLID_PRINCIPLES.md)
-* [Registros de Decisiones de Arquitectura (ADRs)](../docs/decisions/)
-* [Referencia de la API REST](../docs/API_REFERENCE.md)
-* [Esquema de Base de Datos](../docs/DATABASE.md)
-* [Autenticación y Seguridad](../docs/AUTH_AND_SECURITY.md)
-* [Despliegue en Producción](../docs/DEPLOYMENT.md)
 
+- [Arquitectura del Sistema](../docs/ARCHITECTURE.md)
+- [Principios SOLID en FinTrack](../docs/SOLID_PRINCIPLES.md)
+- [Registros de Decisiones de Arquitectura (ADRs)](../docs/decisions/)
+- [Referencia de la API REST](../docs/API_REFERENCE.md)
+- [Esquema de Base de Datos](../docs/DATABASE.md)
+- [Autenticación y Seguridad](../docs/AUTH_AND_SECURITY.md)
+- [Despliegue en Producción](../docs/DEPLOYMENT.md)
