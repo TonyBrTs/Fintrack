@@ -87,3 +87,11 @@ type Scheduler interface {
 	Stop()
 }
 
+// APIKeyService defines business operations for automation API keys.
+type APIKeyService interface {
+	GetKeys(ctx context.Context, userID string) ([]models.APIKey, error)
+	CreateKey(ctx context.Context, userID, name string) (*models.CreateAPIKeyResponse, error)
+	DeleteKey(ctx context.Context, id, userID string) error
+	ValidateKey(ctx context.Context, rawKey string) (*models.APIKey, error)
+}
+

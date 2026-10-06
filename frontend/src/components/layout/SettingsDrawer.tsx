@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 import { Sun, Moon, LogOut, User as UserIcon, ShieldCheck } from "lucide-react";
+import { APIKeysManager } from "@/components/settings/APIKeysManager";
 
 const emptySubscribe = () => () => {};
 function useHydrated() {
@@ -224,6 +225,13 @@ export function SettingsDrawer() {
             })}
           </div>
         </div>
+
+        {/* API Keys & Automations (n8n) */}
+        {user && (
+          <div className="pt-2 border-t border-border/50">
+            <APIKeysManager />
+          </div>
+        )}
 
         {/* System Info */}
         <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">

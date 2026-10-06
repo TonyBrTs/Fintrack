@@ -1,6 +1,9 @@
 package middleware
 
 import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/TonyBrTs/fintrack-backend/internal/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -36,13 +40,67 @@ func init() {
 	}
 }
 
-// AuthMiddleware validates Supabase JWTs and enforces user authentication.
-func AuthMiddleware() gin.HandlerFunc {
+// AuthMiddleware validates either a persistent API Key (e.g. from n8n / scripts) or a Supabase JWT.
+func AuthMiddleware(apiKeyRepos ...repository.APIKeyRepository) gin.HandlerFunc {
+	var apiKeyRepo repository.APIKeyRepository
+	if len(apiKeyRepos) > 0 {
+		apiKeyRepo = apiKeyRepos[0]
+	}
+
 	return func(c *gin.Context) {
+		// 1. Check for API Key in X-API-Key header or Authorization header (with fntk_ prefix)
+		apiKeyInput := strings.TrimSpace(c.GetHeader("X-API-Key"))
 		authHeader := c.GetHeader("Authorization")
+
+		if apiKeyInput == "" && authHeader != "" {
+			parts := strings.SplitN(authHeader, " ", 2)
+			if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
+				tokenStr := strings.TrimSpace(parts[1])
+				if strings.HasPrefix(tokenStr, "fntk_") {
+					apiKeyInput = tokenStr
+				}
+			} else if strings.HasPrefix(authHeader, "fntk_") {
+				apiKeyInput = strings.TrimSpace(authHeader)
+			}
+		}
+
+		if apiKeyInput != "" && apiKeyRepo != nil {
+			hasher := sha256.New()
+			hasher.Write([]byte(apiKeyInput))
+			keyHash := hex.EncodeToString(hasher.Sum(nil))
+
+			key, err := apiKeyRepo.FindByHash(c.Request.Context(), keyHash)
+			if err != nil || key == nil || !key.IsActive {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"error": "Clave API inválida, revocada o inexistente.",
+					"code":  "INVALID_API_KEY",
+				})
+				return
+			}
+
+			if key.ExpiresAt != nil && time.Now().UTC().After(*key.ExpiresAt) {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"error": "La clave API ha expirado.",
+					"code":  "EXPIRED_API_KEY",
+				})
+				return
+			}
+
+			// Update last used timestamp in a background goroutine
+			go func(id string) {
+				_ = apiKeyRepo.UpdateLastUsed(context.Background(), id, time.Now().UTC())
+			}(key.ID)
+
+			c.Set("userID", key.UserID)
+			c.Set("authMethod", "api_key")
+			c.Next()
+			return
+		}
+
+		// 2. Fallback to Supabase JWT verification
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "No autorizado. Por favor, inicia sesión para continuar.",
+				"error": "No autorizado. Proporciona un token Bearer o una cabecera X-API-Key válida.",
 				"code":  "UNAUTHORIZED",
 			})
 			return

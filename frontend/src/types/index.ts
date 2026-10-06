@@ -105,3 +105,26 @@ export interface RecurringIncomeSyncResult {
   processed_count: number;
   incomes: Income[];
 }
+
+export interface APIKey {
+  id: string;
+  user_id: string;
+  name: string;
+  key_prefix: string;
+  key_last4: string;
+  created_at: string;
+  last_used_at?: string | null;
+  expires_at?: string | null;
+  is_active: boolean;
+}
+
+export interface CreateAPIKeyResponse {
+  id: string;
+  user_id: string;
+  name: string;
+  key_prefix: string;
+  key_last4: string;
+  created_at: string;
+  plain_key: string;
+  is_active: boolean;
+}

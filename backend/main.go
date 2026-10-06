@@ -24,6 +24,7 @@ const (
 	categoriesFile        = "categories.json"
 	recurringExpensesFile = "recurring_expenses.json"
 	recurringIncomesFile  = "recurring_incomes.json"
+	apiKeysFile           = "api_keys.json"
 )
 
 func main() {
@@ -46,6 +47,7 @@ func main() {
 		categoryRepo        repository.CategoryRepository
 		recurringRepo       repository.RecurringExpenseRepository
 		recurringIncomeRepo repository.RecurringIncomeRepository
+		apiKeyRepo          repository.APIKeyRepository
 	)
 
 	if db != nil {
@@ -56,6 +58,7 @@ func main() {
 		categoryRepo = gorm_repo.NewGormCategoryRepository(db)
 		recurringRepo = gorm_repo.NewGormRecurringExpenseRepository(db)
 		recurringIncomeRepo = gorm_repo.NewGormRecurringIncomeRepository(db)
+		apiKeyRepo = gorm_repo.NewGormAPIKeyRepository(db)
 	} else {
 		log.Println("[Storage] Initializing Memory & JSON fallback repositories...")
 		expenseRepo = memory_repo.NewMemoryExpenseRepository(expensesFile)
@@ -64,6 +67,7 @@ func main() {
 		categoryRepo = memory_repo.NewMemoryCategoryRepository(categoriesFile)
 		recurringRepo = memory_repo.NewMemoryRecurringExpenseRepository(recurringExpensesFile)
 		recurringIncomeRepo = memory_repo.NewMemoryRecurringIncomeRepository(recurringIncomesFile)
+		apiKeyRepo = memory_repo.NewMemoryAPIKeyRepository(apiKeysFile)
 	}
 
 	// 4. Instantiate Services (Dependency Inversion: Injecting Repositories)
@@ -73,6 +77,7 @@ func main() {
 	categoryService := services.NewCategoryService(categoryRepo, expenseRepo, incomeRepo)
 	recurringService := services.NewRecurringExpenseService(recurringRepo, expenseRepo)
 	recurringIncomeService := services.NewRecurringIncomeService(recurringIncomeRepo, incomeRepo)
+	apiKeyService := services.NewAPIKeyService(apiKeyRepo)
 
 	// 5. Instantiate Handlers (Single Responsibility: Pure HTTP mapping)
 	expenseHandler := handlers.NewExpenseHandler(expenseService)
@@ -81,6 +86,7 @@ func main() {
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	recurringHandler := handlers.NewRecurringExpenseHandler(recurringService)
 	recurringIncomeHandler := handlers.NewRecurringIncomeHandler(recurringIncomeService)
+	apiKeyHandler := handlers.NewAPIKeyHandler(apiKeyService)
 
 	// 6. Background scheduler for due recurring transactions (Single Responsibility Principle)
 	scheduler := services.NewRecurringScheduler(recurringService, recurringIncomeService, 1*time.Hour)
@@ -93,9 +99,9 @@ func main() {
 	// Public Health Endpoint
 	router.GET("/health", handlers.HealthCheck)
 
-	// Protected API Routes (Supabase Auth Middleware)
+	// Protected API Routes (Supabase Auth Middleware & API Key Auth)
 	api := router.Group("/api")
-	api.Use(middleware.AuthMiddleware())
+	api.Use(middleware.AuthMiddleware(apiKeyRepo))
 	{
 		// Expenses API
 		api.GET("/expenses", expenseHandler.GetExpenses)
@@ -135,6 +141,11 @@ func main() {
 		api.GET("/categories", categoryHandler.GetCategories)
 		api.POST("/categories", categoryHandler.CreateCategory)
 		api.DELETE("/categories/:id", categoryHandler.DeleteCategory)
+
+		// API Keys API (Automation & Integrations)
+		api.GET("/api-keys", apiKeyHandler.GetKeys)
+		api.POST("/api-keys", apiKeyHandler.CreateKey)
+		api.DELETE("/api-keys/:id", apiKeyHandler.DeleteKey)
 	}
 
 	// 7. Start HTTP Server

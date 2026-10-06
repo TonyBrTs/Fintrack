@@ -65,3 +65,12 @@ type RecurringIncomeRepository interface {
 	Update(ctx context.Context, id, userID string, recurring *models.RecurringIncome) (*models.RecurringIncome, error)
 	Delete(ctx context.Context, id, userID string) error
 }
+
+// APIKeyRepository defines persistence operations for user-scoped automation API keys.
+type APIKeyRepository interface {
+	FindByUserID(ctx context.Context, userID string) ([]models.APIKey, error)
+	FindByHash(ctx context.Context, keyHash string) (*models.APIKey, error)
+	Create(ctx context.Context, key *models.APIKey) error
+	Delete(ctx context.Context, id, userID string) error
+	UpdateLastUsed(ctx context.Context, id string, lastUsed time.Time) error
+}
