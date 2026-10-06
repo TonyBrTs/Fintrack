@@ -12,7 +12,6 @@ import {
   Clock,
   Calendar,
   Loader2,
-  Cpu,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -58,7 +57,7 @@ export function APIKeysManager() {
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newKeyName.trim()) {
-      toast.error("Por favor ingresa un nombre para la clave");
+      toast.error("Ingresa un nombre para la clave");
       return;
     }
 
@@ -67,13 +66,13 @@ export function APIKeysManager() {
     setIsCreating(false);
 
     if (res.ok && res.data) {
-      toast.success("¡Clave de API generada con éxito!");
+      toast.success("¡Clave de API creada!");
       setCreatedResult(res.data);
       setIsCreateOpen(false);
       setNewKeyName("");
       fetchKeys();
     } else {
-      toast.error(res.error || "No fue posible generar la clave de API");
+      toast.error(res.error || "No fue posible generar la clave");
     }
   };
 
@@ -84,7 +83,7 @@ export function APIKeysManager() {
     setConfirmDeleteId(null);
 
     if (res.ok) {
-      toast.success("Clave de API revocada y eliminada");
+      toast.success("Clave revocada exitosamente");
       setKeys((prev) => prev.filter((k) => k.id !== id));
     } else {
       toast.error(res.error || "No se pudo revocar la clave");
@@ -94,7 +93,7 @@ export function APIKeysManager() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
-    toast.success("Clave copiada al portapapeles");
+    toast.success("Clave copiada");
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -115,174 +114,138 @@ export function APIKeysManager() {
   const apiBase = getApiBaseUrl();
 
   return (
-    <div className="space-y-3.5 w-full max-w-full overflow-hidden">
-      {/* Header card optimized for mobile */}
-      <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-500/20 flex flex-col gap-3">
-        <div className="flex items-start gap-3">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-500/20 text-blue-500 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
-            <Cpu size={20} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-bold text-foreground text-xs sm:text-sm">
-                Claves de API & Automatizaciones
-              </h3>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30 shrink-0">
-                Seguro
-              </span>
-            </div>
-            <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              Conecta servicios externos, atajos o scripts para registrar gastos automáticamente sin tokens que expiran.
-            </p>
-          </div>
+    <div className="space-y-3 w-full max-w-full">
+      {/* Clean unified section header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <KeyRound size={15} className="text-blue-500" />
+          <span className="text-xs font-bold text-foreground">
+            Claves de API
+          </span>
+          {keys.length > 0 && (
+            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-secondary text-muted-foreground">
+              {keys.length}
+            </span>
+          )}
         </div>
 
         <Button
           onClick={() => setIsCreateOpen(true)}
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs h-9 rounded-xl shadow-xs cursor-pointer"
+          size="sm"
+          className="h-7 px-2.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-xs cursor-pointer"
         >
-          <Plus size={15} />
-          <span>Generar Nueva Clave</span>
+          <Plus size={13} />
+          <span>Nueva Clave</span>
         </Button>
       </div>
 
-      {/* Keys List */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            Claves Activas ({keys.length})
-          </span>
+      {/* Content Area */}
+      {isLoading ? (
+        <div className="p-4 text-center bg-secondary/30 dark:bg-card/40 border border-border/50 rounded-xl">
+          <Loader2 className="w-4 h-4 animate-spin text-blue-500 mx-auto mb-1.5" />
+          <p className="text-[11px] text-muted-foreground">Cargando...</p>
         </div>
+      ) : keys.length === 0 ? (
+        <div className="p-3.5 text-center bg-secondary/20 dark:bg-card/30 border border-border/50 rounded-xl">
+          <p className="text-xs text-muted-foreground">
+            No tienes claves activas. Usa <strong className="text-foreground">Nueva Clave</strong> para conectar servicios externos.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-2">
+          {keys.map((key) => {
+            const isConfirming = confirmDeleteId === key.id;
+            const isDeleting = deletingId === key.id;
 
-        {isLoading ? (
-          <div className="p-6 text-center bg-card/40 border border-border/60 rounded-2xl">
-            <Loader2 className="w-5 h-5 animate-spin text-blue-500 mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">Cargando claves de API...</p>
-          </div>
-        ) : keys.length === 0 ? (
-          <div className="p-6 text-center bg-card/40 border border-border/60 rounded-2xl space-y-2">
-            <div className="w-10 h-10 rounded-xl bg-secondary/80 text-muted-foreground flex items-center justify-center mx-auto">
-              <KeyRound size={20} />
-            </div>
-            <p className="text-xs font-semibold text-foreground">No tienes claves creadas aún</p>
-            <p className="text-[11px] text-muted-foreground max-w-xs mx-auto">
-              Crea una clave para conectar automatizaciones externas a tu cuenta.
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsCreateOpen(true)}
-              className="mt-1 text-xs font-bold h-8"
-            >
-              <Plus size={14} />
-              <span>Crear mi primera clave</span>
-            </Button>
-          </div>
-        ) : (
-          <div className="grid gap-2">
-            {keys.map((key) => {
-              const isConfirming = confirmDeleteId === key.id;
-              const isDeleting = deletingId === key.id;
+            return (
+              <div
+                key={key.id}
+                className="p-3 bg-secondary/30 dark:bg-card/50 hover:bg-secondary/50 dark:hover:bg-card border border-border/60 rounded-xl transition-all space-y-2"
+              >
+                {/* Header row */}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-foreground truncate min-w-0">
+                    {key.name}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Activa
+                  </span>
+                </div>
 
-              return (
-                <div
-                  key={key.id}
-                  className="p-3 sm:p-3.5 bg-card/70 hover:bg-card border border-border/70 rounded-2xl transition-all shadow-xs flex flex-col gap-2.5"
-                >
-                  {/* Top row: Name, Status */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-foreground truncate min-w-0">
-                      {key.name}
+                {/* Masked Key */}
+                <div>
+                  <code className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-background border border-border/60 text-slate-700 dark:text-slate-300 w-full block truncate select-all">
+                    {key.key_prefix}••••••••••••{key.key_last4}
+                  </code>
+                </div>
+
+                {/* Footer metadata & Delete */}
+                <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40 text-[10px] text-muted-foreground">
+                  <div className="flex items-center gap-2.5 truncate">
+                    <span className="flex items-center gap-1 truncate">
+                      <Calendar size={11} className="text-slate-400 shrink-0" />
+                      {formatDate(key.created_at)}
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Activa
+                    <span className="flex items-center gap-1 truncate">
+                      <Clock size={11} className="text-slate-400 shrink-0" />
+                      {key.last_used_at ? formatDate(key.last_used_at) : "Sin uso"}
                     </span>
                   </div>
 
-                  {/* Key preview: Masked */}
-                  <div className="flex items-center">
-                    <code className="text-[11px] font-mono px-2 py-1 rounded-lg bg-secondary/80 dark:bg-slate-900 border border-border/60 text-slate-700 dark:text-slate-300 w-full truncate select-all">
-                      {key.key_prefix}••••••••••••{key.key_last4}
-                    </code>
-                  </div>
-
-                  {/* Bottom row: Dates and Action */}
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40 text-[10px] text-muted-foreground">
-                    <div className="flex items-center gap-2.5 flex-wrap min-w-0">
-                      <span className="flex items-center gap-1 truncate">
-                        <Calendar size={11} className="text-slate-400 shrink-0" />
-                        {formatDate(key.created_at)}
-                      </span>
-                      <span className="flex items-center gap-1 truncate">
-                        <Clock size={11} className="text-slate-400 shrink-0" />
-                        {key.last_used_at ? formatDate(key.last_used_at) : "Sin uso"}
-                      </span>
-                    </div>
-
-                    {/* Inline two-tap delete (No browser alert) */}
-                    <div className="shrink-0">
-                      {isConfirming ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            disabled={isDeleting}
-                            onClick={() => handleExecuteDelete(key.id)}
-                            className="px-2 py-1 rounded-lg bg-rose-500 text-white font-bold text-[10px] hover:bg-rose-600 transition-colors flex items-center gap-1 cursor-pointer"
-                          >
-                            {isDeleting ? (
-                              <Loader2 size={11} className="animate-spin" />
-                            ) : (
-                              <span>Revocar</span>
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setConfirmDeleteId(null)}
-                            className="p-1 rounded-lg text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
-                            title="Cancelar"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ) : (
+                  {/* Inline Delete action */}
+                  <div className="shrink-0">
+                    {isConfirming ? (
+                      <div className="flex items-center gap-1">
                         <button
                           type="button"
-                          onClick={() => setConfirmDeleteId(key.id)}
-                          className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
-                          title="Revocar clave"
+                          disabled={isDeleting}
+                          onClick={() => handleExecuteDelete(key.id)}
+                          className="px-2 py-0.5 rounded-md bg-rose-500 text-white font-bold text-[10px] hover:bg-rose-600 transition-colors flex items-center gap-1 cursor-pointer"
                         >
-                          <Trash2 size={13} />
-                          <span className="hidden sm:inline">Eliminar</span>
+                          {isDeleting ? (
+                            <Loader2 size={11} className="animate-spin" />
+                          ) : (
+                            <span>Confirmar</span>
+                          )}
                         </button>
-                      )}
-                    </div>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="p-1 rounded-md text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
+                          title="Cancelar"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteId(key.id)}
+                        className="p-1 text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors cursor-pointer"
+                        title="Revocar clave"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Security standard note */}
-      <div className="p-2.5 bg-secondary/40 border border-border/50 rounded-xl flex items-center justify-between text-[10px] sm:text-[11px] text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
-          <span>Cifrado SHA-256 estándar • Claves mostradas una sola vez</span>
+              </div>
+            );
+          })}
         </div>
-      </div>
+      )}
 
       {/* Modal 1: Create Key Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md max-h-[90vh] overflow-y-auto p-5">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-sm sm:text-base font-bold">
-              <KeyRound className="w-5 h-5 text-blue-500 shrink-0" />
+              <KeyRound className="w-4 h-4 text-blue-500 shrink-0" />
               <span>Generar Clave de API</span>
             </DialogTitle>
             <DialogDescription className="text-xs">
-              Asigna un nombre descriptivo para identificar qué integración o servicio externo utilizará esta clave.
+              Asigna un nombre descriptivo para identificar qué integración utilizará esta clave.
             </DialogDescription>
           </DialogHeader>
 
@@ -299,14 +262,14 @@ export function APIKeysManager() {
                 value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
                 maxLength={100}
-                className="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium bg-background border border-border/80 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-muted-foreground/60"
+                className="w-full px-3 py-2 rounded-xl text-xs font-medium bg-background border border-border/80 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-muted-foreground/60"
               />
             </div>
 
-            <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-600 dark:text-blue-300 flex items-start gap-2">
-              <ShieldCheck size={15} className="shrink-0 mt-0.5" />
+            <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-600 dark:text-blue-300 flex items-start gap-2">
+              <ShieldCheck size={14} className="shrink-0 mt-0.5" />
               <p>
-                FinTrack generará una clave aleatoria con prefijo <code>fntk_live_</code> con 256 bits de entropía. El servidor solo almacenará su hash criptográfico.
+                FinTrack generará una clave con prefijo <code>fntk_live_</code> cifrada con SHA-256.
               </p>
             </div>
 
@@ -315,22 +278,22 @@ export function APIKeysManager() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsCreateOpen(false)}
-                className="text-xs font-semibold h-9"
+                className="text-xs font-semibold h-8"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={isCreating || !newKeyName.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-9 cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-8 cursor-pointer"
               >
                 {isCreating ? (
                   <>
-                    <Loader2 size={14} className="animate-spin mr-1.5" />
+                    <Loader2 size={13} className="animate-spin mr-1" />
                     <span>Generando...</span>
                   </>
                 ) : (
-                  <span>Generar Clave</span>
+                  <span>Crear Clave</span>
                 )}
               </Button>
             </DialogFooter>
@@ -338,7 +301,7 @@ export function APIKeysManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal 2: Reveal Key Dialog (One-Time Display) */}
+      {/* Modal 2: Reveal Key Dialog */}
       <Dialog
         open={!!createdResult}
         onOpenChange={(open) => {
@@ -356,20 +319,16 @@ export function APIKeysManager() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3.5 pt-1">
-            {/* Warning Callout */}
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs flex items-start gap-2">
-              <AlertTriangle size={16} className="shrink-0 text-amber-500 mt-0.5" />
-              <div className="space-y-0.5">
-                <p className="font-bold text-[11px] sm:text-xs">Guarda tu clave de API ahora</p>
-                <p className="text-[10px] sm:text-[11px] opacity-90 leading-relaxed">
-                  Por seguridad, esta clave no se almacena en texto plano y no podrá volver a mostrarse.
-                </p>
-              </div>
+          <div className="space-y-3 pt-1">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs flex items-start gap-2">
+              <AlertTriangle size={15} className="shrink-0 text-amber-500 mt-0.5" />
+              <p className="text-[11px] leading-relaxed">
+                Guarda tu clave ahora. Por seguridad, no podrá volver a mostrarse.
+              </p>
             </div>
 
             {/* Key Copy Box */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Tu Clave de API Secreta
               </label>
@@ -402,11 +361,11 @@ export function APIKeysManager() {
             </div>
 
             {/* Quick Integration Guide */}
-            <div className="space-y-1.5 p-3 bg-secondary/50 rounded-xl border border-border/70 text-xs">
-              <span className="font-bold text-foreground text-[11px]">
-                Cómo usarla en tus integraciones:
+            <div className="space-y-1 p-2.5 bg-secondary/50 rounded-xl border border-border/70 text-xs">
+              <span className="font-bold text-foreground text-[11px] block">
+                Uso en cabeceras HTTP:
               </span>
-              <div className="space-y-1 text-[10px] sm:text-[11px] text-muted-foreground font-mono">
+              <div className="space-y-0.5 text-[10px] sm:text-[11px] text-muted-foreground font-mono">
                 <p>
                   <strong>Método:</strong> <span className="text-blue-500 font-bold">POST</span>
                 </p>
@@ -422,9 +381,9 @@ export function APIKeysManager() {
             <DialogFooter className="pt-1">
               <Button
                 onClick={() => setCreatedResult(null)}
-                className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white dark:text-slate-900 text-white font-bold text-xs h-9 rounded-xl cursor-pointer"
+                className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white dark:text-slate-900 text-white font-bold text-xs h-8 rounded-xl cursor-pointer"
               >
-                <span>Ya copié mi clave, cerrar</span>
+                <span>Listo, cerrar</span>
               </Button>
             </DialogFooter>
           </div>
