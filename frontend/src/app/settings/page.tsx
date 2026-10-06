@@ -38,8 +38,8 @@ export default function SettingsPage() {
           </h1>
           <p className="text-xs text-muted-foreground">
             {isEs
-              ? "Administra tus preferencias, claves de API y automatizaciones de n8n"
-              : "Manage your preferences, API keys, and n8n automations"}
+              ? "Administra tus preferencias, claves de API y automatizaciones externas"
+              : "Manage your preferences, API keys, and external automations"}
           </p>
         </div>
       </div>
@@ -169,7 +169,7 @@ export default function SettingsPage() {
         {/* Automations & API Keys Card */}
         <div className="p-5 bg-card/60 border border-border/70 rounded-2xl space-y-4">
           <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <span>{isEs ? "Automatizaciones (n8n)" : "Automations (n8n)"}</span>
+            <span>{isEs ? "Automatizaciones & API Keys" : "Automations & API Keys"}</span>
           </h2>
           {user ? (
             <APIKeysManager />
