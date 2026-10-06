@@ -11,9 +11,15 @@ interface SettingsContextType {
   language: Language;
   currency: Currency;
   iconSource: IconSource;
+  reducedMotion: boolean;
+  highContrast: boolean;
+  largeFont: boolean;
   setLanguage: (lang: Language) => void;
   setCurrency: (curr: Currency) => void;
   setIconSource: (source: IconSource) => void;
+  setReducedMotion: (val: boolean) => void;
+  setHighContrast: (val: boolean) => void;
+  setLargeFont: (val: boolean) => void;
   currencySymbol: string;
   translate: (path: string, fallback?: string) => string;
   isSettingsOpen: boolean;
@@ -35,6 +41,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [language, setLanguage] = useState<Language>("es");
   const [currency, setCurrency] = useState<Currency>("CRC");
   const [iconSource, setIconSource] = useState<IconSource>("phosphor");
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
+  const [largeFont, setLargeFont] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const openSettings = () => setIsSettingsOpen(true);
@@ -45,6 +54,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const savedLanguage = localStorage.getItem("language") as Language;
     const savedCurrency = localStorage.getItem("currency") as Currency;
     const savedIconSource = localStorage.getItem("iconSource") as IconSource;
+    const savedReducedMotion = localStorage.getItem("reducedMotion") === "true";
+    const savedHighContrast = localStorage.getItem("highContrast") === "true";
+    const savedLargeFont = localStorage.getItem("largeFont") === "true";
 
     if (savedLanguage && ["en", "es"].includes(savedLanguage)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -56,6 +68,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (savedIconSource && ["phosphor", "tabler", "lucide"].includes(savedIconSource)) {
       setIconSource(savedIconSource);
     }
+    if (savedReducedMotion) setReducedMotion(true);
+    if (savedHighContrast) setHighContrast(true);
+    if (savedLargeFont) setLargeFont(true);
   }, []);
 
   // Save settings to localStorage when they change
@@ -76,6 +91,27 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.setItem("iconSource", iconSource);
     }
   }, [iconSource]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("reducedMotion", String(reducedMotion));
+      document.documentElement.classList.toggle("reduce-motion", reducedMotion);
+    }
+  }, [reducedMotion]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("highContrast", String(highContrast));
+      document.documentElement.classList.toggle("high-contrast", highContrast);
+    }
+  }, [highContrast]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("largeFont", String(largeFont));
+      document.documentElement.classList.toggle("text-scale-large", largeFont);
+    }
+  }, [largeFont]);
 
   const translate = (path: string, fallback?: string): string => {
     const keys = path.split(".");
@@ -101,9 +137,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     language,
     currency,
     iconSource,
+    reducedMotion,
+    highContrast,
+    largeFont,
     setLanguage,
     setCurrency,
     setIconSource,
+    setReducedMotion,
+    setHighContrast,
+    setLargeFont,
     currencySymbol: currencySymbols[currency],
     translate,
     isSettingsOpen,

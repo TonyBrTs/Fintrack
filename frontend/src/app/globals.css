@@ -327,3 +327,24 @@ body {
     page-break-inside: avoid !important;
   }
 }
+
+/* Accessibility Preferences */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+html.high-contrast {
+  --border: #64748b;
+}
+
+html.high-contrast .border {
+  border-width: 1.5px !important;
+}
+
+html.text-scale-large {
+  font-size: 108% !important;
+}
