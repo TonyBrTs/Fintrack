@@ -157,16 +157,22 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 
-export const useSettings = () => {
+export const useSettings = (): SettingsContextType => {
   const context = useContext(SettingsContext);
   if (context === undefined) {
     return {
       language: "en" as Language,
       currency: "USD" as Currency,
       iconSource: "phosphor" as IconSource,
+      reducedMotion: false,
+      highContrast: false,
+      largeFont: false,
       setLanguage: () => {},
       setCurrency: () => {},
       setIconSource: () => {},
+      setReducedMotion: () => {},
+      setHighContrast: () => {},
+      setLargeFont: () => {},
       currencySymbol: "$",
       translate: (_path: string, fallback?: string) => fallback || "",
       isSettingsOpen: false,
