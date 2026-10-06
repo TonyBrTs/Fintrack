@@ -3,80 +3,72 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Settings } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { SettingsView } from "@/components/settings/SettingsView";
 
 export function SettingsDrawer() {
-  const { isSettingsOpen, closeSettings, translate, language } = useSettings();
+  const { isSettingsOpen, closeSettings } = useSettings();
   const [mounted, setMounted] = useState(false);
-  const isEs = language === "es";
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Prevent background body scrolling when modal is open
+  // Prevent background body scrolling ONLY on desktop/tablet to eliminate mobile layout-shift/flicker
   useEffect(() => {
-    if (isSettingsOpen) {
+    if (!isSettingsOpen) return;
+
+    // Check if on desktop breakpoint to prevent mobile scrollbar jump and address bar jitter
+    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 768;
+    if (isDesktop) {
+      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+      return () => {
+        document.body.style.overflow = originalOverflow || "";
+      };
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isSettingsOpen]);
+
+  // Close modal when pressing the Escape key
+  useEffect(() => {
+    if (!isSettingsOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeSettings();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSettingsOpen, closeSettings]);
 
   if (!mounted) return null;
 
   return createPortal(
     <AnimatePresence>
       {isSettingsOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overscroll-contain">
+          {/* Backdrop: Solid dark on mobile to avoid GPU blur stutter/flicker, subtle blur on desktop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
             onClick={closeSettings}
-            className="fixed inset-0 bg-slate-950/65 backdrop-blur-sm cursor-pointer"
+            className="fixed inset-0 bg-slate-950/75 md:backdrop-blur-sm cursor-pointer"
           />
 
-          {/* Centered Modal Card (Claude / ChatGPT style) */}
+          {/* Modal Card:
+              - Mobile: Native full-screen settings view (h-[100dvh] w-full rounded-none bg-background)
+              - Desktop: Centered 2-column modal (w-[92vw] max-w-4xl h-[600px] max-h-[85vh] rounded-3xl bg-card border shadow-2xl)
+          */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 8 }}
+            initial={{ opacity: 0, scale: 0.98, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 8 }}
-            transition={{ type: "spring", damping: 26, stiffness: 320 }}
-            className="relative z-[101] w-full max-w-lg sm:max-w-xl max-h-[88vh] sm:max-h-[82vh] bg-card/98 dark:bg-[#0b101b]/98 backdrop-blur-2xl border border-border/80 dark:border-slate-800/90 rounded-3xl shadow-2xl shadow-black/40 flex flex-col overflow-hidden"
+            exit={{ opacity: 0, scale: 0.98, y: 8 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-[101] w-full h-[100dvh] md:h-[600px] md:max-h-[86vh] md:w-[92vw] md:max-w-4xl bg-background md:bg-card/98 md:backdrop-blur-2xl border-0 md:border md:border-border/80 dark:md:border-slate-800/90 rounded-none md:rounded-3xl shadow-none md:shadow-2xl md:shadow-black/50 flex flex-col overflow-hidden overscroll-contain transform-gpu will-change-transform"
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 sm:px-6 py-3.5 border-b border-border/60 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                  <Settings size={18} />
-                </div>
-                <h2 className="text-foreground font-bold text-sm sm:text-base tracking-tight">
-                  {translate("settingsDrawer.title") ||
-                    (isEs ? "Ajustes y Configuración" : "Settings & Preferences")}
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={closeSettings}
-                className="w-8 h-8 rounded-xl bg-secondary/80 hover:bg-secondary text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors cursor-pointer"
-                aria-label="Cerrar ajustes"
-              >
-                <X size={17} />
-              </button>
-            </div>
-
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4 space-y-4">
-              <SettingsView onCloseDrawer={closeSettings} />
-            </div>
+            <SettingsView onCloseDrawer={closeSettings} />
           </motion.div>
         </div>
       )}

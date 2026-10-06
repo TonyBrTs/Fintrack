@@ -10,7 +10,7 @@ export default function SettingsPage() {
   const isEs = language === "es";
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5 pb-12">
+    <div className="max-w-4xl mx-auto space-y-5 pb-12">
       {/* Page Header */}
       <div className="flex items-center gap-3 pb-2 border-b border-border/60">
         <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
@@ -29,7 +29,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Main Categorized Settings Container */}
-      <div className="p-4 sm:p-6 bg-card/60 border border-border/70 rounded-3xl shadow-sm">
+      <div className="bg-card/60 border border-border/70 rounded-3xl shadow-sm overflow-hidden min-h-[560px]">
         <SettingsView />
       </div>
     </div>
