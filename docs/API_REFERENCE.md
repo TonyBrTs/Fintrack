@@ -1,345 +1,456 @@
-# 📡 Referencia de la API REST — FinTrack
+# 📡 FinTrack REST API — Especificación Técnica Formal
 
-La API REST de FinTrack proporciona operaciones CRUD completas y seguras para la gestión de finanzas personales, categorización, metas de ahorro y transacciones recurrentes.
-
----
-
-## 🌐 URLs Base
-
-| Entorno                          | URL Base                             | Descripción                              |
-| :------------------------------- | :----------------------------------- | :--------------------------------------- |
-| **Producción (Backend Render)**  | `https://fintrack-ihwb.onrender.com` | Servicio en la nube desplegado en Render |
-| **Local (Desarrollo)**           | `http://localhost:8080`              | Servidor Go local (`go run main.go`)     |
-| **Ruta Serverless AI (Next.js)** | `/api/ai/insights`                   | Ejecutado en Vercel Edge/Serverless      |
+- **Versión de la API:** `2.0.0`
+- **Protocolo:** `HTTPS` / `RESTful JSON`
+- **Arquitectura de Ejecución:** Go 1.24 (Gin Framework) + Arquitectura Hexagonal / Repositorios desacoplados
+- **Capa de Persistencia:** PostgreSQL 15 en Supabase (GORM ORM) con fallback en memoria/JSON
+- **Seguridad y Aislamiento:** Row Level Security (RLS) + Dual Authentication (JWT / SHA-256 API Keys)
 
 ---
 
-## 🔐 Autenticación
+## 🌐 1. Entornos y Direcciones Base (Base URLs)
 
-Todas las rutas bajo `/api/*` (excepto `/health`) están protegidas mediante **Supabase Auth**.
+| Entorno | URL Base | Propósito |
+| :--- | :--- | :--- |
+| **Producción (Render)** | `https://fintrack-ihwb.onrender.com` | Servicio principal en la nube |
+| **Desarrollo Local** | `http://localhost:8080` | Servidor backend en entorno local |
+| **Edge Serverless (Next.js)** | `https://fintrack-six-opal.vercel.app/api/ai` | Módulos de IA y analítica frontend |
 
-### Encabezado Requerido:
+---
 
-```http
-Authorization: Bearer <TU_SUPABASE_JWT_ACCESS_TOKEN>
+## 🔐 2. Modelo de Autenticación y Autorización
+
+FinTrack implementa un **modelo de autenticación dual** diseñado para soportar tanto clientes interactivos (Single Page Applications) como sistemas automatizados (pipelines n8n, webhooks bancarios, cron jobs y scripts).
+
+```
+                      ┌───────────────────────────────────────────────┐
+                      │              Petición Entrante                │
+                      └──────────────────────┬────────────────────────┘
+                                             │
+                       ¿Contiene X-API-Key o Bearer fntk_live_*?
+                                             │
+                        ┌────────────────────┴────────────────────┐
+                        ▼                                         ▼
+                     [ SÍ ]                                    [ NO ]
+                        │                                         │
+           Validar Hash SHA-256 en DB                  Validar Supabase JWT
+           Verificar IsActive & ExpiresAt             (Firma RS256/HS256)
+                        │                                         │
+                        ▼                                         ▼
+             Inyectar Contexto:                        Inyectar Contexto:
+             - c.Set("userID", key.UserID)             - c.Set("userID", claims.Sub)
+             - Asíncrono: Update LastUsedAt            - c.Set("email", claims.Email)
+                        │                                         │
+                        └────────────────────┬────────────────────┘
+                                             ▼
+                                c.Next() -> Controlador
 ```
 
-_Si no se envía el encabezado o el token está expirado/inválido, la API responderá con `401 Unauthorized`._
+### 2.1. Métodos de Autenticación Soportados
+
+#### A. Claves de API Persistentes (`API Keys`) — *Recomendado para Automatizaciones*
+- **Formato:** Cadena alfanumérica con prefijo obligatorio: `fntk_live_<hex32>` (ej. `fntk_live_3f9a8b1c4e2d0f5a6b7c8d9e0f1a2b3c`).
+- **Mecanismo de Verificación:** 
+  1. El servidor computa el hash `SHA-256(plain_token)` en tiempo constante.
+  2. Consulta la tabla `api_keys` por `key_hash`.
+  3. Verifica que `is_active == true` y que `expires_at == null || now() < expires_at`.
+  4. Extrae el `user_id` asociado y lo inyecta en el contexto de ejecución.
+  5. Despacha una goroutine en segundo plano para actualizar la marca de tiempo `last_used_at`.
+- **Cabeceras HTTP Aceptadas:**
+  ```http
+  X-API-Key: fntk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  ```
+  o alternativamente:
+  ```http
+  Authorization: Bearer fntk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  ```
+
+#### B. Tokens JWT de Supabase — *Para Sesiones Web y Móviles*
+- **Formato:** JSON Web Token RFC 7519 emitido por Supabase Auth.
+- **Cabecera HTTP:**
+  ```http
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  ```
 
 ---
 
-## ⚠️ Formato de Respuestas de Error
+## ⚠️ 3. Códigos de Estado y Formato de Errores
 
-En caso de error, la API responde con un objeto JSON uniforme:
+Todas las respuestas con código de error retornan un payload JSON consistente bajo la estructura:
 
 ```json
 {
-  "error": "Descripción detallada del motivo del fallo"
+  "error": "Descripción legible del error",
+  "code": "CODIGO_DE_ERROR_OPCIONAL"
 }
 ```
 
+| Código HTTP | Significado | Causa común |
+| :--- | :--- | :--- |
+| `200 OK` | Operación exitosa | Petición GET, PUT o DELETE procesada correctamente |
+| `201 Created` | Recurso creado | Registro exitoso de gastos, ingresos, metas o claves |
+| `400 Bad Request` | Payload inválido | Error de sintaxis JSON o campo obligatorio ausente |
+| `401 Unauthorized` | Autenticación fallida | Clave API inexistente, revocada, expirada o JWT inválido |
+| `404 Not Found` | Recurso no encontrado | El ID solicitado no existe o no pertenece al usuario autenticado |
+| `500 Internal Error`| Error del servidor | Fallo de conexión con la base de datos o fallo interno |
+
 ---
 
-## 📉 1. Módulo de Gastos (`/api/expenses`)
+## 📋 4. Catálogo Completo de Endpoints
 
-### `GET /api/expenses`
+### 4.1. Diagnóstico y Monitoreo
 
-Obtiene la lista de gastos del usuario autenticado ordenados cronológicamente descendente.
-
-- **Headers**: `Authorization: Bearer <token>`
-- **Respuesta Exitosa (`200 OK`)**:
-
-```json
-[
+#### `GET /health`
+Verifica la disponibilidad del servicio y la conectividad con la base de datos.
+- **Autenticación requerida:** Ninguna (Público).
+- **Respuesta (`200 OK`):**
+  ```json
   {
-    "id": "1741829392182938100",
-    "user_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-    "amount": 45.5,
+    "status": "ok",
+    "timestamp": "2026-10-06T20:30:00Z",
+    "database": "connected"
+  }
+  ```
+
+---
+
+### 4.2. Módulo de Gestión de API Keys (`/api/api-keys`)
+
+#### `GET /api/api-keys`
+Retorna la lista de todas las claves generadas por el usuario actual. Por seguridad, **nunca retorna la clave completa**, solo el prefijo y los últimos 4 caracteres.
+- **Headers:** `X-API-Key` o `Authorization: Bearer <jwt>`
+- **Respuesta (`200 OK`):**
+  ```json
+  [
+    {
+      "id": "key_9b1deb4d3b7d",
+      "user_id": "c1f7a28e-5b12-4c8d-93e5-82b1c4e7f9a2",
+      "name": "Pipeline n8n Facturas",
+      "key_prefix": "fntk_live_",
+      "key_last4": "a9f2",
+      "created_at": "2026-10-01T15:20:00Z",
+      "last_used_at": "2026-10-06T18:45:10Z",
+      "expires_at": null,
+      "is_active": true
+    }
+  ]
+  ```
+
+#### `POST /api/api-keys`
+Genera una nueva clave criptográfica para el usuario.
+- **Cuerpo (`application/json`):**
+  ```json
+  {
+    "name": "Bot de Gastos WhatsApp"
+  }
+  ```
+- **Respuesta (`201 Created`):**
+  > [!IMPORTANT]
+  > El campo `plain_key` contiene la clave secreta en texto claro. Esta es la **única vez** que se transmitirá. Debe ser almacenada de inmediato.
+  ```json
+  {
+    "id": "key_e4b2c1d0f5a6",
+    "user_id": "c1f7a28e-5b12-4c8d-93e5-82b1c4e7f9a2",
+    "name": "Bot de Gastos WhatsApp",
+    "key_prefix": "fntk_live_",
+    "key_last4": "8b3c",
+    "plain_key": "fntk_live_a8c9e0f1b2d3c4e5f6a7b8c9d0e1f2a3",
+    "created_at": "2026-10-06T20:45:00Z",
+    "is_active": true
+  }
+  ```
+
+#### `DELETE /api/api-keys/:id`
+Revoca y elimina inmediatamente la clave especificada.
+- **Parámetros de ruta:** `id` (Identificador único de la clave).
+- **Respuesta (`200 OK`):**
+  ```json
+  {
+    "message": "API key revoked successfully"
+  }
+  ```
+
+---
+
+### 4.3. Módulo de Gastos (`/api/expenses`)
+
+#### `GET /api/expenses`
+Obtiene los gastos del usuario autenticado ordenados cronológicamente de forma descendente.
+- **Headers:** `X-API-Key` o `Authorization: Bearer <token>`
+- **Respuesta (`200 OK`):**
+  ```json
+  [
+    {
+      "id": "exp_8f7b2c1a",
+      "user_id": "c1f7a28e-5b12-4c8d-93e5-82b1c4e7f9a2",
+      "amount": 34.50,
+      "currency": "USD",
+      "description": "Almuerzo de trabajo",
+      "category": "Alimentación",
+      "payment_method": "Tarjeta de Débito",
+      "date": "2026-10-06T13:30:00Z",
+      "created_at": "2026-10-06T13:30:05Z"
+    }
+  ]
+  ```
+
+#### `POST /api/expenses`
+Registra un nuevo gasto.
+
+> [!TIP]
+> **Inferencia Automática de Categorías y Defaults Inteligentes:**
+> - Si se omite `category`, el backend analiza la `description` y clasifica el gasto automáticamente:
+>   - Palabras como *restaurante, café, supermercado, uber eats, pizza* ➔ `Alimentación`.
+>   - Palabras como *uber, didi, gasolina, peaje, vuelo* ➔ `Transporte`.
+>   - Palabras como *luz, agua, internet, teléfono, alquiler* ➔ `Servicios`.
+>   - Palabras como *netflix, spotify, cine, cineplanet, steam* ➔ `Entretenimiento`.
+>   - Palabras como *farmacia, doctor, medicina, dentista* ➔ `Salud`.
+> - Si se omite `currency`, se establece por defecto `"USD"`.
+> - Si se omite `payment_method`, se establece `"Automático (API)"`.
+> - Si se omite `date`, se registra la fecha y hora UTC actual.
+
+- **Payload Completo:**
+  ```json
+  {
+    "amount": 45.00,
     "currency": "USD",
-    "description": "Supermercado semanal",
+    "description": "Supermercado Walmart",
     "category": "Alimentación",
-    "date": "2026-03-12T14:30:00Z",
-    "payment_method": "Tarjeta de Débito",
-    "created_at": "2026-03-12T14:30:00Z"
+    "payment_method": "Tarjeta de Crédito",
+    "date": "2026-10-06T18:00:00Z"
   }
-]
-```
-
----
-
-### `POST /api/expenses`
-
-Registra un nuevo gasto para el usuario autenticado.
-
-- **Headers**: `Content-Type: application/json`, `Authorization: Bearer <token>`
-- **Cuerpo de la Petición**:
-
-```json
-{
-  "amount": 89.0,
-  "currency": "USD",
-  "description": "Cena de negocios",
-  "category": "Alimentación",
-  "payment_method": "Tarjeta de Crédito",
-  "date": "2026-03-12T20:00:00Z"
-}
-```
-
-- **Respuesta Exitosa (`201 Created`)**: Devuelve el objeto `Expense` creado con su `id` y `user_id` asignados.
-
----
-
-### `PUT /api/expenses/:id`
-
-Actualiza un gasto existente perteneciente al usuario autenticado.
-
-- **Parámetros de Ruta**: `id` (string) - Identificador del gasto.
-- **Cuerpo de la Petición**: Campos actualizados del gasto.
-- **Respuesta Exitosa (`200 OK`)**: Objeto actualizado.
-- **Respuestas de Error**:
-  - `400 Bad Request`: Payload JSON inválido.
-  - `404 Not Found`: Gasto no encontrado o no pertenece al usuario.
-
----
-
-### `DELETE /api/expenses/:id`
-
-Elimina un gasto existente.
-
-- **Parámetros de Ruta**: `id` (string) - Identificador del gasto.
-- **Respuesta Exitosa (`204 No Content`)**: Vacío.
-
----
-
-## 📈 2. Módulo de Ingresos (`/api/incomes`)
-
-### `GET /api/incomes`
-
-Obtiene los ingresos del usuario autenticado ordenados por fecha.
-
-- **Respuesta Exitosa (`200 OK`)**:
-
-```json
-[
+  ```
+- **Payload Mínimo Válido (para automatizaciones ágiles):**
+  ```json
   {
-    "id": "1741829392182938200",
-    "user_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-    "amount": 2500.0,
-    "currency": "USD",
-    "description": "Pago Quincenal",
-    "source": "Salario",
-    "date": "2026-03-15T09:00:00Z",
-    "payment_method": "Transferencia Bancaria",
-    "created_at": "2026-03-15T09:00:00Z"
+    "amount": 45.00,
+    "description": "Supermercado Walmart"
   }
-]
-```
+  ```
+- **Respuesta (`201 Created`):** Objeto `Expense` persistido.
 
-### `POST /api/incomes`
+#### `PUT /api/expenses/:id`
+Actualiza un gasto existente.
+- **Parámetros de ruta:** `id` (Identificador del gasto).
+- **Cuerpo:** Campos a modificar en formato JSON.
+- **Respuesta (`200 OK`):** Objeto `Expense` actualizado.
 
-Registra un nuevo ingreso (`201 Created`).
+#### `DELETE /api/expenses/:id`
+Elimina un registro de gasto.
+- **Parámetros de ruta:** `id` (Identificador del gasto).
+- **Respuesta (`200 OK`):**
+  ```json
+  {
+    "message": "Expense deleted successfully"
+  }
+  ```
 
-### `PUT /api/incomes/:id`
+---
 
+### 4.4. Módulo de Ingresos (`/api/incomes`)
+
+#### `GET /api/incomes`
+Lista los ingresos del usuario autenticado.
+- **Respuesta (`200 OK`):** Lista de objetos `Income`.
+
+#### `POST /api/incomes`
+Registra un nuevo ingreso.
+- **Cuerpo:**
+  ```json
+  {
+    "amount": 2200.00,
+    "currency": "USD",
+    "description": "Salario Primera Quincena",
+    "source": "Salario",
+    "payment_method": "Transferencia Bancaria",
+    "date": "2026-10-15T09:00:00Z"
+  }
+  ```
+- *Valores estándar de `source`:* `Salario`, `Freelance`, `Inversiones`, `Regalo`, `Otros`.
+- **Respuesta (`201 Created`):** Objeto `Income` creado.
+
+#### `PUT /api/incomes/:id`
 Actualiza un ingreso existente (`200 OK`).
 
-### `DELETE /api/incomes/:id`
-
-Elimina un ingreso (`204 No Content`).
+#### `DELETE /api/incomes/:id`
+Elimina un ingreso (`200 OK`).
 
 ---
 
-## 🎯 3. Módulo de Metas de Ahorro (`/api/goals`)
+### 4.5. Módulo de Transacciones Recurrentes (`/api/recurring-expenses` & `/api/recurring-incomes`)
 
-### `GET /api/goals`
+Permite programar gastos o ingresos fijos con ejecución automática mediante un scheduler en segundo plano.
 
-Lista todas las metas de ahorro del usuario con su progreso actual.
+| Endpoint | Método | Descripción |
+| :--- | :--- | :--- |
+| `/api/recurring-expenses` | `GET` | Lista todos los gastos periódicos activos |
+| `/api/recurring-expenses` | `POST` | Programa una nueva regla de gasto recurrente |
+| `/api/recurring-expenses/:id` | `PUT` | Actualiza montos, periodicidad o estado |
+| `/api/recurring-expenses/:id` | `DELETE` | Elimina la regla recurrente |
+| `/api/recurring-expenses/sync` | `POST` | Fuerza la sincronización de cuotas pendientes |
+| `/api/recurring-expenses/:id/execute-now` | `POST` | Dispara y registra una cuota inmediatamente |
 
-- **Respuesta Exitosa (`200 OK`)**:
-
-```json
-[
+- **Esquema de Creación (`POST /api/recurring-expenses`):**
+  ```json
   {
-    "id": "1741829392182938300",
-    "user_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-    "name": "Fondo de Emergencia",
-    "target_amount": 5000.0,
-    "current_amount": 1500.0,
-    "deadline": "2026-12-31T00:00:00Z",
-    "category": "Ahorro",
-    "created_at": "2026-01-01T10:00:00Z"
+    "description": "Suscripción Internet Fibra Óptica",
+    "amount": 55.00,
+    "currency": "USD",
+    "category": "Servicios",
+    "payment_method": "Débito Automático",
+    "frequency": "monthly",
+    "billing_day": 20,
+    "start_date": "2026-10-01T00:00:00Z",
+    "auto_register": true
   }
-]
-```
-
-### `POST /api/goals`
-
-Crea una nueva meta de ahorro (`201 Created`).
-
-### `PUT /api/goals/:id`
-
-Actualiza el monto acumulado o datos de la meta (`200 OK`).
-
-### `DELETE /api/goals/:id`
-
-Elimina una meta de ahorro (`204 No Content`).
+  ```
+- *Frecuencias soportadas:* `monthly` (mensual), `biweekly` (quincenal: días 15 y fin de mes), `weekly` (semanal), `yearly` (anual).
 
 ---
 
-## 🏷️ 4. Módulo de Categorías Dinámicas (`/api/categories`)
+### 4.6. Módulo de Metas de Ahorro (`/api/goals`)
 
-### `GET /api/categories?type=expense|income`
-
-Obtiene las categorías combinadas: categorías estándar del sistema (`is_default: true`) más las categorías personalizadas del usuario (`is_default: false`).
-
-- **Query Parameters**:
-  - `type` (opcional): `"expense"` o `"income"`.
-- **Respuesta Exitosa (`200 OK`)**:
-
-```json
-[
-  {
-    "id": "default-exp-1",
-    "name": "Alimentación",
-    "type": "expense",
-    "color": "emerald",
-    "icon": "utensils",
-    "is_default": true
-  },
-  {
-    "id": "cat-1741829392182938400",
-    "user_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-    "name": "Mascotas",
-    "type": "expense",
-    "color": "amber",
-    "icon": "paw-print",
-    "is_default": false
-  }
-]
-```
-
----
-
-### `POST /api/categories`
-
-Crea una nueva categoría personalizada para el usuario autenticado.
-
-- **Cuerpo de la Petición**:
-
-```json
-{
-  "name": "Suscripciones",
-  "type": "expense",
-  "color": "indigo",
-  "icon": "film"
-}
-```
-
-- **Respuesta Exitosa (`201 Created`)**.
-- **Respuestas de Error**:
-  - `400 Bad Request`: Si el nombre ya existe en las categorías del sistema o entre las creadas por el usuario.
-
----
-
-### `DELETE /api/categories/:id?reassignTo=...`
-
-Elimina una categoría personalizada con protección de integridad referencial.
-
-- **Parámetros**:
-  - `id` (ruta): ID de la categoría.
-  - `reassignTo` (query opcional): Nombre de la categoría a la cual transferir los movimientos asociados.
-- **Comportamiento Seguro**:
-  - Si la categoría tiene gastos o ingresos asociados y NO se envía `reassignTo`, la API responde con **`409 Conflict`**:
-    ```json
+#### `GET /api/goals`
+Lista todas las metas financieras y su nivel de avance.
+- **Respuesta (`200 OK`):**
+  ```json
+  [
     {
-      "error": "Esta categoría está asociada a 3 transacción(es). Puedes reasignarlas antes de eliminarla.",
-      "in_use": true,
-      "count": 3,
-      "category_name": "Suscripciones",
-      "category_type": "expense"
+      "id": "goal_3f8a1b2c",
+      "user_id": "c1f7a28e-5b12-4c8d-93e5-82b1c4e7f9a2",
+      "name": "Fondo de Emergencia",
+      "target_amount": 5000.00,
+      "current_amount": 1850.00,
+      "deadline": "2026-12-31T00:00:00Z",
+      "category": "Ahorro",
+      "created_at": "2026-08-01T10:00:00Z"
     }
-    ```
-  - Si se proporciona `reassignTo`, todas las transacciones vinculadas se actualizan a la nueva categoría antes de eliminarla.
-- **Respuesta Exitosa (`200 OK`)**:
+  ]
+  ```
 
-```json
-{
-  "message": "Categoría eliminada exitosamente",
-  "reassigned": true,
-  "reassigned_to": "Servicios",
-  "reassigned_count": 3
-}
-```
-
----
-
-## 🔄 5. Módulo de Transacciones Fijas y Recurrentes
-
-### Gastos Fijos (`/api/recurring-expenses`)
-
-- `GET /api/recurring-expenses`: Lista gastos fijos programados del usuario.
-- `POST /api/recurring-expenses`: Crea una regla de gasto recurrente (quincenal, mensual, etc.).
-- `PUT /api/recurring-expenses/:id`: Actualiza configuración de frecuencia, monto o activa/pausa la regla.
-- `DELETE /api/recurring-expenses/:id`: Elimina la regla (los gastos ya registrados previamente se conservan).
-- `POST /api/recurring-expenses/sync`: Sincroniza y registra automáticamente los gastos vencidos hasta la fecha.
-- `POST /api/recurring-expenses/:id/execute-now`: Fuerza el cobro/registro anticipado de un gasto hoy.
-
-### Ingresos Fijos (`/api/recurring-incomes`)
-
-- `GET /api/recurring-incomes`: Lista ingresos fijos programados del usuario (salario, honorarios, etc.).
-- `POST /api/recurring-incomes`: Crea una regla de ingreso recurrente.
-- `PUT /api/recurring-incomes/:id`: Actualiza la regla (monto, día de cobro, fuente, activo/pausado).
-- `DELETE /api/recurring-incomes/:id`: Elimina la regla.
-- `POST /api/recurring-incomes/sync`: Sincroniza y registra automáticamente los ingresos vencidos hasta la fecha.
-- `POST /api/recurring-incomes/:id/execute-now`: Fuerza el registro anticipado de un ingreso recibido hoy.
-
----
-
-## 🤖 6. Análisis con IA (`/api/ai/insights`)
-
-### `POST /api/ai/insights`
-
-Genera recomendaciones financieras avanzadas utilizando modelos de **Google Gemini** con fallback automático.
-
-- **Cuerpo de la Petición**:
-
-```json
-{
-  "expenses": [...],
-  "incomes": [...],
-  "goals": [...],
-  "language": "es"
-}
-```
-
-- **Respuesta Exitosa (`200 OK`)**:
-
-```json
-[
+#### `POST /api/goals`
+Crea una nueva meta de ahorro.
+- **Cuerpo:**
+  ```json
   {
-    "id": "ins-1",
-    "type": "warning",
-    "title": "Gasto Elevado en Alimentación",
-    "description": "El 42% de tus egresos de este mes corresponden a restaurantes.",
-    "category": "Alimentación",
-    "priority": "high"
+    "name": "Viaje de Vacaciones",
+    "target_amount": 2000.00,
+    "current_amount": 300.00,
+    "deadline": "2027-06-30T00:00:00Z",
+    "category": "Viajes"
   }
-]
-```
+  ```
+- **Respuesta (`201 Created`)**.
+
+#### `PUT /api/goals/:id`
+Actualiza el progreso o atributos de la meta (`200 OK`).
+
+#### `DELETE /api/goals/:id`
+Elimina la meta financiera (`200 OK`).
 
 ---
 
-## 🩺 7. Verificación de Salud (`/health`)
+### 4.7. Módulo de Categorías Personalizadas (`/api/categories`)
 
-### `GET /health`
+- **`GET /api/categories`**: Retorna el catálogo unificado de categorías predefinidas del sistema y categorías personalizadas del usuario.
+- **`POST /api/categories`**: Registra una nueva categoría:
+  ```json
+  {
+    "name": "Gimnasio & Suplementos",
+    "type": "expense",
+    "icon": "dumbbell",
+    "color": "#10B981"
+  }
+  ```
+- **`DELETE /api/categories/:id`**: Elimina una categoría personalizada garantizando la integridad de transacciones existentes.
 
-Ruta pública para balanceadores de carga y monitoreo.
+---
 
-- **Respuesta Exitosa (`200 OK`)**:
+## 💻 5. Ejemplos Prácticos de Implementación
 
-```json
-{
-  "status": "healthy",
-  "database": true
+### A. cURL (Terminal / Bash)
+```bash
+curl -X POST "https://fintrack-ihwb.onrender.com/api/expenses" \
+  -H "X-API-Key: fntk_live_tu_clave_secreta_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 28.50,
+    "currency": "USD",
+    "description": "Almuerzo cafetería",
+    "payment_method": "Tarjeta de Débito"
+  }'
+```
+
+### B. Node.js / TypeScript
+```typescript
+interface ExpenseInput {
+  amount: number;
+  description: string;
+  currency?: string;
+  category?: string;
+  payment_method?: string;
+}
+
+async function registerExpense(expense: ExpenseInput) {
+  const response = await fetch("https://fintrack-ihwb.onrender.com/api/expenses", {
+    method: "POST",
+    headers: {
+      "X-API-Key": process.env.FINTRACK_API_KEY!,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(expense),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json();
+    throw new Error(`FinTrack Error [${response.status}]: ${errorBody.error}`);
+  }
+
+  return await response.json();
 }
 ```
+
+### C. Python 3
+```python
+import os
+import requests
+
+FINTRACK_URL = "https://fintrack-ihwb.onrender.com/api/expenses"
+API_KEY = os.getenv("FINTRACK_API_KEY", "fntk_live_tu_clave_secreta")
+
+def create_expense(amount: float, description: str):
+    headers = {
+        "X-API-Key": API_KEY,
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "amount": amount,
+        "description": description,
+        "currency": "USD"
+    }
+    
+    res = requests.post(FINTRACK_URL, json=payload, headers=headers)
+    res.raise_for_status()
+    return res.json()
+
+if __name__ == "__main__":
+    result = create_expense(15.75, "Gasolina semanal")
+    print("Gasto registrado con ID:", result.get("id"))
+```
+
+### D. Configuración en Automatizadores (n8n / Make)
+1. **Nodo:** `HTTP Request`
+2. **Método:** `POST`
+3. **URL:** `https://fintrack-ihwb.onrender.com/api/expenses`
+4. **Authentication:** `None` (autenticación directa vía headers)
+5. **Headers:**
+   - Nombre: `X-API-Key` | Valor: `fntk_live_xxxxxxxx`
+   - Nombre: `Content-Type` | Valor: `application/json`
+6. **Body (JSON / Raw):**
+   ```json
+   {
+     "amount": {{ $json.monto }},
+     "description": "{{ $json.comercio_o_concepto }}",
+     "currency": "USD"
+   }
+   ```
