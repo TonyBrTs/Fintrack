@@ -25,6 +25,18 @@ func (s *incomeService) CreateIncome(ctx context.Context, userID string, income 
 		income.ID = GenerateShortID("inc_")
 	}
 	income.UserID = userID
+	if income.Currency == "" {
+		income.Currency = "USD"
+	}
+	if income.Description == "" {
+		income.Description = "Ingreso automatizado"
+	}
+	if income.Source == "" {
+		income.Source = models.SourceOtros
+	}
+	if income.PaymentMethod == "" {
+		income.PaymentMethod = "Automático (API)"
+	}
 	if income.Date.IsZero() {
 		income.Date = time.Now()
 	}

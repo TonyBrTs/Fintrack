@@ -114,6 +114,60 @@ Verifica la disponibilidad del servicio y la conectividad con la base de datos.
 
 ---
 
+### 4.2. Consulta de Métodos de Pago (`/api/payment-methods`)
+
+#### `GET /api/payment-methods`
+Retorna los métodos de pago estándar aceptados por FinTrack. Puede ser consumido por automatizaciones (n8n, scripts) para poblar selectores o validar datos.
+- **Headers:** `X-API-Key` o `Authorization: Bearer <token>` (también disponible como endpoint público en `/payment-methods`)
+- **Query Parameters (Opcionales):**
+  - `?type=expense` (o `gasto`): Retorna únicamente los métodos de pago para gastos.
+  - `?type=income` (o `ingreso`): Retorna únicamente los métodos de pago para ingresos.
+- **Respuesta completa (`200 OK`):**
+  ```json
+  {
+    "expense_methods": [
+      "Tarjeta de Crédito",
+      "Tarjeta de Débito",
+      "Efectivo",
+      "Transferencia",
+      "Automático (API)",
+      "PayPal",
+      "SINPE Móvil",
+      "Depósito Bancario",
+      "Otro"
+    ],
+    "income_methods": [
+      "Transferencia",
+      "Efectivo",
+      "Depósito Bancario",
+      "Automático (API)",
+      "PayPal",
+      "SINPE Móvil",
+      "Cheque",
+      "Otro"
+    ]
+  }
+  ```
+- **Respuesta filtrada (`GET /api/payment-methods?type=expense`):**
+  ```json
+  [
+    "Tarjeta de Crédito",
+    "Tarjeta de Débito",
+    "Efectivo",
+    "Transferencia",
+    "Automático (API)",
+    "PayPal",
+    "SINPE Móvil",
+    "Depósito Bancario",
+    "Otro"
+  ]
+  ```
+
+> [!NOTE]
+> Al registrar gastos o ingresos vía API (`POST /api/expenses`), FinTrack es flexible y permite enviar **cualquier** método de pago en el campo `payment_method` (por ejemplo: `"Apple Pay"`, `"SINPE Móvil"`, `"Efectivo"` o `"Tarjeta de Crédito"`). Si se omite, se asigna `"Automático (API)"`.
+
+---
+
 ### 4.2. Módulo de Gestión de API Keys (`/api/api-keys`)
 
 #### `GET /api/api-keys`

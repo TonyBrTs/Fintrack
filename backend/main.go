@@ -87,6 +87,7 @@ func main() {
 	recurringHandler := handlers.NewRecurringExpenseHandler(recurringService)
 	recurringIncomeHandler := handlers.NewRecurringIncomeHandler(recurringIncomeService)
 	apiKeyHandler := handlers.NewAPIKeyHandler(apiKeyService)
+	paymentMethodHandler := handlers.NewPaymentMethodHandler()
 
 	// 6. Background scheduler for due recurring transactions (Single Responsibility Principle)
 	scheduler := services.NewRecurringScheduler(recurringService, recurringIncomeService, 1*time.Hour)
@@ -98,11 +99,15 @@ func main() {
 
 	// Public Health Endpoint
 	router.GET("/health", handlers.HealthCheck)
+	router.GET("/payment-methods", paymentMethodHandler.GetPaymentMethods)
 
 	// Protected API Routes (Supabase Auth Middleware & API Key Auth)
 	api := router.Group("/api")
 	api.Use(middleware.AuthMiddleware(apiKeyRepo))
 	{
+		// Payment Methods API
+		api.GET("/payment-methods", paymentMethodHandler.GetPaymentMethods)
+
 		// Expenses API
 		api.GET("/expenses", expenseHandler.GetExpenses)
 		api.POST("/expenses", expenseHandler.CreateExpense)
