@@ -249,39 +249,58 @@ Obtiene los gastos del usuario autenticado ordenados cronológicamente de forma 
   ```
 
 #### `POST /api/expenses`
-Registra un nuevo gasto.
+Registra un nuevo gasto. Soporta tanto identificadores únicos (`category_id`, `payment_method_id`) como nombres directos en texto plano.
 
 > [!TIP]
-> **Inferencia Automática de Categorías y Defaults Inteligentes:**
-> - Si se omite `category`, el backend analiza la `description` y clasifica el gasto automáticamente:
->   - Palabras como *restaurante, café, supermercado, uber eats, pizza* ➔ `Alimentación`.
->   - Palabras como *uber, didi, gasolina, peaje, vuelo* ➔ `Transporte`.
->   - Palabras como *luz, agua, internet, teléfono, alquiler* ➔ `Servicios`.
->   - Palabras como *netflix, spotify, cine, cineplanet, steam* ➔ `Entretenimiento`.
->   - Palabras como *farmacia, doctor, medicina, dentista* ➔ `Salud`.
-> - Si se omite `currency`, se establece por defecto `"USD"`.
-> - Si se omite `payment_method`, se establece `"Automático (API)"`.
-> - Si se omite `date`, se registra la fecha y hora UTC actual.
+> **Patrón Recomendado para Integraciones (Uso de IDs):**
+> 1. Consulta primero las opciones disponibles para tu usuario mediante `GET /api/categories` y `GET /api/payment-methods`.
+> 2. Envía `category_id` (ej. `"default-exp-1"` para Alimentación, o el ID de tu categoría personalizada `"cat_..."`) y `payment_method_id` (ej. `"pm_tarjeta_credito"`).
+> 3. **Seguridad y Aislamiento Multiusuario:** FinTrack valida que la categoría pertenezca estrictamente al usuario autenticado (o sea del sistema global). Nadie puede usar categorías de otros usuarios.
+> 4. **Inferencia Automática:** Si no envías ni `category` ni `category_id`, FinTrack analiza la `description` y clasifica el gasto automáticamente.
 
-- **Payload Completo:**
+- **Payload Recomendado (por IDs):**
+  ```json
+  {
+    "amount": 45.00,
+    "currency": "USD",
+    "description": "Supermercado Walmart",
+    "category_id": "default-exp-1",
+    "payment_method_id": "pm_tarjeta_debito",
+    "date": "2026-10-06T18:00:00Z"
+  }
+  ```
+- **Payload Alternativo (por Nombres en Texto):**
   ```json
   {
     "amount": 45.00,
     "currency": "USD",
     "description": "Supermercado Walmart",
     "category": "Alimentación",
-    "payment_method": "Tarjeta de Crédito",
+    "payment_method": "Tarjeta de Débito",
     "date": "2026-10-06T18:00:00Z"
   }
   ```
-- **Payload Mínimo Válido (para automatizaciones ágiles):**
+- **Payload Mínimo Válido (para automatizaciones ágiles con auto-categorización):**
   ```json
   {
     "amount": 45.00,
     "description": "Supermercado Walmart"
   }
   ```
-- **Respuesta (`201 Created`):** Objeto `Expense` persistido.
+- **Respuesta (`201 Created`):**
+  ```json
+  {
+    "id": "exp_8f7b2c1a",
+    "user_id": "c1f7a28e-5b12-4c8d-93e5-82b1c4e7f9a2",
+    "amount": 45.00,
+    "currency": "USD",
+    "description": "Supermercado Walmart",
+    "category": "Alimentación",
+    "payment_method": "Tarjeta de Débito",
+    "date": "2026-10-06T18:00:00Z",
+    "created_at": "2026-10-06T18:00:02Z"
+  }
+  ```
 
 #### `PUT /api/expenses/:id`
 Actualiza un gasto existente.

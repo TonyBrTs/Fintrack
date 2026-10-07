@@ -10,11 +10,16 @@ import (
 )
 
 type expenseService struct {
-	repo repository.ExpenseRepository
+	repo    repository.ExpenseRepository
+	catRepo repository.CategoryRepository
 }
 
-func NewExpenseService(repo repository.ExpenseRepository) ExpenseService {
-	return &expenseService{repo: repo}
+func NewExpenseService(repo repository.ExpenseRepository, catRepos ...repository.CategoryRepository) ExpenseService {
+	var catRepo repository.CategoryRepository
+	if len(catRepos) > 0 {
+		catRepo = catRepos[0]
+	}
+	return &expenseService{repo: repo, catRepo: catRepo}
 }
 
 func (s *expenseService) GetExpenses(ctx context.Context, userID string) ([]models.Expense, error) {
@@ -32,12 +37,49 @@ func (s *expenseService) CreateExpense(ctx context.Context, userID string, expen
 	if expense.Description == "" {
 		expense.Description = "Gasto automatizado"
 	}
-	if expense.Category == "" {
+
+	// 1. Resolve Category ID or Name
+	catInput := strings.TrimSpace(expense.CategoryID)
+	if catInput == "" {
+		catInput = strings.TrimSpace(expense.Category)
+	}
+
+	if catInput != "" {
+		resolvedDefault := models.ResolveDefaultCategoryName(catInput, "expense")
+		if resolvedDefault != "" {
+			expense.Category = resolvedDefault
+		} else if s.catRepo != nil {
+			// Look up custom category by ID belonging to this user
+			customCat, err := s.catRepo.FindByIDAndUserID(ctx, catInput, userID)
+			if err == nil && customCat != nil {
+				expense.Category = customCat.Name
+			} else {
+				// Look up custom category by name belonging to this user
+				customByName, err := s.catRepo.FindByNameAndType(ctx, userID, catInput, "expense")
+				if err == nil && customByName != nil {
+					expense.Category = customByName.Name
+				} else {
+					expense.Category = catInput
+				}
+			}
+		} else {
+			expense.Category = catInput
+		}
+	} else {
 		expense.Category = InferExpenseCategory(expense.Description)
 	}
-	if expense.PaymentMethod == "" {
+
+	// 2. Resolve Payment Method ID or Name
+	pmInput := strings.TrimSpace(expense.PaymentMethodID)
+	if pmInput == "" {
+		pmInput = strings.TrimSpace(expense.PaymentMethod)
+	}
+	if pmInput != "" {
+		expense.PaymentMethod = models.ResolvePaymentMethodName(pmInput)
+	} else {
 		expense.PaymentMethod = "Automático (API)"
 	}
+
 	if expense.Date.IsZero() {
 		expense.Date = time.Now()
 	}

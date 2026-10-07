@@ -71,8 +71,8 @@ func main() {
 	}
 
 	// 4. Instantiate Services (Dependency Inversion: Injecting Repositories)
-	expenseService := services.NewExpenseService(expenseRepo)
-	incomeService := services.NewIncomeService(incomeRepo)
+	expenseService := services.NewExpenseService(expenseRepo, categoryRepo)
+	incomeService := services.NewIncomeService(incomeRepo, categoryRepo)
 	goalService := services.NewGoalService(goalRepo)
 	categoryService := services.NewCategoryService(categoryRepo, expenseRepo, incomeRepo)
 	recurringService := services.NewRecurringExpenseService(recurringRepo, expenseRepo)
