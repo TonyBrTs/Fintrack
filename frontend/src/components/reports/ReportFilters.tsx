@@ -5,7 +5,7 @@ import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatCurrency } from "@/lib/utils";
-import { Calendar as CalendarIcon, ChevronDown, RotateCcw, Check } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronDown, RotateCcw, Check, FileText } from "lucide-react";
 
 export type PeriodPreset =
   "this_month" | "last_month" | "last_30_days" | "this_year" | "all" | "custom";
@@ -310,7 +310,7 @@ export function ReportFilters({
               : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
           }`}
         >
-          <span>✍️</span>
+          <FileText size={13} className="shrink-0" />
           <span>{isEs ? "Observaciones Contables" : "Auditor Notes"}</span>
         </button>
       </div>

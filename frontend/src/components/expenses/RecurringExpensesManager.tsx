@@ -90,7 +90,7 @@ export function RecurringExpensesManager({
       if (res.ok && res.data) {
         if (res.data.processed_count > 0) {
           toast.success(
-            `✨ Se registraron ${res.data.processed_count} gasto(s) automático(s) que llegaron a su fecha.`,
+            `Se registraron ${res.data.processed_count} gasto(s) automático(s) que llegaron a su fecha.`,
             { duration: 5000 }
           );
           if (onExpenseGenerated) onExpenseGenerated();
@@ -159,7 +159,7 @@ export function RecurringExpensesManager({
       const res = await recurringService.executeRecurringExpenseNow(item.id);
 
       if (res.ok) {
-        toast.success(`✨ Se registró "${item.description}" como gasto realizado hoy.`);
+        toast.success(`Se registró "${item.description}" como gasto realizado hoy.`);
         if (onExpenseGenerated) onExpenseGenerated();
         fetchRecurring();
       } else {

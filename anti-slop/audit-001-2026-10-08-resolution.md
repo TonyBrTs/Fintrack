@@ -84,8 +84,29 @@
 
 ---
 
+## Fase 2: Depuración de Emojis y Etiquetas Innecesarias (R-05 & R-14)
+
+A solicitud del usuario, se realizó un barrido completo para eliminar etiquetas redundantes (eyebrow badges) y emojis decorativos en toda la plataforma:
+
+1. **Eliminación de Emojis (`✨`, `✍️`):**
+   - `frontend/src/app/expenses/page.tsx` y `frontend/src/app/incomes/page.tsx`: Eliminado emoji `✨` de los toasts automáticos de sincronización periódica.
+   - `frontend/src/components/expenses/RecurringExpensesManager.tsx`: Eliminado emoji `✨` en notificaciones de ejecución programada y manual.
+   - `frontend/src/components/incomes/RecurringIncomesManager.tsx`: Eliminado emoji `✨` en notificaciones de ejecución programada y manual.
+   - `frontend/src/components/reports/ReportFilters.tsx`: Sustituido `<span>✍️</span>` por el ícono vectorial semántico `<FileText size={13} />`.
+2. **Eliminación de Badges / Eyebrow Labels Redundantes:**
+   - `frontend/src/app/page.tsx`: Eliminado pill badge `"Panel General"` / `"Dashboard"` ubicado innecesariamente sobre el título principal.
+   - `frontend/src/app/incomes/page.tsx`: Eliminado pill badge `"Flujo de Capital"` ubicado sobre el título principal.
+   - `frontend/src/app/expenses/page.tsx`: Eliminado pill badge `"Control de Egresos"` ubicado sobre el título principal.
+   - `frontend/src/app/goals/page.tsx`: Eliminado pill badge `"Objetivos Financieros"` ubicado sobre el título principal.
+   - `frontend/src/components/reports/ReportHeaderActions.tsx`: Eliminada etiqueta redundante `"/ Auditoría y Exportación"` en la barra de navegación.
+   - `frontend/src/components/reports/AccountStatementDocument.tsx`: Eliminada etiqueta decorativa `"REGISTRO OFICIAL"` en el recuadro de auditoría.
+   - `frontend/src/components/FinancialInsights.tsx`: Eliminada etiqueta decorativa `<Sparkles /> Gemini` en el encabezado y reemplazado `<Sparkles />` por `<Bot />` en el pie.
+
+---
+
 ## Verificación de Compilación y Calidad
 
 - Compilador TypeScript: Sin errores (`0 errors`).
 - Búsqueda global de caracteres em dash (`—`): **0 ocurrencias en `frontend/src`**.
-- Estado git: Listo para confirmación (commit) y publicación (push).
+- Búsqueda global de emojis: **0 emojis en interfaces y mensajes de usuario**.
+- Estado git: Confirmado y sincronizado con el repositorio remoto.

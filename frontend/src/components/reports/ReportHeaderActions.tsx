@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Printer, FileSpreadsheet, FileDown, ArrowLeft, SlidersHorizontal } from "lucide-react";
+import { Printer, FileSpreadsheet, FileDown, ArrowLeft } from "lucide-react";
 
 interface ReportHeaderActionsProps {
   reportReference: string;
@@ -30,11 +30,6 @@ export function ReportHeaderActions({
             <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
             <span>{isEs ? "Volver al Dashboard" : "Back to Dashboard"}</span>
           </Link>
-          <span className="text-border">/</span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-            <SlidersHorizontal size={10} />
-            {isEs ? "Auditoría y Exportación" : "Audit & Export"}
-          </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">

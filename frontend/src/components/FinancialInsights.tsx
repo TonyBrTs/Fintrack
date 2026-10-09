@@ -9,7 +9,7 @@ import {
   Target,
   Zap,
   ShieldCheck,
-  Sparkles,
+  Bot,
   Loader2,
   RefreshCw,
 } from "lucide-react";
@@ -323,12 +323,6 @@ export function FinancialInsights({ expenses, incomes, goals = [] }: FinancialIn
           </div>
 
           <div className="flex items-center gap-1.5">
-            {isAIActive && (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                <Sparkles size={11} className="text-amber-500" />
-                Gemini
-              </span>
-            )}
             <button
               onClick={() => requestAIInsights(true)}
               disabled={isLoading || (expenses.length === 0 && incomes.length === 0)}
@@ -391,8 +385,8 @@ export function FinancialInsights({ expenses, incomes, goals = [] }: FinancialIn
         <span>
           {isAIActive ? "Análisis contextualizado por IA" : "Consejos basados en tus hábitos"}
         </span>
-        <span className="font-bold text-action flex items-center gap-1">
-          <Sparkles size={12} className="text-amber-500" />
+        <span className="font-bold text-action flex items-center gap-1.5">
+          <Bot size={13} className="text-blue-500" />
           FinTrack AI
         </span>
       </div>

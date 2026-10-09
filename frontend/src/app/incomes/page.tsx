@@ -45,7 +45,6 @@ import {
   Repeat,
   Search,
   Tag,
-  TrendingUp,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -117,7 +116,7 @@ function IncomesContent() {
       .then((res) => {
         if (res.ok && res.data && res.data.processed_count > 0) {
           toast.success(
-            `✨ Se registraron automáticamente ${res.data.processed_count} ingreso(s) fijos de tu quincena/mes.`,
+            `Se registraron automáticamente ${res.data.processed_count} ingreso(s) fijos del período.`,
             { duration: 6000 }
           );
           fetchIncomes(true);
@@ -219,15 +218,8 @@ function IncomesContent() {
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            <TrendingUp size={12} className="text-emerald-500" />
-            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
-              Flujo de Capital
-            </span>
-          </div>
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
               {translate("income.title") || "Ingresos"}
             </h1>
             <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">

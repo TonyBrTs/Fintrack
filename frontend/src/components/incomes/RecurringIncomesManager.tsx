@@ -91,7 +91,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
       if (res.ok && res.data) {
         if (res.data.processed_count > 0) {
           toast.success(
-            `✨ Se registraron ${res.data.processed_count} ingreso(s) automático(s) que llegaron a su fecha.`,
+            `Se registraron ${res.data.processed_count} ingreso(s) automático(s) que llegaron a su fecha.`,
             { duration: 5000 }
           );
           if (onIncomeGenerated) onIncomeGenerated();
@@ -162,7 +162,7 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
       const res = await recurringService.executeRecurringIncomeNow(item.id);
 
       if (res.ok) {
-        toast.success(`✨ Se registró "${item.description}" como ingreso recibido hoy.`);
+        toast.success(`Se registró "${item.description}" como ingreso recibido hoy.`);
         if (onIncomeGenerated) onIncomeGenerated();
         fetchRecurring();
       } else {

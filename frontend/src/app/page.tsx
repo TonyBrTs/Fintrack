@@ -1,7 +1,7 @@
 "use client";
 
 import { KPICard } from "@/components/ui/KPICard";
-import { Loader2, Calendar, CloudOff, RefreshCw, BarChart3 } from "lucide-react";
+import { Loader2, Calendar, CloudOff, RefreshCw } from "lucide-react";
 import {
   KPIBalanceIcon,
   NavIncomeIcon,
@@ -199,15 +199,8 @@ export default function SummaryPage() {
       <div className="space-y-8 max-w-7xl mx-auto">
         {/* Header & Filter */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
-              <BarChart3 size={12} className="text-blue-500" />
-              <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
-                {isEs ? "Panel General" : "Dashboard"}
-              </span>
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
                 {translate("nav.summary") || "Resumen"}
               </h1>
               <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">

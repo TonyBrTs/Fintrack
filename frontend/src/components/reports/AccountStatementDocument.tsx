@@ -94,9 +94,6 @@ export function AccountStatementDocument({
               <div className="text-[10px] text-slate-500 mt-1">
                 {isEs ? `Emisión: ${generatedAt}` : `Issued: ${generatedAt}`}
               </div>
-              <div className="inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
-                {isEs ? "REGISTRO OFICIAL" : "OFFICIAL RECORD"}
-              </div>
             </div>
           </div>
 
