@@ -207,7 +207,7 @@ export default function ReportsPage() {
     }
 
     if (dateRange.from && dateRange.to) {
-      return `${formatDateDDMMYYYY(dateRange.from)} — ${formatDateDDMMYYYY(dateRange.to)}`;
+      return `${formatDateDDMMYYYY(dateRange.from)} - ${formatDateDDMMYYYY(dateRange.to)}`;
     }
     if (dateRange.from) {
       return formatDateDDMMYYYY(dateRange.from);

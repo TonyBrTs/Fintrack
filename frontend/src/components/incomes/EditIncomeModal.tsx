@@ -115,7 +115,7 @@ export function EditIncomeModal({ isOpen, onClose, onSuccess, income }: EditInco
                 {translate("income.form.amount")}
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-400 z-10">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-500 dark:text-slate-400 z-10">
                   {currencySymbol}
                 </span>
                 <Input

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { format, isValid } from "date-fns";
 import { es, enUS } from "date-fns/locale";
-import { CalendarIcon, ChevronDown, Sparkles } from "lucide-react";
+import { CalendarIcon, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";

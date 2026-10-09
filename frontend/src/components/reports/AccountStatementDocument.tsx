@@ -103,7 +103,7 @@ export function AccountStatementDocument({
           {/* Account Holder & Scope Metadata */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-4 mt-4 border-t border-slate-200 text-xs">
             <div>
-              <span className="block text-[10px] uppercase font-bold text-slate-400 mb-0.5">
+              <span className="block text-[10px] uppercase font-bold text-slate-600 mb-0.5">
                 {isEs ? "Titular de Cuenta" : "Account Holder"}
               </span>
               <span className="font-semibold text-slate-800 break-words block">
@@ -113,7 +113,7 @@ export function AccountStatementDocument({
               </span>
             </div>
             <div>
-              <span className="block text-[10px] uppercase font-bold text-slate-400 mb-0.5">
+              <span className="block text-[10px] uppercase font-bold text-slate-600 mb-0.5">
                 {isEs ? "Correo Electrónico" : "Email"}
               </span>
               <span className="font-mono text-slate-700 break-words block">
@@ -121,7 +121,7 @@ export function AccountStatementDocument({
               </span>
             </div>
             <div>
-              <span className="block text-[10px] uppercase font-bold text-slate-400 mb-0.5">
+              <span className="block text-[10px] uppercase font-bold text-slate-600 mb-0.5">
                 {isEs ? "Período Consultado" : "Consulted Period"}
               </span>
               <span className="font-semibold text-slate-800 break-words block">{periodLabel}</span>
@@ -493,10 +493,10 @@ export function AccountStatementDocument({
                 <ShieldCheck size={14} className="text-blue-600" />
                 <span>{isEs ? "DOCUMENTO CERTIFICADO" : "CERTIFIED REPORT"}</span>
               </div>
-              <p className="text-[9px] text-slate-400">
+              <p className="text-[9px] text-slate-500">
                 REF: {reportReference} • {isEs ? "EMISIÓN:" : "ISSUED:"} {generatedAt}
               </p>
-              <p className="text-[9px] text-slate-400">FinTrack Systems © 2026</p>
+              <p className="text-[9px] text-slate-500">FinTrack Systems © 2026</p>
             </div>
           </div>
         </div>

@@ -212,7 +212,7 @@ export default function SummaryPage() {
               </h1>
               <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
                 {translate("common.summaryDescription") ||
-                  "Visualiza tu salud financiera de un vistazo — saldo, movimientos y metas del período."}
+                  "Visualiza tu salud financiera de un vistazo: saldo, movimientos y metas del período."}
               </p>
             </div>
           </div>

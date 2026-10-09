@@ -29,7 +29,6 @@ export function SettingsDrawer() {
     }
   }, [isSettingsOpen]);
 
-  // Close modal when pressing the Escape key
   useEffect(() => {
     if (!isSettingsOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {

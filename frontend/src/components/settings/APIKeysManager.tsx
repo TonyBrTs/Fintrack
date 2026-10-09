@@ -132,9 +132,9 @@ export function APIKeysManager() {
         <Button
           onClick={() => setIsCreateOpen(true)}
           size="sm"
-          className="h-7 px-2.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-xs cursor-pointer"
+          className="min-h-[40px] sm:min-h-0 sm:h-7 px-3 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-xs cursor-pointer touch-manipulation"
         >
-          <Plus size={13} />
+          <Plus size={14} />
           <span>Nueva Clave</span>
         </Button>
       </div>
@@ -184,11 +184,11 @@ export function APIKeysManager() {
                 <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40 text-[10px] text-muted-foreground">
                   <div className="flex items-center gap-2.5 truncate">
                     <span className="flex items-center gap-1 truncate">
-                      <Calendar size={11} className="text-slate-400 shrink-0" />
+                      <Calendar size={11} className="text-slate-500 dark:text-slate-400 shrink-0" />
                       {formatDate(key.created_at)}
                     </span>
                     <span className="flex items-center gap-1 truncate">
-                      <Clock size={11} className="text-slate-400 shrink-0" />
+                      <Clock size={11} className="text-slate-500 dark:text-slate-400 shrink-0" />
                       {key.last_used_at ? formatDate(key.last_used_at) : "Sin uso"}
                     </span>
                   </div>
@@ -196,15 +196,15 @@ export function APIKeysManager() {
                   {/* Inline Delete action */}
                   <div className="shrink-0">
                     {isConfirming ? (
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1.5">
                         <button
                           type="button"
                           disabled={isDeleting}
                           onClick={() => handleExecuteDelete(key.id)}
-                          className="px-2 py-0.5 rounded-md bg-rose-500 text-white font-bold text-[10px] hover:bg-rose-600 transition-colors flex items-center gap-1 cursor-pointer"
+                          className="min-h-[38px] sm:min-h-0 px-2.5 py-1.5 sm:py-0.5 rounded-md bg-rose-500 text-white font-bold text-[11px] sm:text-[10px] hover:bg-rose-600 transition-colors flex items-center gap-1 cursor-pointer touch-manipulation"
                         >
                           {isDeleting ? (
-                            <Loader2 size={11} className="animate-spin" />
+                            <Loader2 size={12} className="animate-spin" />
                           ) : (
                             <span>Confirmar</span>
                           )}
@@ -212,20 +212,22 @@ export function APIKeysManager() {
                         <button
                           type="button"
                           onClick={() => setConfirmDeleteId(null)}
-                          className="p-1 rounded-md text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
+                          className="min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1 rounded-md text-muted-foreground hover:bg-secondary transition-colors cursor-pointer flex items-center justify-center touch-manipulation"
                           title="Cancelar"
+                          aria-label="Cancelar eliminación"
                         >
-                          <X size={12} />
+                          <X size={14} />
                         </button>
                       </div>
                     ) : (
                       <button
                         type="button"
                         onClick={() => setConfirmDeleteId(key.id)}
-                        className="p-1 text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors cursor-pointer"
+                        className="min-w-[38px] min-h-[38px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1 text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors cursor-pointer flex items-center justify-center touch-manipulation"
                         title="Revocar clave"
+                        aria-label="Revocar clave"
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={15} />
                       </button>
                     )}
                   </div>

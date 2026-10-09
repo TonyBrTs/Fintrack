@@ -107,7 +107,6 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
 
   const currentTab = tabs.find((t) => t.id === activeTab) || tabs[0];
 
-  // Render tab settings content
   const renderTabContent = () => {
     switch (activeTab) {
       case "personalizacion":
@@ -392,9 +391,7 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
 
   return (
     <div className="w-full h-full flex flex-col md:flex-row overflow-hidden select-none">
-      {/* =========================================================================
-          DESKTOP SIDEBAR (>= md: matches reference image with left sidebar & profile)
-          ========================================================================= */}
+      {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 flex-col justify-between border-r border-border/60 bg-secondary/35 dark:bg-slate-900/50 p-4 shrink-0">
         <div className="space-y-5">
           {/* Sidebar Header */}
@@ -487,9 +484,7 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
         </div>
       </aside>
 
-      {/* =========================================================================
-          DESKTOP RIGHT CONTENT PANE (>= md: Tab header, Close button & Tab body)
-          ========================================================================= */}
+      {/* Desktop Content Pane */}
       <main className="hidden md:flex flex-1 flex-col min-w-0 overflow-hidden bg-background/50 dark:bg-card/20">
         {/* Header with Title, Description and Close 'X' Button */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 shrink-0">
@@ -528,9 +523,7 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
         </div>
       </main>
 
-      {/* =========================================================================
-          MOBILE VIEW (< md: Standard Native Mobile Settings with clean segmented tabs)
-          ========================================================================= */}
+      {/* Mobile Settings View */}
       <div className="flex md:hidden flex-col h-full w-full overflow-hidden bg-background">
         {/* Mobile Top App Bar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 shrink-0 bg-background/95">

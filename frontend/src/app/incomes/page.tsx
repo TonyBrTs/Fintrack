@@ -232,7 +232,7 @@ function IncomesContent() {
             </h1>
             <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
               {translate("income.description") ||
-                "Registra y analiza todas tus fuentes de capital — salario, freelance, inversiones y más."}
+                "Registra y analiza todas tus fuentes de capital: salario, freelance, inversiones y más."}
             </p>
           </div>
         </div>

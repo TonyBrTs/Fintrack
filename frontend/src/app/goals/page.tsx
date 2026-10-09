@@ -11,7 +11,7 @@ import { RegisterGoalModal } from "@/components/goals/RegisterGoalModal";
 import { KPICard } from "@/components/ui/KPICard";
 import { NavGoalsIcon } from "@/components/ui/AppIcons";
 import { PageLoadingState } from "@/components/ui/PageLoadingState";
-import { Plus, Loader2, Trophy, Sparkles } from "lucide-react";
+import { Plus, Loader2, Trophy, Target } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
 import { toast } from "sonner";
@@ -173,7 +173,7 @@ export default function GoalsPage() {
               amount={`${overallProgress.toFixed(1)}%`}
               trend={overallProgress >= 50 ? "Buen avance" : "En progreso"}
               trendType={overallProgress >= 50 ? "up" : "neutral"}
-              icon={<Sparkles size={22} className="text-amber-500" />}
+              icon={<Target size={22} className="text-amber-500" />}
             />
             <KPICard
               title="Metas Cumplidas"
