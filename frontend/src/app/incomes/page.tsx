@@ -218,15 +218,14 @@ function IncomesContent() {
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
-        <div>
+        <div className="space-y-1">
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
-              {translate("income.title") || "Ingresos"}
-            </h1>
-            <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
-              {translate("income.description") ||
-                "Registra y analiza todas tus fuentes de capital: salario, freelance, inversiones y más."}
-            </p>
-          </div>
+            {translate("income.title") || "Ingresos"}
+          </h1>
+          <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
+            {translate("income.description") ||
+              "Registra y analiza todas tus fuentes de capital: salario, freelance, inversiones y más."}
+          </p>
         </div>
         <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <Button

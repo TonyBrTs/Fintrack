@@ -124,15 +124,14 @@ export default function GoalsPage() {
 
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
-          <div>
+          <div className="space-y-1">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
-                {translate("goals.title") || "Metas Financieras"}
-              </h1>
-              <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
-                {translate("goals.description") ||
-                  "Define tus objetivos de ahorro, visualiza tu avance y celebra cada logro."}
-              </p>
-            </div>
+              {translate("goals.title") || "Metas Financieras"}
+            </h1>
+            <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
+              {translate("goals.description") ||
+                "Define tus objetivos de ahorro, visualiza tu avance y celebra cada logro."}
+            </p>
           </div>
           <motion.button
             whileHover={{ scale: 1.02 }}

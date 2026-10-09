@@ -199,15 +199,14 @@ export default function SummaryPage() {
       <div className="space-y-8 max-w-7xl mx-auto">
         {/* Header & Filter */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
-          <div>
+          <div className="space-y-1">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
-                {translate("nav.summary") || "Resumen"}
-              </h1>
-              <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
-                {translate("common.summaryDescription") ||
-                  "Visualiza tu salud financiera de un vistazo: saldo, movimientos y metas del período."}
-              </p>
-            </div>
+              {translate("nav.summary") || "Resumen"}
+            </h1>
+            <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
+              {translate("common.summaryDescription") ||
+                "Visualiza tu salud financiera de un vistazo: saldo, movimientos y metas del período."}
+            </p>
           </div>
           <div className="sm:w-auto w-full flex items-center gap-2.5 shrink-0">
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
