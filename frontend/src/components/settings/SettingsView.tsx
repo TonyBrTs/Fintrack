@@ -10,9 +10,7 @@ import {
   Moon,
   LogOut,
   User as UserIcon,
-  ShieldCheck,
-  Lock,
-  Sparkles,
+  Contrast,
   Type,
   ZapOff,
   X,
@@ -88,8 +86,8 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
       label: isEs ? "Seguridad" : "Security",
       title: isEs ? "Seguridad y Accesos" : "Security & Access",
       subtitle: isEs
-        ? "Gestiona tu cuenta, claves de API para integraciones y protocolos de cifrado."
-        : "Manage your account, API keys for external automations, and encryption.",
+        ? "Gestiona tu cuenta y credenciales de acceso para integraciones externas."
+        : "Manage your account and access credentials for external integrations.",
       icon: Shield,
       color: "text-emerald-500",
     },
@@ -299,17 +297,6 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
                 <APIKeysManager />
               </div>
             )}
-
-            {/* Encryption & Security info */}
-            <div className="p-3 bg-secondary/30 dark:bg-card/40 border border-border/50 rounded-xl flex items-center justify-between text-[11px] text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Lock size={13} className="text-emerald-500 shrink-0" />
-                <span>{isEs ? "Cifrado en tránsito y base de datos segura" : "Encrypted & secure storage"}</span>
-              </div>
-              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                TLS / SHA-256
-              </span>
-            </div>
           </div>
         );
 
@@ -343,7 +330,7 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
             <div className="p-3.5 bg-secondary/40 dark:bg-card/50 border border-border/60 rounded-2xl flex items-center justify-between gap-3">
               <div className="space-y-0.5 min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <Sparkles size={15} className="text-amber-500 shrink-0" />
+                  <Contrast size={15} className="text-purple-500 shrink-0" />
                   <span className="text-xs font-bold text-foreground">
                     {isEs ? "Alto contraste" : "High contrast"}
                   </span>
@@ -514,11 +501,7 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
 
           {/* System Footer Info */}
           <div className="pt-4 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <span>FinTrack v2.0 • Supabase</span>
-            </div>
-            <span>{isEs ? "Protegido en la Nube" : "Cloud Protected"}</span>
+            <span>FinTrack v2.0</span>
           </div>
         </div>
       </main>
@@ -578,11 +561,7 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
 
           {/* System Footer Info */}
           <div className="pt-3 pb-6 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <span>FinTrack v2.0 • Supabase</span>
-            </div>
-            <span>{isEs ? "Protegido en la Nube" : "Cloud Protected"}</span>
+            <span>FinTrack v2.0</span>
           </div>
         </div>
       </div>

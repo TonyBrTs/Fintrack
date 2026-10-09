@@ -271,7 +271,7 @@ export function APIKeysManager() {
             <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-600 dark:text-blue-300 flex items-start gap-2">
               <ShieldCheck size={14} className="shrink-0 mt-0.5" />
               <p>
-                FinTrack generará una clave con prefijo <code>fntk_live_</code> cifrada con SHA-256.
+                FinTrack generará una clave única con prefijo <code>fntk_live_</code>. Por seguridad, solo se mostrará una vez.
               </p>
             </div>
 

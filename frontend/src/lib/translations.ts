@@ -31,8 +31,8 @@ export const translations = {
       currency: "Main Currency",
       language: "Language",
       iconStyle: "Icon Style",
-      systemVersion: "FinTrack v2.0 • Supabase Auth",
-      cloudSafe: "Cloud Protected",
+      systemVersion: "FinTrack v2.0",
+      cloudSafe: "FinTrack",
       preferences: "Settings & Preferences",
     },
     summary: {
@@ -276,8 +276,8 @@ export const translations = {
       currency: "Moneda Principal",
       language: "Idioma",
       iconStyle: "Estilo de Íconos",
-      systemVersion: "FinTrack v2.0 • Supabase Auth",
-      cloudSafe: "Protegido en la Nube",
+      systemVersion: "FinTrack v2.0",
+      cloudSafe: "FinTrack",
       preferences: "Ajustes y Preferencias",
     },
     summary: {

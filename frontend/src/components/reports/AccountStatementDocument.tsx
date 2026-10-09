@@ -480,8 +480,8 @@ export function AccountStatementDocument({
               </p>
               <p className="leading-relaxed text-slate-500">
                 {isEs
-                  ? "Este estado de cuenta ha sido consolidado de forma automatizada y cifrada a partir de los registros provistos por el titular en la plataforma FinTrack. Documento privado para uso exclusivo de control contable y patrimonial."
-                  : "This financial statement has been consolidated automatically and securely from records provided by the account holder in FinTrack. Private document for accounting and asset management purposes."}
+                  ? "Este estado de cuenta ha sido consolidado de forma automatizada a partir de los registros provistos por el titular en la plataforma FinTrack. Documento privado para uso exclusivo de control contable y patrimonial."
+                  : "This financial statement has been consolidated automatically from records provided by the account holder in FinTrack. Private document for accounting and asset management purposes."}
               </p>
             </div>
 

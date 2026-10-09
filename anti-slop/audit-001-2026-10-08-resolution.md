@@ -104,9 +104,27 @@ A solicitud del usuario, se realizó un barrido completo para eliminar etiquetas
 
 ---
 
+## Fase 3: Eliminación de Menciones a Tecnologías Internas y Jerga de Cifrado
+
+A solicitud del usuario, se eliminó toda mención innecesaria a proveedores técnicos (Supabase), protocolos de infraestructura y alardes de cifrado (SHA-256, TLS, cifrado en tránsito):
+
+1. **Eliminación de Menciones a Supabase:**
+   - `frontend/src/components/settings/SettingsView.tsx`: Eliminado `• Supabase` de los pies de página del sistema (escritorio y móvil), dejando únicamente la identificación limpia `FinTrack v2.0`.
+   - `frontend/src/lib/translations.ts`: Eliminado `Supabase Auth` de las cadenas de versión del sistema (`systemVersion: "FinTrack v2.0"`).
+2. **Eliminación de Jerga Técnica de Cifrado:**
+   - `frontend/src/components/settings/SettingsView.tsx`:
+     - Eliminada la tarjeta técnica de alarde `"Cifrado en tránsito y base de datos segura • TLS / SHA-256"`.
+     - Ajustado el subtítulo de la pestaña de seguridad para omitir `"y protocolos de cifrado"`, enfocándolo en funcionalidad real: `"Gestiona tu cuenta y credenciales de acceso para integraciones externas."`.
+     - Reemplazado ícono `Sparkles` en "Alto contraste" por el ícono semántico de accesibilidad `<Contrast />`.
+   - `frontend/src/components/settings/APIKeysManager.tsx`: Eliminada la mención de `"cifrada con SHA-256"` en la modal de creación de API keys, sustituyéndola por una instrucción clara para el usuario: `"FinTrack generará una clave única con prefijo fntk_live_. Por seguridad, solo se mostrará una vez."`.
+   - `frontend/src/components/reports/AccountStatementDocument.tsx`: Eliminada la frase `"y cifrada"` y `"and securely"` del dictamen legal del estado de cuenta, conservando una redacción formal y contable.
+
+---
+
 ## Verificación de Compilación y Calidad
 
 - Compilador TypeScript: Sin errores (`0 errors`).
 - Búsqueda global de caracteres em dash (`—`): **0 ocurrencias en `frontend/src`**.
 - Búsqueda global de emojis: **0 emojis en interfaces y mensajes de usuario**.
+- Búsqueda de menciones técnicas o de cifrado en UI: **0 menciones de proveedores o algoritmos internos en componentes visuales**.
 - Estado git: Confirmado y sincronizado con el repositorio remoto.
