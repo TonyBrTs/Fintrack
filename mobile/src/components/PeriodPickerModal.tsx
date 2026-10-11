@@ -13,14 +13,21 @@ import {
 import { useSettings } from "../context/SettingsContext";
 
 /**
- * Extrae la clave de fecha en formato YYYY-MM-DD sin sufrir desajustes por zona horaria.
+ * Extrae la clave de fecha en formato YYYY-MM-DD según la hora local del usuario,
+ * evitando desajustes por zona horaria o UTC offsets.
  */
 export const extractDateKey = (dateVal: string | Date | undefined): string => {
   if (!dateVal) return "";
   if (typeof dateVal === "string") {
-    if (dateVal.length >= 10 && /^\d{4}-\d{2}-\d{2}/.test(dateVal)) {
+    // Si es solo una fecha plana "YYYY-MM-DD"
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+      return dateVal;
+    }
+    // Si es una marca medianoche pura "YYYY-MM-DDT00:00:00..."
+    if (/^\d{4}-\d{2}-\d{2}T00:00:00(\.000)?Z?$/i.test(dateVal)) {
       return dateVal.slice(0, 10);
     }
+    // Si contiene hora/zona horaria, convertir a fecha local del dispositivo
     const d = new Date(dateVal);
     if (!isNaN(d.getTime())) {
       const y = d.getFullYear();

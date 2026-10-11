@@ -10,7 +10,7 @@ import type { Expense, Income, Goal } from "@/types/index";
 import type { DateRange } from "react-day-picker";
 import { PageLoadingState } from "@/components/ui/PageLoadingState";
 import { exportFinancialReportExcel } from "@/lib/excelExport";
-import { formatDateDDMMYYYY } from "@/lib/utils";
+import { formatDateDDMMYYYY, parseCalendarDate } from "@/lib/utils";
 import { toast } from "sonner";
 import { AlertCircle, RotateCcw } from "lucide-react";
 import {
@@ -22,20 +22,10 @@ import {
 
 /**
  * Safely parses any date string or Date object to a local Date instance
- * normalized at midday (12:00:00) to prevent UTC midnight rollback.
+ * using the unified parseCalendarDate logic.
  */
 function parseLocalDate(d: Date | string): Date {
-  if (d instanceof Date) return d;
-  if (!d) return new Date();
-  if (typeof d === "string") {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
-      const [year, month, day] = d.split("-").map(Number);
-      return new Date(year, month - 1, day, 12, 0, 0);
-    }
-    const parsed = new Date(d);
-    if (!isNaN(parsed.getTime())) return parsed;
-  }
-  return new Date();
+  return parseCalendarDate(d);
 }
 
 export default function ReportsPage() {

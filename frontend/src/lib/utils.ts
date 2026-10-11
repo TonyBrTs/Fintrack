@@ -269,15 +269,28 @@ export function getTodayLocal(): string {
 
 /**
  * Parses any date (string or Date) into a local Date without UTC offset regressions.
- * e.g. "2026-09-30T00:00:00Z" -> Date object for Sep 30 locally.
+ * - For plain calendar dates ("YYYY-MM-DD") or midnight timestamps ("YYYY-MM-DDT00:00:00..."),
+ *   normalizes to midday (12:00:00) to prevent rollback.
+ * - For real timestamps with hour/minute and timezone (e.g. from PostgreSQL or API like "2026-10-11T02:37:00Z" / "2026-10-10T20:37:00-06:00"),
+ *   evaluates the date in the user's local timezone.
  */
 export function parseCalendarDate(dateInput: string | Date | null | undefined): Date {
   if (!dateInput) return new Date();
   if (typeof dateInput === "string") {
-    const datePart = dateInput.split("T")[0];
-    const parts = datePart.split("-").map(Number);
-    if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+    // 1. Plain calendar date "YYYY-MM-DD"
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+      const parts = dateInput.split("-").map(Number);
       return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+    }
+    // 2. Pure midnight timestamps without specific transaction time
+    if (/^\d{4}-\d{2}-\d{2}T00:00:00(\.000)?Z?$/i.test(dateInput)) {
+      const parts = dateInput.split("T")[0].split("-").map(Number);
+      return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+    }
+    // 3. ISO timestamps with specific time / timezone
+    const parsed = new Date(dateInput);
+    if (!isNaN(parsed.getTime())) {
+      return parsed;
     }
   }
   return new Date(dateInput);
