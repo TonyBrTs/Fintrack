@@ -69,7 +69,7 @@ export function BankCardView({
 
   return (
     <div
-      className={`relative select-none perspective-[1200px] w-full max-w-[400px] mx-auto ${className}`}
+      className={`relative select-none perspective-[1200px] w-full max-w-[420px] mx-auto ${className}`}
       style={{ minHeight: "220px" }}
     >
       <div
