@@ -139,7 +139,30 @@ export function maskCardNumber(val: string, last4 = ""): string {
 
 export function formatClabe(val: string): string {
   const digits = val.replace(/\D/g, "").slice(0, 18);
-  // Groups: 3 - 3 - 11 - 1
   if (digits.length <= 6) return digits;
   return digits.replace(/(\d{3})(\d{3})(\d{11})(\d{1})?/, "$1 $2 $3 $4").trim();
 }
+
+/**
+ * Format Costa Rica IBAN (22 characters: CR + 20 digits)
+ * Example: CR05 0102 0000 9008 3456 78
+ */
+export function formatIban(val: string): string {
+  const cleaned = val.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 22);
+  if (!cleaned) return "";
+  // Ensure it starts with CR if user enters numbers directly
+  const withPrefix = cleaned.startsWith("CR") ? cleaned : `CR${cleaned}`.slice(0, 22);
+  const groups = withPrefix.match(/.{1,4}/g);
+  return groups ? groups.join(" ") : withPrefix;
+}
+
+/**
+ * Format Costa Rica SINPE Móvil (8 digits phone number)
+ * Example: 8888-8888
+ */
+export function formatSinpe(val: string): string {
+  const digits = val.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 4) return digits;
+  return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+}
+

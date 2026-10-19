@@ -4,7 +4,12 @@ import React, { useState, useEffect } from "react";
 import type { VaultCard, BankId, CardType, CardNetwork } from "@/types";
 import { BankCardView } from "./BankCardView";
 import { BANK_PRESETS, getBankTheme } from "@/lib/bankThemes";
-import { detectCardNetwork, formatCardNumber } from "@/lib/vaultCrypto";
+import {
+  detectCardNetwork,
+  formatCardNumber,
+  formatIban,
+  formatSinpe,
+} from "@/lib/vaultCrypto";
 import {
   Dialog,
   DialogContent,
@@ -20,10 +25,11 @@ import {
   Building2,
   Calendar,
   Lock,
-  DollarSign,
   Phone,
   Trash2,
   Sparkles,
+  Smartphone,
+  Coins,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,15 +53,17 @@ export function VaultCardModal({
   const isEditing = Boolean(cardToEdit);
 
   // Form State
-  const [bank, setBank] = useState<BankId>("bbva");
+  const [bank, setBank] = useState<BankId>("bac");
   const [cardType, setCardType] = useState<CardType>("credit");
   const [cardNetwork, setCardNetwork] = useState<CardNetwork>("visa");
+  const [currency, setCurrency] = useState<"CRC" | "USD">("CRC");
   const [alias, setAlias] = useState("");
   const [cardholderName, setCardholderName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [cvv, setCvv] = useState("");
-  const [clabe, setClabe] = useState("");
+  const [iban, setIban] = useState("");
+  const [sinpeMovil, setSinpeMovil] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [cutOffDay, setCutOffDay] = useState<string>("");
   const [paymentDueDay, setPaymentDueDay] = useState<string>("");
@@ -67,15 +75,17 @@ export function VaultCardModal({
   // Reset or fill form when opening
   useEffect(() => {
     if (cardToEdit) {
-      setBank(cardToEdit.bank || "bbva");
+      setBank(cardToEdit.bank || "bac");
       setCardType(cardToEdit.card_type || "credit");
       setCardNetwork(cardToEdit.card_network || "visa");
+      setCurrency((cardToEdit.currency === "USD" ? "USD" : "CRC"));
       setAlias(cardToEdit.alias || "");
       setCardholderName(cardToEdit.cardholder_name || "");
       setCardNumber(cardToEdit.card_number || "");
       setExpirationDate(cardToEdit.expiration_date || "");
       setCvv(cardToEdit.cvv || "");
-      setClabe(cardToEdit.clabe || "");
+      setIban(cardToEdit.iban || cardToEdit.clabe || "");
+      setSinpeMovil(cardToEdit.sinpe_movil || "");
       setAccountNumber(cardToEdit.account_number || "");
       setCutOffDay(cardToEdit.cut_off_day ? String(cardToEdit.cut_off_day) : "");
       setPaymentDueDay(
@@ -87,21 +97,23 @@ export function VaultCardModal({
       setBankPhone(cardToEdit.bank_phone || "");
       setNotes(cardToEdit.notes || "");
     } else {
-      // Default initial values for new card
-      setBank("bbva");
+      // Default initial values for new card in Costa Rica
+      setBank("bac");
       setCardType("credit");
       setCardNetwork("visa");
+      setCurrency("CRC");
       setAlias("");
       setCardholderName("");
       setCardNumber("");
       setExpirationDate("");
       setCvv("");
-      setClabe("");
+      setIban("");
+      setSinpeMovil("");
       setAccountNumber("");
       setCutOffDay("");
       setPaymentDueDay("");
       setCreditLimit("");
-      setBankPhone("");
+      setBankPhone(getBankTheme("bac").bankPhone || "");
       setNotes("");
     }
   }, [cardToEdit, isOpen]);
@@ -113,8 +125,8 @@ export function VaultCardModal({
     if (!bankPhone || bankPhone === getBankTheme(bank).bankPhone) {
       setBankPhone(theme.bankPhone || "");
     }
-    if (newBank === "amex") {
-      setCardNetwork("amex");
+    if (theme.defaultNetwork) {
+      setCardNetwork(theme.defaultNetwork);
     }
   };
 
@@ -141,10 +153,16 @@ export function VaultCardModal({
     }
   };
 
-  // CLABE formatter 18 digits max
-  const handleClabeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "").slice(0, 18);
-    setClabe(raw);
+  // IBAN formatter (CR + 20 digits = 22 characters)
+  const handleIbanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 22);
+    setIban(raw);
+  };
+
+  // SINPE Móvil formatter (8 digits: 8888-8888)
+  const handleSinpeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 8);
+    setSinpeMovil(raw);
   };
 
   // Live preview card object
@@ -160,12 +178,14 @@ export function VaultCardModal({
     last4: cardNumber.replace(/\D/g, "").slice(-4) || "0000",
     expiration_date: expirationDate || "MM/AA",
     cvv: cvv || "•••",
-    clabe,
+    iban,
+    clabe: iban,
+    sinpe_movil: sinpeMovil ? formatSinpe(sinpeMovil) : "",
     account_number: accountNumber,
     cut_off_day: cutOffDay ? parseInt(cutOffDay, 10) : null,
     payment_due_day: paymentDueDay ? parseInt(paymentDueDay, 10) : null,
     credit_limit: creditLimit ? parseFloat(creditLimit) : null,
-    currency: "MXN",
+    currency,
     bank_phone: bankPhone || getBankTheme(bank).bankPhone || "",
     notes,
     is_favorite: cardToEdit?.is_favorite || false,
@@ -179,8 +199,8 @@ export function VaultCardModal({
       return;
     }
 
-    if (!cardNumber.trim() && !clabe.trim() && !accountNumber.trim()) {
-      toast.error("Ingresa al menos un número de tarjeta, CLABE o número de cuenta");
+    if (!cardNumber.trim() && !iban.trim() && !sinpeMovil.trim() && !accountNumber.trim()) {
+      toast.error("Ingresa al menos un número de tarjeta, IBAN o SINPE Móvil");
       return;
     }
 
@@ -196,12 +216,14 @@ export function VaultCardModal({
         card_number: cardNumber.replace(/\D/g, ""),
         expiration_date: expirationDate.trim(),
         cvv: cvv.trim(),
-        clabe: clabe.replace(/\D/g, ""),
+        iban: iban.trim().toUpperCase(),
+        clabe: iban.trim().toUpperCase(),
+        sinpe_movil: sinpeMovil.replace(/\D/g, ""),
         account_number: accountNumber.trim(),
         cut_off_day: cutOffDay ? parseInt(cutOffDay, 10) : null,
         payment_due_day: paymentDueDay ? parseInt(paymentDueDay, 10) : null,
         credit_limit: creditLimit ? parseFloat(creditLimit) : null,
-        currency: "MXN",
+        currency,
         bank_phone: bankPhone.trim(),
         notes: notes.trim(),
         is_favorite: cardToEdit?.is_favorite || false,
@@ -232,46 +254,46 @@ export function VaultCardModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto p-0 gap-0 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl">
-        <DialogHeader className="p-6 pb-2 border-b border-slate-200/80 dark:border-slate-800">
+      <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[92dvh] overflow-y-auto p-0 gap-0 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl">
+        <DialogHeader className="p-4 sm:p-6 pb-2 sm:pb-3 border-b border-slate-200/80 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shrink-0">
               <ShieldCheck size={20} />
             </div>
-            <div>
-              <DialogTitle className="text-xl font-bold tracking-tight">
-                {isEditing ? "Editar Tarjeta / Cuenta" : "Registrar en Bóveda"}
+            <div className="min-w-0">
+              <DialogTitle className="text-base sm:text-lg font-bold tracking-tight truncate">
+                {isEditing ? "Editar Tarjeta / Cuenta" : "Registrar en Bóveda (Costa Rica)"}
               </DialogTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Protegido con cifrado de grado bancario AES-GCM 256-bit
+              <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+                Cifrado bancario AES-256 • Soporte para IBAN y SINPE Móvil
               </p>
             </div>
           </div>
         </DialogHeader>
 
         {/* Live Card Preview Banner */}
-        <div className="p-6 bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center border-b border-slate-200/80 dark:border-slate-800">
-          <div className="w-full max-w-[360px]">
+        <div className="p-4 sm:p-6 bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center border-b border-slate-200/80 dark:border-slate-800">
+          <div className="w-full max-w-[340px] sm:max-w-[380px]">
             <BankCardView
               card={previewCard}
               isUnlocked={true}
               interactive={true}
             />
           </div>
-          <p className="text-[11px] text-muted-foreground mt-2 flex items-center gap-1.5 font-medium">
-            <Sparkles size={13} className="text-amber-500" />
-            Toca la tarjeta para voltearla y ver el reverso
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-2 flex items-center gap-1.5 font-medium">
+            <Sparkles size={12} className="text-amber-500" />
+            Toca la tarjeta para voltearla en 3D y ver el reverso
           </p>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Bank Selector Horizontal Scroll */}
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
+          {/* Costa Rica Bank Selector Horizontal Scroll */}
+          <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Banco o Emisor
+              Banco o Entidad Financiera de Costa Rica
             </label>
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none touch-pan-x">
               {Object.entries(BANK_PRESETS).map(([bId, preset]) => {
                 const isSelected = bank === bId;
                 return (
@@ -280,7 +302,7 @@ export function VaultCardModal({
                     type="button"
                     onClick={() => handleBankChange(bId as BankId)}
                     className={`
-                      px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-2 border
+                      px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer select-none
                       ${
                         isSelected
                           ? "bg-blue-600 text-white border-blue-600 shadow-md scale-105"
@@ -295,16 +317,17 @@ export function VaultCardModal({
             </div>
           </div>
 
-          {/* Type & Network */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Type, Network & Currency Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Instrument Type */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold">Tipo de Instrumento</label>
-              <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-200/70 dark:bg-slate-800 rounded-xl">
+              <label className="text-xs font-semibold">Tipo de Cuenta</label>
+              <div className="grid grid-cols-3 gap-1 p-1 bg-slate-200/70 dark:bg-slate-800 rounded-xl">
                 {(
                   [
                     { id: "credit", label: "Crédito" },
                     { id: "debit", label: "Débito" },
-                    { id: "account", label: "Cuenta" },
+                    { id: "account", label: "Ahorros" },
                   ] as const
                 ).map((t) => (
                   <button
@@ -312,10 +335,10 @@ export function VaultCardModal({
                     type="button"
                     onClick={() => setCardType(t.id)}
                     className={`
-                      py-1.5 text-xs font-semibold rounded-lg transition-all
+                      py-1.5 text-[11px] font-semibold rounded-lg transition-all cursor-pointer
                       ${
                         cardType === t.id
-                          ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                          ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
                           : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                       }
                     `}
@@ -326,15 +349,44 @@ export function VaultCardModal({
               </div>
             </div>
 
+            {/* Currency (CRC or USD) */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold">Red de Pago</label>
-              <div className="grid grid-cols-4 gap-1 p-1 bg-slate-200/70 dark:bg-slate-800 rounded-xl">
+              <label className="text-xs font-semibold">Moneda</label>
+              <div className="grid grid-cols-2 gap-1 p-1 bg-slate-200/70 dark:bg-slate-800 rounded-xl">
+                {(
+                  [
+                    { id: "CRC", label: "₡ Colones" },
+                    { id: "USD", label: "$ Dólares" },
+                  ] as const
+                ).map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCurrency(c.id)}
+                    className={`
+                      py-1.5 text-[11px] font-semibold rounded-lg transition-all cursor-pointer
+                      ${
+                        currency === c.id
+                          ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                      }
+                    `}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Network Brand */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold">Franquicia</label>
+              <div className="grid grid-cols-3 gap-1 p-1 bg-slate-200/70 dark:bg-slate-800 rounded-xl">
                 {(
                   [
                     { id: "visa", label: "Visa" },
                     { id: "mastercard", label: "Master" },
                     { id: "amex", label: "Amex" },
-                    { id: "carnet", label: "Carnet" },
                   ] as const
                 ).map((n) => (
                   <button
@@ -342,10 +394,10 @@ export function VaultCardModal({
                     type="button"
                     onClick={() => setCardNetwork(n.id)}
                     className={`
-                      py-1.5 text-xs font-semibold rounded-lg transition-all
+                      py-1.5 text-[11px] font-semibold rounded-lg transition-all cursor-pointer
                       ${
                         cardNetwork === n.id
-                          ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                          ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
                           : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                       }
                     `}
@@ -358,17 +410,17 @@ export function VaultCardModal({
           </div>
 
           {/* Alias & Cardholder */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-1.5">
               <label htmlFor="alias" className="text-xs font-semibold">
                 Nombre de la Tarjeta / Alias *
               </label>
               <Input
                 id="alias"
-                placeholder="ej. BBVA Nómina, Nu Oro, Débito Ahorros"
+                placeholder="ej. BAC Débito Principal, BNCR Ahorros, Scotiabank Platino"
                 value={alias}
                 onChange={(e) => setAlias(e.target.value)}
-                className="rounded-xl bg-white dark:bg-slate-950"
+                className="rounded-xl bg-white dark:bg-slate-950 text-xs sm:text-sm"
                 required
               />
             </div>
@@ -378,16 +430,16 @@ export function VaultCardModal({
               </label>
               <Input
                 id="cardholder"
-                placeholder="ej. JUAN PEREZ LOPEZ"
+                placeholder="ej. CARLOS ROJAS MORA"
                 value={cardholderName}
                 onChange={(e) => setCardholderName(e.target.value.toUpperCase())}
-                className="rounded-xl bg-white dark:bg-slate-950 tracking-wider"
+                className="rounded-xl bg-white dark:bg-slate-950 tracking-wider text-xs sm:text-sm"
               />
             </div>
           </div>
 
           {/* Card Number, Expiration & CVV */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4">
             <div className="sm:col-span-6 space-y-1.5">
               <label htmlFor="cardNumber" className="text-xs font-semibold">
                 Número de Tarjeta (16 dígitos)
@@ -398,11 +450,11 @@ export function VaultCardModal({
                   placeholder="0000 0000 0000 0000"
                   value={formatCardNumber(cardNumber)}
                   onChange={handleCardNumberChange}
-                  className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-widest pl-9"
+                  className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-widest pl-9 text-xs sm:text-sm"
                   maxLength={19}
                 />
                 <CreditCard
-                  size={16}
+                  size={15}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
               </div>
@@ -418,7 +470,7 @@ export function VaultCardModal({
                   placeholder="12/28"
                   value={expirationDate}
                   onChange={handleExpirationChange}
-                  className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-wider pl-8 text-center"
+                  className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-wider pl-8 text-center text-xs sm:text-sm"
                   maxLength={5}
                 />
                 <Calendar
@@ -441,7 +493,7 @@ export function VaultCardModal({
                   onChange={(e) =>
                     setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))
                   }
-                  className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-widest pl-8 text-center"
+                  className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-widest pl-8 text-center text-xs sm:text-sm"
                   maxLength={4}
                 />
                 <Lock
@@ -452,54 +504,76 @@ export function VaultCardModal({
             </div>
           </div>
 
-          {/* CLABE & Account Number */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Costa Rica IBAN & SINPE Móvil */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            {/* IBAN */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label htmlFor="clabe" className="text-xs font-semibold">
-                  CLABE Interbancaria (18 dígitos)
+                <label htmlFor="iban" className="text-xs font-semibold">
+                  Cuenta IBAN Costa Rica (22 dígitos)
                 </label>
                 <span
                   className={`text-[10px] font-mono font-bold ${
-                    clabe.length === 18 ? "text-emerald-500" : "text-muted-foreground"
+                    iban.replace(/\s+/g, "").length === 22
+                      ? "text-emerald-500"
+                      : "text-muted-foreground"
                   }`}
                 >
-                  {clabe.length}/18
+                  {iban.replace(/\s+/g, "").length}/22
                 </span>
               </div>
               <div className="relative">
                 <Input
-                  id="clabe"
-                  placeholder="012 180 00000000000 0"
-                  value={clabe}
-                  onChange={handleClabeChange}
-                  className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-wider pl-9"
-                  maxLength={18}
+                  id="iban"
+                  placeholder="CR05 0102 0000 9008 3456 78"
+                  value={formatIban(iban)}
+                  onChange={handleIbanChange}
+                  className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-wider pl-9 text-xs sm:text-sm"
+                  maxLength={27}
                 />
                 <Building2
-                  size={16}
+                  size={15}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
               </div>
             </div>
 
+            {/* SINPE Móvil */}
             <div className="space-y-1.5">
-              <label htmlFor="accountNumber" className="text-xs font-semibold">
-                Número de Cuenta (opcional)
-              </label>
-              <Input
-                id="accountNumber"
-                placeholder="ej. 1234567890"
-                value={accountNumber}
-                onChange={(e) => setAccountNumber(e.target.value)}
-                className="rounded-xl bg-white dark:bg-slate-950 font-mono"
-              />
+              <div className="flex items-center justify-between">
+                <label htmlFor="sinpe" className="text-xs font-semibold">
+                  Número SINPE Móvil (8 dígitos)
+                </label>
+                <span
+                  className={`text-[10px] font-mono font-bold ${
+                    sinpeMovil.length === 8
+                      ? "text-emerald-500"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {sinpeMovil.length}/8
+                </span>
+              </div>
+              <div className="relative">
+                <Input
+                  id="sinpe"
+                  placeholder="8888-8888"
+                  value={formatSinpe(sinpeMovil)}
+                  onChange={handleSinpeChange}
+                  className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-wider pl-9 text-xs sm:text-sm"
+                  maxLength={9}
+                />
+                <Smartphone
+                  size={15}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+              </div>
             </div>
           </div>
 
           {/* Credit Card Specific: Cutoff & Due Day, Credit Limit */}
           {cardType === "credit" && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-blue-50/50 dark:bg-blue-950/20 rounded-2xl border border-blue-200/50 dark:border-blue-900/40">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-blue-50/50 dark:bg-blue-950/20 rounded-2xl border border-blue-200/50 dark:border-blue-900/40">
               <div className="space-y-1.5">
                 <label htmlFor="cutoff" className="text-xs font-semibold">
                   Día de Corte
@@ -512,7 +586,7 @@ export function VaultCardModal({
                   placeholder="ej. 15"
                   value={cutOffDay}
                   onChange={(e) => setCutOffDay(e.target.value)}
-                  className="rounded-xl bg-white dark:bg-slate-950"
+                  className="rounded-xl bg-white dark:bg-slate-950 text-xs sm:text-sm"
                 />
               </div>
 
@@ -528,25 +602,25 @@ export function VaultCardModal({
                   placeholder="ej. 5"
                   value={paymentDueDay}
                   onChange={(e) => setPaymentDueDay(e.target.value)}
-                  className="rounded-xl bg-white dark:bg-slate-950"
+                  className="rounded-xl bg-white dark:bg-slate-950 text-xs sm:text-sm"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label htmlFor="limit" className="text-xs font-semibold">
-                  Límite de Crédito
+                  Límite de Crédito ({currency})
                 </label>
                 <div className="relative">
                   <Input
                     id="limit"
                     type="number"
                     step="0.01"
-                    placeholder="30000"
+                    placeholder={currency === "USD" ? "2000" : "1000000"}
                     value={creditLimit}
                     onChange={(e) => setCreditLimit(e.target.value)}
-                    className="rounded-xl bg-white dark:bg-slate-950 pl-7"
+                    className="rounded-xl bg-white dark:bg-slate-950 pl-7 text-xs sm:text-sm"
                   />
-                  <DollarSign
+                  <Coins
                     size={14}
                     className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                   />
@@ -556,18 +630,18 @@ export function VaultCardModal({
           )}
 
           {/* Bank phone & Notes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-1.5">
               <label htmlFor="phone" className="text-xs font-semibold">
-                Línea de Atención del Banco
+                Teléfono de Servicio al Cliente
               </label>
               <div className="relative">
                 <Input
                   id="phone"
-                  placeholder="55 5226 2663"
+                  placeholder="2295-9898"
                   value={bankPhone}
                   onChange={(e) => setBankPhone(e.target.value)}
-                  className="rounded-xl bg-white dark:bg-slate-950 pl-9 font-mono"
+                  className="rounded-xl bg-white dark:bg-slate-950 pl-9 font-mono text-xs sm:text-sm"
                 />
                 <Phone
                   size={15}
@@ -582,24 +656,24 @@ export function VaultCardModal({
               </label>
               <Input
                 id="notes"
-                placeholder="ej. Token físico en gaveta, sucursal Reforma"
+                placeholder="ej. Token de seguridad en app móvil, sucursal Escazú"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="rounded-xl bg-white dark:bg-slate-950"
+                className="rounded-xl bg-white dark:bg-slate-950 text-xs sm:text-sm"
               />
             </div>
           </div>
 
-          <DialogFooter className="pt-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between sm:justify-between w-full">
+          <DialogFooter className="pt-3 border-t border-slate-200/80 dark:border-slate-800 flex flex-row items-center justify-between w-full gap-2">
             {isEditing && onDelete ? (
               <Button
                 type="button"
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={isSubmitting}
-                className="rounded-xl gap-2 cursor-pointer"
+                className="rounded-xl gap-1.5 cursor-pointer text-xs h-9"
               >
-                <Trash2 size={16} />
+                <Trash2 size={14} />
                 <span>Eliminar</span>
               </Button>
             ) : (
@@ -612,14 +686,14 @@ export function VaultCardModal({
                 variant="outline"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="rounded-xl cursor-pointer"
+                className="rounded-xl cursor-pointer text-xs h-9"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 cursor-pointer shadow-md"
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 cursor-pointer shadow-md text-xs h-9"
               >
                 {isSubmitting ? "Guardando..." : "Guardar en Bóveda"}
               </Button>

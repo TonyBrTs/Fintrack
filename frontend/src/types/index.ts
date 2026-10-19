@@ -130,20 +130,18 @@ export interface CreateAPIKeyResponse {
 }
 
 export type BankId =
-  | "bbva"
-  | "nu"
-  | "santander"
-  | "banorte"
-  | "citibanamex"
-  | "mercadopago"
-  | "amex"
-  | "hsbc"
+  | "bac"
+  | "bncr"
+  | "bcr"
+  | "popular"
   | "scotiabank"
-  | "rappi"
-  | "stori"
-  | "klar"
-  | "uala"
-  | "revolut"
+  | "davivienda"
+  | "promerica"
+  | "lafise"
+  | "coopealianza"
+  | "coopenae"
+  | "wink"
+  | "multimoney"
   | "other";
 
 export type CardType = "credit" | "debit" | "account";
@@ -161,6 +159,8 @@ export interface VaultCard {
   cardholder_name: string;
   card_number: string;
   last4: string;
+  iban?: string;
+  sinpe_movil?: string;
   clabe?: string;
   account_number?: string;
   expiration_date?: string;
@@ -168,7 +168,7 @@ export interface VaultCard {
   cut_off_day?: number | null;
   payment_due_day?: number | null;
   credit_limit?: number | null;
-  currency: string;
+  currency: string; // "CRC" | "USD"
   color_scheme?: string;
   bank_phone?: string;
   notes?: string;

@@ -29,7 +29,7 @@ export function BankCardView({
   const [showCvv, setShowCvv] = useState(false);
 
   const theme = getBankTheme(card.bank);
-  const isAmex = card.card_network === "amex" || card.bank === "amex";
+  const isAmex = card.card_network === "amex";
 
   const handleCopy = (text: string, label: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -84,10 +84,15 @@ export function BankCardView({
           {/* Top Bar: Bank Logo & Chip / NFC */}
           <div className="relative z-10 flex items-start justify-between">
             <div className="flex flex-col">
-              <span className="font-black tracking-widest uppercase text-base sm:text-lg drop-shadow-sm font-sans">
-                {theme.cardLogoText}
-              </span>
-              <span className="text-[9px] uppercase tracking-wider font-semibold opacity-80">
+              <div className="flex items-center gap-1.5">
+                <span className="font-black tracking-widest uppercase text-base sm:text-lg drop-shadow-sm font-sans leading-tight">
+                  {theme.cardLogoText}
+                </span>
+                <span className="px-1.5 py-0.2 rounded text-[8px] font-extrabold bg-white/20 backdrop-blur-xs tracking-wider">
+                  {card.currency === "USD" ? "USD $" : "CRC ₡"}
+                </span>
+              </div>
+              <span className="text-[9px] uppercase tracking-wider font-semibold opacity-85 mt-0.5">
                 {card.card_type === "credit"
                   ? "Crédito"
                   : card.card_type === "debit"
@@ -99,7 +104,7 @@ export function BankCardView({
             <div className="flex items-center gap-2">
               {/* Contactless NFC Waves Icon */}
               <svg
-                className="w-5 h-5 opacity-80 rotate-90"
+                className="w-4 h-4 sm:w-5 sm:h-5 opacity-80 rotate-90"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -119,7 +124,7 @@ export function BankCardView({
                     e.stopPropagation();
                     setIsFlipped(true);
                   }}
-                  className="w-7 h-7 rounded-full bg-black/25 hover:bg-black/40 flex items-center justify-center text-white/90 transition backdrop-blur-xs"
+                  className="w-7 h-7 rounded-full bg-black/25 hover:bg-black/40 flex items-center justify-center text-white/90 transition backdrop-blur-xs cursor-pointer"
                   title="Ver reverso"
                 >
                   <RotateCw size={13} />
@@ -132,7 +137,7 @@ export function BankCardView({
           <div className="relative z-10 flex items-center justify-between mt-1">
             {/* Realistic EMV Metallic Chip */}
             <div
-              className={`w-11 h-8 rounded-md relative overflow-hidden border shadow-inner flex items-center justify-center ${
+              className={`w-10 h-7 sm:w-11 sm:h-8 rounded-md relative overflow-hidden border shadow-inner flex items-center justify-center ${
                 theme.chipColor === "gold"
                   ? "bg-gradient-to-br from-[#FFE599] via-[#F3C64F] to-[#C4922A] border-[#D4A338]"
                   : "bg-gradient-to-br from-[#E2E8F0] via-[#CBD5E1] to-[#94A3B8] border-[#94A3B8]"
@@ -147,7 +152,7 @@ export function BankCardView({
             <button
               type="button"
               onClick={(e) => handleCopy(card.card_number, "Número de Tarjeta", e)}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/15 hover:bg-white/25 backdrop-blur-xs border border-white/20 flex items-center gap-1.5 transition active:scale-95"
+              className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10px] font-bold bg-white/15 hover:bg-white/25 backdrop-blur-xs border border-white/20 flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
               title="Copiar número"
             >
               <Copy size={11} />
@@ -158,8 +163,8 @@ export function BankCardView({
           {/* Card Number */}
           <div className="relative z-10 mt-1 flex items-center justify-between">
             <span
-              className={`font-mono text-base sm:text-lg tracking-[0.2em] font-semibold drop-shadow-md truncate ${
-                isAmex ? "tracking-[0.25em]" : ""
+              className={`font-mono text-sm sm:text-base md:text-lg tracking-[0.16em] sm:tracking-[0.2em] font-semibold drop-shadow-md truncate ${
+                isAmex ? "tracking-[0.2em] sm:tracking-[0.25em]" : ""
               }`}
             >
               {displayNumber}
@@ -172,7 +177,7 @@ export function BankCardView({
                   e.stopPropagation();
                   setShowFullNumber(!showFullNumber);
                 }}
-                className="p-1 rounded text-white/70 hover:text-white transition"
+                className="p-1 rounded text-white/70 hover:text-white transition cursor-pointer"
               >
                 {showFullNumber ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -181,22 +186,22 @@ export function BankCardView({
 
           {/* Bottom Row: Holder, Expiration, Brand Network */}
           <div className="relative z-10 flex items-end justify-between pt-1">
-            <div className="flex flex-col max-w-[65%]">
+            <div className="flex flex-col max-w-[65%] min-w-0">
               <span className="text-[8px] uppercase tracking-widest text-white/70 font-bold">
                 Titular
               </span>
-              <span className="text-xs font-semibold uppercase tracking-wider truncate font-sans drop-shadow-xs">
+              <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider truncate font-sans drop-shadow-xs">
                 {card.cardholder_name || "TITULAR REGISTRADO"}
               </span>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               {card.expiration_date && (
                 <div className="flex flex-col text-right">
                   <span className="text-[8px] uppercase tracking-widest text-white/70 font-bold">
                     Vence
                   </span>
-                  <span className="font-mono text-xs font-semibold tracking-wider">
+                  <span className="font-mono text-[11px] sm:text-xs font-semibold tracking-wider">
                     {card.expiration_date}
                   </span>
                 </div>
@@ -212,12 +217,12 @@ export function BankCardView({
 
         {/* ================= CARD BACK ================= */}
         <div
-          className={`absolute inset-0 rounded-2xl pt-4 pb-5 flex flex-col justify-between overflow-hidden [transform:rotateY(180deg)] [backface-visibility:hidden] border border-white/20 shadow-inner text-white`}
+          className={`absolute inset-0 rounded-2xl pt-3 sm:pt-4 pb-3 sm:pb-5 flex flex-col justify-between overflow-hidden [transform:rotateY(180deg)] [backface-visibility:hidden] border border-white/20 shadow-inner text-white`}
           style={{ background: theme.bgGradient }}
         >
           {/* Top Bar on Reverse */}
-          <div className="px-5 flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/80">
+          <div className="px-4 sm:px-5 flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/80 truncate max-w-[75%]">
               {card.alias}
             </span>
             <button
@@ -226,7 +231,7 @@ export function BankCardView({
                 e.stopPropagation();
                 setIsFlipped(false);
               }}
-              className="w-6 h-6 rounded-full bg-black/25 hover:bg-black/40 flex items-center justify-center text-white/90 transition backdrop-blur-xs"
+              className="w-6 h-6 rounded-full bg-black/25 hover:bg-black/40 flex items-center justify-center text-white/90 transition backdrop-blur-xs cursor-pointer"
               title="Voltear al frente"
             >
               <RotateCw size={12} />
@@ -234,17 +239,17 @@ export function BankCardView({
           </div>
 
           {/* Magnetic Stripe (Realistic standard dark band) */}
-          <div className="w-full h-10 bg-slate-950 mt-1 shadow-inner relative">
+          <div className="w-full h-8 sm:h-10 bg-slate-950 mt-1 shadow-inner relative">
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-slate-900 to-black/80" />
           </div>
 
           {/* Signature Strip & CVV Box */}
-          <div className="px-5 my-1">
+          <div className="px-4 sm:px-5 my-0.5">
             <div className="flex items-center justify-end gap-2">
-              <div className="flex-1 h-7 bg-slate-100 rounded-sm flex items-center px-2.5 text-slate-400 font-mono text-[9px] italic border border-slate-300">
+              <div className="flex-1 h-6 sm:h-7 bg-slate-100 rounded-sm flex items-center px-2 text-slate-400 font-mono text-[8px] sm:text-[9px] italic border border-slate-300 truncate">
                 Firma Autorizada
               </div>
-              <div className="flex items-center gap-1.5 bg-white text-slate-900 px-2.5 h-7 rounded-sm border border-slate-300 font-mono text-xs font-bold shadow-xs">
+              <div className="flex items-center gap-1.5 bg-white text-slate-900 px-2 h-6 sm:h-7 rounded-sm border border-slate-300 font-mono text-xs font-bold shadow-xs">
                 <span className="text-[9px] text-slate-500 font-sans">CVV</span>
                 <span>
                   {showCvv && isUnlocked ? card.cvv || "•••" : "•••"}
@@ -256,7 +261,7 @@ export function BankCardView({
                       e.stopPropagation();
                       setShowCvv(!showCvv);
                     }}
-                    className="text-slate-600 hover:text-slate-900"
+                    className="text-slate-600 hover:text-slate-900 cursor-pointer"
                   >
                     {showCvv ? <EyeOff size={11} /> : <Eye size={11} />}
                   </button>
@@ -265,32 +270,49 @@ export function BankCardView({
             </div>
           </div>
 
-          {/* Extra Account Data & Hotline */}
-          <div className="px-5 flex items-end justify-between text-[10px]">
-            <div className="flex flex-col gap-0.5 max-w-[70%]">
-              {card.clabe && (
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[8px] uppercase tracking-wider text-white/70">CLABE:</span>
-                  <span className="font-mono text-[10px] font-bold truncate">{card.clabe}</span>
+          {/* Extra Account Data & Costa Rica IBAN / SINPE */}
+          <div className="px-4 sm:px-5 flex items-end justify-between text-[10px]">
+            <div className="flex flex-col gap-0.5 max-w-[70%] min-w-0">
+              {(card.iban || card.clabe) && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[8px] uppercase tracking-wider text-white/70 font-bold shrink-0">IBAN:</span>
+                  <span className="font-mono text-[9px] font-bold truncate">
+                    {card.iban || card.clabe}
+                  </span>
                   <button
                     type="button"
-                    onClick={(e) => handleCopy(card.clabe || "", "CLABE", e)}
-                    className="text-white/80 hover:text-white"
+                    onClick={(e) => handleCopy(card.iban || card.clabe || "", "IBAN", e)}
+                    className="text-white/80 hover:text-white shrink-0 cursor-pointer"
                   >
-                    <Copy size={10} />
+                    <Copy size={9} />
                   </button>
                 </div>
               )}
-              {theme.bankPhone && (
-                <div className="flex items-center gap-1 text-[9px] text-white/80">
-                  <Phone size={9} />
-                  <span>Atención: {theme.bankPhone}</span>
+              {card.sinpe_movil && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[8px] uppercase tracking-wider text-white/70 font-bold shrink-0">SINPE:</span>
+                  <span className="font-mono text-[9px] font-bold text-amber-300 truncate">
+                    {card.sinpe_movil}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => handleCopy(card.sinpe_movil || "", "SINPE Móvil", e)}
+                    className="text-white/80 hover:text-white shrink-0 cursor-pointer"
+                  >
+                    <Copy size={9} />
+                  </button>
+                </div>
+              )}
+              {(card.bank_phone || theme.bankPhone) && (
+                <div className="flex items-center gap-1 text-[8px] sm:text-[9px] text-white/80 truncate">
+                  <Phone size={9} className="shrink-0" />
+                  <span className="truncate">Tel: {card.bank_phone || theme.bankPhone}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-1 text-[9px] text-white/70">
-              <ShieldCheck size={12} className="text-emerald-400" />
+            <div className="flex items-center gap-1 text-[8px] sm:text-[9px] text-white/70 shrink-0">
+              <ShieldCheck size={11} className="text-emerald-400" />
               <span>FinTrack Vault</span>
             </div>
           </div>

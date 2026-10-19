@@ -305,14 +305,16 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
             cardholder_name: row.cardholder_name,
             card_number: cardNumber,
             last4: row.last4 || cardNumber.slice(-4),
+            iban: clabe,
             clabe,
+            sinpe_movil: accountNumber,
             account_number: accountNumber,
             expiration_date: expirationDate,
             cvv,
             cut_off_day: row.cut_off_day,
             payment_due_day: row.payment_due_day,
             credit_limit: row.credit_limit,
-            currency: row.currency || "MXN",
+            currency: row.currency || "CRC",
             color_scheme: row.color_scheme,
             bank_phone: row.bank_phone,
             notes,
@@ -352,11 +354,14 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
       const encryptedCardNumber = cleanDigits
         ? await encryptText(cleanDigits, pin, salt)
         : "";
-      const encryptedClabe = cardData.clabe
-        ? await encryptText(cardData.clabe.replace(/\D/g, ""), pin, salt)
+      const ibanVal = cardData.iban || cardData.clabe || "";
+      const sinpeVal = cardData.sinpe_movil || cardData.account_number || "";
+
+      const encryptedClabe = ibanVal
+        ? await encryptText(ibanVal.toUpperCase().replace(/[^A-Z0-9]/g, ""), pin, salt)
         : "";
-      const encryptedAccount = cardData.account_number
-        ? await encryptText(cardData.account_number, pin, salt)
+      const encryptedAccount = sinpeVal
+        ? await encryptText(sinpeVal, pin, salt)
         : "";
       const encryptedExp = cardData.expiration_date
         ? await encryptText(cardData.expiration_date, pin, salt)
@@ -390,7 +395,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
           cut_off_day: cardData.cut_off_day,
           payment_due_day: cardData.payment_due_day,
           credit_limit: cardData.credit_limit,
-          currency: cardData.currency || "MXN",
+          currency: cardData.currency || "CRC",
           color_scheme: cardData.color_scheme,
           bank_phone: cardData.bank_phone,
           encrypted_notes: encryptedNotes,
@@ -480,11 +485,14 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
       const encryptedCardNumber = cleanDigits
         ? await encryptText(cleanDigits, pin, salt)
         : "";
-      const encryptedClabe = merged.clabe
-        ? await encryptText(merged.clabe.replace(/\D/g, ""), pin, salt)
+      const ibanVal = merged.iban || merged.clabe || "";
+      const sinpeVal = merged.sinpe_movil || merged.account_number || "";
+
+      const encryptedClabe = ibanVal
+        ? await encryptText(ibanVal.toUpperCase().replace(/[^A-Z0-9]/g, ""), pin, salt)
         : "";
-      const encryptedAccount = merged.account_number
-        ? await encryptText(merged.account_number, pin, salt)
+      const encryptedAccount = sinpeVal
+        ? await encryptText(sinpeVal, pin, salt)
         : "";
       const encryptedExp = merged.expiration_date
         ? await encryptText(merged.expiration_date, pin, salt)
