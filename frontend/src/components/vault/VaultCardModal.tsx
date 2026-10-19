@@ -73,6 +73,8 @@ export function VaultCardModal({
   const [bankPhone, setBankPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Reset or fill form when opening
   useEffect(() => {
@@ -302,6 +304,9 @@ export function VaultCardModal({
               card={previewCard}
               isUnlocked={true}
               interactive={true}
+              flipped={isCardFlipped}
+              onFlipChange={setIsCardFlipped}
+              focusedField={focusedField}
             />
           </div>
           <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-2 flex items-center gap-1.5 font-medium">
@@ -452,6 +457,11 @@ export function VaultCardModal({
                 placeholder="ej. BAC Débito Principal, BNCR Ahorros, Scotiabank Platino"
                 value={alias}
                 onChange={(e) => setAlias(e.target.value)}
+                onFocus={() => {
+                  setIsCardFlipped(false);
+                  setFocusedField("alias");
+                }}
+                onBlur={() => setFocusedField(null)}
                 className="rounded-xl bg-white dark:bg-slate-950 text-xs sm:text-sm"
                 required
               />
@@ -465,6 +475,11 @@ export function VaultCardModal({
                 placeholder="ej. CARLOS ROJAS MORA"
                 value={cardholderName}
                 onChange={(e) => setCardholderName(e.target.value.toUpperCase())}
+                onFocus={() => {
+                  setIsCardFlipped(false);
+                  setFocusedField("cardholder");
+                }}
+                onBlur={() => setFocusedField(null)}
                 className="rounded-xl bg-white dark:bg-slate-950 tracking-wider text-xs sm:text-sm"
               />
             </div>
@@ -482,6 +497,11 @@ export function VaultCardModal({
                   placeholder="0000 0000 0000 0000"
                   value={formatCardNumber(cardNumber)}
                   onChange={handleCardNumberChange}
+                  onFocus={() => {
+                    setIsCardFlipped(false);
+                    setFocusedField("cardNumber");
+                  }}
+                  onBlur={() => setFocusedField(null)}
                   className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-widest pl-9 text-xs sm:text-sm"
                   maxLength={19}
                 />
@@ -502,6 +522,11 @@ export function VaultCardModal({
                   placeholder="12/28"
                   value={expirationDate}
                   onChange={handleExpirationChange}
+                  onFocus={() => {
+                    setIsCardFlipped(false);
+                    setFocusedField("exp");
+                  }}
+                  onBlur={() => setFocusedField(null)}
                   className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-wider pl-8 text-center text-xs sm:text-sm"
                   maxLength={5}
                 />
@@ -525,6 +550,11 @@ export function VaultCardModal({
                   onChange={(e) =>
                     setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))
                   }
+                  onFocus={() => {
+                    setIsCardFlipped(true); // Automatically flips to back!
+                    setFocusedField("cvv");
+                  }}
+                  onBlur={() => setFocusedField(null)}
                   className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-widest pl-8 text-center text-xs sm:text-sm"
                   maxLength={4}
                 />
@@ -560,6 +590,10 @@ export function VaultCardModal({
                   placeholder="CR05 0102 0000 9008 3456 78"
                   value={formatIban(iban)}
                   onChange={handleIbanChange}
+                  onFocus={() => {
+                    setFocusedField("iban");
+                  }}
+                  onBlur={() => setFocusedField(null)}
                   className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-wider pl-9 text-xs sm:text-sm"
                   maxLength={27}
                 />
@@ -592,6 +626,10 @@ export function VaultCardModal({
                   placeholder="8888-8888"
                   value={formatSinpe(sinpeMovil)}
                   onChange={handleSinpeChange}
+                  onFocus={() => {
+                    setFocusedField("sinpe");
+                  }}
+                  onBlur={() => setFocusedField(null)}
                   className="rounded-xl bg-white dark:bg-slate-950 font-mono tracking-wider pl-9 text-xs sm:text-sm"
                   maxLength={9}
                 />

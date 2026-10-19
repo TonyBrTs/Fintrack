@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { VaultCard } from "@/types";
 import { getBankTheme } from "@/lib/bankThemes";
 import { maskCardNumber, formatCardNumber } from "@/lib/vaultCrypto";
@@ -14,6 +14,9 @@ interface BankCardViewProps {
   onToggleFavorite?: (id: string) => void;
   className?: string;
   interactive?: boolean;
+  flipped?: boolean;
+  onFlipChange?: (flipped: boolean) => void;
+  focusedField?: string | null;
 }
 
 export function BankCardView({
@@ -23,10 +26,26 @@ export function BankCardView({
   onToggleFavorite,
   className = "",
   interactive = true,
+  flipped,
+  onFlipChange,
+  focusedField,
 }: BankCardViewProps) {
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(flipped ?? false);
   const [showFullNumber, setShowFullNumber] = useState(false);
   const [showCvv, setShowCvv] = useState(false);
+
+  // Sync external flipped prop
+  useEffect(() => {
+    if (typeof flipped === "boolean") {
+      setIsFlipped(flipped);
+    }
+  }, [flipped]);
+
+  const toggleFlip = (target?: boolean) => {
+    const next = typeof target === "boolean" ? target : !isFlipped;
+    setIsFlipped(next);
+    onFlipChange?.(next);
+  };
 
   const theme = getBankTheme(card.bank);
   const isAmex = card.card_network === "amex";
@@ -57,11 +76,11 @@ export function BankCardView({
         className={`relative w-full aspect-[1.586/1] transition-transform duration-700 [transform-style:preserve-3d] cursor-pointer rounded-2xl shadow-xl hover:shadow-2xl ${
           isFlipped ? "[transform:rotateY(180deg)]" : ""
         }`}
-        onClick={() => interactive && setIsFlipped(!isFlipped)}
+        onClick={() => interactive && toggleFlip()}
       >
         {/* ================= CARD FRONT ================= */}
         <div
-          className={`absolute inset-0 rounded-2xl p-5 sm:p-6 flex flex-col justify-between overflow-hidden [backface-visibility:hidden] border border-white/20 shadow-inner text-white`}
+          className={`absolute inset-0 rounded-2xl p-4 sm:p-5 flex flex-col justify-between overflow-hidden [backface-visibility:hidden] border border-white/20 shadow-inner text-white`}
           style={{ background: theme.bgGradient }}
         >
           {/* Subtle Ambient Glass / Gloss Overlay */}
@@ -161,7 +180,13 @@ export function BankCardView({
           </div>
 
           {/* Card Number */}
-          <div className="relative z-10 mt-1 flex items-center justify-between">
+          <div
+            className={`relative z-10 mt-1 flex items-center justify-between rounded-lg transition-all duration-300 ${
+              focusedField === "cardNumber"
+                ? "bg-white/20 ring-2 ring-white/80 px-2 py-0.5 -mx-1 shadow-sm"
+                : ""
+            }`}
+          >
             <span
               className={`font-mono text-sm sm:text-base md:text-lg tracking-[0.16em] sm:tracking-[0.2em] font-semibold drop-shadow-md truncate ${
                 isAmex ? "tracking-[0.2em] sm:tracking-[0.25em]" : ""
@@ -186,7 +211,13 @@ export function BankCardView({
 
           {/* Bottom Row: Holder, Expiration, Brand Network */}
           <div className="relative z-10 flex items-end justify-between pt-1">
-            <div className="flex flex-col max-w-[65%] min-w-0">
+            <div
+              className={`flex flex-col max-w-[65%] min-w-0 rounded-lg transition-all duration-300 ${
+                focusedField === "cardholder"
+                  ? "bg-white/20 ring-2 ring-white/80 px-1.5 py-0.5 -mx-1"
+                  : ""
+              }`}
+            >
               <span className="text-[8px] uppercase tracking-widest text-white/70 font-bold">
                 Titular
               </span>
@@ -197,7 +228,13 @@ export function BankCardView({
 
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               {card.expiration_date && (
-                <div className="flex flex-col text-right">
+                <div
+                  className={`flex flex-col text-right rounded-lg transition-all duration-300 ${
+                    focusedField === "exp"
+                      ? "bg-white/20 ring-2 ring-white/80 px-1.5 py-0.5 -mx-1"
+                      : ""
+                  }`}
+                >
                   <span className="text-[8px] uppercase tracking-widest text-white/70 font-bold">
                     Vence
                   </span>
@@ -229,7 +266,7 @@ export function BankCardView({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setIsFlipped(false);
+                toggleFlip(false);
               }}
               className="w-6 h-6 rounded-full bg-black/25 hover:bg-black/40 flex items-center justify-center text-white/90 transition backdrop-blur-xs cursor-pointer"
               title="Voltear al frente"
@@ -249,10 +286,18 @@ export function BankCardView({
               <div className="flex-1 h-6 sm:h-7 bg-slate-100 rounded-sm flex items-center px-2 text-slate-400 font-mono text-[8px] sm:text-[9px] italic border border-slate-300 truncate">
                 Firma Autorizada
               </div>
-              <div className="flex items-center gap-1.5 bg-white text-slate-900 px-2 h-6 sm:h-7 rounded-sm border border-slate-300 font-mono text-xs font-bold shadow-xs">
+              <div
+                className={`flex items-center gap-1.5 bg-white text-slate-900 px-2 h-6 sm:h-7 rounded-sm border font-mono text-xs font-bold transition-all duration-300 ${
+                  focusedField === "cvv"
+                    ? "ring-2 ring-amber-400 border-amber-400 shadow-md shadow-amber-400/40 scale-105"
+                    : "border-slate-300 shadow-xs"
+                }`}
+              >
                 <span className="text-[9px] text-slate-500 font-sans">CVV</span>
-                <span>
-                  {showCvv && isUnlocked ? card.cvv || "•••" : "•••"}
+                <span className="tracking-widest">
+                  {(showCvv || focusedField === "cvv") && isUnlocked
+                    ? card.cvv || "•••"
+                    : "•••"}
                 </span>
                 {isUnlocked && card.cvv && (
                   <button
