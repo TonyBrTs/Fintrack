@@ -370,7 +370,7 @@ export function BankCardView({
 /**
  * High-definition vector badges for payment networks
  */
-function NetworkLogo({ network }: { network: string }) {
+export function NetworkLogo({ network }: { network: string }) {
   if (network === "visa") {
     return (
       <span className="font-serif italic font-black text-xl text-white tracking-tighter drop-shadow-md">

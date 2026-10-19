@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import type { VaultCard, BankId, CardType, CardNetwork } from "@/types";
-import { BankCardView } from "./BankCardView";
+import { BankCardView, NetworkLogo } from "./BankCardView";
 import { BANK_PRESETS, getBankTheme } from "@/lib/bankThemes";
 import {
   detectCardNetwork,
@@ -322,18 +322,30 @@ export function VaultCardModal({
             />
 
             <div className="w-full flex flex-col items-center z-10 my-auto">
-              {/* Detection Badge or Live Preview Label */}
-              {detectedBankName ? (
-                <div className="mb-4 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center gap-2 shadow-lg animate-in fade-in">
-                  <Sparkles size={13} className="text-amber-400 shrink-0" />
-                  <span>Detectado: {detectedBankName}</span>
-                </div>
-              ) : (
-                <div className="mb-4 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-slate-300 text-xs font-medium flex items-center gap-1.5">
-                  <Sparkles size={12} className="text-blue-400 shrink-0" />
-                  <span>Previsualización 3D en Tiempo Real</span>
-                </div>
-              )}
+              {/* Header Status in Showcase */}
+              <div className="flex items-center justify-between w-full mb-3 px-1">
+                <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles size={13} className="text-amber-400" />
+                  {detectedBankName || `${getBankTheme(bank).name} • ${cardNetwork.toUpperCase()}`}
+                </span>
+
+                {/* Subtle optional theme override */}
+                <Select value={bank} onValueChange={(val) => handleBankChange(val as BankId)}>
+                  <SelectTrigger className="h-7 px-2 text-[11px] rounded-lg bg-white/10 hover:bg-white/20 border-white/15 text-white/90 gap-1.5 font-medium cursor-pointer w-auto">
+                    <SelectValue placeholder="Estilo" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {Object.entries(BANK_PRESETS).map(([bId, preset]) => (
+                      <SelectItem key={bId} value={bId} className="text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: preset.accentColor }} />
+                          <span>{preset.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* The 3D Bank Card View */}
               <div className="w-full max-w-[380px] py-1">
@@ -378,161 +390,71 @@ export function VaultCardModal({
             </div>
           </div>
 
-          {/* RIGHT PANE: Clean, Organized, Spacious Form */}
+          {/* RIGHT PANE: Clean, Streamlined, Essential Form */}
           <form
             onSubmit={handleSubmit}
             className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 overflow-hidden"
           >
             {/* Scrollable Form Body */}
-            <div className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-6 pb-14">
-              {/* 1. Banco Selector */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Building2 size={15} className="text-blue-600 dark:text-blue-400" />
-                    Banco o Entidad Financiera (Costa Rica)
-                  </label>
-                  {detectedBankName && (
-                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                      <Sparkles size={11} className="text-amber-500" /> Auto-detectado
-                    </span>
-                  )}
-                </div>
-
-                {/* Select Dropdown with all banks */}
-                <Select value={bank} onValueChange={(val) => handleBankChange(val as BankId)}>
-                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-sm font-semibold">
-                    <SelectValue placeholder="Selecciona tu banco o entidad" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    {Object.entries(BANK_PRESETS).map(([bId, preset]) => (
-                      <SelectItem key={bId} value={bId} className="py-2.5">
-                        <div className="flex items-center gap-2.5">
-                          <span
-                            className="w-3 h-3 rounded-full shrink-0 shadow-xs border border-black/10"
-                            style={{ backgroundColor: preset.accentColor }}
-                          />
-                          <span className="font-medium text-sm">{preset.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {/* Quick Select Popular Bank Chips */}
-                <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                  <span className="text-[11px] text-muted-foreground mr-1">Rápidos:</span>
-                  {(
-                    [
-                      { id: "bac", label: "BAC" },
-                      { id: "bncr", label: "BNCR" },
-                      { id: "bcr", label: "BCR" },
-                      { id: "popular", label: "Popular" },
-                      { id: "scotiabank", label: "Scotiabank" },
-                      { id: "davivienda", label: "Davivienda" },
-                      { id: "promerica", label: "Promerica" },
-                    ] as const
-                  ).map((qb) => (
-                    <button
-                      key={qb.id}
-                      type="button"
-                      onClick={() => handleBankChange(qb.id as BankId)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
-                        bank === qb.id
-                          ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700"
-                      }`}
-                    >
-                      {qb.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 2. Tipo, Moneda & Franquicia */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Tipo de Instrumento */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tipo</label>
-                  <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                    {(
-                      [
-                        { id: "credit", label: "Crédito" },
-                        { id: "debit", label: "Débito" },
-                        { id: "account", label: "Ahorros" },
-                      ] as const
-                    ).map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => setCardType(t.id)}
-                        className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center ${
-                          cardType === t.id
-                            ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs font-bold"
-                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
+            <div className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-5 pb-14">
+              {/* 1. Tipo de Tarjeta (Débito vs Crédito) & Moneda */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+                {/* Débito vs Crédito */}
+                <div className="flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setCardType("debit")}
+                    className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      cardType === "debit"
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <CreditCard size={14} />
+                    <span>Tarjeta de Débito</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCardType("credit")}
+                    className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      cardType === "credit"
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <Coins size={14} />
+                    <span>Tarjeta de Crédito</span>
+                  </button>
                 </div>
 
                 {/* Moneda */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Moneda</label>
-                  <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                    {(
-                      [
-                        { id: "CRC", label: "₡ Colones" },
-                        { id: "USD", label: "$ Dólares" },
-                      ] as const
-                    ).map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setCurrency(c.id)}
-                        className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center ${
-                          currency === c.id
-                            ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs font-bold"
-                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                      >
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Franquicia */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Franquicia</label>
-                  <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                    {(
-                      [
-                        { id: "visa", label: "Visa" },
-                        { id: "mastercard", label: "Master" },
-                        { id: "amex", label: "Amex" },
-                      ] as const
-                    ).map((n) => (
-                      <button
-                        key={n.id}
-                        type="button"
-                        onClick={() => setCardNetwork(n.id)}
-                        className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center ${
-                          cardNetwork === n.id
-                            ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs font-bold"
-                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                      >
-                        {n.label}
-                      </button>
-                    ))}
-                  </div>
+                <div className="flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setCurrency("CRC")}
+                    className={`py-2 px-3.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                      currency === "CRC"
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    ₡ Colones
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrency("USD")}
+                    className={`py-2 px-3.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                      currency === "USD"
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    $ Dólares
+                  </button>
                 </div>
               </div>
 
-              {/* 3. Identificación: Alias & Titular */}
+              {/* 2. Identificación: Alias & Titular */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="alias" className="text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -540,7 +462,7 @@ export function VaultCardModal({
                   </label>
                   <Input
                     id="alias"
-                    placeholder="ej. BAC Débito Principal, BNCR Salario"
+                    placeholder="ej. Tarjeta Personal, BAC Débito, BNCR Salario"
                     value={alias}
                     onChange={(e) => setAlias(e.target.value)}
                     onFocus={() => {
@@ -548,13 +470,13 @@ export function VaultCardModal({
                       setFocusedField("alias");
                     }}
                     onBlur={() => setFocusedField(null)}
-                    className="rounded-xl bg-slate-50 dark:bg-slate-950 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
+                    className="rounded-xl bg-slate-50 dark:bg-slate-950 text-sm h-11 border-slate-200 dark:border-slate-800"
                     required
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label htmlFor="cardholder" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Nombre del Titular
+                    Nombre del Titular (en el plástico)
                   </label>
                   <Input
                     id="cardholder"
@@ -566,17 +488,24 @@ export function VaultCardModal({
                       setFocusedField("cardholder");
                     }}
                     onBlur={() => setFocusedField(null)}
-                    className="rounded-xl bg-slate-50 dark:bg-slate-950 tracking-wider text-sm h-11 uppercase border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
+                    className="rounded-xl bg-slate-50 dark:bg-slate-950 tracking-wider text-sm h-11 uppercase border-slate-200 dark:border-slate-800"
                   />
                 </div>
               </div>
 
-              {/* 4. Datos de Tarjeta: Número, Exp y CVV */}
+              {/* 3. Datos de Tarjeta: Número (con auto-detección de Visa/Mastercard), Exp y CVV */}
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                 <div className="sm:col-span-6 space-y-1.5">
-                  <label htmlFor="cardNumber" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Número de Tarjeta (16 dígitos)
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="cardNumber" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Número de Tarjeta (16 dígitos)
+                    </label>
+                    <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                      {cardNetwork === "visa" && "Visa detectada"}
+                      {cardNetwork === "mastercard" && "Mastercard detectada"}
+                      {cardNetwork === "amex" && "American Express detectada"}
+                    </span>
+                  </div>
                   <div className="relative">
                     <Input
                       id="cardNumber"
@@ -588,13 +517,18 @@ export function VaultCardModal({
                         setFocusedField("cardNumber");
                       }}
                       onBlur={() => setFocusedField(null)}
-                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-widest pl-10 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
+                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-widest pl-10 pr-14 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
                       maxLength={19}
                     />
                     <CreditCard
                       size={17}
                       className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
+                    {cardNetwork !== "other" && (
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center">
+                        <NetworkLogo network={cardNetwork} />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -657,136 +591,152 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* 5. Cuentas Bancarias Costa Rica: IBAN & SINPE */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* IBAN */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="iban" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Cuenta IBAN Costa Rica (22 dígitos)
-                    </label>
-                    <span
-                      className={`text-[11px] font-mono font-bold ${
-                        iban.replace(/\s+/g, "").length === 22
-                          ? "text-emerald-500"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {iban.replace(/\s+/g, "").length}/22
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      id="iban"
-                      placeholder="CR05 0102 0000 9008 3456 78"
-                      value={formatIban(iban)}
-                      onChange={handleIbanChange}
-                      onFocus={() => setFocusedField("iban")}
-                      onBlur={() => setFocusedField(null)}
-                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-wider pl-10 text-sm h-11 uppercase border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
-                      maxLength={27}
-                    />
-                    <Building2
-                      size={16}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    />
-                  </div>
-                </div>
-
-                {/* SINPE Móvil */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="sinpe" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Número SINPE Móvil (8 dígitos)
-                    </label>
-                    <span
-                      className={`text-[11px] font-mono font-bold ${
-                        sinpeMovil.length === 8
-                          ? "text-emerald-500"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {sinpeMovil.length}/8
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      id="sinpe"
-                      placeholder="8888-8888"
-                      value={formatSinpe(sinpeMovil)}
-                      onChange={handleSinpeChange}
-                      onFocus={() => setFocusedField("sinpe")}
-                      onBlur={() => setFocusedField(null)}
-                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-wider pl-10 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
-                      maxLength={9}
-                    />
-                    <Smartphone
-                      size={16}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* 6. Parámetros de Crédito (solo si tipo === 'credit') */}
+              {/* 4. Parámetros de Crédito (SOLO si Tipo === 'credit') */}
               {cardType === "credit" && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-blue-50/70 dark:bg-blue-950/25 rounded-2xl border border-blue-200/70 dark:border-blue-900/40">
-                  <div className="space-y-1.5">
-                    <label htmlFor="cutoff" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Día de Corte
-                    </label>
-                    <Input
-                      id="cutoff"
-                      type="number"
-                      min="1"
-                      max="31"
-                      placeholder="ej. 15"
-                      value={cutOffDay}
-                      onChange={(e) => setCutOffDay(e.target.value)}
-                      className="rounded-xl bg-white dark:bg-slate-950 text-sm h-10 border-slate-200 dark:border-slate-800"
-                    />
+                <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/25 border border-blue-200/70 dark:border-blue-900/40 space-y-3 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                      ₡
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      Parámetros de Tarjeta de Crédito
+                    </span>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label htmlFor="paymentDue" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Día Límite de Pago
-                    </label>
-                    <Input
-                      id="paymentDue"
-                      type="number"
-                      min="1"
-                      max="31"
-                      placeholder="ej. 5"
-                      value={paymentDueDay}
-                      onChange={(e) => setPaymentDueDay(e.target.value)}
-                      className="rounded-xl bg-white dark:bg-slate-950 text-sm h-10 border-slate-200 dark:border-slate-800"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="limit" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Límite ({currency === "CRC" ? "₡" : "$"})
-                    </label>
-                    <div className="relative">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1.5">
+                      <label htmlFor="cutoff" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Día de Corte (1 - 31)
+                      </label>
                       <Input
-                        id="limit"
+                        id="cutoff"
                         type="number"
-                        step="0.01"
-                        placeholder={currency === "USD" ? "2000" : "1000000"}
-                        value={creditLimit}
-                        onChange={(e) => setCreditLimit(e.target.value)}
-                        className="rounded-xl bg-white dark:bg-slate-950 pl-8 text-sm h-10 font-mono border-slate-200 dark:border-slate-800"
+                        min="1"
+                        max="31"
+                        placeholder="ej. 15"
+                        value={cutOffDay}
+                        onChange={(e) => setCutOffDay(e.target.value)}
+                        className="rounded-xl bg-white dark:bg-slate-950 text-sm h-10 border-slate-200 dark:border-slate-800"
                       />
-                      <Coins
-                        size={15}
-                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="paymentDue" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Día Límite de Pago
+                      </label>
+                      <Input
+                        id="paymentDue"
+                        type="number"
+                        min="1"
+                        max="31"
+                        placeholder="ej. 5"
+                        value={paymentDueDay}
+                        onChange={(e) => setPaymentDueDay(e.target.value)}
+                        className="rounded-xl bg-white dark:bg-slate-950 text-sm h-10 border-slate-200 dark:border-slate-800"
                       />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="limit" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Límite ({currency === "CRC" ? "₡" : "$"})
+                      </label>
+                      <div className="relative">
+                        <Input
+                          id="limit"
+                          type="number"
+                          step="0.01"
+                          placeholder={currency === "USD" ? "2000" : "1000000"}
+                          value={creditLimit}
+                          onChange={(e) => setCreditLimit(e.target.value)}
+                          className="rounded-xl bg-white dark:bg-slate-950 pl-8 text-sm h-10 font-mono border-slate-200 dark:border-slate-800"
+                        />
+                        <Coins
+                          size={15}
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* 7. Teléfono de Servicio & Notas */}
+              {/* 5. Cuentas Asociadas Costa Rica: IBAN & SINPE */}
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
+                  Cuentas Asociadas en Costa Rica (Opcional)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* IBAN */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="iban" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Cuenta IBAN (22 caracteres)
+                      </label>
+                      <span
+                        className={`text-[11px] font-mono font-bold ${
+                          iban.replace(/\s+/g, "").length === 22
+                            ? "text-emerald-500"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {iban.replace(/\s+/g, "").length}/22
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        id="iban"
+                        placeholder="CR05 0102 0000 9008 3456 78"
+                        value={formatIban(iban)}
+                        onChange={handleIbanChange}
+                        onFocus={() => setFocusedField("iban")}
+                        onBlur={() => setFocusedField(null)}
+                        className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-wider pl-10 text-sm h-11 uppercase border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
+                        maxLength={27}
+                      />
+                      <Building2
+                        size={16}
+                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      />
+                    </div>
+                  </div>
+
+                  {/* SINPE Móvil */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="sinpe" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Número SINPE Móvil (8 dígitos)
+                      </label>
+                      <span
+                        className={`text-[11px] font-mono font-bold ${
+                          sinpeMovil.length === 8
+                            ? "text-emerald-500"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {sinpeMovil.length}/8
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        id="sinpe"
+                        placeholder="8888-8888"
+                        value={formatSinpe(sinpeMovil)}
+                        onChange={handleSinpeChange}
+                        onFocus={() => setFocusedField("sinpe")}
+                        onBlur={() => setFocusedField(null)}
+                        className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-wider pl-10 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
+                        maxLength={9}
+                      />
+                      <Smartphone
+                        size={16}
+                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 6. Teléfono de Servicio & Notas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="phone" className="text-xs font-bold text-slate-700 dark:text-slate-300">
