@@ -128,3 +128,60 @@ export interface CreateAPIKeyResponse {
   plain_key: string;
   is_active: boolean;
 }
+
+export type BankId =
+  | "bbva"
+  | "nu"
+  | "santander"
+  | "banorte"
+  | "citibanamex"
+  | "mercadopago"
+  | "amex"
+  | "hsbc"
+  | "scotiabank"
+  | "rappi"
+  | "stori"
+  | "klar"
+  | "uala"
+  | "revolut"
+  | "other";
+
+export type CardType = "credit" | "debit" | "account";
+
+export type CardNetwork = "visa" | "mastercard" | "amex" | "carnet" | "other";
+
+export interface VaultCard {
+  id: string;
+  user_id?: string;
+  bank: BankId;
+  bank_name: string;
+  card_type: CardType;
+  card_network: CardNetwork;
+  alias: string;
+  cardholder_name: string;
+  card_number: string;
+  last4: string;
+  clabe?: string;
+  account_number?: string;
+  expiration_date?: string;
+  cvv?: string;
+  cut_off_day?: number | null;
+  payment_due_day?: number | null;
+  credit_limit?: number | null;
+  currency: string;
+  color_scheme?: string;
+  bank_phone?: string;
+  notes?: string;
+  is_favorite?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface VaultSettings {
+  user_id: string;
+  pin_hash: string;
+  salt: string;
+  auto_lock_minutes: number;
+  created_at?: string;
+  updated_at?: string;
+}

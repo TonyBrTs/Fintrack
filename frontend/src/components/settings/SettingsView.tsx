@@ -14,7 +14,9 @@ import {
   Type,
   ZapOff,
   X,
+  ShieldCheck,
 } from "lucide-react";
+import Link from "next/link";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
@@ -290,6 +292,32 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
                 </button>
               </div>
             )}
+
+            {/* Vault Quick Access Card */}
+            <div className="p-4 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-slate-900/20 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-slate-900/50 border border-blue-500/30 rounded-2xl flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center shrink-0">
+                  <ShieldCheck size={20} />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-bold text-foreground truncate">
+                    {isEs ? "Bóveda Financiera Segura" : "Financial Security Vault"}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground truncate">
+                    {isEs
+                      ? "Cifrado AES-256 para cuentas y tarjetas bancarias"
+                      : "AES-256 encrypted cards and bank accounts"}
+                  </span>
+                </div>
+              </div>
+              <Link
+                href="/vault"
+                onClick={() => onCloseDrawer?.()}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shrink-0 shadow-sm"
+              >
+                {isEs ? "Abrir Bóveda" : "Open Vault"}
+              </Link>
+            </div>
 
             {/* API Keys & Automations */}
             {user && (

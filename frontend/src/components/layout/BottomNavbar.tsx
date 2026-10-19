@@ -6,7 +6,7 @@ import {
   NavIncomeIcon,
   NavGoalsIcon,
 } from "@/components/ui/AppIcons";
-import { FileText } from "lucide-react";
+import { FileText, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -51,6 +51,13 @@ export function BottomNavbar() {
       icon: FileText,
       activeColor: "text-indigo-500",
       badgeColor: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
+    },
+    {
+      name: translate("nav.vault") || "Bóveda",
+      href: "/vault",
+      icon: ShieldCheck,
+      activeColor: "text-amber-500",
+      badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
     },
   ];
 

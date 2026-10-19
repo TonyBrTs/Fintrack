@@ -2,6 +2,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { VaultProvider } from "@/contexts/VaultContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
 import type { Metadata, Viewport } from "next";
@@ -82,10 +83,12 @@ export default function RootLayout({
         >
           <AuthProvider>
             <SettingsProvider>
-              <AppShell>{children}</AppShell>
-              <AuthModal />
-              <Toaster position="top-right" richColors />
-              <ServiceWorkerRegister />
+              <VaultProvider>
+                <AppShell>{children}</AppShell>
+                <AuthModal />
+                <Toaster position="top-right" richColors />
+                <ServiceWorkerRegister />
+              </VaultProvider>
             </SettingsProvider>
           </AuthProvider>
         </ThemeProvider>

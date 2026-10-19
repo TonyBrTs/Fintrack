@@ -6,6 +6,7 @@ export const translations = {
       income: "Income",
       goals: "Goals",
       reports: "Reports",
+      vault: "Vault",
       settings: "Settings",
     },
     header: {
@@ -251,6 +252,7 @@ export const translations = {
       income: "Ingresos",
       goals: "Metas",
       reports: "Reportes",
+      vault: "Bóveda",
       settings: "Ajustes",
     },
     header: {
