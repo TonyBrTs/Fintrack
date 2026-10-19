@@ -6,6 +6,8 @@ import { BankCardView } from "./BankCardView";
 import { BANK_PRESETS, getBankTheme } from "@/lib/bankThemes";
 import {
   detectCardNetwork,
+  detectBankFromCardNumber,
+  detectBankFromIban,
   formatCardNumber,
   formatIban,
   formatSinpe,
@@ -130,7 +132,9 @@ export function VaultCardModal({
     }
   };
 
-  // Card number input formatter with network detection
+  const [detectedBankName, setDetectedBankName] = useState<string | null>(null);
+
+  // Card number input formatter with network detection and Costa Rica bank detection
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, "");
     if (raw.length > 16) return;
@@ -139,6 +143,16 @@ export function VaultCardModal({
     const detected = detectCardNetwork(raw);
     if (detected !== "other") {
       setCardNetwork(detected);
+    }
+
+    const autoBank = detectBankFromCardNumber(raw);
+    if (autoBank) {
+      setBank(autoBank);
+      const theme = getBankTheme(autoBank);
+      setDetectedBankName(`${theme.name} • ${detected !== "other" ? detected.toUpperCase() : "Tarjeta"}`);
+      if (!bankPhone || bankPhone === getBankTheme(bank).bankPhone) {
+        setBankPhone(theme.bankPhone || "");
+      }
     }
   };
 
@@ -153,10 +167,20 @@ export function VaultCardModal({
     }
   };
 
-  // IBAN formatter (CR + 20 digits = 22 characters)
+  // IBAN formatter (CR + 20 digits = 22 characters) with BCCR bank detection
   const handleIbanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 22);
     setIban(raw);
+
+    const autoBank = detectBankFromIban(raw);
+    if (autoBank) {
+      setBank(autoBank);
+      const theme = getBankTheme(autoBank);
+      setDetectedBankName(`${theme.name} (IBAN BCCR)`);
+      if (!bankPhone || bankPhone === getBankTheme(bank).bankPhone) {
+        setBankPhone(theme.bankPhone || "");
+      }
+    }
   };
 
   // SINPE Móvil formatter (8 digits: 8888-8888)
@@ -290,9 +314,17 @@ export function VaultCardModal({
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
           {/* Costa Rica Bank Selector Horizontal Scroll */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Banco o Entidad Financiera de Costa Rica
-            </label>
+            <div className="flex items-center justify-between gap-2">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Banco o Entidad Financiera de Costa Rica
+              </label>
+              {detectedBankName && (
+                <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 rounded-full animate-in fade-in shrink-0">
+                  <Sparkles size={11} className="text-amber-500" />
+                  Detectado: {detectedBankName}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none touch-pan-x">
               {Object.entries(BANK_PRESETS).map(([bId, preset]) => {
                 const isSelected = bank === bId;
