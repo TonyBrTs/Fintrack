@@ -70,7 +70,7 @@ export function AccountStatementDocument({
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-6">
             <div>
               <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                <BrandLogo size={28} variant="full" />
+                <BrandLogo size={28} variant="full" forceTheme="light" />
               </div>
               <h2 className="text-sm sm:text-lg font-black tracking-tight text-slate-900 uppercase">
                 {isEs

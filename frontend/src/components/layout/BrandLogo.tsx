@@ -6,6 +6,7 @@ interface BrandLogoProps {
   size?: number;
   priority?: boolean;
   variant?: "icon" | "full";
+  forceTheme?: "light" | "dark";
 }
 
 export function BrandLogo({
@@ -13,11 +14,48 @@ export function BrandLogo({
   size = 36,
   priority = false,
   variant = "icon",
+  forceTheme,
 }: BrandLogoProps) {
   if (variant === "full") {
     // 800 x 167 (aspect ratio ~4.79)
     const height = size;
     const width = Math.round(size * 4.79);
+
+    if (forceTheme === "light") {
+      return (
+        <div
+          className={`relative inline-flex items-center shrink-0 select-none ${className}`}
+          style={{ height }}
+        >
+          <Image
+            src="/logo-light.png"
+            alt="FinTrack"
+            width={width * 2}
+            height={height * 2}
+            priority={priority}
+            className="h-full w-auto object-contain drop-shadow-sm"
+          />
+        </div>
+      );
+    }
+
+    if (forceTheme === "dark") {
+      return (
+        <div
+          className={`relative inline-flex items-center shrink-0 select-none ${className}`}
+          style={{ height }}
+        >
+          <Image
+            src="/logo-dark.png"
+            alt="FinTrack"
+            width={width * 2}
+            height={height * 2}
+            priority={priority}
+            className="h-full w-auto object-contain drop-shadow-sm"
+          />
+        </div>
+      );
+    }
 
     return (
       <div
@@ -41,6 +79,42 @@ export function BrandLogo({
           height={height * 2}
           priority={priority}
           className="h-full w-auto object-contain block dark:hidden drop-shadow-sm"
+        />
+      </div>
+    );
+  }
+
+  if (forceTheme === "light") {
+    return (
+      <div
+        className={`relative flex items-center justify-center shrink-0 rounded-xl overflow-hidden select-none ${className}`}
+        style={{ width: size, height: size }}
+      >
+        <Image
+          src="/icon-light.png"
+          alt="FinTrack Logo"
+          width={size * 2}
+          height={size * 2}
+          priority={priority}
+          className="w-full h-full object-contain drop-shadow-md"
+        />
+      </div>
+    );
+  }
+
+  if (forceTheme === "dark") {
+    return (
+      <div
+        className={`relative flex items-center justify-center shrink-0 rounded-xl overflow-hidden select-none ${className}`}
+        style={{ width: size, height: size }}
+      >
+        <Image
+          src="/icon-dark.png"
+          alt="FinTrack Logo"
+          width={size * 2}
+          height={size * 2}
+          priority={priority}
+          className="w-full h-full object-contain drop-shadow-md"
         />
       </div>
     );
