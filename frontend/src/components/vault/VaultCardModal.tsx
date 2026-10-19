@@ -19,6 +19,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -281,10 +288,11 @@ export function VaultCardModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[96vw] max-w-6xl max-h-[90vh] md:max-h-[88vh] overflow-hidden p-0 gap-0 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col">
-        <DialogHeader className="px-5 py-3.5 sm:px-7 sm:py-4 border-b border-slate-200/80 dark:border-slate-800 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+      <DialogContent className="w-[96vw] sm:max-w-4xl lg:max-w-5xl xl:max-w-6xl h-[92vh] max-h-[820px] overflow-hidden p-0 gap-0 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col">
+        {/* Modal Top Header */}
+        <DialogHeader className="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
           <div className="flex items-center gap-3 pr-6">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shrink-0">
               <ShieldCheck size={22} />
             </div>
             <div className="min-w-0">
@@ -293,32 +301,42 @@ export function VaultCardModal({
               </DialogTitle>
               <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5 truncate">
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                Cifrado bancario AES-GCM 256 • Soporte para IBAN y SINPE Móvil
+                Cifrado bancario AES-GCM 256 • Soporte oficial para IBAN y SINPE Móvil
               </p>
             </div>
           </div>
         </DialogHeader>
 
-        {/* 2-Column Split on Desktop, Stacked on Mobile */}
-        <div className="flex flex-col md:flex-row flex-1 overflow-hidden min-h-0">
-          {/* LEFT PANE: 3D Interactive Card & Bank Security Info */}
-          <div className="w-full md:w-[44%] lg:w-[42%] bg-gradient-to-b from-slate-100 via-slate-100/90 to-slate-200/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 border-b md:border-b-0 md:border-r border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 lg:p-7 flex flex-col justify-between overflow-y-auto shrink-0">
-            <div className="flex flex-col items-center">
-              {/* Live Auto-detect or Interactive status pill */}
+        {/* 2-Column Split: Showcase on Left, Form on Right */}
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden min-h-0">
+          {/* LEFT PANE: 3D Luxury Interactive Card Showcase */}
+          <div className="w-full lg:w-[42%] xl:w-[40%] bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white border-b lg:border-b-0 lg:border-r border-slate-800 p-6 lg:p-8 flex flex-col justify-between items-center relative overflow-hidden shrink-0">
+            {/* Ambient Radial Glow matching Bank Accent Color */}
+            <div
+              className="absolute -top-20 -left-20 w-72 h-72 rounded-full blur-3xl opacity-25 pointer-events-none transition-all duration-700"
+              style={{ backgroundColor: getBankTheme(bank).accentColor || "#3B82F6" }}
+            />
+            <div
+              className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full blur-3xl opacity-20 pointer-events-none transition-all duration-700"
+              style={{ backgroundColor: getBankTheme(bank).accentColor || "#3B82F6" }}
+            />
+
+            <div className="w-full flex flex-col items-center z-10 my-auto">
+              {/* Detection Badge or Live Preview Label */}
               {detectedBankName ? (
-                <div className="mb-3.5 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 shadow-xs animate-in fade-in">
-                  <Sparkles size={13} className="text-amber-500 shrink-0" />
+                <div className="mb-4 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center gap-2 shadow-lg animate-in fade-in">
+                  <Sparkles size={13} className="text-amber-400 shrink-0" />
                   <span>Detectado: {detectedBankName}</span>
                 </div>
               ) : (
-                <div className="mb-3.5 px-3 py-1 rounded-full bg-slate-200/70 dark:bg-slate-800 border border-slate-300/40 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center gap-1.5">
-                  <Sparkles size={12} className="text-blue-500 shrink-0" />
+                <div className="mb-4 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-slate-300 text-xs font-medium flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-blue-400 shrink-0" />
                   <span>Previsualización 3D en Tiempo Real</span>
                 </div>
               )}
 
-              {/* 3D Bank Card View */}
-              <div className="w-full max-w-[340px] sm:max-w-[380px] lg:max-w-[420px] mx-auto py-1">
+              {/* The 3D Bank Card View */}
+              <div className="w-full max-w-[380px] py-1">
                 <BankCardView
                   card={previewCard}
                   isUnlocked={true}
@@ -326,133 +344,117 @@ export function VaultCardModal({
                   flipped={isCardFlipped}
                   onFlipChange={setIsCardFlipped}
                   focusedField={focusedField}
+                  className="shadow-2xl"
                 />
               </div>
 
-              {/* Flip Button & Interactive Tip */}
-              <div className="flex items-center justify-center gap-2 mt-4">
+              {/* Flip Button & Helper */}
+              <div className="flex flex-col items-center gap-2 mt-5">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setIsCardFlipped(!isCardFlipped)}
-                  className="rounded-xl text-xs h-8 px-3.5 gap-2 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 font-medium"
+                  className="rounded-xl text-xs h-9 px-4 gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20 shadow-md cursor-pointer backdrop-blur-sm transition-all active:scale-95"
                 >
-                  <RotateCw size={13} className="text-blue-500" />
-                  <span>{isCardFlipped ? "Ver Frente de Tarjeta" : "Ver Reverso (CVV / IBAN)"}</span>
+                  <RotateCw size={14} className="text-blue-400" />
+                  <span>{isCardFlipped ? "Ver Frente de la Tarjeta" : "Ver Reverso (CVV / IBAN)"}</span>
                 </Button>
-              </div>
-
-              <p className="text-[11px] text-muted-foreground text-center mt-2 flex items-center justify-center gap-1.5 font-medium">
-                <Sparkles size={11} className="text-amber-500 shrink-0" />
-                <span>Haz clic en la tarjeta o enfoca el CVV para girarla</span>
-              </p>
-
-              {/* Quick Summary Grid */}
-              <div className="mt-5 grid grid-cols-3 gap-2 w-full text-center">
-                <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 shadow-xs">
-                  <span className="block text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
-                    Entidad
-                  </span>
-                  <span className="text-xs font-bold truncate block mt-0.5 text-slate-800 dark:text-slate-200">
-                    {getBankTheme(bank).name}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 shadow-xs">
-                  <span className="block text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
-                    Moneda
-                  </span>
-                  <span className="text-xs font-bold block mt-0.5 text-slate-800 dark:text-slate-200">
-                    {currency === "CRC" ? "₡ Colones" : "$ USD"}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 shadow-xs">
-                  <span className="block text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
-                    Tipo
-                  </span>
-                  <span className="text-xs font-bold capitalize block mt-0.5 text-slate-800 dark:text-slate-200">
-                    {cardType === "credit"
-                      ? "Crédito"
-                      : cardType === "debit"
-                      ? "Débito"
-                      : "Ahorros"}
-                  </span>
-                </div>
+                <p className="text-[11px] text-slate-400 text-center flex items-center gap-1 font-medium">
+                  <span>Haz clic en la tarjeta o enfoca el CVV para girarla</span>
+                </p>
               </div>
             </div>
 
-            {/* Bottom Security Info Box */}
-            <div className="hidden md:flex items-start gap-2.5 p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/50 mt-6">
-              <Lock size={16} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-              <div className="text-[11px] text-slate-600 dark:text-slate-300 leading-tight">
-                <span className="font-semibold text-slate-900 dark:text-slate-100 block mb-0.5">
-                  Bóveda de Máxima Privacidad
-                </span>
-                Los datos se cifran con AES-GCM 256 antes de guardarse. Solo tú con tu PIN puedes descifrarlos.
+            {/* Security Seal at Bottom */}
+            <div className="hidden lg:flex items-center gap-3 w-full p-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-slate-300 z-10 mt-6">
+              <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                <ShieldCheck size={18} />
+              </div>
+              <div className="text-[11px] leading-tight">
+                <span className="font-semibold text-white block">Cifrado Local AES-256</span>
+                Tus datos se encriptan en tu navegador antes de guardarse.
               </div>
             </div>
           </div>
 
-          {/* RIGHT PANE: Form & Pinned Footer */}
+          {/* RIGHT PANE: Clean, Organized, Spacious Form */}
           <form
             onSubmit={handleSubmit}
             className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 overflow-hidden"
           >
             {/* Scrollable Form Body */}
-            <div className="flex-1 overflow-y-auto p-5 sm:p-6 lg:p-8 space-y-6">
-              {/* Costa Rica Bank Selector */}
+            <div className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-6 pb-14">
+              {/* 1. Banco Selector */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <Building2 size={14} className="text-blue-600 dark:text-blue-400" />
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Building2 size={15} className="text-blue-600 dark:text-blue-400" />
                     Banco o Entidad Financiera (Costa Rica)
                   </label>
                   {detectedBankName && (
-                    <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full animate-in fade-in shrink-0">
-                      <Sparkles size={11} className="text-amber-500" />
-                      Detectado
+                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <Sparkles size={11} className="text-amber-500" /> Auto-detectado
                     </span>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 max-h-48 sm:max-h-none overflow-y-auto p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40">
-                  {Object.entries(BANK_PRESETS).map(([bId, preset]) => {
-                    const isSelected = bank === bId;
-                    return (
-                      <button
-                        key={bId}
-                        type="button"
-                        onClick={() => handleBankChange(bId as BankId)}
-                        className={`
-                          px-2.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between border cursor-pointer select-none text-left
-                          ${
-                            isSelected
-                              ? "bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-500/20"
-                              : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-750"
-                          }
-                        `}
-                      >
-                        <span className="truncate pr-1">{preset.name}</span>
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs border border-black/10"
-                          style={{
-                            backgroundColor: isSelected ? "#FFFFFF" : preset.accentColor,
-                          }}
-                        />
-                      </button>
-                    );
-                  })}
+                {/* Select Dropdown with all banks */}
+                <Select value={bank} onValueChange={(val) => handleBankChange(val as BankId)}>
+                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-sm font-semibold">
+                    <SelectValue placeholder="Selecciona tu banco o entidad" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {Object.entries(BANK_PRESETS).map(([bId, preset]) => (
+                      <SelectItem key={bId} value={bId} className="py-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className="w-3 h-3 rounded-full shrink-0 shadow-xs border border-black/10"
+                            style={{ backgroundColor: preset.accentColor }}
+                          />
+                          <span className="font-medium text-sm">{preset.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Quick Select Popular Bank Chips */}
+                <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                  <span className="text-[11px] text-muted-foreground mr-1">Rápidos:</span>
+                  {(
+                    [
+                      { id: "bac", label: "BAC" },
+                      { id: "bncr", label: "BNCR" },
+                      { id: "bcr", label: "BCR" },
+                      { id: "popular", label: "Popular" },
+                      { id: "scotiabank", label: "Scotiabank" },
+                      { id: "davivienda", label: "Davivienda" },
+                      { id: "promerica", label: "Promerica" },
+                    ] as const
+                  ).map((qb) => (
+                    <button
+                      key={qb.id}
+                      type="button"
+                      onClick={() => handleBankChange(qb.id as BankId)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                        bank === qb.id
+                          ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      }`}
+                    >
+                      {qb.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Type, Network & Currency Row */}
+              {/* 2. Tipo, Moneda & Franquicia */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Instrument Type */}
+                {/* Tipo de Instrumento */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Tipo de Cuenta
-                  </label>
-                  <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tipo</label>
+                  <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                     {(
                       [
                         { id: "credit", label: "Crédito" },
@@ -464,14 +466,11 @@ export function VaultCardModal({
                         key={t.id}
                         type="button"
                         onClick={() => setCardType(t.id)}
-                        className={`
-                          py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center
-                          ${
-                            cardType === t.id
-                              ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                          }
-                        `}
+                        className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center ${
+                          cardType === t.id
+                            ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        }`}
                       >
                         {t.label}
                       </button>
@@ -479,12 +478,10 @@ export function VaultCardModal({
                   </div>
                 </div>
 
-                {/* Currency (CRC or USD) */}
+                {/* Moneda */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Moneda
-                  </label>
-                  <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Moneda</label>
+                  <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                     {(
                       [
                         { id: "CRC", label: "₡ Colones" },
@@ -495,14 +492,11 @@ export function VaultCardModal({
                         key={c.id}
                         type="button"
                         onClick={() => setCurrency(c.id)}
-                        className={`
-                          py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center
-                          ${
-                            currency === c.id
-                              ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                          }
-                        `}
+                        className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center ${
+                          currency === c.id
+                            ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        }`}
                       >
                         {c.label}
                       </button>
@@ -510,12 +504,10 @@ export function VaultCardModal({
                   </div>
                 </div>
 
-                {/* Network Brand */}
+                {/* Franquicia */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Franquicia
-                  </label>
-                  <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Franquicia</label>
+                  <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                     {(
                       [
                         { id: "visa", label: "Visa" },
@@ -527,14 +519,11 @@ export function VaultCardModal({
                         key={n.id}
                         type="button"
                         onClick={() => setCardNetwork(n.id)}
-                        className={`
-                          py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center
-                          ${
-                            cardNetwork === n.id
-                              ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold"
-                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                          }
-                        `}
+                        className={`py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center ${
+                          cardNetwork === n.id
+                            ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        }`}
                       >
                         {n.label}
                       </button>
@@ -543,7 +532,7 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* Alias & Cardholder */}
+              {/* 3. Identificación: Alias & Titular */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="alias" className="text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -551,7 +540,7 @@ export function VaultCardModal({
                   </label>
                   <Input
                     id="alias"
-                    placeholder="ej. BAC Débito Principal, BNCR Ahorros, Scotiabank Platino"
+                    placeholder="ej. BAC Débito Principal, BNCR Salario"
                     value={alias}
                     onChange={(e) => setAlias(e.target.value)}
                     onFocus={() => {
@@ -559,7 +548,7 @@ export function VaultCardModal({
                       setFocusedField("alias");
                     }}
                     onBlur={() => setFocusedField(null)}
-                    className="rounded-xl bg-slate-50/70 dark:bg-slate-950 text-sm h-10 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                    className="rounded-xl bg-slate-50 dark:bg-slate-950 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
                     required
                   />
                 </div>
@@ -577,12 +566,12 @@ export function VaultCardModal({
                       setFocusedField("cardholder");
                     }}
                     onBlur={() => setFocusedField(null)}
-                    className="rounded-xl bg-slate-50/70 dark:bg-slate-950 tracking-wider text-sm h-10 uppercase border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                    className="rounded-xl bg-slate-50 dark:bg-slate-950 tracking-wider text-sm h-11 uppercase border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
                   />
                 </div>
               </div>
 
-              {/* Card Number, Expiration & CVV */}
+              {/* 4. Datos de Tarjeta: Número, Exp y CVV */}
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                 <div className="sm:col-span-6 space-y-1.5">
                   <label htmlFor="cardNumber" className="text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -599,11 +588,11 @@ export function VaultCardModal({
                         setFocusedField("cardNumber");
                       }}
                       onBlur={() => setFocusedField(null)}
-                      className="rounded-xl bg-slate-50/70 dark:bg-slate-950 font-mono tracking-widest pl-10 text-sm h-10 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-widest pl-10 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
                       maxLength={19}
                     />
                     <CreditCard
-                      size={16}
+                      size={17}
                       className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
                   </div>
@@ -624,7 +613,7 @@ export function VaultCardModal({
                         setFocusedField("exp");
                       }}
                       onBlur={() => setFocusedField(null)}
-                      className="rounded-xl bg-slate-50/70 dark:bg-slate-950 font-mono tracking-wider pl-9 text-center text-sm h-10 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-wider pl-9 text-center text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
                       maxLength={5}
                     />
                     <Calendar
@@ -640,7 +629,7 @@ export function VaultCardModal({
                       CVV / CVC
                     </label>
                     <span className="text-[10px] text-amber-500 font-semibold flex items-center gap-0.5">
-                      <RotateCw size={10} /> Reverso 3D
+                      <RotateCw size={10} /> 3D
                     </span>
                   </div>
                   <div className="relative">
@@ -657,7 +646,7 @@ export function VaultCardModal({
                         setFocusedField("cvv");
                       }}
                       onBlur={() => setFocusedField(null)}
-                      className="rounded-xl bg-slate-50/70 dark:bg-slate-950 font-mono tracking-widest pl-9 text-center text-sm h-10 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 transition-colors ring-offset-2 focus:ring-2 focus:ring-amber-500/50"
+                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-widest pl-9 text-center text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 ring-offset-2 focus:ring-2 focus:ring-amber-500/50"
                       maxLength={4}
                     />
                     <Lock
@@ -668,13 +657,13 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* Costa Rica IBAN & SINPE Móvil */}
+              {/* 5. Cuentas Bancarias Costa Rica: IBAN & SINPE */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* IBAN */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label htmlFor="iban" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Cuenta IBAN Costa Rica (22 caracteres)
+                      Cuenta IBAN Costa Rica (22 dígitos)
                     </label>
                     <span
                       className={`text-[11px] font-mono font-bold ${
@@ -692,11 +681,9 @@ export function VaultCardModal({
                       placeholder="CR05 0102 0000 9008 3456 78"
                       value={formatIban(iban)}
                       onChange={handleIbanChange}
-                      onFocus={() => {
-                        setFocusedField("iban");
-                      }}
+                      onFocus={() => setFocusedField("iban")}
                       onBlur={() => setFocusedField(null)}
-                      className="rounded-xl bg-slate-50/70 dark:bg-slate-950 font-mono tracking-wider pl-10 text-sm h-10 uppercase border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-wider pl-10 text-sm h-11 uppercase border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
                       maxLength={27}
                     />
                     <Building2
@@ -728,11 +715,9 @@ export function VaultCardModal({
                       placeholder="8888-8888"
                       value={formatSinpe(sinpeMovil)}
                       onChange={handleSinpeChange}
-                      onFocus={() => {
-                        setFocusedField("sinpe");
-                      }}
+                      onFocus={() => setFocusedField("sinpe")}
                       onBlur={() => setFocusedField(null)}
-                      className="rounded-xl bg-slate-50/70 dark:bg-slate-950 font-mono tracking-wider pl-10 text-sm h-10 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-wider pl-10 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
                       maxLength={9}
                     />
                     <Smartphone
@@ -743,9 +728,9 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* Credit Card Specific: Cutoff & Due Day, Credit Limit */}
+              {/* 6. Parámetros de Crédito (solo si tipo === 'credit') */}
               {cardType === "credit" && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-blue-50/60 dark:bg-blue-950/20 rounded-2xl border border-blue-200/60 dark:border-blue-900/40">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-blue-50/70 dark:bg-blue-950/25 rounded-2xl border border-blue-200/70 dark:border-blue-900/40">
                   <div className="space-y-1.5">
                     <label htmlFor="cutoff" className="text-xs font-bold text-slate-700 dark:text-slate-300">
                       Día de Corte
@@ -780,7 +765,7 @@ export function VaultCardModal({
 
                   <div className="space-y-1.5">
                     <label htmlFor="limit" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Límite de Crédito ({currency === "CRC" ? "₡ Colones" : "$ USD"})
+                      Límite ({currency === "CRC" ? "₡" : "$"})
                     </label>
                     <div className="relative">
                       <Input
@@ -794,14 +779,14 @@ export function VaultCardModal({
                       />
                       <Coins
                         size={15}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                       />
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Bank phone & Notes */}
+              {/* 7. Teléfono de Servicio & Notas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="phone" className="text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -813,7 +798,7 @@ export function VaultCardModal({
                       placeholder="2295-9898"
                       value={bankPhone}
                       onChange={(e) => setBankPhone(e.target.value)}
-                      className="rounded-xl bg-slate-50/70 dark:bg-slate-950 pl-10 font-mono text-sm h-10 border-slate-200 dark:border-slate-800"
+                      className="rounded-xl bg-slate-50 dark:bg-slate-950 pl-10 font-mono text-sm h-11 border-slate-200 dark:border-slate-800"
                     />
                     <Phone
                       size={16}
@@ -824,21 +809,21 @@ export function VaultCardModal({
 
                 <div className="space-y-1.5">
                   <label htmlFor="notes" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Notas Seguras (Cifradas)
+                    Notas Confidenciales
                   </label>
                   <Input
                     id="notes"
-                    placeholder="ej. Token de seguridad en app móvil, sucursal Escazú"
+                    placeholder="ej. Sucursal Escazú, token digital, etc."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="rounded-xl bg-slate-50/70 dark:bg-slate-950 text-sm h-10 border-slate-200 dark:border-slate-800"
+                    className="rounded-xl bg-slate-50 dark:bg-slate-950 text-sm h-11 border-slate-200 dark:border-slate-800"
                   />
                 </div>
               </div>
             </div>
 
             {/* Pinned Form Footer */}
-            <div className="px-5 py-4 sm:px-7 sm:py-4.5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-between shrink-0 gap-3">
+            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-between shrink-0 gap-3">
               {isEditing && onDelete ? (
                 <Button
                   type="button"
