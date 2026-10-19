@@ -72,11 +72,11 @@ export function ReportFilters({
   isEs,
 }: ReportFiltersProps) {
   return (
-    <div className="rounded-2xl bg-card border border-border/80 p-4 sm:p-5 shadow-xs space-y-4 print:hidden">
+    <div className="rounded-2xl bg-card border border-border/80 p-3.5 sm:p-5 shadow-xs space-y-3.5 sm:space-y-4 print:hidden">
       {/* Date & Period Controls */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0 sm:flex-wrap -mx-1 px-1 sm:mx-0 sm:px-0">
+          <span className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1 shrink-0">
             <CalendarIcon size={13} />
             {isEs ? "PERÍODO:" : "PERIOD:"}
           </span>
@@ -84,7 +84,7 @@ export function ReportFilters({
           <button
             type="button"
             onClick={() => handleSelectPreset("this_month")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
               preset === "this_month"
                 ? "bg-blue-600 text-white border-blue-600 shadow-xs"
                 : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
@@ -96,7 +96,7 @@ export function ReportFilters({
           <button
             type="button"
             onClick={() => handleSelectPreset("last_month")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
               preset === "last_month"
                 ? "bg-blue-600 text-white border-blue-600 shadow-xs"
                 : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
@@ -108,7 +108,7 @@ export function ReportFilters({
           <button
             type="button"
             onClick={() => handleSelectPreset("last_30_days")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
               preset === "last_30_days"
                 ? "bg-blue-600 text-white border-blue-600 shadow-xs"
                 : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
@@ -120,7 +120,7 @@ export function ReportFilters({
           <button
             type="button"
             onClick={() => handleSelectPreset("this_year")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
               preset === "this_year"
                 ? "bg-blue-600 text-white border-blue-600 shadow-xs"
                 : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
@@ -132,7 +132,7 @@ export function ReportFilters({
           <button
             type="button"
             onClick={() => handleSelectPreset("all")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
               preset === "all"
                 ? "bg-blue-600 text-white border-blue-600 shadow-xs"
                 : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
@@ -166,7 +166,7 @@ export function ReportFilters({
             </button>
           </PopoverTrigger>
           <PopoverContent
-            align="end"
+            align="center"
             sideOffset={8}
             className="w-auto max-w-[calc(100vw-2rem)] p-3.5"
           >
@@ -209,110 +209,113 @@ export function ReportFilters({
       </div>
 
       {/* Inclusions Selector */}
-      <div className="pt-3 border-t border-border/50 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-bold text-muted-foreground mr-1">
+      <div className="pt-3 border-t border-border/50">
+        <div className="text-[11px] sm:text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1">
           {isEs ? "SECCIONES A INCLUIR:" : "INCLUDE MODULES:"}
-        </span>
-
-        {/* Summary Toggle */}
-        <button
-          type="button"
-          onClick={() => setIncludeSummary(!includeSummary)}
-          className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-            includeSummary
-              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 font-semibold"
-              : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-          }`}
-        >
-          <span
-            className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
-              includeSummary ? "bg-blue-600 text-white" : "border border-muted-foreground/40"
+        </div>
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0 sm:flex-wrap -mx-1 px-1 sm:mx-0 sm:px-0">
+          {/* Summary Toggle */}
+          <button
+            type="button"
+            onClick={() => setIncludeSummary(!includeSummary)}
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
+              includeSummary
+                ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 font-semibold"
+                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
             }`}
           >
-            {includeSummary && <Check size={11} strokeWidth={3} />}
-          </span>
-          <span>{isEs ? "Estado de Flujo y Resumen" : "Flow & Summary"}</span>
-        </button>
+            <span
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center text-[10px] ${
+                includeSummary ? "bg-blue-600 text-white" : "border border-muted-foreground/40"
+              }`}
+            >
+              {includeSummary && <Check size={10} strokeWidth={3} />}
+            </span>
+            <span>{isEs ? "Estado y Resumen" : "Flow & Summary"}</span>
+          </button>
 
-        {/* Expenses List Toggle */}
-        <button
-          type="button"
-          onClick={() => setIncludeExpensesList(!includeExpensesList)}
-          className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-            includeExpensesList
-              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 font-semibold"
-              : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-          }`}
-        >
-          <span
-            className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
-              includeExpensesList ? "bg-rose-600 text-white" : "border border-muted-foreground/40"
+          {/* Expenses List Toggle */}
+          <button
+            type="button"
+            onClick={() => setIncludeExpensesList(!includeExpensesList)}
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
+              includeExpensesList
+                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 font-semibold"
+                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
             }`}
           >
-            {includeExpensesList && <Check size={11} strokeWidth={3} />}
-          </span>
-          <span>
-            {isEs ? "Detalle de Cada Gasto" : "Every Expense"} ({filteredExpensesCount})
-          </span>
-        </button>
+            <span
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center text-[10px] ${
+                includeExpensesList ? "bg-rose-600 text-white" : "border border-muted-foreground/40"
+              }`}
+            >
+              {includeExpensesList && <Check size={10} strokeWidth={3} />}
+            </span>
+            <span>
+              {isEs ? "Detalle Gastos" : "Every Expense"} ({filteredExpensesCount})
+            </span>
+          </button>
 
-        {/* Incomes List Toggle */}
-        <button
-          type="button"
-          onClick={() => setIncludeIncomesList(!includeIncomesList)}
-          className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-            includeIncomesList
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-semibold"
-              : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-          }`}
-        >
-          <span
-            className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
-              includeIncomesList ? "bg-emerald-600 text-white" : "border border-muted-foreground/40"
+          {/* Incomes List Toggle */}
+          <button
+            type="button"
+            onClick={() => setIncludeIncomesList(!includeIncomesList)}
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
+              includeIncomesList
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-semibold"
+                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
             }`}
           >
-            {includeIncomesList && <Check size={11} strokeWidth={3} />}
-          </span>
-          <span>
-            {isEs ? "Detalle de Cada Ingreso" : "Every Income"} ({filteredIncomesCount})
-          </span>
-        </button>
+            <span
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center text-[10px] ${
+                includeIncomesList
+                  ? "bg-emerald-600 text-white"
+                  : "border border-muted-foreground/40"
+              }`}
+            >
+              {includeIncomesList && <Check size={10} strokeWidth={3} />}
+            </span>
+            <span>
+              {isEs ? "Detalle Ingresos" : "Every Income"} ({filteredIncomesCount})
+            </span>
+          </button>
 
-        {/* Goals Toggle */}
-        <button
-          type="button"
-          onClick={() => setIncludeGoals(!includeGoals)}
-          className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-            includeGoals
-              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 font-semibold"
-              : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-          }`}
-        >
-          <span
-            className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
-              includeGoals ? "bg-amber-600 text-white" : "border border-muted-foreground/40"
+          {/* Goals Toggle */}
+          <button
+            type="button"
+            onClick={() => setIncludeGoals(!includeGoals)}
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
+              includeGoals
+                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 font-semibold"
+                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
             }`}
           >
-            {includeGoals && <Check size={11} strokeWidth={3} />}
-          </span>
-          <span>
-            {isEs ? "Metas de Ahorro" : "Savings Goals"} ({goalsCount})
-          </span>
-        </button>
+            <span
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center text-[10px] ${
+                includeGoals ? "bg-amber-600 text-white" : "border border-muted-foreground/40"
+              }`}
+            >
+              {includeGoals && <Check size={10} strokeWidth={3} />}
+            </span>
+            <span>
+              {isEs ? "Metas" : "Savings Goals"} ({goalsCount})
+            </span>
+          </button>
 
-        {/* Notes Toggle */}
-        <button
-          type="button"
-          onClick={() => setShowNotes(!showNotes)}
-          className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-            showNotes
-              ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30 font-semibold"
-              : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-          }`}
-        >
-          <FileText size={13} className="shrink-0" />
-          <span>{isEs ? "Observaciones Contables" : "Auditor Notes"}</span>
-        </button>
+          {/* Notes Toggle */}
+          <button
+            type="button"
+            onClick={() => setShowNotes(!showNotes)}
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
+              showNotes
+                ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30 font-semibold"
+                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
+            }`}
+          >
+            <FileText size={13} className="shrink-0" />
+            <span>{isEs ? "Observaciones" : "Auditor Notes"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Collapsible Notes Box */}
@@ -334,40 +337,46 @@ export function ReportFilters({
 
       {/* Live Metrics Summary Bar */}
       <div className="pt-3 border-t border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 text-xs font-mono">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
-          <span className="whitespace-nowrap">
-            {isEs ? "Ingresos:" : "Income:"}{" "}
-            <strong className="text-emerald-600 dark:text-emerald-400">
+        <div className="grid grid-cols-3 gap-2 p-2 sm:p-0 rounded-xl bg-muted/40 sm:bg-transparent sm:flex sm:items-center sm:gap-x-3 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1">
+            <span className="text-[10px] sm:text-xs text-muted-foreground">
+              {isEs ? "Ingresos:" : "Income:"}
+            </span>
+            <strong className="text-emerald-600 dark:text-emerald-400 whitespace-nowrap text-[11px] sm:text-xs">
               +{currencySymbol}
               {formatCurrency(totalIncome)}
             </strong>
-          </span>
+          </div>
           <span className="hidden sm:inline text-border/80">•</span>
-          <span className="whitespace-nowrap">
-            {isEs ? "Egresos:" : "Expenses:"}{" "}
-            <strong className="text-rose-600 dark:text-rose-400">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1">
+            <span className="text-[10px] sm:text-xs text-muted-foreground">
+              {isEs ? "Egresos:" : "Expenses:"}
+            </span>
+            <strong className="text-rose-600 dark:text-rose-400 whitespace-nowrap text-[11px] sm:text-xs">
               -{currencySymbol}
               {formatCurrency(totalExpense)}
             </strong>
-          </span>
+          </div>
           <span className="hidden sm:inline text-border/80">•</span>
-          <span className="whitespace-nowrap">
-            {isEs ? "Saldo:" : "Balance:"}{" "}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1">
+            <span className="text-[10px] sm:text-xs text-muted-foreground">
+              {isEs ? "Saldo:" : "Balance:"}
+            </span>
             <strong
-              className={
+              className={`whitespace-nowrap text-[11px] sm:text-xs ${
                 netSavings >= 0
                   ? "text-emerald-600 dark:text-emerald-400"
                   : "text-rose-600 dark:text-rose-400"
-              }
+              }`}
             >
               {netSavings < 0
                 ? `-${currencySymbol}${formatCurrency(Math.abs(netSavings))}`
                 : `+${currencySymbol}${formatCurrency(netSavings)}`}
             </strong>
-          </span>
+          </div>
         </div>
 
-        <div className="text-muted-foreground text-[11px] sm:text-xs">
+        <div className="text-muted-foreground text-[10px] sm:text-xs text-center sm:text-right">
           {filteredExpensesCount + filteredIncomesCount}{" "}
           {isEs ? "movimientos en período" : "records in period"}
         </div>

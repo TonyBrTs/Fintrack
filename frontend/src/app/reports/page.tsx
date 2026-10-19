@@ -392,7 +392,7 @@ export default function ReportsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6 py-6 print:p-0 print:m-0 print:max-w-none">
+      <div className="space-y-5 sm:space-y-6 max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 print:p-0 print:m-0 print:max-w-none">
         {/* Header and Export Action Buttons */}
         <ReportHeaderActions
           reportReference={reportReference}

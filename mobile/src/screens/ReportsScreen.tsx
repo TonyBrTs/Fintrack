@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  Share,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
@@ -148,12 +149,14 @@ export const ReportsScreen: React.FC = () => {
   const handleCopyReference = () => {
     if (typeof navigator !== "undefined" && (navigator as any)?.clipboard?.writeText) {
       (navigator as any).clipboard.writeText(reportReference);
+    } else {
+      Share.share({ message: reportReference }).catch(() => {});
     }
     setCopiedRef(true);
     setTimeout(() => setCopiedRef(false), 2000);
   };
 
-  const handleExportSummary = () => {
+  const handleExportSummary = async () => {
     const periodName =
       preset === "this_month"
         ? language === "en"
@@ -190,12 +193,19 @@ export const ReportsScreen: React.FC = () => {
       (navigator as any).clipboard.writeText(summaryText);
     }
 
-    Alert.alert(
-      language === "en" ? "Report Exported" : "Reporte Exportado",
-      language === "en"
-        ? `Audit Reference: ${reportReference}\n\nThe financial summary has been copied to your clipboard.`
-        : `Código de Auditoría: ${reportReference}\n\nEl resumen contable ha sido copiado a tu portapapeles.`
-    );
+    try {
+      await Share.share({
+        message: summaryText,
+        title: language === "en" ? "FinTrack Financial Report" : "Reporte Financiero FinTrack",
+      });
+    } catch {
+      Alert.alert(
+        language === "en" ? "Report Exported" : "Reporte Exportado",
+        language === "en"
+          ? `Audit Reference: ${reportReference}\n\nThe financial summary has been copied to your clipboard.`
+          : `Código de Auditoría: ${reportReference}\n\nEl resumen contable ha sido copiado a tu portapapeles.`
+      );
+    }
   };
 
   if (loading) {
