@@ -19,16 +19,23 @@ export function AppShell({ children }: AppShellProps) {
   const { user, isLoading } = useAuth();
 
   const isAuthRoute = pathname === "/login";
+  const isPublicUtilityRoute =
+    pathname === "/version" || pathname === "/commit" || pathname === "/health";
 
   useEffect(() => {
     if (!isLoading) {
-      if (!user && !isAuthRoute) {
+      if (!user && !isAuthRoute && !isPublicUtilityRoute) {
         router.replace("/login");
       } else if (user && isAuthRoute) {
         router.replace("/");
       }
     }
-  }, [user, isLoading, isAuthRoute, router]);
+  }, [user, isLoading, isAuthRoute, isPublicUtilityRoute, router]);
+
+  // Render standalone public utility pages (/version, /commit, /health) immediately without splash or navbars
+  if (isPublicUtilityRoute) {
+    return <>{children}</>;
+  }
 
   // Initial session loading splash
   if (isLoading) {
