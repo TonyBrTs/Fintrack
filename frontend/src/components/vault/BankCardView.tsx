@@ -5,7 +5,7 @@ import type { VaultCard } from "@/types";
 import { getBankTheme } from "@/lib/bankThemes";
 import { maskCardNumber, formatCardNumber } from "@/lib/vaultCrypto";
 import { toast } from "sonner";
-import { Copy, Eye, EyeOff, RotateCw, Phone, ShieldCheck, Star } from "lucide-react";
+import { Copy, Eye, EyeOff, RotateCw, Phone } from "lucide-react";
 
 interface BankCardViewProps {
   card: VaultCard;
@@ -22,8 +22,6 @@ interface BankCardViewProps {
 export function BankCardView({
   card,
   isUnlocked,
-  onEdit,
-  onToggleFavorite,
   className = "",
   interactive = true,
   flipped,
@@ -34,7 +32,6 @@ export function BankCardView({
   const [showFullNumber, setShowFullNumber] = useState(false);
   const [showCvv, setShowCvv] = useState(false);
 
-  // Sync external flipped prop
   useEffect(() => {
     if (typeof flipped === "boolean") {
       setIsFlipped(flipped);
@@ -49,6 +46,7 @@ export function BankCardView({
 
   const theme = getBankTheme(card.bank);
   const isAmex = card.card_network === "amex";
+  const isAccountOnly = card.card_type === "account" && !card.card_number.replace(/•/g, "").trim();
 
   const handleCopy = (text: string, label: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -57,13 +55,15 @@ export function BankCardView({
       return;
     }
     navigator.clipboard.writeText(text.replace(/\s+/g, ""));
-    toast.success(`${label} copiada al portapapeles`, {
+    toast.success(`${label} copiado al portapapeles`, {
       description: text,
       duration: 2500,
     });
   };
 
-  const displayNumber = showFullNumber && isUnlocked
+  const displayNumber = isAccountOnly
+    ? card.iban || card.account_number || "CUENTA BANCARIA"
+    : showFullNumber && isUnlocked
     ? formatCardNumber(card.card_number)
     : maskCardNumber(card.card_number, card.last4);
 
@@ -78,15 +78,12 @@ export function BankCardView({
         }`}
         onClick={() => interactive && toggleFlip()}
       >
-        {/* ================= CARD FRONT ================= */}
         <div
-          className={`absolute inset-0 rounded-2xl p-4 sm:p-5 flex flex-col justify-between overflow-hidden [backface-visibility:hidden] border border-white/20 shadow-inner text-white`}
+          className="absolute inset-0 rounded-2xl p-4 sm:p-5 flex flex-col justify-between overflow-hidden [backface-visibility:hidden] border border-white/20 shadow-inner text-white"
           style={{ background: theme.bgGradient }}
         >
-          {/* Subtle Ambient Glass / Gloss Overlay */}
           <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20 pointer-events-none rounded-2xl" />
 
-          {/* Bank Aesthetic Vector Background Patterns */}
           {theme.patternType === "geometric" && (
             <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full border-[28px] border-white/10 pointer-events-none transform rotate-45" />
           )}
@@ -100,7 +97,6 @@ export function BankCardView({
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/15 via-transparent to-transparent pointer-events-none" />
           )}
 
-          {/* Top Bar: Bank Logo & Chip / NFC */}
           <div className="relative z-10 flex items-start justify-between">
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
@@ -116,12 +112,11 @@ export function BankCardView({
                   ? "Crédito"
                   : card.card_type === "debit"
                   ? "Débito"
-                  : "Cuenta"}
+                  : "Cuenta Bancaria"}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Contactless NFC Waves Icon */}
               <svg
                 className="w-4 h-4 sm:w-5 sm:h-5 opacity-80 rotate-90"
                 viewBox="0 0 24 24"
@@ -135,7 +130,6 @@ export function BankCardView({
                 <path d="M15.5 21.5a12 12 0 0 0 0-19" />
               </svg>
 
-              {/* Flip Button */}
               {interactive && (
                 <button
                   type="button"
@@ -152,9 +146,7 @@ export function BankCardView({
             </div>
           </div>
 
-          {/* Middle: EMV Smart Chip */}
           <div className="relative z-10 flex items-center justify-between mt-1">
-            {/* Realistic EMV Metallic Chip */}
             <div
               className={`w-10 h-7 sm:w-11 sm:h-8 rounded-md relative overflow-hidden border shadow-inner flex items-center justify-center ${
                 theme.chipColor === "gold"
@@ -167,10 +159,15 @@ export function BankCardView({
               <div className="w-5 h-4 border border-black/25 rounded-xs" />
             </div>
 
-            {/* Quick Copy Card Number Button */}
             <button
               type="button"
-              onClick={(e) => handleCopy(card.card_number, "Número de Tarjeta", e)}
+              onClick={(e) =>
+                handleCopy(
+                  isAccountOnly ? card.iban || card.account_number || "" : card.card_number,
+                  isAccountOnly ? "Cuenta" : "Número de Tarjeta",
+                  e
+                )
+              }
               className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10px] font-bold bg-white/15 hover:bg-white/25 backdrop-blur-xs border border-white/20 flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
               title="Copiar número"
             >
@@ -179,7 +176,6 @@ export function BankCardView({
             </button>
           </div>
 
-          {/* Card Number */}
           <div
             className={`relative z-10 mt-1 flex items-center justify-between rounded-lg transition-all duration-300 ${
               focusedField === "cardNumber"
@@ -195,7 +191,7 @@ export function BankCardView({
               {displayNumber}
             </span>
 
-            {isUnlocked && card.card_number && (
+            {isUnlocked && !isAccountOnly && card.card_number && (
               <button
                 type="button"
                 onClick={(e) => {
@@ -209,10 +205,9 @@ export function BankCardView({
             )}
           </div>
 
-          {/* Bottom Row: Holder, Expiration, Brand Network */}
           <div className="relative z-10 flex items-end justify-between pt-1">
             <div
-              className={`flex flex-col max-w-[65%] min-w-0 rounded-lg transition-all duration-300 ${
+              className={`flex flex-col max-w-[62%] min-w-0 rounded-lg transition-all duration-300 ${
                 focusedField === "cardholder"
                   ? "bg-white/20 ring-2 ring-white/80 px-1.5 py-0.5 -mx-1"
                   : ""
@@ -244,7 +239,6 @@ export function BankCardView({
                 </div>
               )}
 
-              {/* Payment Network Brand Badge */}
               <div className="shrink-0 flex items-center justify-center">
                 <NetworkLogo network={card.card_network} />
               </div>
@@ -252,12 +246,10 @@ export function BankCardView({
           </div>
         </div>
 
-        {/* ================= CARD BACK ================= */}
         <div
-          className={`absolute inset-0 rounded-2xl pt-3 sm:pt-4 pb-3 sm:pb-5 flex flex-col justify-between overflow-hidden [transform:rotateY(180deg)] [backface-visibility:hidden] border border-white/20 shadow-inner text-white`}
+          className="absolute inset-0 rounded-2xl pt-3 sm:pt-4 pb-3 sm:pb-5 flex flex-col justify-between overflow-hidden [transform:rotateY(180deg)] [backface-visibility:hidden] border border-white/20 shadow-inner text-white"
           style={{ background: theme.bgGradient }}
         >
-          {/* Top Bar on Reverse */}
           <div className="px-4 sm:px-5 flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/80 truncate max-w-[75%]">
               {card.alias}
@@ -275,15 +267,13 @@ export function BankCardView({
             </button>
           </div>
 
-          {/* Magnetic Stripe (Realistic standard dark band) */}
           <div className="w-full h-8 sm:h-10 bg-slate-950 mt-1 shadow-inner relative">
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-slate-900 to-black/80" />
           </div>
 
-          {/* Signature Strip & CVV Box */}
           <div className="px-4 sm:px-5 my-0.5">
             <div className="flex items-center justify-end gap-2">
-              <div className="flex-1 h-6 sm:h-7 bg-slate-100 rounded-sm flex items-center px-2 text-slate-400 font-mono text-[8px] sm:text-[9px] italic border border-slate-300 truncate">
+              <div className="flex-1 h-6 sm:h-7 bg-slate-100 rounded-sm flex items-center px-2 text-slate-500 font-mono text-[8px] sm:text-[9px] italic border border-slate-300 truncate">
                 Firma Autorizada
               </div>
               <div
@@ -293,7 +283,7 @@ export function BankCardView({
                     : "border-slate-300 shadow-xs"
                 }`}
               >
-                <span className="text-[9px] text-slate-500 font-sans">CVV</span>
+                <span className="text-[9px] text-slate-600 font-sans">CVV</span>
                 <span className="tracking-widest">
                   {(showCvv || focusedField === "cvv") && isUnlocked
                     ? card.cvv || "•••"
@@ -315,12 +305,13 @@ export function BankCardView({
             </div>
           </div>
 
-          {/* Extra Account Data & Costa Rica IBAN / SINPE */}
           <div className="px-4 sm:px-5 flex items-end justify-between text-[10px]">
-            <div className="flex flex-col gap-0.5 max-w-[70%] min-w-0">
+            <div className="flex flex-col gap-0.5 max-w-[72%] min-w-0">
               {(card.iban || card.clabe) && (
                 <div className="flex items-center gap-1">
-                  <span className="text-[8px] uppercase tracking-wider text-white/70 font-bold shrink-0">IBAN:</span>
+                  <span className="text-[8px] uppercase tracking-wider text-white/70 font-bold shrink-0">
+                    IBAN:
+                  </span>
                   <span className="font-mono text-[9px] font-bold truncate">
                     {card.iban || card.clabe}
                   </span>
@@ -333,15 +324,17 @@ export function BankCardView({
                   </button>
                 </div>
               )}
-              {card.sinpe_movil && (
+              {card.account_number && (
                 <div className="flex items-center gap-1">
-                  <span className="text-[8px] uppercase tracking-wider text-white/70 font-bold shrink-0">SINPE:</span>
-                  <span className="font-mono text-[9px] font-bold text-amber-300 truncate">
-                    {card.sinpe_movil}
+                  <span className="text-[8px] uppercase tracking-wider text-white/70 font-bold shrink-0">
+                    CTA:
+                  </span>
+                  <span className="font-mono text-[9px] font-bold truncate">
+                    {card.account_number}
                   </span>
                   <button
                     type="button"
-                    onClick={(e) => handleCopy(card.sinpe_movil || "", "SINPE Móvil", e)}
+                    onClick={(e) => handleCopy(card.account_number || "", "Cuenta", e)}
                     className="text-white/80 hover:text-white shrink-0 cursor-pointer"
                   >
                     <Copy size={9} />
@@ -356,9 +349,8 @@ export function BankCardView({
               )}
             </div>
 
-            <div className="flex items-center gap-1 text-[8px] sm:text-[9px] text-white/70 shrink-0">
-              <ShieldCheck size={11} className="text-emerald-400" />
-              <span>FinTrack Vault</span>
+            <div className="shrink-0">
+              <NetworkLogo network={card.card_network} size="sm" />
             </div>
           </div>
         </div>
@@ -367,41 +359,109 @@ export function BankCardView({
   );
 }
 
-/**
- * High-definition vector badges for payment networks
- */
-export function NetworkLogo({ network }: { network: string }) {
+export function NetworkLogo({
+  network,
+  size = "md",
+}: {
+  network: string;
+  size?: "sm" | "md";
+}) {
+  const isSm = size === "sm";
+
   if (network === "visa") {
     return (
-      <span className="font-serif italic font-black text-xl text-white tracking-tighter drop-shadow-md">
-        VISA
-      </span>
+      <div
+        className={`inline-flex items-center justify-center rounded-md bg-white/95 px-1.5 py-0.5 shadow-xs ${
+          isSm ? "h-5 w-9" : "h-6 w-11"
+        }`}
+        title="Visa"
+      >
+        <svg
+          viewBox="0 0 256 83"
+          className="w-full h-full"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M108.234 1.586L86.792 81.345H66.058L87.498 1.586H108.234ZM195.887 53.078L206.827 22.956L213.128 53.078H195.887ZM224.892 81.345H244.022L227.324 1.586H209.687C205.718 1.586 202.371 3.896 200.892 7.452L170.025 81.345H191.693L196.002 69.431H222.495L224.892 81.345ZM171.213 55.335C171.302 34.298 142.126 33.139 142.327 23.702C142.393 20.844 145.109 17.813 151.053 17.037C154.004 16.652 162.138 16.357 171.368 20.614L174.996 3.681C170.025 1.879 163.635 0.144 155.702 0.144C135.318 0.144 120.971 10.979 120.851 26.501C120.719 37.981 131.093 44.382 138.902 48.196C146.925 52.104 149.619 54.614 149.588 58.128C149.532 63.486 143.168 65.853 137.234 65.946C126.867 66.107 120.859 63.149 116.059 60.916L112.313 78.414C117.131 80.625 126.028 82.548 135.258 82.644C156.935 82.644 171.132 71.936 171.213 55.335ZM85.647 1.586L52.192 81.345H30.395L13.918 17.653C12.916 13.719 12.043 12.275 8.995 10.619C4.008 7.916 -4.212 5.383 -11.458 3.816L-10.966 1.586H24.161C28.637 1.586 32.668 4.568 33.684 9.726L42.385 55.908L63.854 1.586H85.647Z"
+            fill="#1434CB"
+          />
+          <path
+            d="M33.684 9.726C32.668 4.568 28.637 1.586 24.161 1.586H0.42L0 3.816C18.374 8.508 30.521 19.832 35.534 33.438L33.684 9.726Z"
+            fill="#F7B600"
+          />
+        </svg>
+      </div>
     );
   }
+
   if (network === "mastercard") {
     return (
-      <div className="flex items-center -space-x-2">
-        <div className="w-5 h-5 rounded-full bg-[#EB001B] shadow-xs" />
-        <div className="w-5 h-5 rounded-full bg-[#F79E1B]/90 shadow-xs" />
+      <div
+        className={`inline-flex items-center justify-center rounded-md bg-slate-950/40 backdrop-blur-xs px-1.5 py-0.5 border border-white/15 ${
+          isSm ? "h-5 w-9" : "h-6 w-11"
+        }`}
+        title="Mastercard"
+      >
+        <svg
+          viewBox="0 0 152 100"
+          className="w-full h-full"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="52" cy="50" r="44" fill="#EB001B" />
+          <circle cx="100" cy="50" r="44" fill="#F79E1B" />
+          <path
+            d="M76 15.36C86.67 23.43 93.56 36.21 93.56 50C93.56 63.79 86.67 76.57 76 84.64C65.33 76.57 58.44 63.79 58.44 50C58.44 36.21 65.33 23.43 76 15.36Z"
+            fill="#FF5F00"
+          />
+        </svg>
       </div>
     );
   }
+
   if (network === "amex") {
     return (
-      <div className="px-2 py-0.5 rounded bg-blue-600 text-white font-sans font-black text-[9px] tracking-wider border border-white/40">
-        AMEX
+      <div
+        className={`inline-flex items-center justify-center rounded-md bg-[#016FD0] border border-white/40 shadow-xs overflow-hidden ${
+          isSm ? "h-5 w-9" : "h-6 w-11"
+        }`}
+        title="American Express"
+      >
+        <svg
+          viewBox="0 0 120 76"
+          className="w-full h-full"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect width="120" height="76" rx="8" fill="#016FD0" />
+          <path
+            d="M17.2 28L9 48H15.2L16.7 44H24.3L25.8 48H32.3L24.1 28H17.2ZM20.5 33.8L22.7 39.5H18.3L20.5 33.8ZM34.5 28V48H40.1V35.6L45.4 48H49.8L55.1 35.6V48H60.7V28H52.4L47.6 39.4L42.8 28H34.5ZM64.5 28V48H81.3V43.2H70.2V40.2H80.9V35.6H70.2V32.8H81.3V28H64.5ZM83.5 28L91.1 38L83.2 48H90.4L94.8 42.1L99.2 48H106.4L98.5 38L106.1 28H99L94.8 33.7L90.6 28H83.5Z"
+            fill="white"
+          />
+        </svg>
       </div>
     );
   }
+
   if (network === "carnet") {
     return (
-      <div className="px-2 py-0.5 rounded bg-red-600 text-white font-sans font-black text-[8px] tracking-wider">
-        carnet
+      <div
+        className={`inline-flex items-center justify-center rounded-md bg-red-600 text-white font-sans font-black tracking-wider border border-white/30 ${
+          isSm ? "h-5 px-1.5 text-[7px]" : "h-6 px-2 text-[8px]"
+        }`}
+      >
+        CARNET
       </div>
     );
   }
+
   return (
-    <div className="w-7 h-5 rounded border border-white/40 flex items-center justify-center text-[8px] font-bold tracking-widest text-white/80">
+    <div
+      className={`inline-flex items-center justify-center rounded-md border border-white/40 font-bold tracking-widest text-white/80 ${
+        isSm ? "h-5 px-1.5 text-[7px]" : "h-6 px-2 text-[8px]"
+      }`}
+    >
       CARD
     </div>
   );

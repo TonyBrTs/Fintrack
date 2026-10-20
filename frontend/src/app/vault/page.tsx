@@ -6,21 +6,16 @@ import { VaultLockScreen } from "@/components/vault/VaultLockScreen";
 import { BankCardView } from "@/components/vault/BankCardView";
 import { VaultCardModal } from "@/components/vault/VaultCardModal";
 import type { VaultCard, CardType } from "@/types";
-import { formatIban, formatSinpe } from "@/lib/vaultCrypto";
+import { formatIban } from "@/lib/vaultCrypto";
 import {
-  ShieldCheck,
   Lock,
   Plus,
   CreditCard,
-  Building2,
   Copy,
-  Calendar,
   Phone,
   Edit3,
   Layers,
   LayoutGrid,
-  CheckCircle2,
-  Smartphone,
   Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,31 +37,27 @@ export default function VaultPage() {
     toggleFavorite,
   } = useVault();
 
-  // UI state
   const [activeFilter, setActiveFilter] = useState<"all" | CardType | "favorite">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"wallet" | "grid">("wallet");
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cardToEdit, setCardToEdit] = useState<VaultCard | null>(null);
 
-  // If still checking PIN setup in database
   if (isLoading) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 animate-pulse flex items-center justify-center mb-4">
-          <ShieldCheck size={32} />
+        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 animate-pulse flex items-center justify-center mb-3">
+          <Lock size={24} />
         </div>
         <p className="text-sm font-semibold text-muted-foreground">
-          Verificando seguridad de la bóveda...
+          Cargando bóveda...
         </p>
       </div>
     );
   }
 
-  // If locked, render security keypad lockscreen
   if (!isUnlocked) {
     return (
       <VaultLockScreen
@@ -77,7 +68,6 @@ export default function VaultPage() {
     );
   }
 
-  // Filter cards
   const filteredCards = cards.filter((card) => {
     if (activeFilter === "favorite" && !card.is_favorite) return false;
     if (activeFilter !== "all" && activeFilter !== "favorite" && card.card_type !== activeFilter)
@@ -89,9 +79,9 @@ export default function VaultPage() {
       const matchBank = card.bank_name.toLowerCase().includes(q);
       const matchLast4 = card.last4.includes(q);
       const matchHolder = card.cardholder_name.toLowerCase().includes(q);
-      const matchSinpe = card.sinpe_movil?.includes(q) || false;
+      const matchAccount = card.account_number?.toLowerCase().includes(q) || false;
       const matchIban = (card.iban || card.clabe)?.toLowerCase().includes(q) || false;
-      return matchAlias || matchBank || matchLast4 || matchHolder || matchSinpe || matchIban;
+      return matchAlias || matchBank || matchLast4 || matchHolder || matchAccount || matchIban;
     }
     return true;
   });
@@ -130,27 +120,17 @@ export default function VaultPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-28 sm:pb-32 space-y-4 sm:space-y-6">
-      {/* Top Banner & Actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 p-4 sm:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-800 relative overflow-hidden">
-        {/* Glow accent */}
-        <div className="absolute -right-20 -top-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 p-4 sm:p-6 bg-slate-900 text-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-800 relative overflow-hidden">
         <div className="relative z-10 flex items-start sm:items-center gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
-            <ShieldCheck size={22} className="sm:w-6 sm:h-6" />
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-600 flex items-center justify-center text-white shrink-0">
+            <CreditCard size={20} />
           </div>
           <div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <h1 className="text-lg sm:text-2xl font-black tracking-tight">
-                Bóveda Financiera
-              </h1>
-              <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <CheckCircle2 size={10} />
-                Costa Rica
-              </span>
-            </div>
+            <h1 className="text-lg sm:text-2xl font-black tracking-tight">
+              Bóveda
+            </h1>
             <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 max-w-lg leading-tight">
-              Tarjetas, IBAN y SINPE Móvil protegidos con cifrado militar AES-256 en tu dispositivo.
+              Tarjetas de crédito, débito y cuentas bancarias.
             </p>
           </div>
         </div>
@@ -160,7 +140,7 @@ export default function VaultPage() {
             variant="outline"
             size="sm"
             onClick={lockVault}
-            className="rounded-xl sm:rounded-2xl border-white/20 text-white hover:bg-white/10 text-xs font-semibold gap-1.5 cursor-pointer bg-white/5 h-9"
+            className="rounded-xl border-white/20 text-white hover:bg-white/10 text-xs font-semibold gap-1.5 cursor-pointer bg-white/5 h-9"
           >
             <Lock size={14} />
             <span>Bloquear</span>
@@ -169,7 +149,7 @@ export default function VaultPage() {
           <Button
             size="sm"
             onClick={handleOpenAdd}
-            className="rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold gap-1.5 cursor-pointer shadow-lg hover:shadow-blue-500/25 transition-all h-9"
+            className="rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold gap-1.5 cursor-pointer shadow-lg transition-all h-9"
           >
             <Plus size={15} />
             <span>Agregar</span>
@@ -177,14 +157,13 @@ export default function VaultPage() {
         </div>
       </div>
 
-      {/* Stats Quick Badges */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
         <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <span className="text-[10px] sm:text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">
             Total en Bóveda
           </span>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-black">{cards.length}</span>
+            <span className="text-xl sm:text-2xl font-black font-mono tabular-nums">{cards.length}</span>
             <span className="text-[10px] sm:text-xs text-muted-foreground">registros</span>
           </div>
         </div>
@@ -194,8 +173,10 @@ export default function VaultPage() {
             Tarjetas de Crédito
           </span>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-black text-blue-500">{creditCount}</span>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">plásticos</span>
+            <span className="text-xl sm:text-2xl font-black font-mono tabular-nums text-blue-600 dark:text-blue-400">
+              {creditCount}
+            </span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">tarjetas</span>
           </div>
         </div>
 
@@ -204,33 +185,35 @@ export default function VaultPage() {
             Tarjetas de Débito
           </span>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-black text-emerald-500">{debitCount}</span>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">cuentas</span>
+            <span className="text-xl sm:text-2xl font-black font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
+              {debitCount}
+            </span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">tarjetas</span>
           </div>
         </div>
 
         <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <span className="text-[10px] sm:text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">
-            Cuentas IBAN / Ahorro
+            Cuentas Bancarias
           </span>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-black text-purple-500">{accountCount}</span>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">CR</span>
+            <span className="text-xl sm:text-2xl font-black font-mono tabular-nums text-purple-600 dark:text-purple-400">
+              {accountCount}
+            </span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">cuentas</span>
           </div>
         </div>
       </div>
 
-      {/* Filter and View Toggles */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-        {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none touch-pan-x">
           {(
             [
               { id: "all", label: "Todas" },
               { id: "credit", label: "Crédito" },
               { id: "debit", label: "Débito" },
-              { id: "account", label: "Ahorros" },
-              { id: "favorite", label: "Favoritas ★" },
+              { id: "account", label: "Cuentas" },
+              { id: "favorite", label: "Favoritas" },
             ] as const
           ).map((f) => (
             <button
@@ -250,7 +233,6 @@ export default function VaultPage() {
           ))}
         </div>
 
-        {/* View Mode & Search */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1 sm:w-56">
             <Search
@@ -259,7 +241,7 @@ export default function VaultPage() {
             />
             <input
               type="text"
-              placeholder="Buscar banco, IBAN, SINPE..."
+              placeholder="Buscar banco, alias, IBAN..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -293,9 +275,7 @@ export default function VaultPage() {
         </div>
       </div>
 
-      {/* Main Content Area */}
       {cards.length === 0 ? (
-        /* Empty State */
         <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center bg-white dark:bg-slate-900/60 rounded-2xl sm:rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 space-y-4">
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
             <CreditCard size={30} />
@@ -303,7 +283,7 @@ export default function VaultPage() {
           <div className="max-w-md">
             <h2 className="text-base sm:text-lg font-bold">Tu bóveda está vacía</h2>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Registra tus tarjetas de bancos de Costa Rica (BAC, Banco Nacional, BCR, Popular, Scotiabank, Davivienda, etc.), cuentas IBAN y SINPE Móvil con la interfaz de Google Wallet.
+              Guarda tus tarjetas de crédito, débito y cuentas IBAN para consultar y copiar tus datos bancarios rápidamente.
             </p>
           </div>
           <Button
@@ -311,31 +291,28 @@ export default function VaultPage() {
             className="rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold gap-2 px-6 cursor-pointer"
           >
             <Plus size={16} />
-            <span>Agregar primera tarjeta</span>
+            <span>Agregar primera tarjeta o cuenta</span>
           </Button>
         </div>
       ) : filteredCards.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground text-xs">
-          No se encontraron tarjetas con el filtro o búsqueda actual.
+          No se encontraron registros con el filtro o búsqueda actual.
         </div>
       ) : viewMode === "wallet" ? (
-        /* ================= GOOGLE WALLET STACK VIEW ================= */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-          {/* Card Stack / Carousel on Left / Top */}
           <div className="lg:col-span-6 space-y-3">
             <div className="flex items-center justify-between px-1">
               <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Tus Tarjetas ({filteredCards.length})
+                Tarjetas y Cuentas ({filteredCards.length})
               </span>
               <span className="text-[10px] sm:text-[11px] text-muted-foreground">
-                Toca para ver detalles
+                Selecciona para ver detalles
               </span>
             </div>
 
-            {/* Wallet Responsive Card Stack */}
             <div className="flex flex-col space-y-[-115px] sm:space-y-[-140px] md:space-y-[-150px] pb-28 sm:pb-36 pt-1">
               {filteredCards.map((card, index) => {
-                const isSelected = (activeCard?.id === card.id);
+                const isSelected = activeCard?.id === card.id;
                 return (
                   <motion.div
                     key={card.id}
@@ -370,20 +347,28 @@ export default function VaultPage() {
             </div>
           </div>
 
-          {/* Active Card Expanded Detail Panel on Right */}
           {activeCard && (
             <div className="lg:col-span-6 space-y-4 lg:sticky lg:top-6">
               <div className="p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-5">
-                {/* Header */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-500 block truncate">
-                      {activeCard.bank_name} • {activeCard.card_type === "credit" ? "Crédito" : "Débito / Ahorros"} • {activeCard.currency || "CRC"}
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block truncate">
+                      {activeCard.bank_name} -{" "}
+                      {activeCard.card_type === "credit"
+                        ? "Crédito"
+                        : activeCard.card_type === "debit"
+                        ? "Débito"
+                        : "Cuenta"}{" "}
+                      - {activeCard.currency || "CRC"}
                     </span>
-                    <h3 className="text-lg sm:text-xl font-black mt-0.5 truncate">{activeCard.alias}</h3>
-                    <p className="text-xs text-muted-foreground font-mono mt-0.5">
-                      •••• •••• •••• {activeCard.last4}
-                    </p>
+                    <h3 className="text-lg sm:text-xl font-black mt-0.5 truncate">
+                      {activeCard.alias}
+                    </h3>
+                    {activeCard.card_number && (
+                      <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                        •••• •••• •••• {activeCard.last4}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
@@ -399,13 +384,11 @@ export default function VaultPage() {
                   </div>
                 </div>
 
-                {/* Quick Copy Banking Coordinates Grid */}
                 <div className="space-y-2.5">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
-                    Transferencias y Pagos en Costa Rica
+                    Datos de Tarjeta y Cuenta
                   </span>
 
-                  {/* Card Number */}
                   {activeCard.card_number && (
                     <div className="flex items-center justify-between p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60">
                       <div className="space-y-0.5 min-w-0">
@@ -413,7 +396,10 @@ export default function VaultPage() {
                           Número de Tarjeta
                         </span>
                         <p className="font-mono text-xs sm:text-sm font-bold tracking-wider truncate">
-                          {activeCard.card_number.replace(/\D/g, "").replace(/(\d{4})/g, "$1 ").trim()}
+                          {activeCard.card_number
+                            .replace(/\D/g, "")
+                            .replace(/(\d{4})/g, "$1 ")
+                            .trim()}
                         </p>
                       </div>
                       <Button
@@ -428,12 +414,11 @@ export default function VaultPage() {
                     </div>
                   )}
 
-                  {/* Costa Rica IBAN */}
                   {(activeCard.iban || activeCard.clabe) && (
                     <div className="flex items-center justify-between p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60">
                       <div className="space-y-0.5 min-w-0 pr-2">
                         <span className="text-[9px] font-semibold text-muted-foreground uppercase block">
-                          Cuenta IBAN (Costa Rica)
+                          Cuenta IBAN
                         </span>
                         <p className="font-mono text-xs sm:text-sm font-bold tracking-wide text-emerald-600 dark:text-emerald-400 truncate">
                           {formatIban(activeCard.iban || activeCard.clabe || "")}
@@ -442,7 +427,9 @@ export default function VaultPage() {
                       <Button
                         size="sm"
                         variant="secondary"
-                        onClick={() => handleCopy(activeCard.iban || activeCard.clabe || "", "Cuenta IBAN")}
+                        onClick={() =>
+                          handleCopy(activeCard.iban || activeCard.clabe || "", "Cuenta IBAN")
+                        }
                         className="rounded-xl text-xs gap-1 cursor-pointer shrink-0 h-8"
                       >
                         <Copy size={12} />
@@ -451,32 +438,7 @@ export default function VaultPage() {
                     </div>
                   )}
 
-                  {/* SINPE Móvil */}
-                  {activeCard.sinpe_movil && (
-                    <div className="flex items-center justify-between p-3 rounded-xl sm:rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30">
-                      <div className="space-y-0.5 min-w-0">
-                        <span className="text-[9px] font-semibold text-amber-700 dark:text-amber-400 uppercase flex items-center gap-1">
-                          <Smartphone size={11} />
-                          SINPE Móvil
-                        </span>
-                        <p className="font-mono text-sm sm:text-base font-black text-amber-900 dark:text-amber-200 tracking-wider">
-                          {formatSinpe(activeCard.sinpe_movil)}
-                        </p>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleCopy(activeCard.sinpe_movil || "", "SINPE Móvil")}
-                        className="rounded-xl text-xs gap-1 cursor-pointer shrink-0 h-8 bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 dark:text-amber-100"
-                      >
-                        <Copy size={12} />
-                        <span>Copiar</span>
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Account Number */}
-                  {activeCard.account_number && !activeCard.sinpe_movil && (
+                  {activeCard.account_number && (
                     <div className="flex items-center justify-between p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60">
                       <div className="space-y-0.5 min-w-0">
                         <span className="text-[9px] font-semibold text-muted-foreground uppercase block">
@@ -498,7 +460,6 @@ export default function VaultPage() {
                     </div>
                   )}
 
-                  {/* Security CVV & Expiration Row */}
                   <div className="grid grid-cols-2 gap-2.5">
                     <div className="p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between">
                       <div>
@@ -513,7 +474,9 @@ export default function VaultPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleCopy(activeCard.expiration_date || "", "Vigencia")}
+                          onClick={() =>
+                            handleCopy(activeCard.expiration_date || "", "Vigencia")
+                          }
                           className="h-7 w-7 p-0 cursor-pointer"
                         >
                           <Copy size={12} />
@@ -544,15 +507,14 @@ export default function VaultPage() {
                   </div>
                 </div>
 
-                {/* Credit Card Dates Banner */}
                 {activeCard.card_type === "credit" && (
                   <div className="p-3.5 rounded-xl sm:rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/50 flex items-center justify-around text-center">
                     <div>
                       <span className="text-[9px] uppercase font-bold text-muted-foreground block">
                         Día de Corte
                       </span>
-                      <p className="text-sm sm:text-base font-black text-blue-600 dark:text-blue-400 mt-0.5">
-                        Día {activeCard.cut_off_day || "—"}
+                      <p className="text-sm sm:text-base font-black font-mono tabular-nums text-blue-600 dark:text-blue-400 mt-0.5">
+                        Día {activeCard.cut_off_day || "-"}
                       </p>
                     </div>
                     <div className="w-px h-7 bg-blue-200 dark:bg-blue-900" />
@@ -560,8 +522,8 @@ export default function VaultPage() {
                       <span className="text-[9px] uppercase font-bold text-muted-foreground block">
                         Límite de Pago
                       </span>
-                      <p className="text-sm sm:text-base font-black text-rose-600 dark:text-rose-400 mt-0.5">
-                        Día {activeCard.payment_due_day || "—"}
+                      <p className="text-sm sm:text-base font-black font-mono tabular-nums text-rose-600 dark:text-rose-400 mt-0.5">
+                        Día {activeCard.payment_due_day || "-"}
                       </p>
                     </div>
                     {activeCard.credit_limit && (
@@ -571,8 +533,9 @@ export default function VaultPage() {
                           <span className="text-[9px] uppercase font-bold text-muted-foreground block">
                             Límite
                           </span>
-                          <p className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-                            {activeCard.currency === "USD" ? "$" : "₡"}{activeCard.credit_limit.toLocaleString()}
+                          <p className="text-xs sm:text-sm font-black font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            {activeCard.currency === "USD" ? "$" : "₡"}
+                            {activeCard.credit_limit.toLocaleString()}
                           </p>
                         </div>
                       </>
@@ -580,7 +543,6 @@ export default function VaultPage() {
                   </div>
                 )}
 
-                {/* Bank Contact Phone */}
                 {activeCard.bank_phone && (
                   <div className="flex items-center justify-between pt-2 border-t border-slate-200/80 dark:border-slate-800 text-xs">
                     <span className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
@@ -600,7 +562,6 @@ export default function VaultPage() {
           )}
         </div>
       ) : (
-        /* ================= GRID VIEW ================= */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredCards.map((card) => (
             <div
@@ -615,21 +576,11 @@ export default function VaultPage() {
               />
 
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs px-1">
-                <span className="font-bold truncate max-w-[140px] text-xs">
+                <span className="font-bold truncate max-w-[160px] text-xs">
                   {card.alias}
                 </span>
 
                 <div className="flex items-center gap-1">
-                  {card.sinpe_movil && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleCopy(card.sinpe_movil || "", "SINPE Móvil")}
-                      className="h-7 px-2 text-[10px] gap-1 cursor-pointer font-bold text-amber-600 dark:text-amber-400"
-                    >
-                      SINPE
-                    </Button>
-                  )}
                   {(card.iban || card.clabe) && (
                     <Button
                       size="sm"
@@ -656,7 +607,6 @@ export default function VaultPage() {
         </div>
       )}
 
-      {/* Vault Card Add/Edit Modal */}
       <VaultCardModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

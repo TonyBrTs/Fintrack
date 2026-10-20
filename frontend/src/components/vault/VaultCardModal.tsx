@@ -6,16 +6,18 @@ import { BankCardView, NetworkLogo } from "./BankCardView";
 import { BANK_PRESETS, getBankTheme } from "@/lib/bankThemes";
 import {
   detectCardNetwork,
+  detectBankFromCardNumber,
+  detectBankFromIban,
+  detectBankFromText,
+  lookupBankByBinOnline,
   formatCardNumber,
   formatIban,
-  formatSinpe,
 } from "@/lib/vaultCrypto";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -27,17 +29,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  ShieldCheck,
   CreditCard,
   Building2,
   Calendar,
   Lock,
   Phone,
   Trash2,
-  Sparkles,
-  Smartphone,
   Coins,
   RotateCw,
+  Hash,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -60,7 +60,6 @@ export function VaultCardModal({
 }: VaultCardModalProps) {
   const isEditing = Boolean(cardToEdit);
 
-  // Form State
   const [bank, setBank] = useState<BankId>("bac");
   const [cardType, setCardType] = useState<CardType>("credit");
   const [cardNetwork, setCardNetwork] = useState<CardNetwork>("visa");
@@ -71,7 +70,6 @@ export function VaultCardModal({
   const [expirationDate, setExpirationDate] = useState("");
   const [cvv, setCvv] = useState("");
   const [iban, setIban] = useState("");
-  const [sinpeMovil, setSinpeMovil] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [cutOffDay, setCutOffDay] = useState<string>("");
   const [paymentDueDay, setPaymentDueDay] = useState<string>("");
@@ -82,20 +80,18 @@ export function VaultCardModal({
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Reset or fill form when opening
   useEffect(() => {
     if (cardToEdit) {
       setBank(cardToEdit.bank || "bac");
       setCardType(cardToEdit.card_type || "credit");
       setCardNetwork(cardToEdit.card_network || "visa");
-      setCurrency((cardToEdit.currency === "USD" ? "USD" : "CRC"));
+      setCurrency(cardToEdit.currency === "USD" ? "USD" : "CRC");
       setAlias(cardToEdit.alias || "");
       setCardholderName(cardToEdit.cardholder_name || "");
       setCardNumber(cardToEdit.card_number || "");
       setExpirationDate(cardToEdit.expiration_date || "");
       setCvv(cardToEdit.cvv || "");
       setIban(cardToEdit.iban || cardToEdit.clabe || "");
-      setSinpeMovil(cardToEdit.sinpe_movil || "");
       setAccountNumber(cardToEdit.account_number || "");
       setCutOffDay(cardToEdit.cut_off_day ? String(cardToEdit.cut_off_day) : "");
       setPaymentDueDay(
@@ -107,7 +103,6 @@ export function VaultCardModal({
       setBankPhone(cardToEdit.bank_phone || "");
       setNotes(cardToEdit.notes || "");
     } else {
-      // Default initial values for new card in Costa Rica
       setBank("bac");
       setCardType("credit");
       setCardNetwork("visa");
@@ -118,7 +113,6 @@ export function VaultCardModal({
       setExpirationDate("");
       setCvv("");
       setIban("");
-      setSinpeMovil("");
       setAccountNumber("");
       setCutOffDay("");
       setPaymentDueDay("");
@@ -128,31 +122,52 @@ export function VaultCardModal({
     }
   }, [cardToEdit, isOpen]);
 
-  // When bank changes, pre-fill default phone if empty
+  const applyDetectedBank = (detectedBank: BankId) => {
+    setBank((prevBank) => {
+      const nextTheme = getBankTheme(detectedBank);
+      const prevTheme = getBankTheme(prevBank);
+      setBankPhone((prevPhone) =>
+        !prevPhone || prevPhone === prevTheme.bankPhone
+          ? nextTheme.bankPhone || ""
+          : prevPhone
+      );
+      return detectedBank;
+    });
+  };
+
   const handleBankChange = (newBank: BankId) => {
-    setBank(newBank);
     const theme = getBankTheme(newBank);
-    if (!bankPhone || bankPhone === getBankTheme(bank).bankPhone) {
+    const prevTheme = getBankTheme(bank);
+    setBank(newBank);
+    if (!bankPhone || bankPhone === prevTheme.bankPhone) {
       setBankPhone(theme.bankPhone || "");
     }
-    if (theme.defaultNetwork) {
+    if (!cardNumber && theme.defaultNetwork) {
       setCardNetwork(theme.defaultNetwork);
     }
   };
 
-  // Card number input formatter with real-time automatic network & card detection
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, "");
     const maxLen = raw.startsWith("34") || raw.startsWith("37") ? 15 : 16;
     if (raw.length > maxLen) return;
     setCardNumber(raw);
 
-    // Auto-detect payment network (Visa, Mastercard, Amex, Carnet)
-    const detected = detectCardNetwork(raw);
-    setCardNetwork(detected);
+    const detectedNet = detectCardNetwork(raw);
+    setCardNetwork(detectedNet);
+
+    const detectedBank = detectBankFromCardNumber(raw);
+    if (detectedBank) {
+      applyDetectedBank(detectedBank);
+    } else if (raw.length >= 6) {
+      void lookupBankByBinOnline(raw).then((onlineBank) => {
+        if (onlineBank) {
+          applyDetectedBank(onlineBank);
+        }
+      });
+    }
   };
 
-  // Expiration date formatter MM/YY
   const handleExpirationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let clean = e.target.value.replace(/\D/g, "");
     if (clean.length > 4) clean = clean.slice(0, 4);
@@ -163,19 +178,27 @@ export function VaultCardModal({
     }
   };
 
-  // IBAN formatter (CR + 20 digits = 22 characters)
   const handleIbanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 22);
     setIban(raw);
+
+    const detectedBank = detectBankFromIban(raw);
+    if (detectedBank) {
+      applyDetectedBank(detectedBank);
+    }
   };
 
-  // SINPE Móvil formatter (8 digits: 8888-8888)
-  const handleSinpeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "").slice(0, 8);
-    setSinpeMovil(raw);
+  const handleAliasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setAlias(val);
+    if (!cardNumber && !iban) {
+      const detectedBank = detectBankFromText(val);
+      if (detectedBank) {
+        applyDetectedBank(detectedBank);
+      }
+    }
   };
 
-  // Live preview card object
   const previewCard: VaultCard = {
     id: cardToEdit?.id || "preview-id",
     bank,
@@ -190,7 +213,7 @@ export function VaultCardModal({
     cvv: cvv || "•••",
     iban,
     clabe: iban,
-    sinpe_movil: sinpeMovil ? formatSinpe(sinpeMovil) : "",
+    sinpe_movil: "",
     account_number: accountNumber,
     cut_off_day: cutOffDay ? parseInt(cutOffDay, 10) : null,
     payment_due_day: paymentDueDay ? parseInt(paymentDueDay, 10) : null,
@@ -205,12 +228,12 @@ export function VaultCardModal({
     e.preventDefault();
 
     if (!alias.trim()) {
-      toast.error("Por favor ingresa un nombre o alias para identificar la tarjeta");
+      toast.error("Ingresa un nombre o alias para identificar el registro");
       return;
     }
 
-    if (!cardNumber.trim() && !iban.trim() && !sinpeMovil.trim() && !accountNumber.trim()) {
-      toast.error("Ingresa al menos un número de tarjeta, IBAN o SINPE Móvil");
+    if (!cardNumber.trim() && !iban.trim() && !accountNumber.trim()) {
+      toast.error("Ingresa al menos un número de tarjeta, cuenta IBAN o número de cuenta");
       return;
     }
 
@@ -228,7 +251,7 @@ export function VaultCardModal({
         cvv: cvv.trim(),
         iban: iban.trim().toUpperCase(),
         clabe: iban.trim().toUpperCase(),
-        sinpe_movil: sinpeMovil.replace(/\D/g, ""),
+        sinpe_movil: "",
         account_number: accountNumber.trim(),
         cut_off_day: cutOffDay ? parseInt(cutOffDay, 10) : null,
         payment_due_day: paymentDueDay ? parseInt(paymentDueDay, 10) : null,
@@ -254,7 +277,7 @@ export function VaultCardModal({
 
   const handleDelete = async () => {
     if (!cardToEdit || !onDelete) return;
-    if (confirm("¿Seguro que deseas eliminar esta tarjeta de tu bóveda protegida?")) {
+    if (confirm("¿Seguro que deseas eliminar este registro de tu bóveda?")) {
       setIsSubmitting(true);
       await onDelete(cardToEdit.id);
       setIsSubmitting(false);
@@ -265,29 +288,21 @@ export function VaultCardModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-[96vw] sm:max-w-4xl lg:max-w-5xl xl:max-w-6xl h-[92vh] max-h-[820px] overflow-hidden p-0 gap-0 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col">
-        {/* Modal Top Header */}
         <DialogHeader className="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
           <div className="flex items-center gap-3 pr-6">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shrink-0">
-              <ShieldCheck size={22} />
+            <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <CreditCard size={20} />
             </div>
             <div className="min-w-0">
-              <DialogTitle className="text-base sm:text-lg md:text-xl font-bold tracking-tight truncate">
-                {isEditing ? "Editar Tarjeta / Cuenta" : "Registrar en Bóveda Bancaria (Costa Rica)"}
+              <DialogTitle className="text-base sm:text-lg font-bold tracking-tight truncate">
+                {isEditing ? "Editar Tarjeta o Cuenta" : "Agregar Tarjeta o Cuenta"}
               </DialogTitle>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5 truncate">
-                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                Cifrado bancario AES-GCM 256 • Soporte oficial para IBAN y SINPE Móvil
-              </p>
             </div>
           </div>
         </DialogHeader>
 
-        {/* 2-Column Split: Showcase on Left, Form on Right */}
         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden min-h-0">
-          {/* LEFT PANE: 3D Luxury Interactive Card Showcase */}
-          <div className="w-full lg:w-[42%] xl:w-[40%] bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white border-b lg:border-b-0 lg:border-r border-slate-800 p-6 lg:p-8 flex flex-col justify-between items-center relative overflow-hidden shrink-0">
-            {/* Ambient Radial Glow matching Bank Accent Color */}
+          <div className="w-full lg:w-[42%] xl:w-[40%] bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white border-b lg:border-b-0 lg:border-r border-slate-800 p-6 lg:p-8 flex flex-col justify-center items-center relative overflow-hidden shrink-0">
             <div
               className="absolute -top-20 -left-20 w-72 h-72 rounded-full blur-3xl opacity-25 pointer-events-none transition-all duration-700"
               style={{ backgroundColor: getBankTheme(bank).accentColor || "#3B82F6" }}
@@ -297,20 +312,15 @@ export function VaultCardModal({
               style={{ backgroundColor: getBankTheme(bank).accentColor || "#3B82F6" }}
             />
 
-            <div className="w-full flex flex-col items-center z-10 my-auto">
-              {/* Header Status in Showcase */}
-              <div className="flex items-center justify-between w-full mb-3 px-1">
+            <div className="w-full flex flex-col items-center z-10">
+              <div className="flex items-center justify-between w-full max-w-[380px] mb-3 px-1">
                 <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Building2 size={14} className="text-blue-400" />
                   {getBankTheme(bank).name}
                 </span>
-                <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 flex items-center gap-1.5">
-                  <Sparkles size={11} className="text-amber-400" />
-                  {cardNetwork !== "other" ? `${cardNetwork.toUpperCase()} DETECTADA` : "TARJETA"}
-                </span>
+                <NetworkLogo network={cardNetwork} size="sm" />
               </div>
 
-              {/* The 3D Bank Card View */}
               <div className="w-full max-w-[380px] py-1">
                 <BankCardView
                   card={previewCard}
@@ -323,7 +333,6 @@ export function VaultCardModal({
                 />
               </div>
 
-              {/* Flip Button & Helper */}
               <div className="flex flex-col items-center gap-2 mt-5">
                 <Button
                   type="button"
@@ -333,48 +342,33 @@ export function VaultCardModal({
                   className="rounded-xl text-xs h-9 px-4 gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20 shadow-md cursor-pointer backdrop-blur-sm transition-all active:scale-95"
                 >
                   <RotateCw size={14} className="text-blue-400" />
-                  <span>{isCardFlipped ? "Ver Frente de la Tarjeta" : "Ver Reverso (CVV / IBAN)"}</span>
+                  <span>{isCardFlipped ? "Ver Frente" : "Ver Reverso (CVV / IBAN)"}</span>
                 </Button>
-                <p className="text-[11px] text-slate-400 text-center flex items-center gap-1 font-medium">
-                  <span>Haz clic en la tarjeta o enfoca el CVV para girarla</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Security Seal at Bottom */}
-            <div className="hidden lg:flex items-center gap-3 w-full p-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-slate-300 z-10 mt-6">
-              <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
-                <ShieldCheck size={18} />
-              </div>
-              <div className="text-[11px] leading-tight">
-                <span className="font-semibold text-white block">Cifrado Local AES-256</span>
-                Tus datos se encriptan en tu navegador antes de guardarse.
               </div>
             </div>
           </div>
 
-          {/* RIGHT PANE: Clean, Streamlined, Essential Form */}
           <form
             onSubmit={handleSubmit}
             className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 overflow-hidden"
           >
-            {/* Scrollable Form Body */}
             <div className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-5 pb-14">
-              {/* 1. Banco Selector */}
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="bankSelect" className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <label
+                    htmlFor="bankSelect"
+                    className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5"
+                  >
                     <Building2 size={15} className="text-blue-600 dark:text-blue-400" />
-                    Banco o Entidad Financiera (Costa Rica) *
+                    Entidad Bancaria *
                   </label>
-                  <span className="text-[11px] font-medium text-muted-foreground">
-                    Selecciona tu entidad
-                  </span>
                 </div>
 
-                {/* Dropdown with all banks */}
                 <Select value={bank} onValueChange={(val) => handleBankChange(val as BankId)}>
-                  <SelectTrigger id="bankSelect" className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-sm font-semibold">
+                  <SelectTrigger
+                    id="bankSelect"
+                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-sm font-semibold"
+                  >
                     <SelectValue placeholder="Selecciona tu banco o entidad" />
                   </SelectTrigger>
                   <SelectContent className="max-h-72">
@@ -392,7 +386,6 @@ export function VaultCardModal({
                   </SelectContent>
                 </Select>
 
-                {/* Quick Select Popular Bank Chips */}
                 <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
                   {[
                     { id: "bac", label: "BAC" },
@@ -430,37 +423,46 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* 2. Tipo de Tarjeta (Débito vs Crédito) & Moneda */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-                {/* Débito vs Crédito */}
                 <div className="flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex-1">
                   <button
                     type="button"
                     onClick={() => setCardType("debit")}
-                    className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       cardType === "debit"
                         ? "bg-blue-600 text-white shadow-xs"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     <CreditCard size={14} />
-                    <span>Tarjeta de Débito</span>
+                    <span>Débito</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setCardType("credit")}
-                    className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       cardType === "credit"
                         ? "bg-blue-600 text-white shadow-xs"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     <Coins size={14} />
-                    <span>Tarjeta de Crédito</span>
+                    <span>Crédito</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCardType("account")}
+                    className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      cardType === "account"
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <Building2 size={14} />
+                    <span>Cuenta</span>
                   </button>
                 </div>
 
-                {/* Moneda */}
                 <div className="flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs shrink-0">
                   <button
                     type="button"
@@ -471,7 +473,7 @@ export function VaultCardModal({
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    ₡ Colones
+                    ₡ CRC
                   </button>
                   <button
                     type="button"
@@ -482,22 +484,21 @@ export function VaultCardModal({
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    $ Dólares
+                    $ USD
                   </button>
                 </div>
               </div>
 
-              {/* 3. Identificación: Alias & Titular */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="alias" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Nombre de la Tarjeta / Alias *
+                    Nombre / Alias *
                   </label>
                   <Input
                     id="alias"
-                    placeholder="ej. Tarjeta Personal, BAC Débito, BNCR Salario"
+                    placeholder="ej. BAC Débito, Cuenta BCR, BNCR Salario"
                     value={alias}
-                    onChange={(e) => setAlias(e.target.value)}
+                    onChange={handleAliasChange}
                     onFocus={() => {
                       setIsCardFlipped(false);
                       setFocusedField("alias");
@@ -509,7 +510,7 @@ export function VaultCardModal({
                 </div>
                 <div className="space-y-1.5">
                   <label htmlFor="cardholder" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Nombre del Titular (en el plástico)
+                    Nombre del Titular
                   </label>
                   <Input
                     id="cardholder"
@@ -526,38 +527,11 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* 4. Datos de Tarjeta: Número, Exp y CVV */}
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                 <div className="sm:col-span-6 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="cardNumber" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Número de Tarjeta ({cardNetwork === "amex" ? "15" : "16"} dígitos)
-                    </label>
-                    {/* Auto-detected card badge */}
-                    {cardNetwork === "visa" && (
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center gap-1 animate-in fade-in">
-                        <Sparkles size={11} className="text-amber-500" />
-                        Visa detectada
-                      </span>
-                    )}
-                    {cardNetwork === "mastercard" && (
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 flex items-center gap-1 animate-in fade-in">
-                        <Sparkles size={11} className="text-amber-500" />
-                        Mastercard detectada
-                      </span>
-                    )}
-                    {cardNetwork === "amex" && (
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 flex items-center gap-1 animate-in fade-in">
-                        <Sparkles size={11} className="text-amber-500" />
-                        Amex detectada
-                      </span>
-                    )}
-                    {cardNetwork === "other" && (
-                      <span className="text-[10px] text-muted-foreground font-medium">
-                        Detección automática
-                      </span>
-                    )}
-                  </div>
+                  <label htmlFor="cardNumber" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                    Número de Tarjeta ({cardNetwork === "amex" ? "15" : "16"} dígitos)
+                  </label>
                   <div className="relative">
                     <Input
                       id="cardNumber"
@@ -577,15 +551,15 @@ export function VaultCardModal({
                       className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
                     {cardNetwork !== "other" && (
-                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center">
-                        <NetworkLogo network={cardNetwork} />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                        <NetworkLogo network={cardNetwork} size="sm" />
                       </div>
                     )}
                   </div>
                 </div>
 
                 <div className="sm:col-span-3 space-y-1.5">
-                  <label htmlFor="exp" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  <label htmlFor="exp" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                     Vence (MM/AA)
                   </label>
                   <div className="relative">
@@ -610,14 +584,9 @@ export function VaultCardModal({
                 </div>
 
                 <div className="sm:col-span-3 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="cvv" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      CVV / CVC
-                    </label>
-                    <span className="text-[10px] text-amber-500 font-semibold flex items-center gap-0.5">
-                      <RotateCw size={10} /> 3D
-                    </span>
-                  </div>
+                  <label htmlFor="cvv" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                    CVV / CVC
+                  </label>
                   <div className="relative">
                     <Input
                       id="cvv"
@@ -628,11 +597,11 @@ export function VaultCardModal({
                         setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))
                       }
                       onFocus={() => {
-                        setIsCardFlipped(true); // Automatically flips to back!
+                        setIsCardFlipped(true);
                         setFocusedField("cvv");
                       }}
                       onBlur={() => setFocusedField(null)}
-                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-widest pl-9 text-center text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 ring-offset-2 focus:ring-2 focus:ring-amber-500/50"
+                      className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-widest pl-9 text-center text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
                       maxLength={4}
                     />
                     <Lock
@@ -643,15 +612,14 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* 5. Parámetros de Crédito (SOLO si Tipo === 'credit') */}
               {cardType === "credit" && (
-                <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/25 border border-blue-200/70 dark:border-blue-900/40 space-y-3 animate-in fade-in duration-200">
+                <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/25 border border-blue-200/70 dark:border-blue-900/40 space-y-3">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-                      ₡
+                      {currency === "CRC" ? "₡" : "$"}
                     </div>
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      Parámetros de Tarjeta de Crédito
+                      Fechas y Límite de Crédito
                     </span>
                   </div>
 
@@ -712,13 +680,11 @@ export function VaultCardModal({
                 </div>
               )}
 
-              {/* 6. Cuentas Asociadas Costa Rica: IBAN & SINPE */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
-                  Cuentas Asociadas en Costa Rica (Opcional)
+                  Cuenta Bancaria
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* IBAN */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <label htmlFor="iban" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -727,7 +693,7 @@ export function VaultCardModal({
                       <span
                         className={`text-[11px] font-mono font-bold ${
                           iban.replace(/\s+/g, "").length === 22
-                            ? "text-emerald-500"
+                            ? "text-emerald-600 dark:text-emerald-400"
                             : "text-muted-foreground"
                         }`}
                       >
@@ -752,34 +718,21 @@ export function VaultCardModal({
                     </div>
                   </div>
 
-                  {/* SINPE Móvil */}
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label htmlFor="sinpe" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        Número SINPE Móvil (8 dígitos)
-                      </label>
-                      <span
-                        className={`text-[11px] font-mono font-bold ${
-                          sinpeMovil.length === 8
-                            ? "text-emerald-500"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {sinpeMovil.length}/8
-                      </span>
-                    </div>
+                    <label htmlFor="accountNumber" className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                      Número de Cuenta Cliente
+                    </label>
                     <div className="relative">
                       <Input
-                        id="sinpe"
-                        placeholder="8888-8888"
-                        value={formatSinpe(sinpeMovil)}
-                        onChange={handleSinpeChange}
-                        onFocus={() => setFocusedField("sinpe")}
+                        id="accountNumber"
+                        placeholder="ej. 900834567"
+                        value={accountNumber}
+                        onChange={(e) => setAccountNumber(e.target.value)}
+                        onFocus={() => setFocusedField("accountNumber")}
                         onBlur={() => setFocusedField(null)}
                         className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-wider pl-10 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
-                        maxLength={9}
                       />
-                      <Smartphone
+                      <Hash
                         size={16}
                         className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                       />
@@ -788,11 +741,10 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* 7. Teléfono de Servicio & Notas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="phone" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Teléfono de Servicio al Cliente
+                    Teléfono del Banco
                   </label>
                   <div className="relative">
                     <Input
@@ -811,11 +763,11 @@ export function VaultCardModal({
 
                 <div className="space-y-1.5">
                   <label htmlFor="notes" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Notas Confidenciales
+                    Notas
                   </label>
                   <Input
                     id="notes"
-                    placeholder="ej. Sucursal Escazú, token digital, etc."
+                    placeholder="ej. Cuenta planilla, sucursal, etc."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     className="rounded-xl bg-slate-50 dark:bg-slate-950 text-sm h-11 border-slate-200 dark:border-slate-800"
@@ -824,7 +776,6 @@ export function VaultCardModal({
               </div>
             </div>
 
-            {/* Pinned Form Footer */}
             <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-between shrink-0 gap-3">
               {isEditing && onDelete ? (
                 <Button
@@ -835,7 +786,7 @@ export function VaultCardModal({
                   className="rounded-xl gap-2 cursor-pointer text-xs h-10 px-4 font-semibold shadow-xs"
                 >
                   <Trash2 size={15} />
-                  <span>Eliminar Tarjeta</span>
+                  <span>Eliminar</span>
                 </Button>
               ) : (
                 <div />
@@ -856,8 +807,7 @@ export function VaultCardModal({
                   disabled={isSubmitting}
                   className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 cursor-pointer shadow-md text-xs h-10 gap-2"
                 >
-                  <ShieldCheck size={16} />
-                  {isSubmitting ? "Guardando..." : "Guardar en Bóveda"}
+                  {isSubmitting ? "Guardando..." : "Guardar"}
                 </Button>
               </div>
             </div>
