@@ -74,31 +74,23 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
     if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
   }, []);
 
-  // Listen to tab visibility & user interactions to auto-lock or reset timer
+  // Listen to user interactions to reset inactivity timer
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && isUnlocked) {
-        lockVault();
-      }
-    };
-
     const handleUserActivity = () => {
       if (isUnlocked) resetLockTimer();
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("mousemove", handleUserActivity);
     window.addEventListener("keydown", handleUserActivity);
     window.addEventListener("touchstart", handleUserActivity);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("mousemove", handleUserActivity);
       window.removeEventListener("keydown", handleUserActivity);
       window.removeEventListener("touchstart", handleUserActivity);
       if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
     };
-  }, [isUnlocked, lockVault, resetLockTimer]);
+  }, [isUnlocked, resetLockTimer]);
 
   // Check whether PIN is already configured (Supabase or LocalStorage)
   const checkPinStatus = useCallback(async () => {
