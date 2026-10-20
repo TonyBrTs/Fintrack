@@ -67,9 +67,8 @@ export function BankCardView({
     return (
       <div
         className={`relative select-none w-full max-w-[420px] mx-auto ${className}`}
-        style={{ minHeight: "220px" }}
       >
-        <div className="relative w-full aspect-[1.586/1] rounded-2xl bg-slate-900 border border-slate-700/80 shadow-xl overflow-hidden flex flex-col justify-between p-4 sm:p-5 text-white">
+        <div className="relative w-full aspect-[1.586/1] rounded-2xl bg-slate-900 border border-slate-700/80 shadow-xl overflow-hidden flex flex-col justify-between p-3.5 sm:p-5 text-white">
           <div
             className="absolute top-0 left-0 right-0 h-1.5"
             style={{ background: theme.bgGradient }}
@@ -189,7 +188,6 @@ export function BankCardView({
   return (
     <div
       className={`relative select-none perspective-[1200px] w-full max-w-[420px] mx-auto ${className}`}
-      style={{ minHeight: "220px" }}
     >
       <div
         className={`relative w-full aspect-[1.586/1] transition-transform duration-700 [transform-style:preserve-3d] cursor-pointer rounded-2xl shadow-xl hover:shadow-2xl ${
@@ -198,7 +196,7 @@ export function BankCardView({
         onClick={() => interactive && toggleFlip()}
       >
         <div
-          className="absolute inset-0 rounded-2xl p-4 sm:p-5 flex flex-col justify-between overflow-hidden [backface-visibility:hidden] border border-white/20 shadow-inner text-white"
+          className="absolute inset-0 rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between overflow-hidden [backface-visibility:hidden] border border-white/20 shadow-inner text-white"
           style={{ background: theme.bgGradient }}
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20 pointer-events-none rounded-2xl" />

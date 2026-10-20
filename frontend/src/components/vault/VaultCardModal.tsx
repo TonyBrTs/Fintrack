@@ -277,14 +277,14 @@ export function VaultCardModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[96vw] sm:max-w-4xl lg:max-w-5xl xl:max-w-6xl h-[92vh] max-h-[820px] overflow-hidden p-0 gap-0 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col">
-        <DialogHeader className="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
-          <div className="flex items-center gap-3 pr-6">
-            <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-              {cardType === "account" ? <Building2 size={20} /> : <CreditCard size={20} />}
+      <DialogContent className="w-[96vw] sm:max-w-4xl lg:max-w-5xl xl:max-w-6xl h-[94dvh] max-h-[94dvh] sm:h-[92vh] sm:max-h-[820px] overflow-hidden p-0 gap-0 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col">
+        <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200/80 dark:border-slate-800 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+          <div className="flex items-center gap-2.5 pr-6">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              {cardType === "account" ? <Building2 size={18} /> : <CreditCard size={18} />}
             </div>
             <div className="min-w-0">
-              <DialogTitle className="text-base sm:text-lg font-bold tracking-tight truncate">
+              <DialogTitle className="text-sm sm:text-lg font-bold tracking-tight truncate">
                 {isEditing ? "Editar Tarjeta o Cuenta" : "Agregar Tarjeta o Cuenta"}
               </DialogTitle>
             </div>
@@ -292,7 +292,7 @@ export function VaultCardModal({
         </DialogHeader>
 
         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden min-h-0">
-          <div className="w-full lg:w-[42%] xl:w-[40%] bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white border-b lg:border-b-0 lg:border-r border-slate-800 p-6 lg:p-8 flex flex-col justify-center items-center relative overflow-hidden shrink-0">
+          <div className="w-full lg:w-[42%] xl:w-[40%] bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white border-b lg:border-b-0 lg:border-r border-slate-800 px-4 py-2.5 sm:p-5 lg:p-8 flex flex-col justify-center items-center relative overflow-hidden shrink-0">
             <div
               className="absolute -top-20 -left-20 w-72 h-72 rounded-full blur-3xl opacity-25 pointer-events-none transition-all duration-700"
               style={{ backgroundColor: getBankTheme(bank).accentColor || "#3B82F6" }}
@@ -303,7 +303,7 @@ export function VaultCardModal({
             />
 
             <div className="w-full flex flex-col items-center z-10">
-              <div className="flex items-center justify-between w-full max-w-[380px] mb-3 px-1">
+              <div className="hidden lg:flex items-center justify-between w-full max-w-[380px] mb-3 px-1">
                 <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Building2 size={14} className="text-blue-400" />
                   {getBankTheme(bank).name}
@@ -313,7 +313,7 @@ export function VaultCardModal({
                 )}
               </div>
 
-              <div className="w-full max-w-[380px] py-1">
+              <div className="w-full max-w-[270px] sm:max-w-[330px] lg:max-w-[380px]">
                 <BankCardView
                   card={previewCard}
                   isUnlocked={true}
@@ -326,7 +326,7 @@ export function VaultCardModal({
               </div>
 
               {cardType !== "account" && (
-                <div className="flex flex-col items-center gap-2 mt-5">
+                <div className="hidden lg:flex flex-col items-center gap-2 mt-5">
                   <Button
                     type="button"
                     variant="outline"
@@ -346,20 +346,20 @@ export function VaultCardModal({
             onSubmit={handleSubmit}
             className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 overflow-hidden"
           >
-            <div className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-5 pb-14">
-              <div className="space-y-2">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7 space-y-4 sm:space-y-5 pb-8">
+              <div className="space-y-1.5">
                 <label
                   htmlFor="bankSelect"
                   className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5"
                 >
-                  <Building2 size={15} className="text-blue-600 dark:text-blue-400" />
+                  <Building2 size={14} className="text-blue-600 dark:text-blue-400" />
                   Entidad Bancaria *
                 </label>
 
                 <Select value={bank} onValueChange={(val) => handleBankChange(val as BankId)}>
                   <SelectTrigger
                     id="bankSelect"
-                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-sm font-semibold"
+                    className="h-10 sm:h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-sm font-semibold"
                   >
                     <SelectValue placeholder="Selecciona tu banco o entidad" />
                   </SelectTrigger>
@@ -379,31 +379,31 @@ export function VaultCardModal({
                 </Select>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-                <div className="flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex-1">
+              <div className="flex items-center justify-between gap-2 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+                <div className="flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex-1 min-w-0">
                   <button
                     type="button"
                     onClick={() => setCardType("debit")}
-                    className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`flex-1 py-1.5 sm:py-2 px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
                       cardType === "debit"
                         ? "bg-blue-600 text-white shadow-xs"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    <CreditCard size={14} />
-                    <span>Débito</span>
+                    <CreditCard size={13} className="shrink-0" />
+                    <span className="truncate">Débito</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setCardType("credit")}
-                    className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`flex-1 py-1.5 sm:py-2 px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
                       cardType === "credit"
                         ? "bg-blue-600 text-white shadow-xs"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    <Coins size={14} />
-                    <span>Crédito</span>
+                    <Coins size={13} className="shrink-0" />
+                    <span className="truncate">Crédito</span>
                   </button>
                   <button
                     type="button"
@@ -411,14 +411,14 @@ export function VaultCardModal({
                       setCardType("account");
                       setIsCardFlipped(false);
                     }}
-                    className={`flex-1 py-2 px-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`flex-1 py-1.5 sm:py-2 px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
                       cardType === "account"
                         ? "bg-blue-600 text-white shadow-xs"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    <Building2 size={14} />
-                    <span>Cuenta</span>
+                    <Building2 size={13} className="shrink-0" />
+                    <span className="truncate">Cuenta</span>
                   </button>
                 </div>
 
@@ -426,7 +426,7 @@ export function VaultCardModal({
                   <button
                     type="button"
                     onClick={() => setCurrency("CRC")}
-                    className={`py-2 px-3.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    className={`py-1.5 sm:py-2 px-2.5 sm:px-3 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                       currency === "CRC"
                         ? "bg-blue-600 text-white shadow-xs"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -437,7 +437,7 @@ export function VaultCardModal({
                   <button
                     type="button"
                     onClick={() => setCurrency("USD")}
-                    className={`py-2 px-3.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    className={`py-1.5 sm:py-2 px-2.5 sm:px-3 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                       currency === "USD"
                         ? "bg-blue-600 text-white shadow-xs"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -487,8 +487,8 @@ export function VaultCardModal({
               </div>
 
               {cardType !== "account" && (
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                  <div className="sm:col-span-6 space-y-1.5">
+                <div className="grid grid-cols-2 sm:grid-cols-12 gap-3 sm:gap-4">
+                  <div className="col-span-2 sm:col-span-6 space-y-1.5">
                     <label htmlFor="cardNumber" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                       Número de Tarjeta ({cardNetwork === "amex" ? "15" : "16"} dígitos)
                     </label>
@@ -518,7 +518,7 @@ export function VaultCardModal({
                     </div>
                   </div>
 
-                  <div className="sm:col-span-3 space-y-1.5">
+                  <div className="col-span-1 sm:col-span-3 space-y-1.5">
                     <label htmlFor="exp" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                       Vence (MM/AA)
                     </label>
@@ -543,7 +543,7 @@ export function VaultCardModal({
                     </div>
                   </div>
 
-                  <div className="sm:col-span-3 space-y-1.5">
+                  <div className="col-span-1 sm:col-span-3 space-y-1.5">
                     <label htmlFor="cvv" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                       CVV / CVC
                     </label>
@@ -574,7 +574,7 @@ export function VaultCardModal({
               )}
 
               {cardType === "credit" && (
-                <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/25 border border-blue-200/70 dark:border-blue-900/40 space-y-3">
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/25 border border-blue-200/70 dark:border-blue-900/40 space-y-3">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
                       {currency === "CRC" ? "₡" : "$"}
@@ -584,7 +584,7 @@ export function VaultCardModal({
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div className="space-y-1.5">
                       <label htmlFor="cutoff" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                         Día de Corte (1 - 31)
@@ -617,7 +617,7 @@ export function VaultCardModal({
                       />
                     </div>
 
-                    <div className="space-y-1.5">
+                    <div className="col-span-2 sm:col-span-1 space-y-1.5">
                       <label htmlFor="limit" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                         Límite ({currency === "CRC" ? "₡" : "$"})
                       </label>
@@ -716,7 +716,7 @@ export function VaultCardModal({
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-between shrink-0 gap-3">
+            <div className="px-4 sm:px-6 py-2.5 sm:py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-between shrink-0 gap-3">
               {isEditing && onDelete ? (
                 <Button
                   type="button"
