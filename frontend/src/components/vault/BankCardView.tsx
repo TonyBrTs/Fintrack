@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from "react";
 import type { VaultCard } from "@/types";
 import { getBankTheme } from "@/lib/bankThemes";
-import { maskCardNumber, formatCardNumber } from "@/lib/vaultCrypto";
+import { maskCardNumber, formatCardNumber, formatIban } from "@/lib/vaultCrypto";
 import { toast } from "sonner";
-import { Copy, Eye, EyeOff, RotateCw, Phone } from "lucide-react";
+import { Copy, Eye, EyeOff, RotateCw, Building2, Landmark } from "lucide-react";
 
 interface BankCardViewProps {
   card: VaultCard;
@@ -46,7 +46,6 @@ export function BankCardView({
 
   const theme = getBankTheme(card.bank);
   const isAmex = card.card_network === "amex";
-  const isAccountOnly = card.card_type === "account" && !card.card_number.replace(/•/g, "").trim();
 
   const handleCopy = (text: string, label: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -61,11 +60,131 @@ export function BankCardView({
     });
   };
 
-  const displayNumber = isAccountOnly
-    ? card.iban || card.account_number || "CUENTA BANCARIA"
-    : showFullNumber && isUnlocked
-    ? formatCardNumber(card.card_number)
-    : maskCardNumber(card.card_number, card.last4);
+  if (card.card_type === "account") {
+    const ibanValue = card.iban || card.clabe || "";
+    const formattedIban = ibanValue ? formatIban(ibanValue) : "CR00 0000 0000 0000 0000 00";
+
+    return (
+      <div
+        className={`relative select-none w-full max-w-[420px] mx-auto ${className}`}
+        style={{ minHeight: "220px" }}
+      >
+        <div className="relative w-full aspect-[1.586/1] rounded-2xl bg-slate-900 border border-slate-700/80 shadow-xl overflow-hidden flex flex-col justify-between p-4 sm:p-5 text-white">
+          <div
+            className="absolute top-0 left-0 right-0 h-1.5"
+            style={{ background: theme.bgGradient }}
+          />
+          <div
+            className="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-3xl opacity-20 pointer-events-none"
+            style={{ backgroundColor: theme.accentColor || "#3B82F6" }}
+          />
+
+          <div className="relative z-10 flex items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-white/15 shadow-xs"
+                style={{ background: theme.bgGradient }}
+              >
+                <Landmark size={17} className="text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-black tracking-tight text-white block truncate">
+                  {theme.name}
+                </span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block truncate">
+                  {card.alias || "Cuenta Bancaria"}
+                </span>
+              </div>
+            </div>
+
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-200 shrink-0 font-mono">
+              {card.currency === "USD" ? "USD $" : "CRC ₡"}
+            </span>
+          </div>
+
+          <div className="relative z-10 space-y-2 my-auto py-1">
+            <div
+              className={`p-2.5 rounded-xl bg-slate-950/80 border transition-all ${
+                focusedField === "iban"
+                  ? "border-blue-500 ring-2 ring-blue-500/30"
+                  : "border-slate-800"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  Cuenta IBAN
+                </span>
+                {ibanValue && (
+                  <button
+                    type="button"
+                    onClick={(e) => handleCopy(ibanValue, "Cuenta IBAN", e)}
+                    className="text-[10px] font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Copy size={10} />
+                    <span>Copiar</span>
+                  </button>
+                )}
+              </div>
+              <p className="font-mono text-xs sm:text-sm font-bold tracking-wider text-emerald-400 truncate">
+                {formattedIban}
+              </p>
+            </div>
+
+            {card.account_number && (
+              <div
+                className={`px-2.5 py-1.5 rounded-lg bg-slate-950/50 border flex items-center justify-between transition-all ${
+                  focusedField === "accountNumber"
+                    ? "border-blue-500 ring-2 ring-blue-500/30"
+                    : "border-slate-800/80"
+                }`}
+              >
+                <div className="min-w-0">
+                  <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block">
+                    Cuenta Cliente
+                  </span>
+                  <span className="font-mono text-[11px] font-bold text-slate-200 truncate block">
+                    {card.account_number}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => handleCopy(card.account_number || "", "Número de Cuenta", e)}
+                  className="text-slate-400 hover:text-white p-1 cursor-pointer shrink-0"
+                  title="Copiar cuenta"
+                >
+                  <Copy size={11} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="relative z-10 flex items-center justify-between pt-2 border-t border-slate-800/80 text-[10px]">
+            <div
+              className={`min-w-0 truncate rounded transition-all ${
+                focusedField === "cardholder" ? "text-blue-400" : "text-slate-300"
+              }`}
+            >
+              <span className="text-[8px] uppercase tracking-wider text-slate-500 font-bold mr-1.5">
+                Titular:
+              </span>
+              <span className="font-semibold uppercase tracking-wide">
+                {card.cardholder_name || "TITULAR DE LA CUENTA"}
+              </span>
+            </div>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1">
+              <Building2 size={11} />
+              Cuenta
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const displayNumber =
+    showFullNumber && isUnlocked
+      ? formatCardNumber(card.card_number)
+      : maskCardNumber(card.card_number, card.last4);
 
   return (
     <div
@@ -108,11 +227,7 @@ export function BankCardView({
                 </span>
               </div>
               <span className="text-[9px] uppercase tracking-wider font-semibold opacity-85 mt-0.5">
-                {card.card_type === "credit"
-                  ? "Crédito"
-                  : card.card_type === "debit"
-                  ? "Débito"
-                  : "Cuenta Bancaria"}
+                {card.card_type === "credit" ? "Crédito" : "Débito"}
               </span>
             </div>
 
@@ -161,13 +276,7 @@ export function BankCardView({
 
             <button
               type="button"
-              onClick={(e) =>
-                handleCopy(
-                  isAccountOnly ? card.iban || card.account_number || "" : card.card_number,
-                  isAccountOnly ? "Cuenta" : "Número de Tarjeta",
-                  e
-                )
-              }
+              onClick={(e) => handleCopy(card.card_number, "Número de Tarjeta", e)}
               className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10px] font-bold bg-white/15 hover:bg-white/25 backdrop-blur-xs border border-white/20 flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
               title="Copiar número"
             >
@@ -191,7 +300,7 @@ export function BankCardView({
               {displayNumber}
             </span>
 
-            {isUnlocked && !isAccountOnly && card.card_number && (
+            {isUnlocked && card.card_number && (
               <button
                 type="button"
                 onClick={(e) => {
@@ -339,12 +448,6 @@ export function BankCardView({
                   >
                     <Copy size={9} />
                   </button>
-                </div>
-              )}
-              {(card.bank_phone || theme.bankPhone) && (
-                <div className="flex items-center gap-1 text-[8px] sm:text-[9px] text-white/80 truncate">
-                  <Phone size={9} className="shrink-0" />
-                  <span className="truncate">Tel: {card.bank_phone || theme.bankPhone}</span>
                 </div>
               )}
             </div>

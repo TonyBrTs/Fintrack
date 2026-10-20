@@ -12,7 +12,6 @@ import {
   Plus,
   CreditCard,
   Copy,
-  Phone,
   Edit3,
   Layers,
   LayoutGrid,
@@ -460,51 +459,53 @@ export default function VaultPage() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div className="p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between">
-                      <div>
-                        <span className="text-[9px] font-semibold text-muted-foreground uppercase block">
-                          Vigencia
-                        </span>
-                        <p className="font-mono text-xs sm:text-sm font-bold">
-                          {activeCard.expiration_date || "N/A"}
-                        </p>
+                  {activeCard.card_type !== "account" && (
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between">
+                        <div>
+                          <span className="text-[9px] font-semibold text-muted-foreground uppercase block">
+                            Vigencia
+                          </span>
+                          <p className="font-mono text-xs sm:text-sm font-bold">
+                            {activeCard.expiration_date || "N/A"}
+                          </p>
+                        </div>
+                        {activeCard.expiration_date && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              handleCopy(activeCard.expiration_date || "", "Vigencia")
+                            }
+                            className="h-7 w-7 p-0 cursor-pointer"
+                          >
+                            <Copy size={12} />
+                          </Button>
+                        )}
                       </div>
-                      {activeCard.expiration_date && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() =>
-                            handleCopy(activeCard.expiration_date || "", "Vigencia")
-                          }
-                          className="h-7 w-7 p-0 cursor-pointer"
-                        >
-                          <Copy size={12} />
-                        </Button>
-                      )}
-                    </div>
 
-                    <div className="p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between">
-                      <div>
-                        <span className="text-[9px] font-semibold text-muted-foreground uppercase block">
-                          CVV
-                        </span>
-                        <p className="font-mono text-xs sm:text-sm font-bold tracking-widest">
-                          {activeCard.cvv || "•••"}
-                        </p>
+                      <div className="p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between">
+                        <div>
+                          <span className="text-[9px] font-semibold text-muted-foreground uppercase block">
+                            CVV
+                          </span>
+                          <p className="font-mono text-xs sm:text-sm font-bold tracking-widest">
+                            {activeCard.cvv || "•••"}
+                          </p>
+                        </div>
+                        {activeCard.cvv && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleCopy(activeCard.cvv || "", "CVV")}
+                            className="h-7 w-7 p-0 cursor-pointer"
+                          >
+                            <Copy size={12} />
+                          </Button>
+                        )}
                       </div>
-                      {activeCard.cvv && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleCopy(activeCard.cvv || "", "CVV")}
-                          className="h-7 w-7 p-0 cursor-pointer"
-                        >
-                          <Copy size={12} />
-                        </Button>
-                      )}
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {activeCard.card_type === "credit" && (
@@ -540,21 +541,6 @@ export default function VaultPage() {
                         </div>
                       </>
                     )}
-                  </div>
-                )}
-
-                {activeCard.bank_phone && (
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-200/80 dark:border-slate-800 text-xs">
-                    <span className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
-                      <Phone size={13} />
-                      Servicio al Cliente:
-                    </span>
-                    <a
-                      href={`tel:${activeCard.bank_phone.replace(/\D/g, "")}`}
-                      className="font-mono font-bold text-blue-600 dark:text-blue-400 hover:underline text-xs"
-                    >
-                      {activeCard.bank_phone}
-                    </a>
                   </div>
                 )}
               </div>
