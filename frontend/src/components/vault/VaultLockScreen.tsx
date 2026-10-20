@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Lock, ShieldCheck, KeyRound, ArrowRight, Delete, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,18 +29,12 @@ export function VaultLockScreen({
     setError(null);
     if (!hasPinConfigured) {
       if (!isConfirming) {
-        if (pin.length < 6) setPin((prev) => prev + digit);
+        setPin((prev) => (prev.length < 6 ? prev + digit : prev));
       } else {
-        if (confirmPin.length < 6) setConfirmPin((prev) => prev + digit);
+        setConfirmPin((prev) => (prev.length < 6 ? prev + digit : prev));
       }
     } else {
-      if (pin.length < 6) {
-        const next = pin + digit;
-        setPin(next);
-        if (next.length >= 4) {
-          // Auto-trigger unlock when 4 or more digits
-        }
-      }
+      setPin((prev) => (prev.length < 6 ? prev + digit : prev));
     }
   };
 
@@ -113,6 +107,42 @@ export function VaultLockScreen({
     }
   };
 
+  // Physical keyboard listener: captures typing without relying on a password input that browsers autofill
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Do not intercept if typing in a visible external input/textarea
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        if (e.target.id !== "vault_security_pin_input") return;
+      }
+
+      if (e.key >= "0" && e.key <= "9") {
+        e.preventDefault();
+        handleDigit(e.key);
+      } else if (e.key === "Backspace") {
+        e.preventDefault();
+        handleDelete();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        handleClear();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (hasPinConfigured) {
+          handleUnlockSubmit();
+        } else if (!isConfirming) {
+          handleSetupNext();
+        } else {
+          handleSetupSubmit();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [hasPinConfigured, isConfirming, pin, confirmPin, loading]);
+
   const activeValue = !hasPinConfigured && isConfirming ? confirmPin : pin;
 
   return (
@@ -164,28 +194,40 @@ export function VaultLockScreen({
           </div>
         )}
 
-        {/* Keyboard Input (Hidden support for physical typing) */}
+        {/*
+          Anti-Autofill Input:
+          Strictly prevents browser credential autofill and password manager popups.
+          Does not use type="password" or autofocus.
+        */}
         <input
-          type="password"
+          id="vault_security_pin_input"
+          name="vault_pin_manual_only"
+          type="tel"
+          inputMode="numeric"
+          pattern="[0-9]*"
           maxLength={6}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-1p-ignore="true"
+          data-bwignore="true"
+          data-form-type="other"
+          aria-autocomplete="none"
           value={activeValue}
           onChange={(e) => {
-            const val = e.target.value.replace(/\D/g, "");
-            if (!hasPinConfigured && isConfirming) {
-              setConfirmPin(val);
-            } else {
-              setPin(val);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (hasPinConfigured) handleUnlockSubmit();
-              else if (!isConfirming) handleSetupNext();
-              else handleSetupSubmit();
+            const raw = e.target.value.replace(/\D/g, "");
+            if (raw.length <= 6) {
+              if (!hasPinConfigured && isConfirming) {
+                setConfirmPin(raw);
+              } else {
+                setPin(raw);
+              }
             }
           }}
           className="sr-only"
-          autoFocus
+          tabIndex={-1}
         />
 
         {/* Keypad Grid (3x4) */}

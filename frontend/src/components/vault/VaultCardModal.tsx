@@ -6,8 +6,6 @@ import { BankCardView, NetworkLogo } from "./BankCardView";
 import { BANK_PRESETS, getBankTheme } from "@/lib/bankThemes";
 import {
   detectCardNetwork,
-  detectBankFromCardNumber,
-  detectBankFromIban,
   formatCardNumber,
   formatIban,
   formatSinpe,
@@ -142,9 +140,7 @@ export function VaultCardModal({
     }
   };
 
-  const [detectedBankName, setDetectedBankName] = useState<string | null>(null);
-
-  // Card number input formatter with network detection and Costa Rica bank detection
+  // Card number input formatter with network detection (Visa, Mastercard, Amex)
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, "");
     if (raw.length > 16) return;
@@ -153,16 +149,6 @@ export function VaultCardModal({
     const detected = detectCardNetwork(raw);
     if (detected !== "other") {
       setCardNetwork(detected);
-    }
-
-    const autoBank = detectBankFromCardNumber(raw);
-    if (autoBank) {
-      setBank(autoBank);
-      const theme = getBankTheme(autoBank);
-      setDetectedBankName(`${theme.name} • ${detected !== "other" ? detected.toUpperCase() : "Tarjeta"}`);
-      if (!bankPhone || bankPhone === getBankTheme(bank).bankPhone) {
-        setBankPhone(theme.bankPhone || "");
-      }
     }
   };
 
@@ -177,20 +163,10 @@ export function VaultCardModal({
     }
   };
 
-  // IBAN formatter (CR + 20 digits = 22 characters) with BCCR bank detection
+  // IBAN formatter (CR + 20 digits = 22 characters)
   const handleIbanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 22);
     setIban(raw);
-
-    const autoBank = detectBankFromIban(raw);
-    if (autoBank) {
-      setBank(autoBank);
-      const theme = getBankTheme(autoBank);
-      setDetectedBankName(`${theme.name} (IBAN BCCR)`);
-      if (!bankPhone || bankPhone === getBankTheme(bank).bankPhone) {
-        setBankPhone(theme.bankPhone || "");
-      }
-    }
   };
 
   // SINPE Móvil formatter (8 digits: 8888-8888)
@@ -325,26 +301,12 @@ export function VaultCardModal({
               {/* Header Status in Showcase */}
               <div className="flex items-center justify-between w-full mb-3 px-1">
                 <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles size={13} className="text-amber-400" />
-                  {detectedBankName || `${getBankTheme(bank).name} • ${cardNetwork.toUpperCase()}`}
+                  <Building2 size={14} className="text-blue-400" />
+                  {getBankTheme(bank).name}
                 </span>
-
-                {/* Subtle optional theme override */}
-                <Select value={bank} onValueChange={(val) => handleBankChange(val as BankId)}>
-                  <SelectTrigger className="h-7 px-2 text-[11px] rounded-lg bg-white/10 hover:bg-white/20 border-white/15 text-white/90 gap-1.5 font-medium cursor-pointer w-auto">
-                    <SelectValue placeholder="Estilo" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {Object.entries(BANK_PRESETS).map(([bId, preset]) => (
-                      <SelectItem key={bId} value={bId} className="text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: preset.accentColor }} />
-                          <span>{preset.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
+                  {cardNetwork.toUpperCase()}
+                </span>
               </div>
 
               {/* The 3D Bank Card View */}
@@ -397,7 +359,77 @@ export function VaultCardModal({
           >
             {/* Scrollable Form Body */}
             <div className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-5 pb-14">
-              {/* 1. Tipo de Tarjeta (Débito vs Crédito) & Moneda */}
+              {/* 1. Banco Selector */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="bankSelect" className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Building2 size={15} className="text-blue-600 dark:text-blue-400" />
+                    Banco o Entidad Financiera (Costa Rica) *
+                  </label>
+                  <span className="text-[11px] font-medium text-muted-foreground">
+                    Selecciona tu entidad
+                  </span>
+                </div>
+
+                {/* Dropdown with all banks */}
+                <Select value={bank} onValueChange={(val) => handleBankChange(val as BankId)}>
+                  <SelectTrigger id="bankSelect" className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-sm font-semibold">
+                    <SelectValue placeholder="Selecciona tu banco o entidad" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {Object.entries(BANK_PRESETS).map(([bId, preset]) => (
+                      <SelectItem key={bId} value={bId} className="py-2.5 cursor-pointer">
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className="w-3 h-3 rounded-full shrink-0 shadow-xs border border-black/10"
+                            style={{ backgroundColor: preset.accentColor }}
+                          />
+                          <span className="font-medium text-sm">{preset.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Quick Select Popular Bank Chips */}
+                <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                  {[
+                    { id: "bac", label: "BAC" },
+                    { id: "bncr", label: "BNCR" },
+                    { id: "bcr", label: "BCR" },
+                    { id: "popular", label: "Popular" },
+                    { id: "scotiabank", label: "Scotiabank" },
+                    { id: "davivienda", label: "Davivienda" },
+                    { id: "promerica", label: "Promerica" },
+                    { id: "wink", label: "Wink" },
+                    { id: "multimoney", label: "MultiMoney" },
+                    { id: "coopenae", label: "Coopenae" },
+                  ].map((item) => {
+                    const isSelected = bank === item.id;
+                    const theme = BANK_PRESETS[item.id as BankId];
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleBankChange(item.id as BankId)}
+                        className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                          isSelected
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60"
+                        }`}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: theme.accentColor }}
+                        />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. Tipo de Tarjeta (Débito vs Crédito) & Moneda */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-800">
                 {/* Débito vs Crédito */}
                 <div className="flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex-1">
@@ -454,7 +486,7 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* 2. Identificación: Alias & Titular */}
+              {/* 3. Identificación: Alias & Titular */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="alias" className="text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -493,18 +525,30 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* 3. Datos de Tarjeta: Número (con auto-detección de Visa/Mastercard), Exp y CVV */}
+              {/* 4. Datos de Tarjeta: Número, Exp y CVV */}
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                 <div className="sm:col-span-6 space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label htmlFor="cardNumber" className="text-xs font-bold text-slate-700 dark:text-slate-300">
                       Número de Tarjeta (16 dígitos)
                     </label>
-                    <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
-                      {cardNetwork === "visa" && "Visa detectada"}
-                      {cardNetwork === "mastercard" && "Mastercard detectada"}
-                      {cardNetwork === "amex" && "American Express detectada"}
-                    </span>
+                    {/* Manual network switcher pills */}
+                    <div className="flex items-center gap-1">
+                      {(["visa", "mastercard", "amex"] as const).map((net) => (
+                        <button
+                          key={net}
+                          type="button"
+                          onClick={() => setCardNetwork(net)}
+                          className={`px-1.5 py-0.5 text-[10px] font-bold uppercase rounded transition cursor-pointer ${
+                            cardNetwork === net
+                              ? "bg-blue-600 text-white shadow-2xs"
+                              : "bg-slate-200/80 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          {net}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div className="relative">
                     <Input
@@ -591,7 +635,7 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* 4. Parámetros de Crédito (SOLO si Tipo === 'credit') */}
+              {/* 5. Parámetros de Crédito (SOLO si Tipo === 'credit') */}
               {cardType === "credit" && (
                 <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/25 border border-blue-200/70 dark:border-blue-900/40 space-y-3 animate-in fade-in duration-200">
                   <div className="flex items-center gap-2">
@@ -660,7 +704,7 @@ export function VaultCardModal({
                 </div>
               )}
 
-              {/* 5. Cuentas Asociadas Costa Rica: IBAN & SINPE */}
+              {/* 6. Cuentas Asociadas Costa Rica: IBAN & SINPE */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
                   Cuentas Asociadas en Costa Rica (Opcional)
@@ -736,7 +780,7 @@ export function VaultCardModal({
                 </div>
               </div>
 
-              {/* 6. Teléfono de Servicio & Notas */}
+              {/* 7. Teléfono de Servicio & Notas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="phone" className="text-xs font-bold text-slate-700 dark:text-slate-300">
