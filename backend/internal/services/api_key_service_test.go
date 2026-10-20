@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -12,10 +13,13 @@ import (
 )
 
 type MockAPIKeyRepository struct {
+	mu   sync.Mutex
 	keys []models.APIKey
 }
 
 func (m *MockAPIKeyRepository) FindByUserID(ctx context.Context, userID string) ([]models.APIKey, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	var res []models.APIKey
 	for _, k := range m.keys {
 		if k.UserID == userID {
@@ -26,6 +30,8 @@ func (m *MockAPIKeyRepository) FindByUserID(ctx context.Context, userID string) 
 }
 
 func (m *MockAPIKeyRepository) FindByHash(ctx context.Context, keyHash string) (*models.APIKey, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	for _, k := range m.keys {
 		if k.KeyHash == keyHash && k.IsActive {
 			cp := k
@@ -36,11 +42,15 @@ func (m *MockAPIKeyRepository) FindByHash(ctx context.Context, keyHash string) (
 }
 
 func (m *MockAPIKeyRepository) Create(ctx context.Context, key *models.APIKey) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.keys = append(m.keys, *key)
 	return nil
 }
 
 func (m *MockAPIKeyRepository) Delete(ctx context.Context, id, userID string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	for i, k := range m.keys {
 		if k.ID == id && k.UserID == userID {
 			m.keys = append(m.keys[:i], m.keys[i+1:]...)
@@ -51,6 +61,8 @@ func (m *MockAPIKeyRepository) Delete(ctx context.Context, id, userID string) er
 }
 
 func (m *MockAPIKeyRepository) UpdateLastUsed(ctx context.Context, id string, lastUsed time.Time) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	for i, k := range m.keys {
 		if k.ID == id {
 			m.keys[i].LastUsedAt = &lastUsed
