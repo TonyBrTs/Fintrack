@@ -140,16 +140,16 @@ export function VaultCardModal({
     }
   };
 
-  // Card number input formatter with network detection (Visa, Mastercard, Amex)
+  // Card number input formatter with real-time automatic network & card detection
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, "");
-    if (raw.length > 16) return;
+    const maxLen = raw.startsWith("34") || raw.startsWith("37") ? 15 : 16;
+    if (raw.length > maxLen) return;
     setCardNumber(raw);
 
+    // Auto-detect payment network (Visa, Mastercard, Amex, Carnet)
     const detected = detectCardNetwork(raw);
-    if (detected !== "other") {
-      setCardNetwork(detected);
-    }
+    setCardNetwork(detected);
   };
 
   // Expiration date formatter MM/YY
@@ -304,8 +304,9 @@ export function VaultCardModal({
                   <Building2 size={14} className="text-blue-400" />
                   {getBankTheme(bank).name}
                 </span>
-                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
-                  {cardNetwork.toUpperCase()}
+                <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 flex items-center gap-1.5">
+                  <Sparkles size={11} className="text-amber-400" />
+                  {cardNetwork !== "other" ? `${cardNetwork.toUpperCase()} DETECTADA` : "TARJETA"}
                 </span>
               </div>
 
@@ -530,30 +531,37 @@ export function VaultCardModal({
                 <div className="sm:col-span-6 space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label htmlFor="cardNumber" className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Número de Tarjeta (16 dígitos)
+                      Número de Tarjeta ({cardNetwork === "amex" ? "15" : "16"} dígitos)
                     </label>
-                    {/* Manual network switcher pills */}
-                    <div className="flex items-center gap-1">
-                      {(["visa", "mastercard", "amex"] as const).map((net) => (
-                        <button
-                          key={net}
-                          type="button"
-                          onClick={() => setCardNetwork(net)}
-                          className={`px-1.5 py-0.5 text-[10px] font-bold uppercase rounded transition cursor-pointer ${
-                            cardNetwork === net
-                              ? "bg-blue-600 text-white shadow-2xs"
-                              : "bg-slate-200/80 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          {net}
-                        </button>
-                      ))}
-                    </div>
+                    {/* Auto-detected card badge */}
+                    {cardNetwork === "visa" && (
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center gap-1 animate-in fade-in">
+                        <Sparkles size={11} className="text-amber-500" />
+                        Visa detectada
+                      </span>
+                    )}
+                    {cardNetwork === "mastercard" && (
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 flex items-center gap-1 animate-in fade-in">
+                        <Sparkles size={11} className="text-amber-500" />
+                        Mastercard detectada
+                      </span>
+                    )}
+                    {cardNetwork === "amex" && (
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 flex items-center gap-1 animate-in fade-in">
+                        <Sparkles size={11} className="text-amber-500" />
+                        Amex detectada
+                      </span>
+                    )}
+                    {cardNetwork === "other" && (
+                      <span className="text-[10px] text-muted-foreground font-medium">
+                        Detección automática
+                      </span>
+                    )}
                   </div>
                   <div className="relative">
                     <Input
                       id="cardNumber"
-                      placeholder="0000 0000 0000 0000"
+                      placeholder={cardNetwork === "amex" ? "0000 000000 00000" : "0000 0000 0000 0000"}
                       value={formatCardNumber(cardNumber)}
                       onChange={handleCardNumberChange}
                       onFocus={() => {
@@ -562,7 +570,7 @@ export function VaultCardModal({
                       }}
                       onBlur={() => setFocusedField(null)}
                       className="rounded-xl bg-slate-50 dark:bg-slate-950 font-mono tracking-widest pl-10 pr-14 text-sm h-11 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900"
-                      maxLength={19}
+                      maxLength={cardNetwork === "amex" ? 17 : 19}
                     />
                     <CreditCard
                       size={17}

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Lock, ShieldCheck, KeyRound, ArrowRight, Delete, AlertCircle } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Lock, ShieldCheck, KeyRound, ArrowRight, Delete, AlertCircle, Keyboard } from "lucide-react";
 import { toast } from "sonner";
 
 interface VaultLockScreenProps {
@@ -23,12 +23,24 @@ export function VaultLockScreen({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Keypad Click
+  // References to always access the latest state in global keyboard and paste listeners
+  const pinRef = useRef(pin);
+  pinRef.current = pin;
+  const confirmPinRef = useRef(confirmPin);
+  confirmPinRef.current = confirmPin;
+  const isConfirmingRef = useRef(isConfirming);
+  isConfirmingRef.current = isConfirming;
+  const loadingRef = useRef(loading);
+  loadingRef.current = loading;
+  const hasPinConfiguredRef = useRef(hasPinConfigured);
+  hasPinConfiguredRef.current = hasPinConfigured;
+
+  // Keypad Click / Keyboard digit input
   const handleDigit = (digit: string) => {
-    if (loading) return;
+    if (loadingRef.current) return;
     setError(null);
-    if (!hasPinConfigured) {
-      if (!isConfirming) {
+    if (!hasPinConfiguredRef.current) {
+      if (!isConfirmingRef.current) {
         setPin((prev) => (prev.length < 6 ? prev + digit : prev));
       } else {
         setConfirmPin((prev) => (prev.length < 6 ? prev + digit : prev));
@@ -40,7 +52,7 @@ export function VaultLockScreen({
 
   const handleDelete = () => {
     setError(null);
-    if (!hasPinConfigured && isConfirming) {
+    if (!hasPinConfiguredRef.current && isConfirmingRef.current) {
       setConfirmPin((prev) => prev.slice(0, -1));
     } else {
       setPin((prev) => prev.slice(0, -1));
@@ -55,15 +67,16 @@ export function VaultLockScreen({
   };
 
   // Submit unlock
-  const handleUnlockSubmit = async (pinToTest = pin) => {
-    if (pinToTest.length < 4) {
+  const handleUnlockSubmit = async (pinToTest?: string) => {
+    const targetPin = pinToTest !== undefined ? pinToTest : pinRef.current;
+    if (targetPin.length < 4) {
       setError("El PIN debe tener al menos 4 dígitos");
       return;
     }
     try {
       setLoading(true);
       setError(null);
-      const success = await onUnlock(pinToTest);
+      const success = await onUnlock(targetPin);
       if (!success) {
         setError("PIN incorrecto. Intenta de nuevo.");
         setPin("");
@@ -77,7 +90,7 @@ export function VaultLockScreen({
 
   // Submit setup
   const handleSetupNext = () => {
-    if (pin.length < 4) {
+    if (pinRef.current.length < 4) {
       setError("El PIN debe tener entre 4 y 6 dígitos.");
       return;
     }
@@ -86,7 +99,7 @@ export function VaultLockScreen({
   };
 
   const handleSetupSubmit = async () => {
-    if (confirmPin !== pin) {
+    if (confirmPinRef.current !== pinRef.current) {
       setError("Los PIN ingresados no coinciden.");
       setConfirmPin("");
       return;
@@ -94,7 +107,7 @@ export function VaultLockScreen({
     try {
       setLoading(true);
       setError(null);
-      const success = await onSetupPin(pin);
+      const success = await onSetupPin(pinRef.current);
       if (success) {
         toast.success("Bóveda configurada y desbloqueada.");
       } else {
@@ -107,31 +120,40 @@ export function VaultLockScreen({
     }
   };
 
-  // Physical keyboard listener: captures typing without relying on a password input that browsers autofill
+  /**
+   * Hardware Keyboard and Paste Listener:
+   * By operating directly via window keydown without an <input> element in the DOM,
+   * Bitwarden, 1Password, Chrome, and other password managers CANNOT detect or autofill
+   * credentials into the PIN, while physical keyboard typing works 100% smoothly.
+   */
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      // Do not intercept if typing in a visible external input/textarea
+      // Do not intercept if user is typing in a real input elsewhere
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
       ) {
-        if (e.target.id !== "vault_security_pin_input") return;
+        return;
       }
 
-      if (e.key >= "0" && e.key <= "9") {
+      // Numeric keys (0-9 from top row or numpad)
+      if (
+        (e.key >= "0" && e.key <= "9") ||
+        (e.code && e.code.startsWith("Numpad") && e.key >= "0" && e.key <= "9")
+      ) {
         e.preventDefault();
         handleDigit(e.key);
       } else if (e.key === "Backspace") {
         e.preventDefault();
         handleDelete();
-      } else if (e.key === "Escape") {
+      } else if (e.key === "Escape" || e.key === "Delete") {
         e.preventDefault();
         handleClear();
       } else if (e.key === "Enter") {
         e.preventDefault();
-        if (hasPinConfigured) {
+        if (hasPinConfiguredRef.current) {
           handleUnlockSubmit();
-        } else if (!isConfirming) {
+        } else if (!isConfirmingRef.current) {
           handleSetupNext();
         } else {
           handleSetupSubmit();
@@ -139,9 +161,24 @@ export function VaultLockScreen({
       }
     };
 
+    const onPaste = (e: ClipboardEvent) => {
+      const text = e.clipboardData?.getData("text") || "";
+      const digits = text.replace(/\D/g, "").slice(0, 6);
+      if (digits.length > 0) {
+        e.preventDefault();
+        for (const char of digits) {
+          handleDigit(char);
+        }
+      }
+    };
+
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [hasPinConfigured, isConfirming, pin, confirmPin, loading]);
+    window.addEventListener("paste", onPaste);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("paste", onPaste);
+    };
+  }, []);
 
   const activeValue = !hasPinConfigured && isConfirming ? confirmPin : pin;
 
@@ -161,7 +198,7 @@ export function VaultLockScreen({
             ? "Confirmar PIN"
             : "Crear PIN de Bóveda"}
         </h2>
-        <p className="text-xs text-muted-foreground mt-1 mb-6 max-w-xs leading-relaxed">
+        <p className="text-xs text-muted-foreground mt-1 mb-5 max-w-xs leading-relaxed">
           {hasPinConfigured
             ? "Ingresa tu PIN de seguridad para acceder a tus cuentas bancarias y tarjetas."
             : isConfirming
@@ -169,21 +206,41 @@ export function VaultLockScreen({
             : "Establece un código maestro para cifrar y proteger todos tus datos bancarios."}
         </p>
 
-        {/* PIN Indicators (Dots) */}
-        <div className="flex items-center justify-center gap-3 mb-6">
-          {[0, 1, 2, 3, 4, 5].map((index) => {
-            const isFilled = index < activeValue.length;
-            return (
-              <div
-                key={index}
-                className={`w-3.5 h-3.5 rounded-full transition-all duration-200 ${
-                  isFilled
-                    ? "bg-blue-600 scale-110 shadow-xs shadow-blue-500/50"
-                    : "border-2 border-border/80 bg-muted/30"
-                }`}
-              />
-            );
-          })}
+        {/*
+          Interactive Keyboard-Ready PIN Box
+          Zero <input> tags in DOM = ZERO Bitwarden / browser credential autofill.
+          Accepts typing directly from keyboard or on-screen keypad.
+        */}
+        <div className="w-full py-3.5 px-4 rounded-2xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex flex-col items-center gap-2.5 mb-5 shadow-xs">
+          {/* PIN Indicators (Dots) */}
+          <div className="flex items-center justify-center gap-3">
+            {[0, 1, 2, 3, 4, 5].map((index) => {
+              const isFilled = index < activeValue.length;
+              const isCurrent = index === activeValue.length;
+              return (
+                <div
+                  key={index}
+                  className={`w-4 h-4 rounded-full transition-all duration-200 flex items-center justify-center ${
+                    isFilled
+                      ? "bg-blue-600 scale-110 shadow-xs shadow-blue-500/50"
+                      : isCurrent
+                      ? "border-2 border-blue-500 bg-blue-500/10 scale-105"
+                      : "border-2 border-border/80 bg-muted/40"
+                  }`}
+                >
+                  {isCurrent && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Typing helper prompt */}
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+            <Keyboard size={13} className="text-blue-500 shrink-0" />
+            <span>Digita con tu teclado o usa la botonera</span>
+          </div>
         </div>
 
         {/* Error Alert */}
@@ -193,42 +250,6 @@ export function VaultLockScreen({
             <span>{error}</span>
           </div>
         )}
-
-        {/*
-          Anti-Autofill Input:
-          Strictly prevents browser credential autofill and password manager popups.
-          Does not use type="password" or autofocus.
-        */}
-        <input
-          id="vault_security_pin_input"
-          name="vault_pin_manual_only"
-          type="tel"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          maxLength={6}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          data-lpignore="true"
-          data-1p-ignore="true"
-          data-bwignore="true"
-          data-form-type="other"
-          aria-autocomplete="none"
-          value={activeValue}
-          onChange={(e) => {
-            const raw = e.target.value.replace(/\D/g, "");
-            if (raw.length <= 6) {
-              if (!hasPinConfigured && isConfirming) {
-                setConfirmPin(raw);
-              } else {
-                setPin(raw);
-              }
-            }
-          }}
-          className="sr-only"
-          tabIndex={-1}
-        />
 
         {/* Keypad Grid (3x4) */}
         <div className="grid grid-cols-3 gap-2.5 sm:gap-3 w-full mb-6">

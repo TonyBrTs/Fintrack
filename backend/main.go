@@ -97,8 +97,10 @@ func main() {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
 
-	// Public Health Endpoint
+	// Public Health & Operational Endpoints
 	router.GET("/health", handlers.HealthCheck)
+	router.GET("/version", handlers.VersionCheck)
+	router.GET("/commit", handlers.VersionCheck)
 	router.GET("/payment-methods", paymentMethodHandler.GetPaymentMethods)
 
 	// Protected API Routes (Supabase Auth Middleware & API Key Auth)
