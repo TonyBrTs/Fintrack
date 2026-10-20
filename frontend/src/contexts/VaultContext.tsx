@@ -275,23 +275,30 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const decrypted: VaultCard[] = await Promise.all(
         rawRecords.map(async (row) => {
-          const cardNumber = row.encrypted_card_number
-            ? await decryptText(row.encrypted_card_number, pin, salt)
+          const rawCardNumber = row.card_number || row.encrypted_card_number || "";
+          const rawClabe = row.clabe || row.encrypted_clabe || "";
+          const rawAccount = row.account_number || row.encrypted_account_number || "";
+          const rawExp = row.expiration_date || row.encrypted_expiration_date || "";
+          const rawCvv = row.cvv || row.encrypted_cvv || "";
+          const rawNotes = row.notes || row.encrypted_notes || "";
+
+          const cardNumber = rawCardNumber
+            ? await decryptText(rawCardNumber, pin, salt)
             : "";
-          const clabe = row.encrypted_clabe
-            ? await decryptText(row.encrypted_clabe, pin, salt)
+          const clabe = rawClabe
+            ? await decryptText(rawClabe, pin, salt)
             : "";
-          const accountNumber = row.encrypted_account_number
-            ? await decryptText(row.encrypted_account_number, pin, salt)
+          const accountNumber = rawAccount
+            ? await decryptText(rawAccount, pin, salt)
             : "";
-          const expirationDate = row.encrypted_expiration_date
-            ? await decryptText(row.encrypted_expiration_date, pin, salt)
+          const expirationDate = rawExp
+            ? await decryptText(rawExp, pin, salt)
             : "";
-          const cvv = row.encrypted_cvv
-            ? await decryptText(row.encrypted_cvv, pin, salt)
+          const cvv = rawCvv
+            ? await decryptText(rawCvv, pin, salt)
             : "";
-          const notes = row.encrypted_notes
-            ? await decryptText(row.encrypted_notes, pin, salt)
+          const notes = rawNotes
+            ? await decryptText(rawNotes, pin, salt)
             : "";
 
           return {
@@ -307,7 +314,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
             last4: row.last4 || cardNumber.slice(-4),
             iban: clabe,
             clabe,
-            sinpe_movil: accountNumber,
+            sinpe_movil: "",
             account_number: accountNumber,
             expiration_date: expirationDate,
             cvv,
@@ -386,19 +393,19 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
           card_network: detectedNetwork,
           alias: cardData.alias,
           cardholder_name: cardData.cardholder_name,
-          encrypted_card_number: encryptedCardNumber,
+          card_number: encryptedCardNumber,
           last4,
-          encrypted_clabe: encryptedClabe,
-          encrypted_account_number: encryptedAccount,
-          encrypted_expiration_date: encryptedExp,
-          encrypted_cvv: encryptedCvv,
+          clabe: encryptedClabe,
+          account_number: encryptedAccount,
+          expiration_date: encryptedExp,
+          cvv: encryptedCvv,
           cut_off_day: cardData.cut_off_day,
           payment_due_day: cardData.payment_due_day,
           credit_limit: cardData.credit_limit,
           currency: cardData.currency || "CRC",
-          color_scheme: cardData.color_scheme,
-          bank_phone: cardData.bank_phone,
-          encrypted_notes: encryptedNotes,
+          color_scheme: cardData.color_scheme || "auto",
+          bank_phone: cardData.bank_phone || "",
+          notes: encryptedNotes,
           is_favorite: cardData.is_favorite || false,
           created_at: now,
           updated_at: now,
@@ -421,19 +428,19 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
           card_network: detectedNetwork,
           alias: cardData.alias,
           cardholder_name: cardData.cardholder_name,
-          encrypted_card_number: encryptedCardNumber,
+          card_number: encryptedCardNumber,
           last4,
-          encrypted_clabe: encryptedClabe,
-          encrypted_account_number: encryptedAccount,
-          encrypted_expiration_date: encryptedExp,
-          encrypted_cvv: encryptedCvv,
+          clabe: encryptedClabe,
+          account_number: encryptedAccount,
+          expiration_date: encryptedExp,
+          cvv: encryptedCvv,
           cut_off_day: cardData.cut_off_day,
           payment_due_day: cardData.payment_due_day,
           credit_limit: cardData.credit_limit,
-          currency: cardData.currency || "MXN",
-          color_scheme: cardData.color_scheme,
-          bank_phone: cardData.bank_phone,
-          encrypted_notes: encryptedNotes,
+          currency: cardData.currency || "CRC",
+          color_scheme: cardData.color_scheme || "auto",
+          bank_phone: cardData.bank_phone || "",
+          notes: encryptedNotes,
           is_favorite: cardData.is_favorite || false,
           created_at: now,
           updated_at: now,
@@ -512,19 +519,19 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
           card_network: merged.card_network,
           alias: merged.alias,
           cardholder_name: merged.cardholder_name,
-          encrypted_card_number: encryptedCardNumber,
+          card_number: encryptedCardNumber,
           last4,
-          encrypted_clabe: encryptedClabe,
-          encrypted_account_number: encryptedAccount,
-          encrypted_expiration_date: encryptedExp,
-          encrypted_cvv: encryptedCvv,
+          clabe: encryptedClabe,
+          account_number: encryptedAccount,
+          expiration_date: encryptedExp,
+          cvv: encryptedCvv,
           cut_off_day: merged.cut_off_day,
           payment_due_day: merged.payment_due_day,
           credit_limit: merged.credit_limit,
           currency: merged.currency,
-          color_scheme: merged.color_scheme,
-          bank_phone: merged.bank_phone,
-          encrypted_notes: encryptedNotes,
+          color_scheme: merged.color_scheme || "auto",
+          bank_phone: merged.bank_phone || "",
+          notes: encryptedNotes,
           is_favorite: merged.is_favorite,
           updated_at: now,
         };
@@ -552,19 +559,19 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
               card_network: merged.card_network,
               alias: merged.alias,
               cardholder_name: merged.cardholder_name,
-              encrypted_card_number: encryptedCardNumber,
+              card_number: encryptedCardNumber,
               last4,
-              encrypted_clabe: encryptedClabe,
-              encrypted_account_number: encryptedAccount,
-              encrypted_expiration_date: encryptedExp,
-              encrypted_cvv: encryptedCvv,
+              clabe: encryptedClabe,
+              account_number: encryptedAccount,
+              expiration_date: encryptedExp,
+              cvv: encryptedCvv,
               cut_off_day: merged.cut_off_day,
               payment_due_day: merged.payment_due_day,
               credit_limit: merged.credit_limit,
               currency: merged.currency,
-              color_scheme: merged.color_scheme,
-              bank_phone: merged.bank_phone,
-              encrypted_notes: encryptedNotes,
+              color_scheme: merged.color_scheme || "auto",
+              bank_phone: merged.bank_phone || "",
+              notes: encryptedNotes,
               is_favorite: merged.is_favorite,
               updated_at: now,
             };
