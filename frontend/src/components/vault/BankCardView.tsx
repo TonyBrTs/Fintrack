@@ -66,7 +66,7 @@ export function BankCardView({
 
     return (
       <div
-        className={`relative select-none w-full max-w-[420px] mx-auto ${className}`}
+        className={`relative select-none outline-none focus:outline-none [-webkit-tap-highlight-color:transparent] w-full max-w-[420px] mx-auto ${className}`}
       >
         <div className="relative w-full aspect-[1.586/1] rounded-2xl bg-slate-900 border border-slate-700/80 shadow-xl overflow-hidden flex flex-col justify-between p-3.5 sm:p-5 text-white">
           <div
@@ -187,10 +187,10 @@ export function BankCardView({
 
   return (
     <div
-      className={`relative select-none perspective-[1200px] w-full max-w-[420px] mx-auto ${className}`}
+      className={`relative select-none outline-none focus:outline-none [-webkit-tap-highlight-color:transparent] perspective-[1200px] w-full max-w-[420px] mx-auto ${className}`}
     >
       <div
-        className={`relative w-full aspect-[1.586/1] transition-transform duration-700 [transform-style:preserve-3d] cursor-pointer rounded-2xl shadow-xl hover:shadow-2xl ${
+        className={`relative w-full aspect-[1.586/1] transition-transform duration-700 [transform-style:preserve-3d] cursor-pointer outline-none focus:outline-none [-webkit-tap-highlight-color:transparent] rounded-2xl shadow-xl hover:shadow-2xl ${
           isFlipped ? "[transform:rotateY(180deg)]" : ""
         }`}
         onClick={() => interactive && toggleFlip()}

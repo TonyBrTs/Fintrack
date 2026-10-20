@@ -304,42 +304,34 @@ export default function VaultPage() {
               <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Tarjetas y Cuentas ({filteredCards.length})
               </span>
-              <span className="text-[10px] sm:text-[11px] text-muted-foreground">
-                Selecciona para ver detalles
-              </span>
             </div>
 
-            <div className="flex flex-col space-y-[-115px] sm:space-y-[-140px] md:space-y-[-150px] pb-28 sm:pb-36 pt-1">
+            <div
+              className={`flex flex-col pt-1 ${
+                filteredCards.length > 1
+                  ? "space-y-[-115px] sm:space-y-[-140px] md:space-y-[-150px] pb-28 sm:pb-36"
+                  : "space-y-4"
+              }`}
+            >
               {filteredCards.map((card, index) => {
                 const isSelected = activeCard?.id === card.id;
                 return (
                   <motion.div
                     key={card.id}
                     layout
-                    whileHover={{ y: -12, transition: { duration: 0.2 } }}
                     animate={{
-                      scale: isSelected ? 1.02 : 1,
                       zIndex: isSelected ? 30 : index + 1,
-                      y: isSelected ? -8 : 0,
                     }}
                     onClick={() => setSelectedCardId(card.id)}
-                    className="cursor-pointer transition-all duration-300"
+                    className="cursor-pointer outline-none focus:outline-none [-webkit-tap-highlight-color:transparent]"
                   >
-                    <div
-                      className={`transition-all duration-300 ${
-                        isSelected
-                          ? "opacity-100"
-                          : "opacity-90 hover:opacity-100"
-                      }`}
-                    >
-                      <BankCardView
-                        card={card}
-                        isUnlocked={isUnlocked}
-                        onEdit={handleOpenEdit}
-                        onToggleFavorite={toggleFavorite}
-                        interactive={isSelected}
-                      />
-                    </div>
+                    <BankCardView
+                      card={card}
+                      isUnlocked={isUnlocked}
+                      onEdit={handleOpenEdit}
+                      onToggleFavorite={toggleFavorite}
+                      interactive={true}
+                    />
                   </motion.div>
                 );
               })}
