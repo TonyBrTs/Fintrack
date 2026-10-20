@@ -328,8 +328,8 @@ export default function VaultPage() {
                     <div
                       className={`transition-all duration-300 ${
                         isSelected
-                          ? "ring-3 sm:ring-4 ring-blue-500/40 rounded-2xl shadow-2xl"
-                          : "opacity-95 hover:opacity-100"
+                          ? "opacity-100"
+                          : "opacity-90 hover:opacity-100"
                       }`}
                     >
                       <BankCardView
