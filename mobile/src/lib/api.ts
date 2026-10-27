@@ -505,30 +505,14 @@ export const api = {
     });
   },
 
-  // Motor de Asesoría AI
+  // Consejos financieros genéricos
   getAIInsights: async (
     expenses: Expense[],
     incomes: Income[],
-    goals: Goal[] = []
+    _goals: Goal[] = []
   ): Promise<AIInsight[]> => {
     if (demoActive) {
       return [...INITIAL_DEMO_AI_INSIGHTS];
-    }
-    const vercelUrl = "https://fintrack-six-opal.vercel.app/api/ai/insights";
-    try {
-      const res = await fetch(vercelUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ expenses, incomes, goals }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data?.insights) && data.insights.length > 0) {
-          return data.insights;
-        }
-      }
-    } catch {
-      // Usar motor local si falla
     }
 
     const totalExp = expenses.reduce((s, e) => s + e.amount, 0);

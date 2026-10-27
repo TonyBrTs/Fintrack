@@ -204,11 +204,12 @@ export function LoginForm({
       </form>
 
       {/* Social Divider */}
-      <div className="relative flex items-center justify-center my-4">
-        <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
-        <span className="bg-white dark:bg-[#0b101d] px-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0">
+      <div className="flex items-center gap-3 my-4">
+        <div className="flex-1 border-t border-slate-200 dark:border-slate-800" />
+        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0 text-center">
           {isEs ? "o bien" : "or"}
         </span>
+        <div className="flex-1 border-t border-slate-200 dark:border-slate-800" />
       </div>
 
       {/* Google OAuth Button */}

@@ -46,7 +46,7 @@ export const translations = {
       noExpenses: "No hay gastos registrados en este período",
       noIncomes: "No hay ingresos registrados en este período",
       noTransactions: "No hay movimientos en este período",
-      aiInsights: "Gemini AI Insights",
+      aiInsights: "Consejos Financieros",
     },
     transactions: {
       title: "Movimientos",
@@ -234,7 +234,7 @@ export const translations = {
       noExpenses: "No expenses recorded for this period",
       noIncomes: "No income recorded for this period",
       noTransactions: "No transactions for this period",
-      aiInsights: "Gemini AI Insights",
+      aiInsights: "Financial Tips",
     },
     transactions: {
       title: "Transactions",
