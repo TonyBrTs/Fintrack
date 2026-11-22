@@ -4,7 +4,7 @@ import { ExpenseDetailsSheet } from "@/components/expenses/ExpenseDetailsSheet";
 import { RegisterExpenseModal } from "@/components/expenses/RegisterExpenseModal";
 import { RecurringExpensesManager } from "@/components/expenses/RecurringExpensesManager";
 import { RecurringExpenseModal } from "@/components/expenses/RecurringExpenseModal";
-import { Badge } from "@/components/ui/Badge";
+import { TransactionTimeFilter } from "@/components/transactions/TransactionTimeFilter";
 import { KPICard } from "@/components/ui/KPICard";
 import { NavExpensesIcon } from "@/components/ui/AppIcons";
 import {
@@ -31,18 +31,33 @@ import { useCategories } from "@/hooks/useCategories";
 import { ManageCategoriesModal } from "@/components/categories/ManageCategoriesModal";
 import { CategoryBadge } from "@/components/categories/CategoryBadge";
 import { PageLoadingState } from "@/components/ui/PageLoadingState";
-import { cn, formatCurrency, getCategoryStyle, formatDateDDMMYYYY } from "@/lib/utils";
-import type { Expense, RecurringSyncResult } from "@/types/index";
+import {
+  cn,
+  formatCurrency,
+  getCategoryStyle,
+  formatDateDDMMYYYY,
+  parseCalendarDate,
+} from "@/lib/utils";
+import {
+  formatDateGroupHeader,
+  getDateGroupKey,
+  getDateRangeForPreset,
+  getPeriodDisplayLabel,
+  isWithinDateRange,
+  type TimeFilterPreset,
+} from "@/lib/dateFilter";
+import type { Expense } from "@/types/index";
+import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
   AlertCircle,
   ChevronRight,
   Filter,
-  Loader2,
   Plus,
   Receipt,
   Repeat,
+  RotateCcw,
   Search,
   Tag,
 } from "lucide-react";
@@ -54,6 +69,8 @@ function ExpensesContent() {
   const { user, openAuthModal } = useAuth();
   const { categories: userCatList } = useCategories("expense");
   const searchParams = useSearchParams();
+  const isEs = language !== "en";
+
   const [activeTab, setActiveTab] = useState<"history" | "recurring">("history");
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,13 +82,16 @@ function ExpensesContent() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [timePreset, setTimePreset] = useState<TimeFilterPreset>("this_month");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() =>
+    getDateRangeForPreset("this_month")
+  );
 
   // Auto-open details if ID is in URL
   useEffect(() => {
     const id = searchParams.get("id");
     if (id && expenses.length > 0) {
       const expense = expenses.find((e) => e.id.toString() === id);
-
       if (expense) {
         setSelectedExpense(expense);
         setIsDetailsOpen(true);
@@ -110,7 +130,6 @@ function ExpensesContent() {
     }
     fetchExpenses();
 
-    // Sincronización automática de gastos fijos pendientes de la quincena/mes
     const localDate = new Date().toLocaleDateString("en-CA");
     expenseService
       .syncRecurringExpenses(localDate)
@@ -126,49 +145,116 @@ function ExpensesContent() {
       .catch(() => {});
   }, [user?.id]);
 
+  const handleSelectPreset = (preset: TimeFilterPreset) => {
+    setTimePreset(preset);
+    setDateRange(getDateRangeForPreset(preset));
+  };
+
+  const handleSelectCustomRange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (range?.from) {
+      setTimePreset("custom");
+    } else {
+      setTimePreset("all");
+    }
+  };
+
   const safeExpenses = useMemo(() => (Array.isArray(expenses) ? expenses : []), [expenses]);
 
-  const totalMonth = useMemo(() => {
-    return safeExpenses.reduce((acc, curr) => acc + curr.amount, 0);
-  }, [safeExpenses]);
+  const categoriesList = useMemo(() => {
+    const set = new Set<string>();
+    userCatList.forEach((c) => set.add(c.name));
+    safeExpenses.forEach((e) => {
+      if (e.category) set.add(e.category);
+    });
+    return Array.from(set);
+  }, [safeExpenses, userCatList]);
+
+  // Filtered and newest-first sorted expenses
+  const filteredExpenses = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    return safeExpenses
+      .filter((e) => {
+        const matchesTime = isWithinDateRange(e.date, dateRange);
+        if (!matchesTime) return false;
+
+        const matchesCat = selectedCategory === "all" || e.category === selectedCategory;
+        if (!matchesCat) return false;
+
+        if (!query) return true;
+        return (
+          e.description.toLowerCase().includes(query) ||
+          e.category.toLowerCase().includes(query) ||
+          e.payment_method.toLowerCase().includes(query)
+        );
+      })
+      .sort((a, b) => parseCalendarDate(b.date).getTime() - parseCalendarDate(a.date).getTime());
+  }, [safeExpenses, dateRange, searchTerm, selectedCategory]);
+
+  const periodTotal = useMemo(
+    () => filteredExpenses.reduce((acc, curr) => acc + curr.amount, 0),
+    [filteredExpenses]
+  );
 
   const categoryTotals = useMemo(() => {
-    return safeExpenses.reduce(
+    return filteredExpenses.reduce(
       (acc, curr) => {
         acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
         return acc;
       },
       {} as Record<string, number>
     );
-  }, [safeExpenses]);
+  }, [filteredExpenses]);
 
   const highestCategory = useMemo(() => {
     return Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || "---";
   }, [categoryTotals]);
 
-  // Unique categories list combining user categories and transactions
-  const categoriesList = useMemo(() => {
-    const set = new Set<string>();
-    userCatList.forEach((c) => set.add(c.name));
-    expenses.forEach((e) => {
-      if (e.category) set.add(e.category);
-    });
-    return Array.from(set);
-  }, [expenses, userCatList]);
+  const periodLabel = useMemo(
+    () => getPeriodDisplayLabel(timePreset, dateRange, language),
+    [timePreset, dateRange, language]
+  );
 
-  // Filtered expenses
-  const filteredExpenses = useMemo(() => {
-    return expenses.filter((e) => {
-      const matchesSearch =
-        e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.payment_method.toLowerCase().includes(searchTerm.toLowerCase());
+  // Date-grouped expenses for native mobile list
+  const groupedExpenses = useMemo(() => {
+    const groups: { key: string; label: string; total: number; items: Expense[] }[] = [];
+    const map = new Map<string, { key: string; label: string; total: number; items: Expense[] }>();
 
-      const matchesCat = selectedCategory === "all" || e.category === selectedCategory;
+    for (const expense of filteredExpenses) {
+      const key = getDateGroupKey(expense.date);
+      let group = map.get(key);
+      if (!group) {
+        group = {
+          key,
+          label: formatDateGroupHeader(expense.date, language),
+          total: 0,
+          items: [],
+        };
+        map.set(key, group);
+        groups.push(group);
+      }
+      group.items.push(expense);
+      group.total += expense.amount;
+    }
 
-      return matchesSearch && matchesCat;
-    });
-  }, [expenses, searchTerm, selectedCategory]);
+    return groups;
+  }, [filteredExpenses, language]);
+
+  const hasActiveFilters =
+    timePreset !== "all" || selectedCategory !== "all" || searchTerm.trim().length > 0;
+
+  const resetAllFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("all");
+    handleSelectPreset("all");
+  };
+
+  const formatExpenseTitle = (expense: Expense) =>
+    expense.category === "Metas"
+      ? `${translate("goals.contributionToGoal") || "Aporte a meta"}: ${
+          expense.description.split(": ")[1] || expense.description
+        }`
+      : expense.description.replace(/^\[Recurrente\]\s*/i, "");
 
   if (loading && expenses.length === 0) {
     return <PageLoadingState message={translate("common.loading") || "Cargando gastos..."} />;
@@ -216,26 +302,30 @@ function ExpensesContent() {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
-        <div className="space-y-1">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto pb-20 md:pb-6">
+      {/* Compact Mobile-First Header */}
+      <header className="flex items-center justify-between gap-3 pb-3 sm:pb-5 border-b border-border/40">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground truncate">
             {translate("expenses.title") || "Gastos"}
           </h1>
-          <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
+          <p className="hidden sm:block text-sm text-muted-foreground mt-1 leading-relaxed max-w-lg">
             {translate("expenses.description") ||
               "Monitorea, categoriza y controla todos tus egresos en un solo lugar."}
           </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             variant="outline"
             onClick={() => setIsManageCategoriesOpen(true)}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl font-bold text-xs sm:text-sm h-10 px-3.5 border-border/80 hover:bg-secondary cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl font-semibold text-xs sm:text-sm min-h-[44px] sm:h-10 px-3 sm:px-3.5 border-border/80 hover:bg-secondary cursor-pointer touch-manipulation"
+            aria-label={isEs ? "Gestionar categorías" : "Manage categories"}
           >
-            <Tag size={15} className="text-blue-500" />
-            <span>Categorías</span>
+            <Tag size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
+            <span className="hidden xs:inline sm:inline">
+              {isEs ? "Categorías" : "Categories"}
+            </span>
           </Button>
 
           {activeTab === "recurring" ? (
@@ -243,43 +333,41 @@ function ExpensesContent() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsRecurringModalOpen(true)}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
+              className="hidden md:flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors cursor-pointer h-10"
             >
               <Plus size={18} strokeWidth={2.5} />
-              <span className="truncate">Nuevo Gasto Fijo</span>
+              <span>{isEs ? "Nuevo Gasto Fijo" : "New Recurring"}</span>
             </motion.button>
           ) : (
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsModalOpen(true)}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer h-10"
+              className="hidden md:flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors cursor-pointer h-10"
             >
               <Plus size={18} strokeWidth={2.5} />
-              <span className="truncate">
-                {translate("expenses.register") || "Registrar Gasto"}
-              </span>
+              <span>{translate("expenses.register") || "Registrar Gasto"}</span>
             </motion.button>
           )}
         </div>
       </header>
 
-      {/* Tabs Switcher - Mobile Responsive Segmented Control */}
+      {/* Segmented Control Tabs */}
       <div className="grid grid-cols-2 sm:inline-flex items-center gap-1 p-1 bg-slate-200/70 dark:bg-slate-900/80 rounded-2xl border border-slate-300/80 dark:border-slate-800 w-full sm:w-auto shadow-xs">
         <button
           type="button"
           onClick={() => setActiveTab("history")}
           className={cn(
-            "flex items-center justify-center gap-2 py-2 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none",
+            "flex items-center justify-center gap-2 min-h-[40px] sm:min-h-[36px] px-3 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none touch-manipulation",
             activeTab === "history"
               ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-foreground shadow-sm border border-slate-200/90 dark:border-slate-700"
               : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
           )}
         >
-          <Receipt className="w-4 h-4 text-blue-500 shrink-0" />
-          <span>Gastos</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground font-semibold">
-            {expenses.length}
+          <Receipt className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+          <span>{isEs ? "Gastos" : "Expenses"}</span>
+          <span className="font-mono tabular-nums text-[11px] px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground font-semibold">
+            {filteredExpenses.length}
           </span>
         </button>
 
@@ -287,14 +375,14 @@ function ExpensesContent() {
           type="button"
           onClick={() => setActiveTab("recurring")}
           className={cn(
-            "flex items-center justify-center gap-2 py-2 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none",
+            "flex items-center justify-center gap-2 min-h-[40px] sm:min-h-[36px] px-3 sm:px-5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none touch-manipulation",
             activeTab === "recurring"
               ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-foreground shadow-sm border border-slate-200/90 dark:border-slate-700"
               : "text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground"
           )}
         >
           <Repeat className="w-4 h-4 text-indigo-500 shrink-0" />
-          <span>Gastos Fijos</span>
+          <span>{isEs ? "Gastos Fijos" : "Recurring"}</span>
         </button>
       </div>
 
@@ -327,12 +415,60 @@ function ExpensesContent() {
         <RecurringExpensesManager onExpenseGenerated={fetchExpenses} />
       ) : (
         <>
-          {/* KPI Cards */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+          {/* Compact Mobile KPI Strip (2-col on mobile) + Full KPICards on desktop */}
+          <section className="grid grid-cols-2 gap-2.5 sm:hidden">
+            <div className="bg-card border border-border/80 rounded-2xl p-3.5 shadow-xs space-y-1">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+                  {periodLabel}
+                </span>
+                <NavExpensesIcon size={15} className="text-rose-500 shrink-0" />
+              </div>
+              <p className="font-mono tabular-nums text-lg font-extrabold tracking-tight text-rose-600 dark:text-rose-400 truncate">
+                -{currencySymbol}
+                {formatCurrency(periodTotal)}
+              </p>
+              <span className="block text-[11px] font-medium text-muted-foreground">
+                {filteredExpenses.length}{" "}
+                {filteredExpenses.length === 1
+                  ? isEs
+                    ? "registro"
+                    : "item"
+                  : isEs
+                    ? "registros"
+                    : "items"}
+              </span>
+            </div>
+
+            <div className="bg-card border border-border/80 rounded-2xl p-3.5 shadow-xs space-y-1">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+                  {isEs ? "Top categoría" : "Top category"}
+                </span>
+                <Tag size={14} className="text-amber-500 shrink-0" />
+              </div>
+              <p className="text-base font-bold tracking-tight text-foreground truncate pt-0.5">
+                {highestCategory === "---"
+                  ? "---"
+                  : translate(`categories.${highestCategory}`) || highestCategory}
+              </p>
+              <span className="block font-mono tabular-nums text-[11px] font-medium text-muted-foreground truncate">
+                {highestCategory !== "---"
+                  ? `${currencySymbol}${formatCurrency(categoryTotals[highestCategory] || 0)}`
+                  : isEs
+                    ? "Sin datos"
+                    : "No data"}
+              </span>
+            </div>
+          </section>
+
+          <section className="hidden sm:grid sm:grid-cols-2 gap-4 md:gap-6">
             <KPICard
-              title={translate("expenses.totalMonth") || "Total en Gastos"}
-              amount={`${currencySymbol}${formatCurrency(totalMonth)}`}
-              trend={`${expenses.length} registros en total`}
+              title={`${translate("expenses.totalMonth") || "Total en Gastos"} · ${periodLabel}`}
+              amount={`${currencySymbol}${formatCurrency(periodTotal)}`}
+              trend={`${filteredExpenses.length} ${
+                filteredExpenses.length === 1 ? "registro" : "registros"
+              }`}
               trendType="down"
               icon={<NavExpensesIcon size={22} className="text-rose-500" />}
             />
@@ -345,7 +481,7 @@ function ExpensesContent() {
               }
               trend={
                 highestCategory !== "---"
-                  ? `${currencySymbol}${formatCurrency(categoryTotals[highestCategory] || 0)} acumulado`
+                  ? `${currencySymbol}${formatCurrency(categoryTotals[highestCategory] || 0)} en período`
                   : undefined
               }
               trendType="neutral"
@@ -353,57 +489,182 @@ function ExpensesContent() {
             />
           </section>
 
-          {/* Filters and Search Bar */}
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar por descripción, categoría o método..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border border-border/80 text-sm placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-action/40 transition-all"
-              />
-            </div>
+          {/* Time Filter Bar + Search & Category Filter */}
+          <div className="space-y-2.5 sm:space-y-3">
+            <TransactionTimeFilter
+              preset={timePreset}
+              dateRange={dateRange}
+              onSelectPreset={handleSelectPreset}
+              onSelectCustomRange={handleSelectCustomRange}
+              language={language}
+              accent="expense"
+            />
 
-            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-auto min-w-[200px] sm:w-[220px] h-10 rounded-xl bg-card/90 dark:bg-card/75 border-border/80 font-medium text-sm">
-                  <div className="flex items-center gap-2 truncate">
-                    <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    <SelectValue placeholder="Todas las categorías" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las categorías</SelectItem>
-                  {categoriesList.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            "w-2 h-2 rounded-full shrink-0",
-                            getCategoryStyle(cat, userCatList).dot
-                          )}
-                        />
-                        <span>{translate(`categories.${cat}`) || cat}</span>
-                      </div>
+            <div className="flex flex-col sm:flex-row gap-2.5 sm:items-center sm:justify-between">
+              <div className="relative flex-1 sm:max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={
+                    isEs
+                      ? "Buscar descripción, categoría o método..."
+                      : "Search description, category, or method..."
+                  }
+                  className="w-full min-h-[44px] sm:min-h-[40px] pl-10 pr-4 py-2 rounded-xl bg-card border border-border/80 text-sm placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-action/40 transition-all"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="flex-1 sm:flex-initial sm:w-[210px] min-h-[44px] sm:h-10 rounded-xl bg-card border-border/80 font-medium text-sm">
+                    <div className="flex items-center gap-2 truncate">
+                      <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <SelectValue
+                        placeholder={isEs ? "Todas las categorías" : "All categories"}
+                      />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">
+                      {isEs ? "Todas las categorías" : "All categories"}
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    {categoriesList.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={cn(
+                              "w-2 h-2 rounded-full shrink-0",
+                              getCategoryStyle(cat, userCatList).dot
+                            )}
+                          />
+                          <span>{translate(`categories.${cat}`) || cat}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <span className="text-xs text-muted-foreground font-semibold px-2.5 py-2 bg-secondary/80 rounded-xl whitespace-nowrap border border-border/50">
-                {filteredExpenses.length} {filteredExpenses.length === 1 ? "gasto" : "gastos"}
-              </span>
+                <span className="hidden sm:inline-flex text-xs font-mono tabular-nums text-muted-foreground font-semibold px-3 py-2 bg-secondary/80 rounded-xl whitespace-nowrap border border-border/50">
+                  {filteredExpenses.length} {filteredExpenses.length === 1 ? "gasto" : "gastos"}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Expenses Table */}
+          {/* Mobile-First Grouped Transaction Feed (< md) */}
+          <section className="md:hidden space-y-4">
+            {groupedExpenses.length === 0 ? (
+              <div className="bg-card border border-border/80 rounded-2xl px-5 py-10 text-center space-y-3">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {isEs
+                    ? "No hay gastos en este período o con estos filtros."
+                    : "No expenses found for this period or filters."}
+                </p>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className="inline-flex items-center gap-1.5 min-h-[44px] px-4 rounded-xl text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/15 transition-colors cursor-pointer touch-manipulation"
+                  >
+                    <RotateCcw size={14} />
+                    {isEs ? "Ver todo el historial" : "View all history"}
+                  </button>
+                )}
+              </div>
+            ) : (
+              groupedExpenses.map((group) => (
+                <div key={group.key} className="space-y-1.5">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {group.label}
+                    </span>
+                    <span className="font-mono tabular-nums text-xs font-bold text-rose-600 dark:text-rose-400">
+                      -{currencySymbol}
+                      {formatCurrency(group.total)}
+                    </span>
+                  </div>
+
+                  <div className="bg-card border border-border/80 rounded-2xl overflow-hidden divide-y divide-border/50 shadow-xs">
+                    {group.items.map((expense) => {
+                      const style = getCategoryStyle(expense.category, userCatList);
+                      const isRecurring =
+                        expense.id.startsWith("rec_") || expense.id.startsWith("rec-");
+
+                      return (
+                        <button
+                          key={expense.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedExpense(expense);
+                            setIsDetailsOpen(true);
+                          }}
+                          className="w-full flex items-center gap-3 px-3.5 py-3 min-h-[64px] text-left hover:bg-secondary/40 active:bg-secondary/70 transition-colors cursor-pointer touch-manipulation"
+                        >
+                          <div
+                            className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border",
+                              style.bg,
+                              style.border
+                            )}
+                          >
+                            <span className={cn("w-2.5 h-2.5 rounded-full", style.dot)} />
+                          </div>
+
+                          <div className="min-w-0 flex-1 space-y-0.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-semibold text-foreground truncate">
+                                {formatExpenseTitle(expense)}
+                              </span>
+                              {isRecurring && (
+                                <Repeat
+                                  size={13}
+                                  className="text-indigo-500 shrink-0"
+                                  aria-label={isEs ? "Recurrente" : "Recurring"}
+                                />
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
+                              <span className="font-semibold truncate">
+                                {translate(`categories.${expense.category}`) || expense.category}
+                              </span>
+                              <span aria-hidden="true">·</span>
+                              <span className="truncate">{expense.payment_method}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <div className="text-right">
+                              <span className="block font-mono tabular-nums text-sm font-extrabold text-rose-600 dark:text-rose-400">
+                                -{currencySymbol}
+                                {formatCurrency(expense.amount)}
+                              </span>
+                              <span className="block text-[10px] font-semibold uppercase text-muted-foreground">
+                                {currency}
+                              </span>
+                            </div>
+                            <ChevronRight
+                              size={16}
+                              className="text-muted-foreground/60 shrink-0"
+                              aria-hidden="true"
+                            />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))
+            )}
+          </section>
+
+          {/* Desktop Table (>= md) */}
           <motion.section
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="bg-card dark:bg-card/75 backdrop-blur-sm border border-slate-200/90 dark:border-border/60 rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all"
+            transition={{ duration: 0.3 }}
+            className="hidden md:block bg-card dark:bg-card/75 backdrop-blur-sm border border-slate-200/90 dark:border-border/60 rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all"
           >
             <Table>
               <TableHeader className="bg-secondary/40 dark:bg-secondary/20">
@@ -430,7 +691,21 @@ function ExpensesContent() {
                       colSpan={5}
                       className="py-12 text-center text-muted-foreground text-sm"
                     >
-                      No se encontraron gastos que coincidan con los filtros aplicados.
+                      <div className="flex flex-col items-center gap-3">
+                        <span>
+                          No se encontraron gastos que coincidan con los filtros aplicados.
+                        </span>
+                        {hasActiveFilters && (
+                          <button
+                            type="button"
+                            onClick={resetAllFilters}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/15 transition-colors cursor-pointer"
+                          >
+                            <RotateCcw size={13} />
+                            {isEs ? "Ver todo el historial" : "View all history"}
+                          </button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -445,7 +720,9 @@ function ExpensesContent() {
                     >
                       <TableCell className="px-5 py-4 text-sm font-medium whitespace-nowrap text-titles dark:text-foreground">
                         <div className="flex flex-col">
-                          <span className="font-semibold">{formatDateDDMMYYYY(expense.date)}</span>
+                          <span className="font-mono tabular-nums font-semibold">
+                            {formatDateDDMMYYYY(expense.date)}
+                          </span>
                           <span className="text-[11px] text-muted-foreground">
                             {expense.payment_method}
                           </span>
@@ -453,13 +730,7 @@ function ExpensesContent() {
                       </TableCell>
                       <TableCell className="px-5 py-4 text-sm font-semibold text-titles dark:text-foreground">
                         <div className="flex items-center gap-1.5">
-                          <span>
-                            {expense.category === "Metas"
-                              ? `${translate("goals.contributionToGoal") || "Aporte a meta"}: ${
-                                  expense.description.split(": ")[1] || expense.description
-                                }`
-                              : expense.description.replace(/^\[Recurrente\]\s*/i, "")}
-                          </span>
+                          <span>{formatExpenseTitle(expense)}</span>
                           {(expense.id.startsWith("rec_") || expense.id.startsWith("rec-")) && (
                             <span
                               title={
@@ -483,7 +754,7 @@ function ExpensesContent() {
                       </TableCell>
                       <TableCell className="px-5 py-4 text-right">
                         <div className="flex flex-col items-end">
-                          <span className="text-base font-black text-rose-500 dark:text-rose-400">
+                          <span className="font-mono tabular-nums text-base font-black text-rose-600 dark:text-rose-400">
                             -{currencySymbol}
                             {formatCurrency(expense.amount)}
                           </span>
@@ -508,6 +779,25 @@ function ExpensesContent() {
           </motion.section>
         </>
       )}
+
+      {/* Mobile Floating Action Button (FAB) */}
+      <button
+        type="button"
+        onClick={() =>
+          activeTab === "recurring" ? setIsRecurringModalOpen(true) : setIsModalOpen(true)
+        }
+        aria-label={
+          activeTab === "recurring"
+            ? isEs
+              ? "Nuevo gasto fijo"
+              : "New recurring expense"
+            : translate("expenses.register") || "Registrar Gasto"
+        }
+        className="md:hidden fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 flex items-center gap-2 h-14 px-5 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all cursor-pointer touch-manipulation"
+      >
+        <Plus size={20} strokeWidth={2.5} />
+        <span>{activeTab === "recurring" ? (isEs ? "Fijo" : "Recurring") : isEs ? "Gasto" : "Expense"}</span>
+      </button>
     </div>
   );
 }
