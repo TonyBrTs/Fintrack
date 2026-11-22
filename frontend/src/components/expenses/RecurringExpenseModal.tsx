@@ -5,7 +5,7 @@ import {
   cn,
   formatLiveNumber,
   parseLiveNumber,
-  getCategoryColorBg,
+  getCategoryStyle,
   getTodayLocal,
   formatCalendarDate,
 } from "@/lib/utils";
@@ -32,6 +32,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { useCategories } from "@/hooks/useCategories";
+import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import {
   Select,
   SelectContent,
@@ -407,11 +408,12 @@ export function RecurringExpenseModal({
                   {categoryList.map((cat) => (
                     <SelectItem key={cat.id} value={cat.name}>
                       <div className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            "w-2.5 h-2.5 rounded-full shrink-0",
-                            getCategoryColorBg(cat.name)
-                          )}
+                        <CategoryIcon
+                          category={cat.name}
+                          categories={categoryList}
+                          iconKey={cat.icon}
+                          size={14}
+                          className={getCategoryStyle(cat.color || cat.name, categoryList).text}
                         />
                         <span className="truncate">{cat.name}</span>
                       </div>

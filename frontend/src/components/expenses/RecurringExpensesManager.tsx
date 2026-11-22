@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   formatCurrency,
-  getCategoryColorBg,
+  getCategoryStyle,
   cn,
   formatCalendarDate,
   formatDateDDMMYYYY,
@@ -11,6 +11,7 @@ import {
   formatDueDateLabel,
   formatFrequencyLabel,
 } from "@/lib/utils";
+import { CategoryAvatar, CategoryIcon } from "@/components/categories/CategoryIcon";
 import { useSettings } from "@/contexts/SettingsContext";
 import { recurringService } from "@/services";
 import { toast } from "sonner";
@@ -356,24 +357,24 @@ export function RecurringExpensesManager({
               >
                 {/* Fila 1: Concepto Principal y Monto */}
                 <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-bold text-sm text-titles dark:text-foreground truncate">
-                      {item.description}
-                    </h4>
-                    <div className="flex items-center gap-1.5 mt-0.5">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <CategoryAvatar category={item.category} categories={categories} size="md" />
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-bold text-sm text-titles dark:text-foreground truncate">
+                        {item.description}
+                      </h4>
                       <span
                         className={cn(
-                          "w-2 h-2 rounded-full shrink-0",
-                          getCategoryColorBg(item.category, categories)
+                          "text-[11px] font-semibold truncate block mt-0.5",
+                          getCategoryStyle(item.category, categories).text
                         )}
-                      />
-                      <span className="text-[11px] text-muted-foreground font-medium truncate">
+                      >
                         {item.category}
                       </span>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className="text-base font-black text-rose-500 dark:text-rose-400 whitespace-nowrap">
+                    <span className="font-mono tabular-nums text-base font-black text-rose-600 dark:text-rose-400 whitespace-nowrap">
                       -{currencySymbol}
                       {formatCurrency(item.amount)}
                     </span>
@@ -485,11 +486,11 @@ export function RecurringExpensesManager({
                           {translate("recurring.category", "Categoría")}
                         </span>
                         <div className="flex items-center gap-1.5 mt-0.5 font-medium text-foreground">
-                          <span
-                            className={cn(
-                              "w-2 h-2 rounded-full shrink-0",
-                              getCategoryColorBg(item.category)
-                            )}
+                          <CategoryIcon
+                            category={item.category}
+                            categories={categories}
+                            size={13}
+                            className={getCategoryStyle(item.category, categories).text}
                           />
                           <span className="truncate">{item.category}</span>
                         </div>
@@ -633,22 +634,26 @@ export function RecurringExpensesManager({
 
                       {/* Concepto & Categoría */}
                       <TableCell className="px-4 py-3.5">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-sm text-titles dark:text-foreground">
-                            {item.description}
-                          </span>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span
-                              className={cn(
-                                "w-2 h-2 rounded-full shrink-0",
-                                getCategoryColorBg(item.category, categories)
-                              )}
-                            />
-                            <span className="text-xs text-muted-foreground">{item.category}</span>
-                            <span className="text-xs text-muted-foreground/50">•</span>
-                            <span className="text-xs text-muted-foreground">
-                              {item.payment_method}
+                        <div className="flex items-center gap-2.5">
+                          <CategoryAvatar category={item.category} categories={categories} size="sm" />
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-sm text-titles dark:text-foreground truncate">
+                              {item.description}
                             </span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span
+                                className={cn(
+                                  "text-xs font-semibold",
+                                  getCategoryStyle(item.category, categories).text
+                                )}
+                              >
+                                {item.category}
+                              </span>
+                              <span className="text-xs text-muted-foreground/50">•</span>
+                              <span className="text-xs text-muted-foreground">
+                                {item.payment_method}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </TableCell>

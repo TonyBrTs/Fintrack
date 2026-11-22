@@ -43,7 +43,8 @@ import {
 import { RecurringIncomeModal } from "./RecurringIncomeModal";
 import { DeleteConfirmDialog } from "@/components/expenses/DeleteConfirmDialog";
 import { useCategories } from "@/hooks/useCategories";
-import { getCategoryColorBg } from "@/lib/utils";
+import { getCategoryStyle } from "@/lib/utils";
+import { CategoryAvatar } from "@/components/categories/CategoryIcon";
 import type { RecurringIncome, RecurringIncomeSyncResult } from "@/types/index";
 
 interface RecurringIncomesManagerProps {
@@ -380,24 +381,24 @@ export function RecurringIncomesManager({ onIncomeGenerated }: RecurringIncomesM
                 >
                   {/* Fila 1: Concepto Principal y Monto */}
                   <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-sm text-titles dark:text-foreground truncate">
-                        {item.description}
-                      </h4>
-                      <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <CategoryAvatar category={item.source} categories={categories} size="md" />
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-sm text-titles dark:text-foreground truncate">
+                          {item.description}
+                        </h4>
                         <span
                           className={cn(
-                            "w-2 h-2 rounded-full shrink-0",
-                            getCategoryColorBg(item.source, categories)
+                            "text-[11px] font-semibold truncate block mt-0.5",
+                            getCategoryStyle(item.source, categories).text
                           )}
-                        />
-                        <span className="text-[11px] text-muted-foreground font-medium truncate">
+                        >
                           {translate(`sources.${item.source}`) || item.source}
                         </span>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="text-base font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                      <span className="font-mono tabular-nums text-base font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                         +{currencySymbol}
                         {formatCurrency(item.amount)}
                       </span>

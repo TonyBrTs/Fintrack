@@ -2,11 +2,12 @@
 
 import React from "react";
 import { cn, getCategoryStyle, CategoryColorTheme } from "@/lib/utils";
+import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { Category } from "@/types";
 
 interface CategoryBadgeProps {
   category: string;
-  categories?: Category[] | Array<{ name: string; color?: string }>;
+  categories?: Category[] | Array<{ name: string; color?: string; icon?: string }>;
   label?: string;
   className?: string;
   showDot?: boolean;
@@ -30,10 +31,10 @@ export function CategoryBadge({
     lg: "text-xs sm:text-sm px-3 py-1.5 gap-2",
   }[size];
 
-  const dotSize = {
-    sm: "w-1.5 h-1.5",
-    md: "w-2 h-2",
-    lg: "w-2.5 h-2.5",
+  const iconSize = {
+    sm: 12,
+    md: 13,
+    lg: 15,
   }[size];
 
   return (
@@ -47,13 +48,7 @@ export function CategoryBadge({
       )}
     >
       {showDot && (
-        <span
-          className={cn(
-            "rounded-full shrink-0 animate-in fade-in zoom-in duration-200",
-            dotSize,
-            theme.dot
-          )}
-        />
+        <CategoryIcon category={category} categories={categories} size={iconSize} />
       )}
       <span className="truncate">{textLabel}</span>
     </span>

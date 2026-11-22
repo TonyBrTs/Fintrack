@@ -5,7 +5,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { formatCurrency, getCategoryStyle, cn, formatDateDDMMYYYY } from "@/lib/utils";
 import { ArrowLeftRight, ChevronLeft, ChevronRight, Repeat } from "lucide-react";
-import { TxTypeIcon } from "@/components/ui/AppIcons";
+import { CategoryAvatar, CategoryIcon } from "@/components/categories/CategoryIcon";
 import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
@@ -155,9 +155,11 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
             {recent.slice(0, 6).map((tx: Transaction) => {
               const isIncome = tx.type === "income";
               const isGoal = (tx as Expense).category === "Metas";
+              const categoryKey = isIncome ? (tx as Income).source : (tx as Expense).category;
+              const style = getCategoryStyle(categoryKey, categories);
               const label = isIncome
-                ? translate(`sources.${(tx as Income).source}`) || (tx as Income).source
-                : translate(`categories.${(tx as Expense).category}`) || (tx as Expense).category;
+                ? translate(`sources.${categoryKey}`) || categoryKey
+                : translate(`categories.${categoryKey}`) || categoryKey;
               const isRecurring = tx.id.startsWith("rec_") || tx.id.startsWith("rec-");
 
               return (
@@ -166,21 +168,7 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
                   href={isIncome ? `/incomes?id=${tx.id}` : `/expenses?id=${tx.id}`}
                   className="flex items-center gap-3 px-3.5 py-3 min-h-[62px] hover:bg-secondary/40 active:bg-secondary/70 transition-colors touch-manipulation"
                 >
-                  <div
-                    className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                      isIncome
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                        : isGoal
-                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                          : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                    )}
-                  >
-                    <TxTypeIcon
-                      type={isIncome ? "income" : isGoal ? "goal" : "expense"}
-                      size={18}
-                    />
-                  </div>
+                  <CategoryAvatar category={categoryKey} categories={categories} size="md" />
 
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <div className="flex items-center gap-1.5">
@@ -196,7 +184,7 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
                       {isRecurring && <Repeat size={12} className="text-indigo-500 shrink-0" />}
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
-                      <span className="font-semibold truncate">{label}</span>
+                      <span className={cn("font-semibold truncate", style.text)}>{label}</span>
                       <span aria-hidden="true">·</span>
                       <span className="font-mono tabular-nums shrink-0">
                         {formatDateDDMMYYYY(tx.date)}
@@ -246,6 +234,8 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
           recent.map((tx: Transaction) => {
             const isIncome = tx.type === "income";
             const isGoal = (tx as Expense).category === "Metas";
+            const categoryKey = isIncome ? (tx as Income).source : (tx as Expense).category;
+            const style = getCategoryStyle(categoryKey, categories);
 
             return (
               <Link
@@ -254,33 +244,12 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
                 className="shrink-0 w-68 sm:w-72 p-4 rounded-2xl bg-card dark:bg-card/75 backdrop-blur-sm border border-slate-200/90 dark:border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-action/40 transition-all group cursor-pointer block snap-start"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <div
-                    className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 ${
-                      isIncome
-                        ? "bg-emerald-500/10 text-emerald-500"
-                        : isGoal
-                          ? "bg-amber-500/10 text-amber-500"
-                          : "bg-rose-500/10 text-rose-500"
-                    }`}
-                    title={
-                      isIncome
-                        ? language === "en"
-                          ? "Income"
-                          : "Ingreso"
-                        : isGoal
-                          ? language === "en"
-                            ? "Goal contribution"
-                            : "Aporte a meta"
-                          : language === "en"
-                            ? "Expense"
-                            : "Gasto"
-                    }
-                  >
-                    <TxTypeIcon
-                      type={isIncome ? "income" : isGoal ? "goal" : "expense"}
-                      size={18}
-                    />
-                  </div>
+                  <CategoryAvatar
+                    category={categoryKey}
+                    categories={categories}
+                    size="md"
+                    className="transition-transform group-hover:scale-110"
+                  />
                   <Badge
                     variant="info"
                     className="bg-secondary text-secondary-foreground text-[10px] font-semibold border border-border/40"
@@ -316,31 +285,27 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
                   <div className="flex justify-between items-end pt-1 border-t border-border/40">
                     <div className="min-w-0 pr-2">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span
-                          className={cn(
-                            "w-2 h-2 rounded-full shrink-0",
-                            getCategoryStyle(
-                              isIncome ? (tx as Income).source : (tx as Expense).category,
-                              categories
-                            ).dot
-                          )}
+                        <CategoryIcon
+                          category={categoryKey}
+                          categories={categories}
+                          size={12}
+                          className={style.text}
                         />
-                        <p className="text-[11px] text-muted-foreground font-semibold truncate max-w-[130px]">
+                        <p className={cn("text-[11px] font-semibold truncate max-w-[130px]", style.text)}>
                           {isIncome
-                            ? translate(`sources.${(tx as Income).source}`) || (tx as Income).source
-                            : translate(`categories.${(tx as Expense).category}`) ||
-                              (tx as Expense).category}
+                            ? translate(`sources.${categoryKey}`) || categoryKey
+                            : translate(`categories.${categoryKey}`) || categoryKey}
                         </p>
                       </div>
-                      <p className="text-[10px] text-muted-foreground/70">
+                      <p className="text-[10px] font-mono tabular-nums text-muted-foreground/70">
                         {formatDateDDMMYYYY(tx.date)}
                       </p>
                     </div>
                     <p
-                      className={`font-black text-base ${
+                      className={`font-mono tabular-nums font-black text-base ${
                         isIncome
-                          ? "text-emerald-500 dark:text-emerald-400"
-                          : "text-rose-500 dark:text-rose-400"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-rose-600 dark:text-rose-400"
                       }`}
                     >
                       {isIncome ? "+" : "-"}

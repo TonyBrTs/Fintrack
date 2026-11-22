@@ -30,6 +30,7 @@ import { incomeService } from "@/services";
 import { useCategories } from "@/hooks/useCategories";
 import { ManageCategoriesModal } from "@/components/categories/ManageCategoriesModal";
 import { CategoryBadge } from "@/components/categories/CategoryBadge";
+import { CategoryAvatar, CategoryIcon } from "@/components/categories/CategoryIcon";
 import { PageLoadingState } from "@/components/ui/PageLoadingState";
 import {
   cn,
@@ -518,11 +519,11 @@ function IncomesContent() {
                     {sourcesList.map((src) => (
                       <SelectItem key={src} value={src}>
                         <div className="flex items-center gap-2">
-                          <span
-                            className={cn(
-                              "w-2 h-2 rounded-full shrink-0",
-                              getCategoryStyle(src, userSourceList).dot
-                            )}
+                          <CategoryIcon
+                            category={src}
+                            categories={userSourceList}
+                            size={14}
+                            className={getCategoryStyle(src, userSourceList).text}
                           />
                           <span>{translate(`sources.${src}`) || src}</span>
                         </div>
@@ -587,15 +588,11 @@ function IncomesContent() {
                           }}
                           className="w-full flex items-center gap-3 px-3.5 py-3 min-h-[64px] text-left hover:bg-secondary/40 active:bg-secondary/70 transition-colors cursor-pointer touch-manipulation"
                         >
-                          <div
-                            className={cn(
-                              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border",
-                              style.bg,
-                              style.border
-                            )}
-                          >
-                            <span className={cn("w-2.5 h-2.5 rounded-full", style.dot)} />
-                          </div>
+                          <CategoryAvatar
+                            category={income.source}
+                            categories={userSourceList}
+                            size="md"
+                          />
 
                           <div className="min-w-0 flex-1 space-y-0.5">
                             <div className="flex items-center gap-1.5">
@@ -611,7 +608,7 @@ function IncomesContent() {
                               )}
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
-                              <span className="font-semibold truncate">
+                              <span className={cn("font-semibold truncate", style.text)}>
                                 {translate(`sources.${income.source}`) || income.source}
                               </span>
                               <span aria-hidden="true">·</span>

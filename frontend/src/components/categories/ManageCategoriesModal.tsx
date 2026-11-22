@@ -13,7 +13,7 @@ import { Trash2, Plus, Shield, Tag, AlertTriangle, Loader2, X } from "lucide-rea
 import { useCategories } from "@/hooks/useCategories";
 import { Category } from "@/types";
 import { CategoryModal } from "./CategoryModal";
-import { getCategoryColorBg, cn } from "@/lib/utils";
+import { CategoryAvatar } from "./CategoryIcon";
 
 interface ManageCategoriesModalProps {
   isOpen: boolean;
@@ -121,8 +121,11 @@ export function ManageCategoriesModal({
                       className="flex items-center justify-between p-3 rounded-xl bg-secondary/40 border border-border/60 hover:bg-secondary/70 transition-colors"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span
-                          className={`w-3.5 h-3.5 rounded-full ${getCategoryColorBg(cat.color)} shrink-0`}
+                        <CategoryAvatar
+                          category={cat.name}
+                          categories={categories}
+                          iconKey={cat.icon}
+                          size="sm"
                         />
                         <span className="text-sm font-semibold text-foreground truncate">
                           {cat.name}
@@ -157,13 +160,13 @@ export function ManageCategoriesModal({
                     className="flex items-center justify-between p-2.5 rounded-xl bg-secondary/20 border border-border/40 text-xs font-medium text-muted-foreground"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className={cn(
-                          "w-2.5 h-2.5 rounded-full shrink-0",
-                          getCategoryColorBg(cat.color || cat.name)
-                        )}
+                      <CategoryAvatar
+                        category={cat.name}
+                        categories={categories}
+                        iconKey={cat.icon}
+                        size="sm"
                       />
-                      <span className="truncate">{cat.name}</span>
+                      <span className="truncate font-semibold text-foreground">{cat.name}</span>
                     </div>
                     <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground font-semibold shrink-0 ml-1.5">
                       Sistema

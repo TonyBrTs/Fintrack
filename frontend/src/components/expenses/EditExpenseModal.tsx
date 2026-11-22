@@ -2,7 +2,8 @@
 
 import { expenseService } from "@/services";
 import { useState, useEffect } from "react";
-import { cn, formatLiveNumber, parseLiveNumber, getCategoryColorBg } from "@/lib/utils";
+import { formatLiveNumber, parseLiveNumber, getCategoryStyle } from "@/lib/utils";
+import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import type { Expense, ExpenseCategory } from "@/types/index";
 import {
   Dialog,
@@ -168,11 +169,12 @@ export function EditExpenseModal({ isOpen, onClose, onSuccess, expense }: EditEx
                     {categoryList.map((cat) => (
                       <SelectItem key={cat.id} value={cat.name}>
                         <div className="flex items-center gap-2">
-                          <span
-                            className={cn(
-                              "w-2.5 h-2.5 rounded-full shrink-0",
-                              getCategoryColorBg(cat.color)
-                            )}
+                          <CategoryIcon
+                            category={cat.name}
+                            categories={categoryList}
+                            iconKey={cat.icon}
+                            size={14}
+                            className={getCategoryStyle(cat.color || cat.name, categoryList).text}
                           />
                           <span className="truncate">{cat.name}</span>
                         </div>

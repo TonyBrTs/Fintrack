@@ -10,7 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tag, Loader2, Check, ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { CATEGORY_ICON_OPTIONS, CategoryAvatar } from "@/components/categories/CategoryIcon";
+import { cn, getCategoryStyle } from "@/lib/utils";
+import { Loader2, Check, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { Category } from "@/types";
 import { toast } from "sonner";
@@ -23,14 +25,17 @@ interface CategoryModalProps {
 }
 
 const COLOR_OPTIONS = [
-  { name: "blue", label: "Azul", bg: "bg-blue-500", ring: "ring-blue-500" },
-  { name: "emerald", label: "Esmeralda", bg: "bg-emerald-500", ring: "ring-emerald-500" },
-  { name: "purple", label: "Púrpura", bg: "bg-purple-500", ring: "ring-purple-500" },
-  { name: "amber", label: "Ámbar", bg: "bg-amber-500", ring: "ring-amber-500" },
-  { name: "rose", label: "Rosa", bg: "bg-rose-500", ring: "ring-rose-500" },
-  { name: "cyan", label: "Cian", bg: "bg-cyan-500", ring: "ring-cyan-500" },
-  { name: "indigo", label: "Índigo", bg: "bg-indigo-500", ring: "ring-indigo-500" },
-  { name: "slate", label: "Gris", bg: "bg-slate-500", ring: "ring-slate-500" },
+  { name: "blue", label: "Azul", bg: "bg-blue-500" },
+  { name: "emerald", label: "Esmeralda", bg: "bg-emerald-500" },
+  { name: "purple", label: "Púrpura", bg: "bg-purple-500" },
+  { name: "amber", label: "Ámbar", bg: "bg-amber-500" },
+  { name: "rose", label: "Rosa", bg: "bg-rose-500" },
+  { name: "cyan", label: "Cian", bg: "bg-cyan-500" },
+  { name: "indigo", label: "Índigo", bg: "bg-indigo-500" },
+  { name: "pink", label: "Fucsia", bg: "bg-pink-500" },
+  { name: "orange", label: "Naranja", bg: "bg-orange-500" },
+  { name: "teal", label: "Turquesa", bg: "bg-teal-500" },
+  { name: "slate", label: "Gris", bg: "bg-slate-500" },
 ];
 
 export function CategoryModal({
@@ -43,14 +48,15 @@ export function CategoryModal({
   const [name, setName] = useState("");
   const [type, setType] = useState<"expense" | "income">(defaultType);
   const [color, setColor] = useState("blue");
+  const [icon, setIcon] = useState("utensils");
   const [loading, setLoading] = useState(false);
 
-  // Sync defaultType when modal opens
   React.useEffect(() => {
     if (isOpen) {
       setType(defaultType);
       setName("");
       setColor(defaultType === "expense" ? "blue" : "emerald");
+      setIcon(defaultType === "expense" ? "shopping-bag" : "briefcase");
     }
   }, [isOpen, defaultType]);
 
@@ -64,7 +70,7 @@ export function CategoryModal({
 
     setLoading(true);
     try {
-      const res = await createCategory(trimmed, type, color);
+      const res = await createCategory(trimmed, type, color, icon);
       if (res.ok && res.category) {
         toast.success(`Categoría "${res.category.name}" creada exitosamente`);
         onSuccess?.(res.category);
@@ -78,30 +84,30 @@ export function CategoryModal({
     }
   };
 
+  const selectedTheme = getCategoryStyle(color);
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         overlayClassName="z-[300]"
-        className="z-[301] sm:max-w-[440px] max-w-[calc(100vw-2rem)] max-h-[90dvh] overflow-y-auto rounded-2xl bg-card border border-border/80 shadow-2xl p-5 sm:p-6"
+        className="z-[301] sm:max-w-[460px] max-w-[calc(100vw-2rem)] max-h-[90dvh] overflow-y-auto rounded-2xl bg-card border border-border/80 shadow-2xl p-5 sm:p-6"
       >
         <DialogHeader className="text-left">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-              <Tag size={20} />
-            </div>
-            <div>
-              <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
-                Nueva Categoría Personalizada
+            <CategoryAvatar category={color} iconKey={icon} size="lg" />
+            <div className="min-w-0">
+              <DialogTitle className="text-base sm:text-lg font-bold text-foreground truncate">
+                {name.trim() || "Nueva Categoría"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                Crea una categoría propia para clasificar tus finanzas
+                Elige un nombre, color e ícono representativo
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          {/* Tipo de categoría con botones grandes táctiles */}
+          {/* Tipo de categoría */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
               Aplica para
@@ -134,7 +140,7 @@ export function CategoryModal({
             </div>
           </div>
 
-          {/* Nombre de la categoría (con tamaño de fuente anti-zoom en móvil) */}
+          {/* Nombre */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
               Nombre de la categoría
@@ -148,19 +154,19 @@ export function CategoryModal({
             />
           </div>
 
-          {/* Selector de color con touch targets accesibles */}
+          {/* Selector de color */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
               Color identificador
             </label>
-            <div className="grid grid-cols-4 sm:flex sm:flex-wrap gap-2.5 pt-1">
+            <div className="flex flex-wrap gap-2 pt-0.5">
               {COLOR_OPTIONS.map((opt) => (
                 <button
                   key={opt.name}
                   type="button"
                   onClick={() => setColor(opt.name)}
                   aria-label={`Seleccionar color ${opt.label}`}
-                  className={`min-w-[40px] min-h-[40px] rounded-xl ${opt.bg} flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 ${
+                  className={`w-9 h-9 rounded-xl ${opt.bg} flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 ${
                     color === opt.name
                       ? "ring-2 ring-offset-2 ring-foreground/70 scale-105 shadow-md"
                       : "opacity-85 hover:opacity-100"
@@ -168,15 +174,46 @@ export function CategoryModal({
                   title={opt.label}
                 >
                   {color === opt.name && (
-                    <Check size={16} className="text-white drop-shadow font-bold" strokeWidth={3} />
+                    <Check size={15} className="text-white drop-shadow font-bold" strokeWidth={3} />
                   )}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Botones de acción adaptables en móvil */}
-          <div className="grid grid-cols-2 sm:flex sm:justify-end gap-2.5 pt-4 border-t border-border/40">
+          {/* Selector de ícono */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+              Ícono
+            </label>
+            <div className="grid grid-cols-6 gap-2 pt-0.5">
+              {CATEGORY_ICON_OPTIONS.map((opt) => {
+                const IconComp = opt.icon;
+                const isSelected = icon === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => setIcon(opt.key)}
+                    title={opt.label}
+                    aria-label={opt.label}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      "min-h-[42px] rounded-xl border flex items-center justify-center transition-all cursor-pointer touch-manipulation",
+                      isSelected
+                        ? cn(selectedTheme.bg, selectedTheme.text, selectedTheme.border, "ring-2 ring-offset-1 ring-current/30 scale-105")
+                        : "bg-secondary/40 border-border/60 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    )}
+                  >
+                    <IconComp size={18} strokeWidth={2.1} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Botones de acción */}
+          <div className="grid grid-cols-2 sm:flex sm:justify-end gap-2.5 pt-3 border-t border-border/40">
             <Button
               type="button"
               variant="outline"

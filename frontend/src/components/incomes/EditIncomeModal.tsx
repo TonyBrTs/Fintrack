@@ -2,7 +2,8 @@
 
 import { incomeService } from "@/services";
 import { useState, useEffect } from "react";
-import { cn, formatLiveNumber, parseLiveNumber, getCategoryColorBg } from "@/lib/utils";
+import { formatLiveNumber, parseLiveNumber, getCategoryStyle } from "@/lib/utils";
+import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import type { Income, IncomeSource } from "@/types/index";
 import {
   Dialog,
@@ -168,11 +169,12 @@ export function EditIncomeModal({ isOpen, onClose, onSuccess, income }: EditInco
                     {sourceList.map((src) => (
                       <SelectItem key={src.id} value={src.name}>
                         <div className="flex items-center gap-2">
-                          <span
-                            className={cn(
-                              "w-2.5 h-2.5 rounded-full shrink-0",
-                              getCategoryColorBg(src.color)
-                            )}
+                          <CategoryIcon
+                            category={src.name}
+                            categories={sourceList}
+                            iconKey={src.icon}
+                            size={14}
+                            className={getCategoryStyle(src.color || src.name, sourceList).text}
                           />
                           <span className="truncate">{src.name}</span>
                         </div>
