@@ -1,36 +1,37 @@
 "use client";
 
-import React from "react";
 import { BrandLogo } from "@/components/layout/BrandLogo";
-import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import styles from "./PageLoadingState.module.css";
 
 interface PageLoadingStateProps {
   message?: string;
   className?: string;
+  fullscreen?: boolean;
 }
 
-export function PageLoadingState({ message = "Cargando...", className }: PageLoadingStateProps) {
+export function PageLoadingState({
+  message = "Cargando...",
+  className,
+  fullscreen = false,
+}: PageLoadingStateProps) {
   return (
     <div
+      role="status"
       className={cn(
-        "flex flex-col items-center justify-center min-h-[60vh] py-16 px-4 text-center select-none animate-in fade-in duration-300",
+        "flex flex-col items-center justify-center gap-5 px-4 py-16 text-center",
+        fullscreen ? "fixed inset-0 z-50 bg-background" : "min-h-[60vh]",
         className
       )}
     >
-      <div className="relative flex flex-col items-center gap-4">
-        {/* Glowing Logo matching initial app load */}
-        <div className="relative">
-          <div className="absolute -inset-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur-xl opacity-40 dark:opacity-60 animate-pulse" />
-          <BrandLogo size={56} className="relative shadow-xl" priority />
-        </div>
-
-        {/* Centered spinner and message */}
-        <div className="flex items-center gap-2.5 mt-1 text-muted-foreground">
-          <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-          <span className="text-sm font-medium tracking-tight animate-pulse">{message}</span>
-        </div>
+      <div aria-hidden="true">
+        <BrandLogo size={56} priority={fullscreen} />
       </div>
+      <div
+        aria-hidden="true"
+        className={cn(styles.indicator, "h-1 w-28 rounded-full bg-action/15 text-action dark:text-blue-400")}
+      />
+      <span className="text-sm font-medium text-muted-foreground">{message}</span>
     </div>
   );
 }

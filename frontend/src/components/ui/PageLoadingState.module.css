@@ -1,0 +1,36 @@
+.indicator {
+  position: relative;
+  overflow: hidden;
+}
+
+.indicator::after {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  border-radius: inherit;
+  background: currentColor;
+  content: "";
+  animation: sweep 1.45s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(265%);
+  }
+}
+
+:global(html.reduce-motion) .indicator::after {
+  animation: none;
+  transform: translateX(82%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator::after {
+    animation: none;
+    transform: translateX(82%);
+  }
+}

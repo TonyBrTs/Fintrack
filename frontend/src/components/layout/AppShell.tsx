@@ -6,8 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/layout/Header";
 import { MainNavigation } from "@/components/layout/MainNavigation";
 import { canAccessVault } from "@/lib/vaultAccess";
-import { BrandLogo } from "@/components/layout/BrandLogo";
-import { Loader2 } from "lucide-react";
+import { PageLoadingState } from "@/components/ui/PageLoadingState";
+import { useSettings } from "@/contexts/SettingsContext";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -17,6 +17,7 @@ export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const { language, translate } = useSettings();
   const showVault = canAccessVault(user?.email);
   const isVaultRoute = pathname === "/vault" || pathname.startsWith("/vault/");
 
@@ -42,20 +43,10 @@ export function AppShell({ children }: AppShellProps) {
   // Initial session loading splash
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#080c15] text-slate-100">
-        <div className="relative flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="absolute -inset-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur-xl opacity-60 animate-pulse" />
-            <BrandLogo size={56} className="relative shadow-2xl" />
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
-            <span className="text-xs font-medium text-slate-400 tracking-wide">
-              Cargando sesión segura...
-            </span>
-          </div>
-        </div>
-      </div>
+      <PageLoadingState
+        fullscreen
+        message={language === "es" ? "Cargando sesión segura..." : "Loading secure session..."}
+      />
     );
   }
 
@@ -66,11 +57,7 @@ export function AppShell({ children }: AppShellProps) {
 
   // Unauthenticated trying to access protected page: Waiting for router.replace("/login")
   if (!user) {
-    return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#080c15]">
-        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-      </div>
-    );
+    return <PageLoadingState fullscreen message={translate("common.loading")} />;
   }
 
   return (
