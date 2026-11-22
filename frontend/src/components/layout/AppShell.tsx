@@ -4,8 +4,8 @@ import React, { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/layout/Header";
-import { SubNavbar } from "@/components/layout/SubNavbar";
-import { BottomNavbar } from "@/components/layout/BottomNavbar";
+import { MainNavigation } from "@/components/layout/MainNavigation";
+import { canAccessVault } from "@/lib/vaultAccess";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { Loader2 } from "lucide-react";
 
@@ -17,6 +17,8 @@ export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const showVault = canAccessVault(user?.email);
+  const isVaultRoute = pathname === "/vault" || pathname.startsWith("/vault/");
 
   const isAuthRoute = pathname === "/login";
   const isPublicUtilityRoute =
@@ -26,11 +28,11 @@ export function AppShell({ children }: AppShellProps) {
     if (!isLoading) {
       if (!user && !isAuthRoute && !isPublicUtilityRoute) {
         router.replace("/login");
-      } else if (user && isAuthRoute) {
+      } else if (user && (isAuthRoute || (isVaultRoute && !showVault))) {
         router.replace("/");
       }
     }
-  }, [user, isLoading, isAuthRoute, isPublicUtilityRoute, router]);
+  }, [user, isLoading, isAuthRoute, isPublicUtilityRoute, isVaultRoute, showVault, router]);
 
   // Render standalone public utility pages (/version, /commit, /health) immediately without splash or navbars
   if (isPublicUtilityRoute) {
@@ -71,19 +73,15 @@ export function AppShell({ children }: AppShellProps) {
     );
   }
 
-  // Authenticated: Render full application with Header, SubNavbar, Main Content and BottomNavbar
   return (
     <>
-      <div className="print:hidden sticky top-0 z-40 backdrop-blur-xl bg-white/95 dark:bg-[#090d16]/90 border-b border-slate-200 dark:border-slate-800/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-none transition-all duration-300">
+      <div className="print:hidden sticky top-0 z-40 border-b border-border bg-background">
         <Header />
-        <SubNavbar />
+        <MainNavigation showVault={showVault} />
       </div>
-      <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-24 md:pb-12 pt-3 md:pt-6 print:p-0 print:m-0 print:max-w-none print:w-full">
-        {children}
+      <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-12 pt-3 md:pt-6 print:p-0 print:m-0 print:max-w-none print:w-full">
+        {(!isVaultRoute || showVault) && children}
       </main>
-      <div className="print:hidden">
-        <BottomNavbar />
-      </div>
     </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { KPICard } from "@/components/ui/KPICard";
-import { Loader2, Calendar, CloudOff, RefreshCw } from "lucide-react";
+import { Loader2, Calendar, ChevronRight, CloudOff, FileText, RefreshCw } from "lucide-react";
 import {
   KPIBalanceIcon,
   NavIncomeIcon,
@@ -198,7 +198,7 @@ export default function SummaryPage() {
     <ProtectedRoute>
       <div className="space-y-8 max-w-7xl mx-auto">
         {/* Header & Filter */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-5 border-b border-border/30">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 pb-5 border-b border-border/30">
           <div className="space-y-1">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
               {translate("nav.summary") || "Resumen"}
@@ -208,9 +208,9 @@ export default function SummaryPage() {
                 "Visualiza tu salud financiera de un vistazo: saldo, movimientos y metas del período."}
             </p>
           </div>
-          <div className="sm:w-auto w-full flex items-center gap-2.5 shrink-0">
+          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-full sm:w-[210px] h-10 rounded-xl bg-card/90 dark:bg-card/75 backdrop-blur-sm border-border/80 shadow-xs font-medium text-sm">
+              <SelectTrigger className="w-full sm:w-[210px] data-[size=default]:h-11 rounded-lg bg-card border-border font-medium text-sm">
                 <div className="flex items-center gap-2 truncate">
                   <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   <SelectValue placeholder="Seleccionar mes" />
@@ -224,6 +224,14 @@ export default function SummaryPage() {
                 ))}
               </SelectContent>
             </Select>
+            <Link
+              href="/reports"
+              className="flex min-h-12 w-full items-center gap-2.5 rounded-lg border border-border bg-card px-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-action sm:min-h-11 sm:w-auto"
+            >
+              <FileText size={18} aria-hidden="true" className="shrink-0 text-action" />
+              {translate("nav.reports")}
+              <ChevronRight size={16} aria-hidden="true" className="ml-auto text-muted-foreground sm:hidden" />
+            </Link>
           </div>
         </div>
 

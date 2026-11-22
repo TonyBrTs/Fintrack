@@ -18,6 +18,7 @@ import {
 } from "@/lib/vaultCrypto";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/contexts/AuthContext";
+import { canAccessVault } from "@/lib/vaultAccess";
 import { toast } from "sonner";
 
 interface VaultContextType {
@@ -41,7 +42,15 @@ const LOCAL_VAULT_CARDS_KEY = "fintrack_vault_cards_v1";
 
 const VaultContext = createContext<VaultContextType | undefined>(undefined);
 
-export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({
+export function VaultProvider({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading || !user || !canAccessVault(user.email)) return <>{children}</>;
+
+  return <AuthorizedVaultProvider key={user.id}>{children}</AuthorizedVaultProvider>;
+}
+
+const AuthorizedVaultProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user } = useAuth();
