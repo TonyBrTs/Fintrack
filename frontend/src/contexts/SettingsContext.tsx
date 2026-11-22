@@ -2,18 +2,19 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { translations } from "@/lib/translations";
+import { currencyChoices } from "@/lib/currencies";
 
 type Language = "en" | "es";
-type Currency = "USD" | "EUR" | "GBP" | "CRC";
 
 interface SettingsContextType {
   language: Language;
-  currency: Currency;
+  currency: string;
+  currencyChoice: string;
   reducedMotion: boolean;
   highContrast: boolean;
   largeFont: boolean;
   setLanguage: (lang: Language) => void;
-  setCurrency: (curr: Currency) => void;
+  setCurrencyChoice: (id: string) => void;
   setReducedMotion: (val: boolean) => void;
   setHighContrast: (val: boolean) => void;
   setLargeFont: (val: boolean) => void;
@@ -27,16 +28,18 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
-const currencySymbols: Record<Currency, string> = {
-  USD: "$",
-  EUR: "€",
-  GBP: "£",
-  CRC: "₡",
-};
+const legacyChoices: Record<string, string> = { USD: "US-USD", EUR: "ES-EUR", GBP: "GB-GBP", CRC: "CR-CRC" };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>("es");
-  const [currency, setCurrency] = useState<Currency>("CRC");
+  const [currencyChoice, updateCurrencyChoice] = useState("CR-CRC");
+  const setCurrencyChoice = (id: string) => {
+    if (currencyChoices.some(choice => choice.id === id)) {
+      localStorage.setItem("currency", id);
+      updateCurrencyChoice(id);
+    }
+  };
+  const currency = currencyChoice.split("-")[1];
   const [reducedMotion, setReducedMotion] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [largeFont, setLargeFont] = useState(false);
@@ -48,7 +51,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Load settings from localStorage on mount (Client-side only)
   useEffect(() => {
     const savedLanguage = localStorage.getItem("language") as Language;
-    const savedCurrency = localStorage.getItem("currency") as Currency;
+    const savedCurrency = localStorage.getItem("currency");
     const savedReducedMotion = localStorage.getItem("reducedMotion") === "true";
     const savedHighContrast = localStorage.getItem("highContrast") === "true";
     const savedLargeFont = localStorage.getItem("largeFont") === "true";
@@ -57,8 +60,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLanguage(savedLanguage);
     }
-    if (savedCurrency && ["USD", "EUR", "GBP", "CRC"].includes(savedCurrency)) {
-      setCurrency(savedCurrency);
+    const savedChoice = savedCurrency && (legacyChoices[savedCurrency] ?? savedCurrency);
+    if (savedChoice && currencyChoices.some(({ id }) => id === savedChoice)) {
+      updateCurrencyChoice(savedChoice);
     }
     if (savedReducedMotion) setReducedMotion(true);
     if (savedHighContrast) setHighContrast(true);
@@ -71,12 +75,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.setItem("language", language);
     }
   }, [language]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("currency", currency);
-    }
-  }, [currency]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -122,15 +120,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const value = {
     language,
     currency,
+    currencyChoice,
     reducedMotion,
     highContrast,
     largeFont,
     setLanguage,
-    setCurrency,
+    setCurrencyChoice,
     setReducedMotion,
     setHighContrast,
     setLargeFont,
-    currencySymbol: currencySymbols[currency],
+    currencySymbol: new Intl.NumberFormat(language, { style: "currency", currency, currencyDisplay: "narrowSymbol" }).formatToParts(0).find(part => part.type === "currency")?.value ?? currency,
     translate,
     isSettingsOpen,
     setIsSettingsOpen,
@@ -146,12 +145,13 @@ export const useSettings = (): SettingsContextType => {
   if (context === undefined) {
     return {
       language: "en" as Language,
-      currency: "USD" as Currency,
+      currency: "USD",
+      currencyChoice: "US-USD",
       reducedMotion: false,
       highContrast: false,
       largeFont: false,
       setLanguage: () => {},
-      setCurrency: () => {},
+      setCurrencyChoice: () => {},
       setReducedMotion: () => {},
       setHighContrast: () => {},
       setLargeFont: () => {},

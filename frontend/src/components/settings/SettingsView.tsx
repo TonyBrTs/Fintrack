@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import { localizedCurrencyChoices } from "@/lib/currencies";
+import React, { useMemo, useState } from "react";
 import {
   Settings as SettingsIcon,
   Palette,
@@ -44,8 +45,8 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
   const {
     language,
     setLanguage,
-    currency,
-    setCurrency,
+    currencyChoice,
+    setCurrencyChoice,
     reducedMotion,
     setReducedMotion,
     highContrast,
@@ -55,6 +56,7 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
   } = useSettings();
 
   const { user, signOut, openAuthModal } = useAuth();
+  const choices = useMemo(() => localizedCurrencyChoices(language), [language]);
   const mounted = useHydrated();
   const isEs = language === "es";
 
@@ -143,28 +145,13 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
 
             {/* Currency Selection */}
             <div className="space-y-2.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 block">
+              <label htmlFor="main-currency" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 block">
                 {isEs ? "Moneda Principal" : "Main Currency"}
-              </span>
-              <div className="grid grid-cols-4 gap-2">
-                {(["USD", "EUR", "GBP", "CRC"] as const).map((curr) => {
-                  const isSelected = currency === curr;
-                  return (
-                    <button
-                      key={curr}
-                      type="button"
-                      onClick={() => setCurrency(curr)}
-                      className={`py-2.5 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
-                        isSelected
-                          ? "bg-blue-500/15 border-blue-500/40 text-blue-600 dark:text-blue-400 shadow-xs"
-                          : "bg-card/50 border-border/60 text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                      }`}
-                    >
-                      {curr}
-                    </button>
-                  );
-                })}
-              </div>
+              </label>
+              <select id="main-currency" value={currencyChoice} onChange={event => setCurrencyChoice(event.target.value)}
+                className="min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground focus-visible:outline-action">
+                {choices.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
+              </select>
             </div>
 
             {/* Language Selection */}
