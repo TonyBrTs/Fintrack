@@ -46,8 +46,6 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
     setLanguage,
     currency,
     setCurrency,
-    iconSource,
-    setIconSource,
     reducedMotion,
     setReducedMotion,
     highContrast,
@@ -197,36 +195,6 @@ export function SettingsView({ onCloseDrawer }: SettingsViewProps) {
                 >
                   English
                 </button>
-              </div>
-            </div>
-
-            {/* Icon Style Selection */}
-            <div className="space-y-2.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 block">
-                {isEs ? "Estilo de Íconos" : "Icon Style"}
-              </span>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: "phosphor", label: "Phosphor" },
-                  { id: "tabler", label: "Tabler" },
-                  { id: "lucide", label: "Lucide" },
-                ].map((style) => {
-                  const isSelected = iconSource === style.id;
-                  return (
-                    <button
-                      key={style.id}
-                      type="button"
-                      onClick={() => setIconSource(style.id as "phosphor" | "tabler" | "lucide")}
-                      className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
-                        isSelected
-                          ? "bg-blue-500/15 border-blue-500/40 text-blue-600 dark:text-blue-400 shadow-xs"
-                          : "bg-card/50 border-border/60 text-muted-foreground hover:text-foreground hover:bg-secondary/60"
-                      }`}
-                    >
-                      {style.label}
-                    </button>
-                  );
-                })}
               </div>
             </div>
           </div>

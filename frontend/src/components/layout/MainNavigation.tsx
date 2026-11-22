@@ -1,18 +1,18 @@
 "use client";
 
-import { ArrowDownLeft, ArrowUpRight, LayoutDashboard, ShieldCheck, Target } from "lucide-react";
+import { IconArrowDownLeft, IconArrowUpRight, IconLayoutDashboard, IconShieldCheck, IconTarget } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSettings } from "@/contexts/SettingsContext";
 
 const mainItems = [
-  { href: "/", label: "nav.summary", icon: LayoutDashboard },
-  { href: "/expenses", label: "nav.expenses", icon: ArrowUpRight },
-  { href: "/incomes", label: "nav.income", icon: ArrowDownLeft },
-  { href: "/goals", label: "nav.goals", icon: Target },
+  { href: "/", label: "nav.summary", icon: IconLayoutDashboard },
+  { href: "/expenses", label: "nav.expenses", icon: IconArrowUpRight },
+  { href: "/incomes", label: "nav.income", icon: IconArrowDownLeft },
+  { href: "/goals", label: "nav.goals", icon: IconTarget },
 ];
 
-const vaultItem = { href: "/vault", label: "nav.vault", icon: ShieldCheck };
+const vaultItem = { href: "/vault", label: "nav.vault", icon: IconShieldCheck };
 
 export function MainNavigation({ showVault }: { showVault: boolean }) {
   const pathname = usePathname();
@@ -35,7 +35,7 @@ export function MainNavigation({ showVault }: { showVault: boolean }) {
               aria-current={isActive ? "page" : undefined}
               className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 text-center text-[11px] leading-tight font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-action aria-[current=page]:bg-action/10 aria-[current=page]:font-semibold aria-[current=page]:text-action md:min-h-11 md:flex-none md:flex-row md:gap-2 md:px-3 md:text-sm"
             >
-              <Icon aria-hidden="true" size={18} strokeWidth={2} className="shrink-0" />
+              <Icon aria-hidden="true" size={18} stroke={2} className="shrink-0" />
               <span>{translate(label)}</span>
             </Link>
           );
