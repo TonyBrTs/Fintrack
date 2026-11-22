@@ -1,7 +1,7 @@
 "use client";
 
 import { KPICard } from "@/components/ui/KPICard";
-import { Loader2, Calendar, ChevronRight, CloudOff, FileText, RefreshCw } from "lucide-react";
+import { Calendar, CloudOff, FileText, RefreshCw } from "lucide-react";
 import {
   KPIBalanceIcon,
   NavIncomeIcon,
@@ -196,21 +196,39 @@ export default function SummaryPage() {
 
   return (
     <ProtectedRoute>
-      <div className="space-y-8 max-w-7xl mx-auto">
+      <div className="space-y-5 sm:space-y-8 max-w-7xl mx-auto">
         {/* Header & Filter */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 pb-5 border-b border-border/30">
-          <div className="space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4 pb-3 sm:pb-5 border-b border-border/40">
+          <div className="flex items-center justify-between gap-3 sm:block sm:space-y-1">
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground">
               {translate("nav.summary") || "Resumen"}
             </h1>
-            <p className="text-sm text-muted-foreground/80 mt-1.5 leading-relaxed max-w-lg">
+            <p className="hidden sm:block text-sm text-muted-foreground mt-1.5 leading-relaxed max-w-lg">
               {translate("common.summaryDescription") ||
                 "Visualiza tu salud financiera de un vistazo: saldo, movimientos y metas del período."}
             </p>
+            <div className="sm:hidden shrink-0 w-[168px]">
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-full min-h-[40px] rounded-xl bg-card border-border/80 font-semibold text-xs">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <SelectValue placeholder="Mes" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  {generateMonthOptions().map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+
+          <div className="hidden sm:flex shrink-0 items-center gap-2">
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-full sm:w-[210px] data-[size=default]:h-11 rounded-lg bg-card border-border font-medium text-sm">
+              <SelectTrigger className="w-[210px] data-[size=default]:h-11 rounded-xl bg-card border-border font-medium text-sm">
                 <div className="flex items-center gap-2 truncate">
                   <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   <SelectValue placeholder="Seleccionar mes" />
@@ -226,17 +244,95 @@ export default function SummaryPage() {
             </Select>
             <Link
               href="/reports"
-              className="flex min-h-12 w-full items-center gap-2.5 rounded-lg border border-border bg-card px-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-action sm:min-h-11 sm:w-auto"
+              className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card px-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-action"
             >
-              <FileText size={18} aria-hidden="true" className="shrink-0 text-action" />
+              <FileText size={16} aria-hidden="true" className="shrink-0 text-action" />
               {translate("nav.reports")}
-              <ChevronRight size={16} aria-hidden="true" className="ml-auto text-muted-foreground sm:hidden" />
             </Link>
           </div>
         </div>
 
-        {/* KPI Cards Row */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+        {/* Mobile Native Financial Summary (< sm) */}
+        <section className="sm:hidden space-y-2.5">
+          {/* Hero Balance Card */}
+          <div className="bg-card border border-border/80 rounded-2xl p-4 shadow-xs space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                {translate("summary.balance")}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 font-mono tabular-nums text-[11px] font-bold px-2 py-0.5 rounded-lg ${
+                  netSavingPercentFiltered >= 20
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                }`}
+              >
+                <KPISavingsIcon size={12} />
+                {isEs ? "Ahorro" : "Savings"} {netSavingPercentFiltered.toFixed(0)}%
+              </span>
+            </div>
+
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="font-mono tabular-nums text-2xl font-black tracking-tight text-foreground">
+                {currencySymbol}
+                {formatCurrency(balance)}
+              </p>
+              <span
+                className={`text-[11px] font-semibold ${
+                  balance >= 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-rose-600 dark:text-rose-400"
+                }`}
+              >
+                {balance >= 0 ? (isEs ? "Positivo" : "Healthy") : isEs ? "Negativo" : "Negative"}
+              </span>
+            </div>
+          </div>
+
+          {/* 2-Column Income & Expenses Strip */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <Link
+              href="/incomes"
+              className="bg-card border border-border/80 rounded-2xl p-3.5 shadow-xs space-y-1 active:bg-secondary/60 transition-colors touch-manipulation"
+            >
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+                  {translate("summary.income")}
+                </span>
+                <NavIncomeIcon size={15} className="text-emerald-500 shrink-0" />
+              </div>
+              <p className="font-mono tabular-nums text-base font-extrabold text-emerald-600 dark:text-emerald-400 truncate">
+                +{currencySymbol}
+                {formatCurrency(totalIncomesFiltered)}
+              </p>
+              <span className="block text-[11px] text-muted-foreground font-medium">
+                {filteredIncomes.length} {isEs ? "ingresos" : "incomes"}
+              </span>
+            </Link>
+
+            <Link
+              href="/expenses"
+              className="bg-card border border-border/80 rounded-2xl p-3.5 shadow-xs space-y-1 active:bg-secondary/60 transition-colors touch-manipulation"
+            >
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+                  {translate("summary.expenses")}
+                </span>
+                <NavExpensesIcon size={15} className="text-rose-500 shrink-0" />
+              </div>
+              <p className="font-mono tabular-nums text-base font-extrabold text-rose-600 dark:text-rose-400 truncate">
+                -{currencySymbol}
+                {formatCurrency(totalExpensesFiltered)}
+              </p>
+              <span className="block text-[11px] text-muted-foreground font-medium">
+                {filteredExpenses.length} {isEs ? "gastos" : "expenses"}
+              </span>
+            </Link>
+          </div>
+        </section>
+
+        {/* Desktop KPI Cards Row (>= sm) */}
+        <section className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
           <KPICard
             title={translate("summary.balance")}
             amount={`${currencySymbol}${formatCurrency(balance)}`}

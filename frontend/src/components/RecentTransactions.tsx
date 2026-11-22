@@ -4,7 +4,7 @@ import { Expense, Income } from "@/types/index";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useCategories } from "@/hooks/useCategories";
 import { formatCurrency, getCategoryStyle, cn, formatDateDDMMYYYY } from "@/lib/utils";
-import { Sparkles, ChevronLeft, ChevronRight, Repeat } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronRight, Repeat } from "lucide-react";
 import { TxTypeIcon } from "@/components/ui/AppIcons";
 import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
@@ -103,22 +103,22 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
   return (
     <div className="w-full">
       {/* Header with Navigation Controls */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
         <h3 className="text-xs font-bold flex items-center gap-2 uppercase tracking-wider text-muted-foreground">
-          <Sparkles size={14} className="text-action" />
+          <ArrowLeftRight size={14} className="text-action" />
           {translate("summary.recentActivity")}
         </h3>
 
         <div className="flex items-center gap-2.5">
           {recent.length > 0 && (
-            <span className="text-xs text-muted-foreground font-semibold px-2.5 py-1 rounded-xl bg-secondary/80 border border-border/50">
+            <span className="text-xs font-mono tabular-nums text-muted-foreground font-semibold px-2.5 py-1 rounded-xl bg-secondary/80 border border-border/50">
               {recent.length} {translate("common.recent")}
             </span>
           )}
 
-          {/* Carousel Arrows (Infinite loop) */}
+          {/* Carousel Arrows (Desktop only) */}
           {recent.length > 2 && (
-            <div className="flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => handleScroll("left")}
@@ -142,7 +142,91 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
         </div>
       </div>
 
-      {/* Cards Container with Auto-play Loop */}
+      {/* Mobile: Vertical Native Transaction List (no horizontal scroll) */}
+      <div className="md:hidden">
+        {recent.length === 0 ? (
+          <div className="w-full text-center py-8 bg-card border border-dashed border-border rounded-2xl text-muted-foreground">
+            <p className="text-sm font-medium">
+              {translate("common.noRecentActivity") || "Sin movimientos recientes"}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-card border border-border/80 rounded-2xl overflow-hidden divide-y divide-border/50 shadow-xs">
+            {recent.slice(0, 6).map((tx: Transaction) => {
+              const isIncome = tx.type === "income";
+              const isGoal = (tx as Expense).category === "Metas";
+              const label = isIncome
+                ? translate(`sources.${(tx as Income).source}`) || (tx as Income).source
+                : translate(`categories.${(tx as Expense).category}`) || (tx as Expense).category;
+              const isRecurring = tx.id.startsWith("rec_") || tx.id.startsWith("rec-");
+
+              return (
+                <Link
+                  key={`mobile-${tx.type}-${tx.id}`}
+                  href={isIncome ? `/incomes?id=${tx.id}` : `/expenses?id=${tx.id}`}
+                  className="flex items-center gap-3 px-3.5 py-3 min-h-[62px] hover:bg-secondary/40 active:bg-secondary/70 transition-colors touch-manipulation"
+                >
+                  <div
+                    className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                      isIncome
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : isGoal
+                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                          : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                    )}
+                  >
+                    <TxTypeIcon
+                      type={isIncome ? "income" : isGoal ? "goal" : "expense"}
+                      size={18}
+                    />
+                  </div>
+
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-semibold text-foreground truncate">
+                        {isGoal
+                          ? `${translate("goals.contributionToGoal")}: ${
+                              tx.description.includes(": ")
+                                ? tx.description.split(": ")[1]
+                                : tx.description
+                            }`
+                          : tx.description.replace(/^\[Recurrente\]\s*/i, "")}
+                      </span>
+                      {isRecurring && <Repeat size={12} className="text-indigo-500 shrink-0" />}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
+                      <span className="font-semibold truncate">{label}</span>
+                      <span aria-hidden="true">·</span>
+                      <span className="font-mono tabular-nums shrink-0">
+                        {formatDateDDMMYYYY(tx.date)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span
+                      className={cn(
+                        "font-mono tabular-nums text-sm font-extrabold",
+                        isIncome
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-rose-600 dark:text-rose-400"
+                      )}
+                    >
+                      {isIncome ? "+" : "-"}
+                      {currencySymbol}
+                      {formatCurrency(tx.amount)}
+                    </span>
+                    <ChevronRight size={15} className="text-muted-foreground/60 shrink-0" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop: Cards Container with Auto-play Loop */}
       <div
         ref={scrollRef}
         onScroll={checkScroll}
@@ -150,7 +234,7 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
         onTouchEnd={() => setIsPaused(false)}
-        className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide pt-1 scroll-smooth snap-x snap-mandatory"
+        className="hidden md:flex gap-4 overflow-x-auto pb-3 scrollbar-hide pt-1 scroll-smooth snap-x snap-mandatory"
       >
         {recent.length === 0 ? (
           <div className="w-full text-center py-8 bg-card/60 dark:bg-card/40 rounded-2xl border border-dashed border-border text-muted-foreground">
@@ -271,9 +355,9 @@ export function RecentTransactions({ expenses, incomes }: RecentTransactionsProp
         )}
       </div>
 
-      {/* Sleek Carousel Progress Indicator Bar */}
+      {/* Sleek Carousel Progress Indicator Bar (Desktop only) */}
       {recent.length > 2 && (
-        <div className="flex items-center justify-center pt-2">
+        <div className="hidden md:flex items-center justify-center pt-2">
           <div className="w-32 h-1 bg-secondary/80 dark:bg-slate-800/80 rounded-full overflow-hidden relative">
             <div
               className="h-full bg-action/70 dark:bg-blue-500/70 rounded-full transition-all duration-200"

@@ -323,9 +323,7 @@ function ExpensesContent() {
             aria-label={isEs ? "Gestionar categorías" : "Manage categories"}
           >
             <Tag size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
-            <span className="hidden xs:inline sm:inline">
-              {isEs ? "Categorías" : "Categories"}
-            </span>
+            <span>{isEs ? "Categorías" : "Categories"}</span>
           </Button>
 
           {activeTab === "recurring" ? (

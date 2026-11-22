@@ -1,14 +1,33 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
-import { Calendar as CalendarIcon, ChevronDown, RotateCcw, Check, FileText } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  ChevronDown,
+  RotateCcw,
+  Check,
+  FileText,
+  SlidersHorizontal,
+} from "lucide-react";
 
 export type PeriodPreset =
-  "this_month" | "last_month" | "last_30_days" | "this_year" | "all" | "custom";
+  | "this_month"
+  | "last_month"
+  | "last_30_days"
+  | "this_year"
+  | "all"
+  | "custom";
 
 interface ReportFiltersProps {
   preset: PeriodPreset;
@@ -41,6 +60,14 @@ interface ReportFiltersProps {
   isEs: boolean;
 }
 
+const REPORT_PRESETS: { id: Exclude<PeriodPreset, "custom">; es: string; en: string }[] = [
+  { id: "this_month", es: "Este Mes", en: "This Month" },
+  { id: "last_month", es: "Mes Pasado", en: "Last Month" },
+  { id: "last_30_days", es: "Últimos 30 Días", en: "Last 30 Days" },
+  { id: "this_year", es: "Año en Curso", en: "This Year" },
+  { id: "all", es: "Todo el Historial", en: "All Time" },
+];
+
 export function ReportFilters({
   preset,
   setPreset,
@@ -71,75 +98,76 @@ export function ReportFilters({
   goalsCount,
   isEs,
 }: ReportFiltersProps) {
+  const [isModulesOpen, setIsModulesOpen] = useState(false);
+
+  const activeSectionsCount = [
+    includeSummary,
+    includeExpensesList,
+    includeIncomesList,
+    includeGoals,
+    showNotes,
+  ].filter(Boolean).length;
+
+  const handleMobilePresetChange = (value: string) => {
+    if (value === "custom") {
+      setIsCalendarOpen(true);
+      return;
+    }
+    handleSelectPreset(value as PeriodPreset);
+  };
+
   return (
     <div className="rounded-2xl bg-card border border-border/80 p-3.5 sm:p-5 shadow-xs space-y-3.5 sm:space-y-4 print:hidden">
       {/* Date & Period Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0 sm:flex-wrap -mx-1 px-1 sm:mx-0 sm:px-0">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-3">
+        {/* Mobile: Dropdown (no horizontal scroll) */}
+        <div className="sm:hidden space-y-1.5">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <CalendarIcon size={12} />
+            {isEs ? "Período del reporte" : "Report period"}
+          </span>
+          <Select value={preset} onValueChange={handleMobilePresetChange}>
+            <SelectTrigger className="w-full min-h-[44px] rounded-xl bg-card border-border/80 font-semibold text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {REPORT_PRESETS.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {isEs ? p.es : p.en}
+                </SelectItem>
+              ))}
+              <SelectItem value="custom">
+                {preset === "custom"
+                  ? periodLabel
+                  : isEs
+                    ? "Rango personalizado..."
+                    : "Custom range..."}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop: Wrapped Period Pills */}
+        <div className="hidden sm:flex items-center gap-1.5 flex-wrap">
           <span className="text-xs font-bold text-muted-foreground mr-1 flex items-center gap-1 shrink-0">
             <CalendarIcon size={13} />
             {isEs ? "PERÍODO:" : "PERIOD:"}
           </span>
 
-          <button
-            type="button"
-            onClick={() => handleSelectPreset("this_month")}
-            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
-              preset === "this_month"
-                ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
-            }`}
-          >
-            {isEs ? "Este Mes" : "This Month"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleSelectPreset("last_month")}
-            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
-              preset === "last_month"
-                ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
-            }`}
-          >
-            {isEs ? "Mes Pasado" : "Last Month"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleSelectPreset("last_30_days")}
-            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
-              preset === "last_30_days"
-                ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
-            }`}
-          >
-            {isEs ? "Últimos 30 Días" : "Last 30 Days"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleSelectPreset("this_year")}
-            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
-              preset === "this_year"
-                ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
-            }`}
-          >
-            {isEs ? "Año en Curso" : "This Year"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleSelectPreset("all")}
-            className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
-              preset === "all"
-                ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
-            }`}
-          >
-            {isEs ? "Todo el Historial" : "All Time"}
-          </button>
+          {REPORT_PRESETS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => handleSelectPreset(p.id)}
+              className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                preset === p.id
+                  ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                  : "bg-muted/40 text-muted-foreground border-border/80 hover:bg-accent hover:text-foreground"
+              }`}
+            >
+              {isEs ? p.es : p.en}
+            </button>
+          ))}
         </div>
 
         {/* Interactive Calendar Popover Trigger */}
@@ -147,7 +175,7 @@ export function ReportFilters({
           <PopoverTrigger asChild>
             <button
               type="button"
-              className={`flex items-center justify-between sm:justify-start gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer w-full sm:w-auto ${
+              className={`flex items-center justify-between sm:justify-start gap-2 min-h-[44px] sm:min-h-[36px] px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer touch-manipulation w-full sm:w-auto ${
                 preset === "custom"
                   ? "bg-blue-600 text-white border-blue-600"
                   : "bg-card text-foreground border-border/90 hover:bg-accent shadow-xs"
@@ -160,7 +188,7 @@ export function ReportFilters({
                     preset === "custom" ? "text-white" : "text-blue-600 dark:text-blue-400"
                   }
                 />
-                <span className="truncate">{periodLabel}</span>
+                <span className="truncate font-mono tabular-nums">{periodLabel}</span>
               </div>
               <ChevronDown size={14} className="opacity-60 ml-1 shrink-0" />
             </button>
@@ -199,7 +227,7 @@ export function ReportFilters({
               <button
                 type="button"
                 onClick={() => setIsCalendarOpen(false)}
-                className="px-3 py-1 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+                className="px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
               >
                 {isEs ? "Aplicar Período" : "Apply Range"}
               </button>
@@ -210,111 +238,237 @@ export function ReportFilters({
 
       {/* Inclusions Selector */}
       <div className="pt-3 border-t border-border/50">
-        <div className="text-[11px] sm:text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1">
-          {isEs ? "SECCIONES A INCLUIR:" : "INCLUDE MODULES:"}
+        {/* Mobile: Dropdown Checklist (no horizontal scroll) */}
+        <div className="sm:hidden">
+          <Popover open={isModulesOpen} onOpenChange={setIsModulesOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="w-full flex items-center justify-between gap-2 min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-accent transition cursor-pointer touch-manipulation"
+              >
+                <span className="flex items-center gap-2 truncate">
+                  <SlidersHorizontal size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span>
+                    {isEs ? "Secciones a incluir" : "Included sections"} ({activeSectionsCount}/5)
+                  </span>
+                </span>
+                <ChevronDown
+                  size={15}
+                  className={`text-muted-foreground transition-transform ${
+                    isModulesOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="center"
+              sideOffset={6}
+              className="w-[calc(100vw-3rem)] max-w-sm p-2 rounded-2xl"
+            >
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => setIncludeSummary(!includeSummary)}
+                  className="w-full flex items-center justify-between gap-2 min-h-[44px] px-3 rounded-xl text-xs font-semibold hover:bg-secondary/70 transition-colors cursor-pointer touch-manipulation"
+                >
+                  <span>{isEs ? "Estado y Resumen" : "Flow & Summary"}</span>
+                  <span
+                    className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                      includeSummary
+                        ? "bg-blue-600 text-white"
+                        : "border border-muted-foreground/40"
+                    }`}
+                  >
+                    {includeSummary && <Check size={12} strokeWidth={3} />}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIncludeExpensesList(!includeExpensesList)}
+                  className="w-full flex items-center justify-between gap-2 min-h-[44px] px-3 rounded-xl text-xs font-semibold hover:bg-secondary/70 transition-colors cursor-pointer touch-manipulation"
+                >
+                  <span>
+                    {isEs ? "Detalle Gastos" : "Every Expense"} ({filteredExpensesCount})
+                  </span>
+                  <span
+                    className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                      includeExpensesList
+                        ? "bg-rose-600 text-white"
+                        : "border border-muted-foreground/40"
+                    }`}
+                  >
+                    {includeExpensesList && <Check size={12} strokeWidth={3} />}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIncludeIncomesList(!includeIncomesList)}
+                  className="w-full flex items-center justify-between gap-2 min-h-[44px] px-3 rounded-xl text-xs font-semibold hover:bg-secondary/70 transition-colors cursor-pointer touch-manipulation"
+                >
+                  <span>
+                    {isEs ? "Detalle Ingresos" : "Every Income"} ({filteredIncomesCount})
+                  </span>
+                  <span
+                    className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                      includeIncomesList
+                        ? "bg-emerald-600 text-white"
+                        : "border border-muted-foreground/40"
+                    }`}
+                  >
+                    {includeIncomesList && <Check size={12} strokeWidth={3} />}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIncludeGoals(!includeGoals)}
+                  className="w-full flex items-center justify-between gap-2 min-h-[44px] px-3 rounded-xl text-xs font-semibold hover:bg-secondary/70 transition-colors cursor-pointer touch-manipulation"
+                >
+                  <span>
+                    {isEs ? "Metas" : "Savings Goals"} ({goalsCount})
+                  </span>
+                  <span
+                    className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                      includeGoals
+                        ? "bg-amber-600 text-white"
+                        : "border border-muted-foreground/40"
+                    }`}
+                  >
+                    {includeGoals && <Check size={12} strokeWidth={3} />}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowNotes(!showNotes)}
+                  className="w-full flex items-center justify-between gap-2 min-h-[44px] px-3 rounded-xl text-xs font-semibold hover:bg-secondary/70 transition-colors cursor-pointer touch-manipulation"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <FileText size={13} className="text-purple-500" />
+                    {isEs ? "Observaciones" : "Auditor Notes"}
+                  </span>
+                  <span
+                    className={`w-5 h-5 rounded-md flex items-center justify-center ${
+                      showNotes
+                        ? "bg-purple-600 text-white"
+                        : "border border-muted-foreground/40"
+                    }`}
+                  >
+                    {showNotes && <Check size={12} strokeWidth={3} />}
+                  </span>
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0 sm:flex-wrap -mx-1 px-1 sm:mx-0 sm:px-0">
-          {/* Summary Toggle */}
-          <button
-            type="button"
-            onClick={() => setIncludeSummary(!includeSummary)}
-            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-              includeSummary
-                ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 font-semibold"
-                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-            }`}
-          >
-            <span
-              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center text-[10px] ${
-                includeSummary ? "bg-blue-600 text-white" : "border border-muted-foreground/40"
+
+        {/* Desktop: Wrapped Toggle Chips */}
+        <div className="hidden sm:block">
+          <div className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1">
+            {isEs ? "SECCIONES A INCLUIR:" : "INCLUDE MODULES:"}
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setIncludeSummary(!includeSummary)}
+              className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer ${
+                includeSummary
+                  ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 font-semibold"
+                  : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
               }`}
             >
-              {includeSummary && <Check size={10} strokeWidth={3} />}
-            </span>
-            <span>{isEs ? "Estado y Resumen" : "Flow & Summary"}</span>
-          </button>
+              <span
+                className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
+                  includeSummary ? "bg-blue-600 text-white" : "border border-muted-foreground/40"
+                }`}
+              >
+                {includeSummary && <Check size={10} strokeWidth={3} />}
+              </span>
+              <span>{isEs ? "Estado y Resumen" : "Flow & Summary"}</span>
+            </button>
 
-          {/* Expenses List Toggle */}
-          <button
-            type="button"
-            onClick={() => setIncludeExpensesList(!includeExpensesList)}
-            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-              includeExpensesList
-                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 font-semibold"
-                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-            }`}
-          >
-            <span
-              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center text-[10px] ${
-                includeExpensesList ? "bg-rose-600 text-white" : "border border-muted-foreground/40"
+            <button
+              type="button"
+              onClick={() => setIncludeExpensesList(!includeExpensesList)}
+              className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer ${
+                includeExpensesList
+                  ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 font-semibold"
+                  : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
               }`}
             >
-              {includeExpensesList && <Check size={10} strokeWidth={3} />}
-            </span>
-            <span>
-              {isEs ? "Detalle Gastos" : "Every Expense"} ({filteredExpensesCount})
-            </span>
-          </button>
+              <span
+                className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
+                  includeExpensesList
+                    ? "bg-rose-600 text-white"
+                    : "border border-muted-foreground/40"
+                }`}
+              >
+                {includeExpensesList && <Check size={10} strokeWidth={3} />}
+              </span>
+              <span>
+                {isEs ? "Detalle Gastos" : "Every Expense"} ({filteredExpensesCount})
+              </span>
+            </button>
 
-          {/* Incomes List Toggle */}
-          <button
-            type="button"
-            onClick={() => setIncludeIncomesList(!includeIncomesList)}
-            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-              includeIncomesList
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-semibold"
-                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-            }`}
-          >
-            <span
-              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center text-[10px] ${
+            <button
+              type="button"
+              onClick={() => setIncludeIncomesList(!includeIncomesList)}
+              className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer ${
                 includeIncomesList
-                  ? "bg-emerald-600 text-white"
-                  : "border border-muted-foreground/40"
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-semibold"
+                  : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
               }`}
             >
-              {includeIncomesList && <Check size={10} strokeWidth={3} />}
-            </span>
-            <span>
-              {isEs ? "Detalle Ingresos" : "Every Income"} ({filteredIncomesCount})
-            </span>
-          </button>
+              <span
+                className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
+                  includeIncomesList
+                    ? "bg-emerald-600 text-white"
+                    : "border border-muted-foreground/40"
+                }`}
+              >
+                {includeIncomesList && <Check size={10} strokeWidth={3} />}
+              </span>
+              <span>
+                {isEs ? "Detalle Ingresos" : "Every Income"} ({filteredIncomesCount})
+              </span>
+            </button>
 
-          {/* Goals Toggle */}
-          <button
-            type="button"
-            onClick={() => setIncludeGoals(!includeGoals)}
-            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-              includeGoals
-                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 font-semibold"
-                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-            }`}
-          >
-            <span
-              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center text-[10px] ${
-                includeGoals ? "bg-amber-600 text-white" : "border border-muted-foreground/40"
+            <button
+              type="button"
+              onClick={() => setIncludeGoals(!includeGoals)}
+              className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer ${
+                includeGoals
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 font-semibold"
+                  : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
               }`}
             >
-              {includeGoals && <Check size={10} strokeWidth={3} />}
-            </span>
-            <span>
-              {isEs ? "Metas" : "Savings Goals"} ({goalsCount})
-            </span>
-          </button>
+              <span
+                className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
+                  includeGoals ? "bg-amber-600 text-white" : "border border-muted-foreground/40"
+                }`}
+              >
+                {includeGoals && <Check size={10} strokeWidth={3} />}
+              </span>
+              <span>
+                {isEs ? "Metas" : "Savings Goals"} ({goalsCount})
+              </span>
+            </button>
 
-          {/* Notes Toggle */}
-          <button
-            type="button"
-            onClick={() => setShowNotes(!showNotes)}
-            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border transition cursor-pointer ${
-              showNotes
-                ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30 font-semibold"
-                : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
-            }`}
-          >
-            <FileText size={13} className="shrink-0" />
-            <span>{isEs ? "Observaciones" : "Auditor Notes"}</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setShowNotes(!showNotes)}
+              className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer ${
+                showNotes
+                  ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30 font-semibold"
+                  : "bg-muted/40 text-muted-foreground border-border/70 hover:text-foreground"
+              }`}
+            >
+              <FileText size={13} className="shrink-0" />
+              <span>{isEs ? "Observaciones" : "Auditor Notes"}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -336,34 +490,34 @@ export function ReportFilters({
       )}
 
       {/* Live Metrics Summary Bar */}
-      <div className="pt-3 border-t border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 text-xs font-mono">
+      <div className="pt-3 border-t border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 text-xs font-mono tabular-nums">
         <div className="grid grid-cols-3 gap-2 p-2 sm:p-0 rounded-xl bg-muted/40 sm:bg-transparent sm:flex sm:items-center sm:gap-x-3 text-center sm:text-left">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1 min-w-0">
             <span className="text-[10px] sm:text-xs text-muted-foreground">
               {isEs ? "Ingresos:" : "Income:"}
             </span>
-            <strong className="text-emerald-600 dark:text-emerald-400 whitespace-nowrap text-[11px] sm:text-xs">
+            <strong className="text-emerald-600 dark:text-emerald-400 truncate text-[11px] sm:text-xs">
               +{currencySymbol}
               {formatCurrency(totalIncome)}
             </strong>
           </div>
           <span className="hidden sm:inline text-border/80">•</span>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1 min-w-0">
             <span className="text-[10px] sm:text-xs text-muted-foreground">
               {isEs ? "Egresos:" : "Expenses:"}
             </span>
-            <strong className="text-rose-600 dark:text-rose-400 whitespace-nowrap text-[11px] sm:text-xs">
+            <strong className="text-rose-600 dark:text-rose-400 truncate text-[11px] sm:text-xs">
               -{currencySymbol}
               {formatCurrency(totalExpense)}
             </strong>
           </div>
           <span className="hidden sm:inline text-border/80">•</span>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1 min-w-0">
             <span className="text-[10px] sm:text-xs text-muted-foreground">
               {isEs ? "Saldo:" : "Balance:"}
             </span>
             <strong
-              className={`whitespace-nowrap text-[11px] sm:text-xs ${
+              className={`truncate text-[11px] sm:text-xs ${
                 netSavings >= 0
                   ? "text-emerald-600 dark:text-emerald-400"
                   : "text-rose-600 dark:text-rose-400"

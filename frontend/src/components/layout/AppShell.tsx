@@ -62,13 +62,13 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <>
-      <div className="print:hidden sticky top-0 z-40 border-b border-border bg-background">
-        <Header />
-        <MainNavigation showVault={showVault} />
+      <div className="print:hidden sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md">
+        <Header showVault={showVault} />
       </div>
       <main className="w-full max-w-360 mx-auto px-4 md:px-10 lg:px-20 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-12 pt-3 md:pt-6 print:p-0 print:m-0 print:max-w-none print:w-full">
         {(!isVaultRoute || showVault) && children}
       </main>
+      <MainNavigation showVault={showVault} variant="mobile" />
     </>
   );
 }

@@ -316,7 +316,7 @@ function IncomesContent() {
             aria-label={isEs ? "Gestionar fuentes" : "Manage sources"}
           >
             <Tag size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span className="hidden xs:inline sm:inline">{isEs ? "Fuentes" : "Sources"}</span>
+            <span>{isEs ? "Fuentes" : "Sources"}</span>
           </Button>
 
           {activeTab === "recurring" ? (

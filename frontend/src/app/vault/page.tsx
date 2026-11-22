@@ -18,6 +18,13 @@ import {
   Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -205,7 +212,27 @@ export default function VaultPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none touch-pan-x">
+        {/* Mobile: Dropdown (no horizontal scroll) */}
+        <div className="sm:hidden">
+          <Select
+            value={activeFilter}
+            onValueChange={(v) => setActiveFilter(v as "all" | CardType | "favorite")}
+          >
+            <SelectTrigger className="w-full min-h-[44px] rounded-xl bg-card border-border/80 font-semibold text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              <SelectItem value="credit">Crédito</SelectItem>
+              <SelectItem value="debit">Débito</SelectItem>
+              <SelectItem value="account">Cuentas</SelectItem>
+              <SelectItem value="favorite">Favoritas</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop: Wrapped Pills */}
+        <div className="hidden sm:flex items-center gap-1.5 flex-wrap">
           {(
             [
               { id: "all", label: "Todas" },

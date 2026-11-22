@@ -3,6 +3,7 @@
 import {
   IconArrowDownLeft,
   IconArrowUpRight,
+  IconFileText,
   IconLayoutDashboard,
   IconShieldCheck,
   IconTarget,
@@ -17,6 +18,7 @@ const mainItems = [
   { href: "/expenses", label: "nav.expenses", icon: IconArrowUpRight },
   { href: "/incomes", label: "nav.income", icon: IconArrowDownLeft },
   { href: "/goals", label: "nav.goals", icon: IconTarget },
+  { href: "/reports", label: "nav.reports", icon: IconFileText },
 ];
 
 const vaultItem = { href: "/vault", label: "nav.vault", icon: IconShieldCheck };

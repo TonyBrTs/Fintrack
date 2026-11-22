@@ -14,6 +14,7 @@ import { Moon, Sun, LogOut, LogIn, Settings, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 import { BrandLogo } from "./BrandLogo";
+import { MainNavigation } from "./MainNavigation";
 import { SettingsDrawer } from "./SettingsDrawer";
 import Link from "next/link";
 
@@ -26,7 +27,11 @@ function useHydrated() {
   );
 }
 
-export function Header() {
+interface HeaderProps {
+  showVault?: boolean;
+}
+
+export function Header({ showVault = false }: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const { translate, openSettings, language } = useSettings();
   const isEs = language === "es";
@@ -49,9 +54,9 @@ export function Header() {
 
   return (
     <>
-      <header className="h-16 px-4 md:px-10 lg:px-20 flex items-center justify-between transition-colors duration-300">
+      <header className="w-full max-w-360 mx-auto h-16 px-4 md:px-10 lg:px-20 flex items-center justify-between gap-4 transition-colors duration-300">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer">
+        <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer shrink-0">
           <BrandLogo
             variant="full"
             size={32}
@@ -60,8 +65,11 @@ export function Header() {
           />
         </Link>
 
+        {/* Centered Desktop Navigation */}
+        <MainNavigation showVault={showVault} variant="desktop" />
+
         {/* Right Actions: Theme Toggle, Mobile Hamburger Menu, Profile / Auth */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
           {/* Theme Quick Switcher (Desktop only - on mobile it is in the hamburger menu) */}
           <button
             onClick={toggleTheme}
