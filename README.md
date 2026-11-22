@@ -3,13 +3,12 @@
 [![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.1-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![Expo](https://img.shields.io/badge/Expo-v57-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Postgres-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI%20Insights-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%26%20SOLID-FF6B6B?style=for-the-badge)](./docs/SOLID_PRINCIPLES.md)
 
-**FinTrack** es una plataforma integral para la gestión y análisis de finanzas personales, diseñada con un estándar riguroso de ingeniería de software. Cuenta con una arquitectura desacoplada en el backend en **Go** basada en principios **SOLID** y **Clean Architecture**, un cliente web moderno en **Next.js 16** con **Tailwind CSS v4**, una aplicación móvil nativa desarrollada con **React Native & Expo v57**, autenticación segura multi-proveedor (Email, Google OAuth 2.0 y recuperación de contraseñas), persistencia en **PostgreSQL** con aislamiento multi-inquilino (_Multi-tenancy_), y un motor inteligente de asesoría financiera impulsado por **Google Gemini AI**.
+**FinTrack** es una plataforma integral para la gestión y análisis de finanzas personales, diseñada con un estándar riguroso de ingeniería de software. Cuenta con una arquitectura desacoplada en el backend en **Go** basada en principios **SOLID** y **Clean Architecture**, un cliente web moderno en **Next.js 16** con **Tailwind CSS v4**, autenticación segura multi-proveedor (Email, Google OAuth 2.0 y recuperación de contraseñas), persistencia en **PostgreSQL** con aislamiento multi-inquilino (_Multi-tenancy_), y un motor inteligente de asesoría financiera impulsado por **Google Gemini AI**.
 
 ---
 
@@ -31,11 +30,6 @@ graph TB
         AIClient["Gemini AI Client (/api/ai/insights)"]
     end
 
-    subgraph MobileClient ["Frontend Mobile (Expo v57 / React Native)"]
-        MobileUI["Dashboard, Modales & Tabs"]
-        MobileAuth["Auth Context & SecureStore"]
-    end
-
     subgraph AuthSecurity ["Autenticación & Identidad"]
         SupabaseAuth["Supabase Auth (JWT + Google OAuth 2.0)"]
     end
@@ -55,14 +49,11 @@ graph TB
     UI --> AIClient
     UI --> ServicesLayer["Capa de Servicios Frontend"]
     ServicesLayer -->|Bearer Token HTTP| Handlers
-    MobileUI --> MobileAuth
-    MobileUI -->|Bearer Token HTTP| Handlers
     Handlers --> Services
     Services --> Repos
     Repos -->|Producción| GormPostgres
     Repos -.->|Fallback Local| MemoryJSON
     AuthCtx --> SupabaseAuth
-    MobileAuth --> SupabaseAuth
     Handlers -->|Verifica JWT| SupabaseAuth
 ```
 
@@ -124,7 +115,6 @@ Toda la arquitectura, base de datos, APIs y manual de usuario están documentado
 
 - [Node.js](https://nodejs.org/) v20 o superior
 - [Go](https://go.dev/) v1.22 o superior
-- [Expo Go](https://expo.dev/go) en tu dispositivo móvil o emulador (opcional para desarrollo móvil)
 
 ### 1. Clonar el repositorio e instalar dependencias
 
@@ -144,7 +134,6 @@ El proyecto incluye scripts en el `package.json` raíz para orquestar los entorn
 | Comando                 | Acción                                                                |
 | :---------------------- | :-------------------------------------------------------------------- |
 | `npm run dev:frontend`  | Inicia el servidor de desarrollo de Next.js (`http://localhost:3000`) |
-| `npm run dev:mobile`    | Inicia el servidor de desarrollo Expo para la app móvil               |
 | `npm run dev:backend`   | Compila y levanta la API REST en Go (`http://localhost:8080`)         |
 | `npm run format`        | Aplica formato estándar con Prettier a todo el repositorio            |
 | `npm run format:check`  | Verifica el formato de código en todo el repositorio                  |
@@ -173,16 +162,6 @@ npm run dev
 ```
 
 _Abre [http://localhost:3000](http://localhost:3000) en tu navegador._
-
-#### Mobile (React Native & Expo)
-
-```bash
-cd mobile
-npm install
-npm start
-```
-
-_Escanea el código QR generado con **Expo Go** (Android/iOS) o presiona `w` para abrir en la web._
 
 ---
 
@@ -222,18 +201,6 @@ Fintrack/
 │       │   └── index.ts            # Barrel file unificado
 │       ├── lib/                    # Clientes API, Supabase, Excel e i18n
 │       └── types/                  # Tipado TypeScript compartido
-│
-├── mobile/                         # Aplicación Móvil Nativa (Expo v57 & React Native)
-│   ├── assets/                     # Iconos adaptativos y splash screens
-│   ├── src/
-│   │   ├── components/             # Modales y componentes interactivos móviles
-│   │   ├── context/                # AuthContext y SettingsContext
-│   │   ├── navigation/             # TabNavigator y CustomTabBar
-│   │   ├── screens/                # Pantallas (Dashboard, Goals, Reports, Transactions)
-│   │   ├── lib/                    # Cliente API, Supabase y utilidades
-│   │   └── types/                  # Tipado móvil
-│   ├── app.json                    # Configuración de Expo y metadatos
-│   └── package.json
 │
 ├── supabase/                       # Esquemas y migraciones de Base de Datos
 │   └── migrations/                 # Migraciones SQL para PostgreSQL / Supabase

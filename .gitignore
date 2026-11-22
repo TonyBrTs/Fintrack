@@ -1,7 +1,6 @@
 # Dependencies
 node_modules/
 frontend/node_modules/
-mobile/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -35,10 +34,6 @@ frontend/.vercel/
 frontend/coverage/
 frontend/next-env.d.ts
 
-# Mobile / Expo / React Native
-mobile/.expo/
-mobile/web-build/
-mobile/dist/
 *.jks
 *.p8
 *.p12
